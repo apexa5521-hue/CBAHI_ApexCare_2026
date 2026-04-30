@@ -448,6 +448,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
     <div class="sec-title">التقدم حسب القسم</div>
     <div class="sec-line"></div>
     <button class="btn btn-ghost" onclick="fetchPolicies()">🔄 مزامنة</button>
+    <button class="btn btn-primary" onclick="syncFromTracker()" title="سحب من شيت Tracker إلى CBAHI">📥 سحب من Tracker</button>
     <button class="btn btn-gold" onclick="exportPoliciesCSV()">📥 CSV</button>
   </div>
   <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:20px" id="pol2-sections"></div>
@@ -731,77 +732,79 @@ let isSyncing = false;
 // API LAYER
 // ═══════════════════════════════════════════════════════════════
 // ════════════════════════════════════════════════════════════════
-// GAS API — JSONP only (only method that works from GitHub Pages)
+// GAS API — Pure JSONP, zero fetch(), zero CORS issues
+// Works 100% from GitHub Pages with Apps Script
 // ════════════════════════════════════════════════════════════════
-function gasGet(params) {
+
+function gasCall(params) {
   return new Promise((resolve, reject) => {
-    const cbName = '_gas_' + Date.now() + '_' + Math.random().toString(36).slice(2);
-    const script = document.createElement('script');
-    const timer  = setTimeout(() => {
-      cleanup(); reject(new Error('timeout'));
-    }, 15000);
-    function cleanup() {
-      clearTimeout(timer);
-      delete window[cbName];
-      if (script.parentNode) script.parentNode.removeChild(script);
-    }
-    window[cbName] = (data) => { cleanup(); resolve(data); };
-    script.onerror  = () => { cleanup(); reject(new Error('script load failed')); };
-    const qs = Object.entries({ ...params, callback: cbName })
-      .map(([k,v]) => encodeURIComponent(k) + '=' + encodeURIComponent(v)).join('&');
-    script.src = GAS_URL + '?' + qs;
-    document.head.appendChild(script);
+    if (!GAS_URL) { reject(new Error('No GAS URL')); return; }
+
+    // Unique callback name
+    const cb = 'GAS_' + Date.now() + '_' + (Math.random()*1e9|0);
+
+    // Self-cleaning timeout
+    const tid = setTimeout(() => {
+      delete window[cb];
+      const el = document.getElementById(cb);
+      if (el) el.remove();
+      reject(new Error('Apps Script timeout — تأكد من صحة الرابط والـ deployment'));
+    }, 20000);
+
+    // Register global callback
+    window[cb] = function(data) {
+      clearTimeout(tid);
+      delete window[cb];
+      const el = document.getElementById(cb);
+      if (el) el.remove();
+      resolve(data);
+    };
+
+    // Build URL
+    const p = { ...params, callback: cb };
+    const qs = Object.keys(p)
+      .map(k => encodeURIComponent(k) + '=' + encodeURIComponent(
+        typeof p[k] === 'object' ? JSON.stringify(p[k]) : String(p[k])
+      )).join('&');
+
+    // Inject script tag
+    const s = document.createElement('script');
+    s.id  = cb;
+    s.src = GAS_URL + '?' + qs;
+    s.onerror = () => {
+      clearTimeout(tid);
+      delete window[cb];
+      s.remove();
+      reject(new Error('فشل تحميل السكريبت — تحقق من رابط Apps Script'));
+    };
+    document.head.appendChild(s);
   });
 }
 
-// All mutations go as GET params (JSONP POST-via-GET pattern)
-async function gasMutate(action, sheet, id, data) {
-  const params = { action };
-  if (sheet) params.sheet = sheet;
-  if (id)    params.id    = String(id);
-  if (data)  params.data  = JSON.stringify(data);
-  return gasGet(params);
+// GET — read data
+function gasGet(action, extra) {
+  return gasCall({ action, ...(extra||{}) });
 }
 
+// MUTATE — write/delete (sent as GET params via JSONP)
+function gasMutate(action, sheet, id, data) {
+  const p = { action };
+  if (sheet) p.sheet = sheet;
+  if (id)    p.id    = String(id);
+  if (data)  p.data  = JSON.stringify(data);
+  return gasCall(p);
+}
+
+// Legacy api() wrapper kept for compatibility
 async function api(method, payload = {}) {
-  if (!GAS_URL) { toast('⚙️ أدخل رابط Apps Script في الإعدادات', 'error'); showSettings(); throw new Error('No GAS URL'); }
-  if (method === 'GET') return gasGet({ action: 'getData' });
+  if (!GAS_URL) {
+    toast('⚙️ أدخل رابط Apps Script في إعدادات الاتصال', 'error');
+    showSettings();
+    throw new Error('No GAS URL');
+  }
+  if (method === 'GET') return gasGet('getData');
   const { action, sheet, data, id } = payload;
   return gasMutate(action, sheet, id, data);
-}
-
-async function syncAll() {
-  if (isSyncing) return;
-  isSyncing = true;
-  setSyncStatus('load');
-  try {
-    const data = await gasGet({ action: 'getData' });
-    if (data.error) throw new Error(data.error);
-    DB.observations = data.observations || [];
-    DB.requirements = data.requirements || [];
-    DB.team         = data.team         || [];
-    DB.locations    = data.locations    || [];
-    DB.tmpChanges   = data.tmpChanges   || [];
-    DB.lectures     = data.lectures     || [];
-    DB.assignments  = data.assignments  || [];
-    DB.policies     = data.policies     || [];
-    DB.workflow     = data.workflow     || [];
-    DB.dashboard    = data.dashboard    || null;
-
-    // fallback: load from localStorage if sheet is empty
-    if (!DB.observations.length) loadLocalFallback();
-
-    renderAll();
-    setSyncStatus('ok');
-    document.getElementById('lastSyncSb').textContent =
-      'آخر مزامنة: ' + new Date().toLocaleTimeString('ar-SA');
-    toast('✅ تمت المزامنة مع Google Sheets', 'success');
-  } catch(e) {
-    setSyncStatus('err');
-    toast('❌ فشل الاتصال — تعمل بالبيانات المحلية', 'error');
-    loadLocalFallback();
-    renderAll();
-  } finally { isSyncing = false; }
 }
 
 async function apiCall(action, sheetKey, id, data) {
@@ -809,25 +812,42 @@ async function apiCall(action, sheetKey, id, data) {
   setSyncStatus('load');
   try {
     const res = await gasMutate(action, sheetKey, id, data);
-    if (res && res.error) { toast('❌ ' + res.error, 'error'); setSyncStatus('err'); return false; }
+    if (res && res.error) {
+      toast('❌ ' + res.error, 'error');
+      setSyncStatus('err');
+      return false;
+    }
     setSyncStatus('ok');
+    toast('✅ حُفظ في Sheets', 'success', 2000);
     return true;
   } catch(e) {
     setSyncStatus('err');
-    toast('⚠️ حُفظ محلياً', 'info');
+    toast('⚠️ حُفظ محلياً: ' + e.message, 'info');
     return false;
   }
 }
 
-function loadLocalFallback() {
-  const saved = localStorage.getItem('cbahi_data_v1');
-  if (!saved) return;
-  const d = JSON.parse(saved);
-  Object.keys(DB).forEach(k => { if (d[k]) DB[k] = d[k]; });
-}
-
-function saveLocal() {
-  localStorage.setItem('cbahi_data_v1', JSON.stringify(DB));
+async function testConnection() {
+  const url = (document.getElementById('cfg-url').value || '').trim();
+  if (!url) { toast('❌ أدخل الرابط أولاً', 'error'); return; }
+  const prev = GAS_URL;
+  GAS_URL = url;
+  setSyncStatus('load');
+  try {
+    const d = await gasGet('ping');
+    GAS_URL = prev;
+    if (d && d.ok) {
+      toast('✅ الاتصال ناجح! الخادم يعمل', 'success');
+      setSyncStatus('ok');
+    } else {
+      toast('⚠️ الرابط يعمل لكن استجابة غير متوقعة', 'info');
+      setSyncStatus('err');
+    }
+  } catch(e) {
+    GAS_URL = prev;
+    setSyncStatus('err');
+    toast('❌ ' + e.message, 'error');
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1267,13 +1287,13 @@ const SIG_FIELDS = [
 async function fetchPolicies() {
   if (!GAS_URL) return;
   try {
-    const d = await gasGet({ action: 'getPolicies', section: 'ALL' });
+    const d = await gasGet('getPolicies', { section: 'ALL' });
 
     if (Array.isArray(d)) {
       POLICIES = d;
       saveLocal();
     }
-    const stats = await gasGet({ action: 'getPolicyStats' });
+    const stats = await gasGet('getPolicyStats');
 
     if (stats && stats.total) POL_STATS = stats;
     renderPoliciesTab();
@@ -1493,6 +1513,43 @@ function exportPoliciesCSV() {
 // Auto-fetch policies on load
 if (GAS_URL) fetchPolicies();
 else { const saved=localStorage.getItem("cbahi_policies_v1"); if(saved){POLICIES=JSON.parse(saved);renderPoliciesTab();} }
+
+// ─── Sync from Tracker ───────────────────────────────────────
+async function syncFromTracker() {
+  if (!GAS_URL) { toast('⚙️ أدخل رابط Apps Script أولاً', 'error'); return; }
+  toast('⏳ جاري المزامنة مع شيت السياسات...', 'info', 4000);
+  setSyncStatus('load');
+  try {
+    const res = await gasGet('syncFromTracker');
+    if (res && res.success) {
+      toast(`✅ تمت المزامنة — ${res.count} سياسة`, 'success');
+      await syncAll(); // refresh all data
+    } else {
+      toast('❌ ' + (res && res.error ? res.error : 'فشلت المزامنة'), 'error');
+      setSyncStatus('err');
+    }
+  } catch(e) {
+    toast('❌ ' + e.message, 'error');
+    setSyncStatus('err');
+  }
+}
+
+// ─── Push to Tracker ─────────────────────────────────────────
+async function syncToTracker() {
+  if (!GAS_URL) { toast('⚙️ أدخل رابط Apps Script أولاً', 'error'); return; }
+  toast('⏳ جاري الدفع إلى شيت Tracker...', 'info', 4000);
+  try {
+    const res = await gasGet('syncToTracker');
+    if (res && res.success) {
+      toast(`✅ تم الدفع — ${res.updated} محدّث`, 'success');
+    } else {
+      toast('❌ ' + (res && res.error ? res.error : 'فشل'), 'error');
+    }
+  } catch(e) {
+    toast('❌ ' + e.message, 'error');
+  }
+}
+
 </script>
 </body>
 </html>

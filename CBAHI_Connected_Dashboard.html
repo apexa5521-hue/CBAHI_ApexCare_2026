@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CBAHI – أبكس كير | متصل بـ Google Sheets</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0a0e1a; --surface:#111827; --surface2:#1a2235; --surface3:#1e2d45;
+  --accent:#00c2ff; --accent2:#0080ff; --gold:#f0b429; --green:#10d97e;
+  --red:#ff4757; --orange:#ff7c2a; --purple:#a855f7;
+  --border:rgba(0,194,255,0.12); --text:#e2eaf8; --text2:#8fa8cc; --text3:#5a7599;
+  --glow:0 0 20px rgba(0,194,255,0.15); --radius:14px; --radius-sm:8px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'Tajawal',sans-serif;min-height:100vh}
+::-webkit-scrollbar{width:5px} ::-webkit-scrollbar-thumb{background:var(--accent2);border-radius:3px}
+
+/* HEADER */
+.header{background:linear-gradient(135deg,#0a1628,#0d1f3c);border-bottom:1px solid var(--border);
+  padding:0 24px;position:sticky;top:0;z-index:100;display:flex;align-items:center;
+  justify-content:space-between;height:62px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-icon{width:38px;height:38px;background:linear-gradient(135deg,var(--accent),var(--accent2));
+  border-radius:10px;display:flex;align-items:center;justify-content:center;
+  font-size:16px;font-weight:900;color:#fff;box-shadow:0 0 15px rgba(0,194,255,0.4)}
+.logo-text{font-size:16px;font-weight:800} .logo-sub{font-size:10px;color:var(--accent);letter-spacing:1px}
+.header-actions{display:flex;align-items:center;gap:10px}
+
+/* STATUS BAR */
+.status-bar{background:var(--surface);border-bottom:1px solid var(--border);
+  padding:8px 24px;display:flex;align-items:center;gap:16px;font-size:12px;flex-wrap:wrap}
+.sb-item{display:flex;align-items:center;gap:6px;color:var(--text3)}
+.sb-dot{width:7px;height:7px;border-radius:50%}
+.connected{color:var(--green)} .disconnected{color:var(--red)} .syncing{color:var(--gold)}
+
+/* TABS */
+.tabs{display:flex;gap:6px;padding:16px 24px 0;flex-wrap:wrap}
+.tab{padding:8px 16px;border-radius:8px;border:1px solid var(--border);background:var(--surface);
+  color:var(--text2);font-family:'Tajawal',sans-serif;font-size:12px;font-weight:600;
+  cursor:pointer;transition:all .2s;white-space:nowrap}
+.tab:hover{border-color:var(--accent);color:var(--accent)}
+.tab.active{background:linear-gradient(135deg,var(--accent2),var(--accent));color:#fff;
+  border-color:transparent;box-shadow:0 0 12px rgba(0,194,255,0.3)}
+
+.main{padding:20px 24px;max-width:1440px;margin:0 auto}
+.pane{display:none} .pane.active{display:block}
+
+/* KPI */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+@media(max-width:900px){.kpi-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:500px){.kpi-grid{grid-template-columns:1fr}}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+  padding:18px;position:relative;overflow:hidden;transition:.2s}
+.kpi:hover{transform:translateY(-2px);box-shadow:var(--glow)}
+.kpi-lbl{font-size:11px;color:var(--text3);font-weight:600;margin-bottom:6px;letter-spacing:.5px}
+.kpi-val{font-size:30px;font-weight:900;line-height:1;margin-bottom:4px;font-family:'Cairo',sans-serif}
+.kpi.blue .kpi-val{color:var(--accent)} .kpi.gold .kpi-val{color:var(--gold)}
+.kpi.green .kpi-val{color:var(--green)} .kpi.red .kpi-val{color:var(--red)}
+.kpi-sub{font-size:11px;color:var(--text3);margin-top:4px}
+.pbar{height:6px;background:rgba(255,255,255,0.06);border-radius:3px;margin-top:10px;overflow:hidden}
+.pfill{height:100%;border-radius:3px;transition:width 1s ease}
+.pfill.blue{background:linear-gradient(90deg,var(--accent2),var(--accent));box-shadow:0 0 6px rgba(0,194,255,.5)}
+.pfill.green{background:linear-gradient(90deg,#059669,var(--green));box-shadow:0 0 6px rgba(16,217,126,.5)}
+.pfill.gold{background:linear-gradient(90deg,#d97706,var(--gold));box-shadow:0 0 6px rgba(240,180,41,.5)}
+
+/* COUNTDOWN */
+.cd-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.cd-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+  padding:18px;text-align:center}
+.cd-num{font-size:38px;font-weight:900;color:var(--accent);line-height:1;font-family:'Cairo',sans-serif}
+.cd-lbl{font-size:11px;color:var(--text3);margin-top:4px;font-weight:600}
+
+/* SECTION */
+.sec-hdr{display:flex;align-items:center;gap:8px;margin:24px 0 14px}
+.sec-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px}
+.sec-title{font-size:15px;font-weight:800}
+.sec-line{flex:1;height:1px;background:linear-gradient(90deg,var(--border),transparent)}
+
+/* TABLE CARD */
+.tcard{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:16px}
+.tcard-hdr{padding:14px 18px;border-bottom:1px solid var(--border);background:linear-gradient(135deg,var(--surface2),var(--surface));
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.tcard-title{font-size:13px;font-weight:700;display:flex;align-items:center;gap:6px}
+.tscroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{padding:9px 14px;text-align:right;font-size:10px;color:var(--text3);font-weight:700;
+  letter-spacing:.5px;background:rgba(255,255,255,.02);border-bottom:1px solid var(--border)}
+td{padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.04);color:var(--text2);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(0,194,255,.03)}
+.td-main{color:var(--text);font-weight:600}
+.num{text-align:center}
+
+/* BADGES & PILLS */
+.badge{display:inline-flex;align-items:center;justify-content:center;
+  padding:2px 9px;border-radius:20px;font-size:10px;font-weight:700;min-width:24px}
+.badge-blue{background:rgba(0,194,255,.12);color:var(--accent);border:1px solid rgba(0,194,255,.2)}
+.badge-green{background:rgba(16,217,126,.12);color:var(--green);border:1px solid rgba(16,217,126,.2)}
+.badge-red{background:rgba(255,71,87,.12);color:var(--red);border:1px solid rgba(255,71,87,.2)}
+.badge-gold{background:rgba(240,180,41,.12);color:var(--gold);border:1px solid rgba(240,180,41,.2)}
+.badge-purple{background:rgba(168,85,247,.12);color:var(--purple);border:1px solid rgba(168,85,247,.2)}
+.badge-orange{background:rgba(255,124,42,.12);color:var(--orange);border:1px solid rgba(255,124,42,.2)}
+
+.pill{display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:20px;
+  font-size:10px;font-weight:700;white-space:nowrap}
+.s-done{background:rgba(16,217,126,.1);color:var(--green);border:1px solid rgba(16,217,126,.2)}
+.s-prog{background:rgba(0,194,255,.1);color:var(--accent);border:1px solid rgba(0,194,255,.2)}
+.s-pend{background:rgba(90,117,153,.15);color:var(--text3);border:1px solid rgba(90,117,153,.2)}
+.s-warn{background:rgba(255,124,42,.1);color:var(--orange);border:1px solid rgba(255,124,42,.2)}
+.s-crit{background:rgba(255,71,87,.1);color:var(--red);border:1px solid rgba(255,71,87,.2)}
+
+/* BUTTONS */
+.btn{padding:7px 16px;border-radius:7px;border:none;font-family:'Tajawal',sans-serif;
+  font-size:12px;font-weight:700;cursor:pointer;transition:.2s;display:inline-flex;align-items:center;gap:5px}
+.btn-primary{background:linear-gradient(135deg,var(--accent2),var(--accent));color:#fff}
+.btn-primary:hover{opacity:.85}
+.btn-ghost{background:rgba(0,194,255,.08);border:1px solid rgba(0,194,255,.25);color:var(--accent)}
+.btn-ghost:hover{background:rgba(0,194,255,.18)}
+.btn-danger{background:rgba(255,71,87,.08);border:1px solid rgba(255,71,87,.25);color:var(--red)}
+.btn-danger:hover{background:rgba(255,71,87,.18)}
+.btn-gold{background:rgba(240,180,41,.1);border:1px solid rgba(240,180,41,.25);color:var(--gold)}
+.add-row{width:100%;padding:10px;border:1px dashed rgba(0,194,255,.2);border-radius:0 0 var(--radius) var(--radius);
+  background:transparent;color:var(--text3);font-family:'Tajawal',sans-serif;font-size:12px;
+  font-weight:600;cursor:pointer;transition:.2s}
+.add-row:hover{border-color:var(--accent);color:var(--accent);background:rgba(0,194,255,.04)}
+
+/* MODAL */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:999;
+  align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.overlay.open{display:flex}
+.modal{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);
+  padding:26px;width:90%;max-width:500px;max-height:90vh;overflow-y:auto}
+.modal h3{font-size:15px;font-weight:800;margin-bottom:18px;display:flex;align-items:center;gap:8px}
+.fg{margin-bottom:13px}
+.fg label{display:block;font-size:11px;color:var(--text3);font-weight:600;margin-bottom:5px}
+.fg input,.fg select,.fg textarea{
+  width:100%;padding:9px 11px;background:var(--surface);border:1px solid var(--border);
+  border-radius:7px;color:var(--text);font-family:'Tajawal',sans-serif;font-size:12px;outline:none;transition:.2s}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--accent)}
+.fg textarea{resize:vertical;min-height:70px}
+.fg select option{background:var(--surface2)}
+.modal-footer{display:flex;gap:8px;margin-top:18px;justify-content:flex-end}
+
+/* TOAST */
+.toast-wrap{position:fixed;bottom:20px;left:20px;z-index:9999;display:flex;flex-direction:column;gap:8px}
+.toast{padding:12px 18px;border-radius:10px;font-size:13px;font-weight:600;
+  color:#fff;animation:slideIn .3s ease;max-width:300px;
+  display:flex;align-items:center;gap:8px;box-shadow:0 4px 20px rgba(0,0,0,.4)}
+.toast.success{background:rgba(16,217,126,.15);border:1px solid var(--green);color:var(--green)}
+.toast.error{background:rgba(255,71,87,.15);border:1px solid var(--red);color:var(--red)}
+.toast.info{background:rgba(0,194,255,.15);border:1px solid var(--accent);color:var(--accent)}
+@keyframes slideIn{from{transform:translateX(-100%);opacity:0}to{transform:translateX(0);opacity:1}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* TEAM */
+.team-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(195px,1fr));gap:12px}
+.team-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);
+  padding:14px;display:flex;align-items:center;gap:10px}
+.avatar{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-size:15px;font-weight:900;flex-shrink:0;border:2px solid}
+.team-info .tname{font-size:12px;font-weight:700;color:var(--text)}
+.team-info .trole{font-size:10px;color:var(--text3)}
+.team-info .tdept{font-size:10px;margin-top:2px}
+
+/* SIGNATORIES */
+.sig-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:20px}
+.sig-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);
+  padding:14px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:6px}
+.sig-emo{font-size:22px}
+.sig-name{font-size:11px;font-weight:700;color:var(--text)}
+.sig-count{font-size:10px;color:var(--text3)}
+
+/* WORKFLOW */
+.wf-list{display:flex;flex-direction:column}
+.wf-step{display:flex;gap:14px;padding:14px;border-bottom:1px solid rgba(255,255,255,.04)}
+.wf-step:last-child{border-bottom:none}
+.wf-num{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--accent2),var(--accent));
+  display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;
+  color:#fff;flex-shrink:0;box-shadow:0 0 8px rgba(0,194,255,.3)}
+.wf-title{font-size:12px;font-weight:700;color:var(--text);margin-bottom:3px}
+.wf-desc{font-size:11px;color:var(--text3)}
+
+/* LOCATION */
+.loc-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:600px){.loc-grid{grid-template-columns:1fr}}
+.loc-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px}
+.loc-name{font-size:12px;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.loc-before{font-size:11px;color:var(--red);margin-bottom:4px}
+.loc-before::before{content:'قبل: ';font-weight:700}
+.loc-after{font-size:11px;color:var(--green)}
+.loc-after::before{content:'بعد: ';font-weight:700}
+
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:800px){.two-col{grid-template-columns:1fr}}
+.spacer{height:28px}
+.info-bar{background:rgba(0,194,255,.06);border:1px solid rgba(0,194,255,.15);border-radius:7px;
+  padding:9px 13px;font-size:11px;color:var(--text3);margin-bottom:12px;display:flex;align-items:center;gap:7px}
+
+/* SYNC STATUS */
+.sync-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:20px;
+  font-size:11px;font-weight:700;border:1px solid}
+.sync-ok{background:rgba(16,217,126,.1);color:var(--green);border-color:rgba(16,217,126,.25)}
+.sync-err{background:rgba(255,71,87,.1);color:var(--red);border-color:rgba(255,71,87,.25)}
+.sync-load{background:rgba(240,180,41,.1);color:var(--gold);border-color:rgba(240,180,41,.25)}
+
+@media print{.header{position:static}.pane{display:block!important}.tabs,.header-actions{display:none}.overlay{display:none!important}}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="logo">
+    <div class="logo-icon">AC</div>
+    <div><div class="logo-text">APEX CARE – أبكس كير</div><div class="logo-sub">CBAHI PROJECT DASHBOARD</div></div>
+  </div>
+  <div class="header-actions">
+    <span class="sync-badge sync-load" id="syncBadge">⟳ جاري الاتصال</span>
+    <button class="btn btn-ghost" onclick="syncAll()">🔄 مزامنة</button>
+    <button class="btn btn-gold" onclick="window.print()">🖨️</button>
+  </div>
+</div>
+
+<!-- STATUS BAR -->
+<div class="status-bar">
+  <div class="sb-item"><div class="sb-dot" id="apiDot" style="background:var(--gold);animation:pulse 1s infinite"></div><span id="apiStatus">جاري الاتصال بـ Google Sheets...</span></div>
+  <div class="sb-item">📅 تاريخ البداية: <strong>10/02/2026</strong></div>
+  <div class="sb-item">🎯 موعد الاستطلاع: <strong style="color:var(--gold)">01/07/2026</strong></div>
+  <div class="sb-item" id="lastSyncSb">آخر مزامنة: –</div>
+  <div class="sb-item" style="margin-right:auto">
+    <button class="btn btn-ghost" style="padding:3px 10px;font-size:10px" onclick="showSettings()">⚙️ إعدادات الاتصال</button>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('overview')">📊 نظرة عامة</button>
+  <button class="tab" onclick="switchTab('observations')">🔍 الملاحظات</button>
+  <button class="tab" onclick="switchTab('requirements')">📋 المتطلبات</button>
+  <button class="tab" onclick="switchTab('team')">👥 الفريق</button>
+  <button class="tab" onclick="switchTab('locations')">🏥 الأماكن</button>
+  <button class="tab" onclick="switchTab('lectures')">🎓 المحاضرات</button>
+  <button class="tab" onclick="switchTab('assignments')">📌 التكليفات</button>
+  <button class="tab" onclick="switchTab('policies')">📜 السياسات</button>
+  <button class="tab" onclick="switchTab('workflow')">🔄 الورك فلو</button>
+</div>
+
+<div class="main">
+
+<!-- ═══ OVERVIEW ═══ -->
+<div class="pane active" id="pane-overview">
+  <div class="kpi-grid">
+    <div class="kpi blue"><div class="kpi-lbl">نسبة الإنجاز الكلية</div><div class="kpi-val" id="k-overall">–</div><div class="pbar"><div class="pfill blue" id="pf-overall" style="width:0%"></div></div><div class="kpi-sub">متوسط جميع الأقسام</div></div>
+    <div class="kpi gold"><div class="kpi-lbl">الأيام المتبقية</div><div class="kpi-val" id="k-days">–</div><div class="kpi-sub">حتى 01 يوليو 2026</div></div>
+    <div class="kpi green"><div class="kpi-lbl">ملاحظات محلولة</div><div class="kpi-val" id="k-obs">–</div><div class="pbar"><div class="pfill green" id="pf-obs" style="width:0%"></div></div><div class="kpi-sub" id="k-obs-sub">من 0</div></div>
+    <div class="kpi red"><div class="kpi-lbl">متطلبات تحتاج تمويل</div><div class="kpi-val" id="k-fin">–</div><div class="kpi-sub" id="k-cost">التكلفة: –</div></div>
+  </div>
+  <!-- Countdown -->
+  <div class="cd-grid">
+    <div class="cd-box"><div class="cd-num" id="cd-d">–</div><div class="cd-lbl">يوم</div></div>
+    <div class="cd-box"><div class="cd-num" id="cd-h">–</div><div class="cd-lbl">ساعة</div></div>
+    <div class="cd-box"><div class="cd-num" id="cd-m">–</div><div class="cd-lbl">دقيقة</div></div>
+    <div class="cd-box"><div class="cd-num" id="cd-s">–</div><div class="cd-lbl">ثانية</div></div>
+  </div>
+  <!-- Summary Table -->
+  <div class="tcard">
+    <div class="tcard-hdr"><div class="tcard-title">📊 ملخص التقدم حسب القسم</div></div>
+    <div class="tscroll">
+      <table>
+        <thead><tr><th>القسم</th><th class="num">الإجمالي</th><th class="num">منجز</th><th class="num">معلق</th><th class="num">النسبة</th><th>الحالة</th></tr></thead>
+        <tbody id="summary-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ OBSERVATIONS ═══ -->
+<div class="pane" id="pane-observations">
+  <div class="sec-hdr">
+    <div class="sec-icon" style="background:rgba(255,71,87,.1)">🔍</div>
+    <div class="sec-title">الملاحظات المبدئية</div>
+    <div class="sec-line"></div>
+    <button class="btn btn-primary" onclick="openModal('m-obs')">+ إضافة</button>
+  </div>
+  <div class="info-bar">ℹ️ جميع التعديلات تُحفظ تلقائياً في Google Sheets وتظهر فوراً</div>
+  <div class="tcard">
+    <div class="tcard-hdr">
+      <div class="tcard-title">📋 الملاحظات <span class="badge badge-blue" id="obs-cnt">0</span></div>
+      <div style="display:flex;gap:6px"><span class="badge badge-green" id="obs-solved">0 محلولة</span><span class="badge badge-red" id="obs-pend">0 معلقة</span></div>
+    </div>
+    <div class="tscroll">
+      <table><thead><tr><th class="num">#</th><th>الملاحظة</th><th>الأولوية</th><th>المسؤول</th><th>الموعد</th><th>الحالة</th><th>إجراء</th></tr></thead>
+      <tbody id="obs-tbody"></tbody></table>
+    </div>
+    <button class="add-row" onclick="openModal('m-obs')">+ إضافة ملاحظة</button>
+  </div>
+</div>
+
+<!-- ═══ REQUIREMENTS ═══ -->
+<div class="pane" id="pane-requirements">
+  <div class="sec-hdr">
+    <div class="sec-icon" style="background:rgba(168,85,247,.1)">📋</div>
+    <div class="sec-title">المتطلبات الكاملة</div>
+    <div class="sec-line"></div>
+    <button class="btn btn-primary" onclick="openModal('m-req')">+ إضافة</button>
+  </div>
+  <div class="tcard">
+    <div class="tcard-hdr">
+      <div class="tcard-title">📌 المتطلبات <span class="badge badge-blue" id="req-cnt">0</span></div>
+      <span class="badge badge-gold" id="req-fin-cnt">0 تحتاج تمويل</span>
+    </div>
+    <div class="tscroll">
+      <table><thead><tr><th class="num">#</th><th>المتطلب</th><th>الفئة</th><th>الأولوية</th><th>التكلفة</th><th>تمويل؟</th><th>الحالة</th><th>المسؤول</th><th></th></tr></thead>
+      <tbody id="req-tbody"></tbody></table>
+    </div>
+    <button class="add-row" onclick="openModal('m-req')">+ إضافة متطلب</button>
+  </div>
+</div>
+
+<!-- ═══ TEAM ═══ -->
+<div class="pane" id="pane-team">
+  <div class="sec-hdr">
+    <div class="sec-icon" style="background:rgba(16,217,126,.1)">👥</div>
+    <div class="sec-title">الفريق الداخلي</div>
+    <div class="sec-line"></div>
+    <button class="btn btn-primary" onclick="openModal('m-team')">+ إضافة</button>
+  </div>
+  <div class="team-grid" id="team-grid"></div>
+  <button class="add-row" style="margin-top:10px;border-radius:8px" onclick="openModal('m-team')">+ إضافة عضو</button>
+</div>
+
+<!-- ═══ LOCATIONS ═══ -->
+<div class="pane" id="pane-locations">
+  <div class="two-col">
+    <div>
+      <div class="sec-hdr">
+        <div class="sec-icon" style="background:rgba(0,194,255,.1)">🏥</div>
+        <div class="sec-title">تعديلات دائمة</div>
+        <div class="sec-line"></div>
+        <button class="btn btn-primary" onclick="openModal('m-loc')">+</button>
+      </div>
+      <div class="loc-grid" id="loc-perm-grid"></div>
+    </div>
+    <div>
+      <div class="sec-hdr">
+        <div class="sec-icon" style="background:rgba(255,124,42,.1)">🔄</div>
+        <div class="sec-title">تعديلات مؤقتة (أثناء الزيارة)</div>
+        <div class="sec-line"></div>
+        <button class="btn btn-primary" onclick="openModal('m-tmp')">+</button>
+      </div>
+      <div class="tcard">
+        <div class="tscroll">
+          <table><thead><tr><th>العنصر</th><th>المكان</th><th>التعديل</th><th>يُعاد</th><th></th></tr></thead>
+          <tbody id="tmp-tbody"></tbody></table>
+        </div>
+        <button class="add-row" onclick="openModal('m-tmp')">+ إضافة تعديل مؤقت</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ LECTURES ═══ -->
+<div class="pane" id="pane-lectures">
+  <div class="sec-hdr">
+    <div class="sec-icon" style="background:rgba(240,180,41,.1)">🎓</div>
+    <div class="sec-title">المحاضرات المجدولة</div>
+    <div class="sec-line"></div>
+    <button class="btn btn-primary" onclick="openModal('m-lec')">+ إضافة</button>
+  </div>
+  <div class="tcard">
+    <div class="tcard-hdr">
+      <div class="tcard-title">🎓 المحاضرات <span class="badge badge-blue" id="lec-cnt">0</span></div>
+      <span class="badge badge-green" id="lec-done-cnt">0 منجزة</span>
+    </div>
+    <div class="tscroll">
+      <table><thead><tr><th class="num">#</th><th>العنوان</th><th>الملقي</th><th>البديل</th><th>التاريخ</th><th>الجمهور</th><th>تمت؟</th><th></th></tr></thead>
+      <tbody id="lec-tbody"></tbody></table>
+    </div>
+    <button class="add-row" onclick="openModal('m-lec')">+ إضافة محاضرة</button>
+  </div>
+</div>
+
+<!-- ═══ ASSIGNMENTS ═══ -->
+<div class="pane" id="pane-assignments">
+  <div class="sec-hdr">
+    <div class="sec-icon" style="background:rgba(255,124,42,.1)">📌</div>
+    <div class="sec-title">التكليفات</div>
+    <div class="sec-line"></div>
+    <button class="btn btn-primary" onclick="openModal('m-assign')">+ إضافة</button>
+  </div>
+  <div class="tcard">
+    <div class="tscroll">
+      <table><thead><tr><th class="num">#</th><th>القسم</th><th>النوع</th><th>السبب</th><th>الوقت</th><th>المسؤول</th><th>الحالة</th><th></th></tr></thead>
+      <tbody id="assign-tbody"></tbody></table>
+    </div>
+    <button class="add-row" onclick="openModal('m-assign')">+ إضافة تكليف</button>
+  </div>
+</div>
+
+<!-- ═══ POLICIES ═══ -->
+<div class="pane" id="pane-policies">
+  <div class="sec-hdr">
+    <div class="sec-icon" style="background:rgba(0,194,255,.1)">📜</div>
+    <div class="sec-title">السياسات والموقعون</div>
+    <div class="sec-line"></div>
+    <button class="btn btn-primary" onclick="openModal('m-pol')">+ إضافة</button>
+  </div>
+  <div class="sig-grid" id="sig-grid"></div>
+  <div class="tcard">
+    <div class="tcard-hdr">
+      <div class="tcard-title">📄 السياسات <span class="badge badge-blue" id="pol-cnt">0</span></div>
+      <span class="badge badge-green" id="pol-signed-cnt">0 موقعة كاملاً</span>
+    </div>
+    <div class="tscroll">
+      <table><thead><tr><th class="num">#</th><th>اسم السياسة</th><th>القسم</th><th>جاهزية المحتوى</th><th>الموقعون المطلوبون</th><th>حالة التوقيع</th><th></th></tr></thead>
+      <tbody id="pol-tbody"></tbody></table>
+    </div>
+    <button class="add-row" onclick="openModal('m-pol')">+ إضافة سياسة</button>
+  </div>
+</div>
+
+<!-- ═══ WORKFLOW ═══ -->
+<div class="pane" id="pane-workflow">
+  <div class="sec-hdr">
+    <div class="sec-icon" style="background:rgba(0,194,255,.1)">🔄</div>
+    <div class="sec-title">ورك فلو ملفات المرضى</div>
+    <div class="sec-line"></div>
+    <button class="btn btn-primary" onclick="openModal('m-wf')">+ إضافة</button>
+  </div>
+  <div class="tcard">
+    <div class="wf-list" id="wf-list"></div>
+    <button class="add-row" onclick="openModal('m-wf')">+ إضافة خطوة</button>
+  </div>
+</div>
+
+</div><!-- /main -->
+
+<!-- ═══ MODALS ═══ -->
+
+<!-- Settings -->
+<div class="overlay" id="m-settings">
+  <div class="modal">
+    <h3>⚙️ إعدادات الاتصال بـ Google Sheets</h3>
+    <div class="fg"><label>رابط Web App (Apps Script Deployment URL)</label>
+      <input type="text" id="cfg-url" placeholder="https://script.google.com/macros/s/YOUR_ID/exec"></div>
+    <div class="fg"><label>اختبار الاتصال</label>
+      <button class="btn btn-ghost" style="width:100%" onclick="testConnection()">🔌 اختبار الآن</button></div>
+    <div class="modal-footer">
+      <button class="btn btn-danger" onclick="closeModal('m-settings')">إغلاق</button>
+      <button class="btn btn-primary" onclick="saveSettings()">💾 حفظ</button>
+    </div>
+  </div>
+</div>
+
+<!-- Observation Modal -->
+<div class="overlay" id="m-obs">
+  <div class="modal">
+    <h3>🔍 <span id="m-obs-title">إضافة ملاحظة</span></h3>
+    <input type="hidden" id="obs-eid">
+    <div class="fg"><label>نص الملاحظة</label><textarea id="obs-text" rows="3" placeholder="وصف الملاحظة..."></textarea></div>
+    <div class="fg"><label>الأولوية</label><select id="obs-pri"><option>عالية</option><option>متوسطة</option><option>منخفضة</option></select></div>
+    <div class="fg"><label>المسؤول</label><input type="text" id="obs-owner" placeholder="اسم المسؤول"></div>
+    <div class="fg"><label>الموعد النهائي</label><input type="date" id="obs-due"></div>
+    <div class="fg"><label>الحالة</label><select id="obs-stat"><option>معلقة</option><option>جارية</option><option>محلولة</option></select></div>
+    <div class="modal-footer">
+      <button class="btn btn-danger" onclick="closeModal('m-obs')">إلغاء</button>
+      <button class="btn btn-primary" onclick="saveObs()">💾 حفظ</button>
+    </div>
+  </div>
+</div>
+
+<!-- Requirement Modal -->
+<div class="overlay" id="m-req">
+  <div class="modal">
+    <h3>📋 <span id="m-req-title">إضافة متطلب</span></h3>
+    <input type="hidden" id="req-eid">
+    <div class="fg"><label>المتطلب</label><textarea id="req-text" rows="2" placeholder="وصف المتطلب..."></textarea></div>
+    <div class="fg"><label>الفئة</label><select id="req-cat">
+      <option>سياسات وإجراءات</option><option>بنية تحتية</option><option>تدريب وتأهيل</option>
+      <option>أجهزة ومعدات</option><option>سجلات وملفات</option><option>سلامة بيئية</option>
+      <option>مستلزمات</option><option>أخرى</option></select></div>
+    <div class="fg"><label>الأولوية</label><select id="req-pri"><option>عالية</option><option>متوسطة</option><option>منخفضة</option></select></div>
+    <div class="fg"><label>التكلفة التقديرية (ريال)</label><input type="number" id="req-cost" placeholder="0" min="0"></div>
+    <div class="fg"><label>يحتاج دعم مالي؟</label><select id="req-fin"><option value="لا">لا</option><option value="نعم">نعم</option></select></div>
+    <div class="fg"><label>الحالة</label><select id="req-stat"><option>معلق</option><option>جارٍ</option><option>مكتمل</option></select></div>
+    <div class="fg"><label>المسؤول</label><input type="text" id="req-owner" placeholder="اسم المسؤول"></div>
+    <div class="modal-footer">
+      <button class="btn btn-danger" onclick="closeModal('m-req')">إلغاء</button>
+      <button class="btn btn-primary" onclick="saveReq()">💾 حفظ</button>
+    </div>
+  </div>
+</div>
+
+<!-- Team Modal -->
+<div class="overlay" id="m-team">
+  <div class="modal">
+    <h3>👥 إضافة عضو</h3>
+    <input type="hidden" id="team-eid">
+    <div class="fg"><label>الاسم</label><input type="text" id="team-name" placeholder="الاسم"></div>
+    <div class="fg"><label>المسمى الوظيفي</label><input type="text" id="team-role" placeholder="المسمى"></div>
+    <div class="fg"><label>القسم</label><input type="text" id="team-dept" placeholder="القسم"></div>
+    <div class="fg"><label>دوره في CBAHI</label><input type="text" id="team-proj" placeholder="دور في المشروع"></div>
+    <div class="fg"><label>الفرع</label><select id="team-branch"><option>بريدة</option><option>عنيزة</option><option>كلا الفرعين</option></select></div>
+    <div class="modal-footer">
+      <button class="btn btn-danger" onclick="closeModal('m-team')">إلغاء</button>
+      <button class="btn btn-primary" onclick="saveTeam()">💾 حفظ</button>
+    </div>
+  </div>
+</div>
+
+<!-- Location Modal -->
+<div class="overlay" id="m-loc">
+  <div class="modal">
+    <h3>🏥 إضافة مكان (تعديل دائم)</h3>
+    <input type="hidden" id="loc-eid">
+    <div class="fg"><label>اسم المكان</label><input type="text" id="loc-name" placeholder="مثال: غرفة الانتظار"></div>
+    <div class="fg"><label>الفرع</label><select id="loc-branch"><option>بريدة</option><option>عنيزة</option><option>كلا الفرعين</option></select></div>
+    <div class="fg"><label>الوضع الحالي (قبل)</label><textarea id="loc-before" rows="2"></textarea></div>
+    <div class="fg"><label>المطلوب (بعد)</label><textarea id="loc-after" rows="2"></textarea></div>
+    <div class="fg"><label>الحالة</label><select id="loc-stat"><option>معلق</option><option>جارٍ</option><option>مكتمل</option></select></div>
+    <div class="fg"><label>المسؤول</label><input type="text" id="loc-owner" placeholder="اسم المسؤول"></div>
+    <div class="modal-footer">
+      <button class="btn btn-danger" onclick="closeModal('m-loc')">إلغاء</button>
+      <button class="btn btn-primary" onclick="saveLoc()">💾 حفظ</button>
+    </div>
+  </div>
+</div>
+
+<!-- Temp Modal -->
+<div class="overlay" id="m-tmp">
+  <div class="modal">
+    <h3>🔄 تعديل مؤقت أثناء الزيارة</h3>
+    <input type="hidden" id="tmp-eid">
+    <div class="fg"><label>العنصر</label><input type="text" id="tmp-item" placeholder="ما الشيء؟"></div>
+    <div class="fg"><label>المكان الحالي</label><input type="text" id="tmp-loc" placeholder="وين موجود؟"></div>
+    <div class="fg"><label>التعديل المؤقت</label><textarea id="tmp-change" rows="2"></textarea></div>
+    <div class="fg"><label>يُعاد لمكانه</label><input type="text" id="tmp-restore" placeholder="متى يُعاد؟"></div>
+    <div class="fg"><label>المسؤول</label><input type="text" id="tmp-owner" placeholder="اسم المسؤول"></div>
+    <div class="modal-footer">
+      <button class="btn btn-danger" onclick="closeModal('m-tmp')">إلغاء</button>
+      <button class="btn btn-primary" onclick="saveTmp()">💾 حفظ</button>
+    </div>
+  </div>
+</div>
+
+<!-- Lecture Modal -->
+<div class="overlay" id="m-lec">
+  <div class="modal">
+    <h3>🎓 إضافة محاضرة</h3>
+    <input type="hidden" id="lec-eid">
+    <div class="fg"><label>عنوان المحاضرة</label><input type="text" id="lec-title" placeholder="عنوان المحاضرة"></div>
+    <div class="fg"><label>الملقي الأساسي</label><input type="text" id="lec-speaker" placeholder="الاسم"></div>
+    <div class="fg"><label>البديل (نيابةً)</label><input type="text" id="lec-alt" placeholder="اسم البديل"></div>
+    <div class="fg"><label>التاريخ</label><input type="date" id="lec-date"></div>
+    <div class="fg"><label>الوقت</label><input type="time" id="lec-time"></div>
+    <div class="fg"><label>الجمهور المستهدف</label><select id="lec-aud">
+      <option>جميع الموظفين</option><option>الكادر التمريضي</option><option>الكادر الطبي</option>
+      <option>الإداريون</option><option>فريق الجودة</option><option>التمريض والصيدلة</option></select></div>
+    <div class="fg"><label>هل تمت؟</label><select id="lec-done"><option value="لا">لا</option><option value="نعم">نعم</option></select></div>
+    <div class="modal-footer">
+      <button class="btn btn-danger" onclick="closeModal('m-lec')">إلغاء</button>
+      <button class="btn btn-primary" onclick="saveLec()">💾 حفظ</button>
+    </div>
+  </div>
+</div>
+
+<!-- Assignment Modal -->
+<div class="overlay" id="m-assign">
+  <div class="modal">
+    <h3>📌 إضافة تكليف</h3>
+    <input type="hidden" id="assign-eid">
+    <div class="fg"><label>القسم</label><input type="text" id="assign-dept" placeholder="القسم"></div>
+    <div class="fg"><label>نوع التكليف</label><select id="assign-type">
+      <option>تكليف رسمي موثق</option><option>تكليف كتابي</option>
+      <option>تفويض صلاحيات</option><option>مهمة ميدانية</option>
+      <option>تكليف تدريبي إلزامي</option></select></div>
+    <div class="fg"><label>السبب والهدف</label><textarea id="assign-reason" rows="2"></textarea></div>
+    <div class="fg"><label>الوقت المطلوب</label><input type="text" id="assign-time" placeholder="يومي / أسبوعي / مرة واحدة"></div>
+    <div class="fg"><label>المسؤول</label><input type="text" id="assign-owner" placeholder="اسم المسؤول"></div>
+    <div class="fg"><label>الحالة</label><select id="assign-stat"><option>معلق</option><option>جارٍ</option><option>مكتمل</option></select></div>
+    <div class="modal-footer">
+      <button class="btn btn-danger" onclick="closeModal('m-assign')">إلغاء</button>
+      <button class="btn btn-primary" onclick="saveAssign()">💾 حفظ</button>
+    </div>
+  </div>
+</div>
+
+<!-- Policy Modal -->
+<div class="overlay" id="m-pol">
+  <div class="modal">
+    <h3>📜 إضافة سياسة</h3>
+    <input type="hidden" id="pol-eid">
+    <div class="fg"><label>اسم السياسة</label><input type="text" id="pol-name" placeholder="اسم السياسة"></div>
+    <div class="fg"><label>القسم</label><input type="text" id="pol-dept" placeholder="القسم المعني"></div>
+    <div class="fg"><label>جاهزية المحتوى</label><select id="pol-content"><option>مكتملة</option><option>قيد الإعداد</option><option>لم تبدأ</option></select></div>
+    <div class="fg"><label>الموقعون المطلوبون</label><input type="text" id="pol-sigs" placeholder="مثال: مدير الجودة، مدير طبي"></div>
+    <div class="fg"><label>حالة التوقيع</label><select id="pol-sigstat"><option>لم يوقع</option><option>موقع جزئياً</option><option>موقع كامل</option></select></div>
+    <div class="modal-footer">
+      <button class="btn btn-danger" onclick="closeModal('m-pol')">إلغاء</button>
+      <button class="btn btn-primary" onclick="savePol()">💾 حفظ</button>
+    </div>
+  </div>
+</div>
+
+<!-- Workflow Modal -->
+<div class="overlay" id="m-wf">
+  <div class="modal">
+    <h3>🔄 إضافة خطوة</h3>
+    <input type="hidden" id="wf-eid">
+    <div class="fg"><label>عنوان الخطوة</label><input type="text" id="wf-title-in" placeholder="عنوان الخطوة"></div>
+    <div class="fg"><label>وصف الخطوة</label><textarea id="wf-desc-in" rows="3" placeholder="التفاصيل..."></textarea></div>
+    <div class="fg"><label>الوثيقة / النموذج</label><input type="text" id="wf-doc-in" placeholder="النموذج المطلوب"></div>
+    <div class="fg"><label>المسؤول</label><input type="text" id="wf-owner-in" placeholder="المسؤول عن الخطوة"></div>
+    <div class="modal-footer">
+      <button class="btn btn-danger" onclick="closeModal('m-wf')">إلغاء</button>
+      <button class="btn btn-primary" onclick="saveWf()">💾 حفظ</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST CONTAINER -->
+<div class="toast-wrap" id="toasts"></div>
+
+<div class="spacer"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// CONFIG & STATE
+// ═══════════════════════════════════════════════════════════════
+const CFG_KEY = 'cbahi_gas_url';
+let GAS_URL = localStorage.getItem(CFG_KEY) || '';
+
+let DB = {
+  observations:[], requirements:[], team:[],
+  locations:[], tmpChanges:[], lectures:[],
+  assignments:[], policies:[], workflow:[],
+  dashboard: null
+};
+
+let isSyncing = false;
+
+// ═══════════════════════════════════════════════════════════════
+// API LAYER
+// ═══════════════════════════════════════════════════════════════
+async function api(method, payload={}) {
+  if (!GAS_URL) {
+    toast('⚠️ لم يتم إعداد رابط Apps Script بعد', 'error');
+    showSettings();
+    throw new Error('No GAS URL');
+  }
+
+  if (method === 'GET') {
+    const res = await fetch(GAS_URL + '?action=getData', { method:'GET' });
+    return res.json();
+  } else {
+    const res = await fetch(GAS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    return res.json();
+  }
+}
+
+async function syncAll() {
+  if (isSyncing) return;
+  isSyncing = true;
+  setSyncStatus('load');
+  try {
+    const data = await api('GET');
+    if (data.error) throw new Error(data.error);
+    DB.observations = data.observations || [];
+    DB.requirements = data.requirements || [];
+    DB.team         = data.team         || [];
+    DB.locations    = data.locations    || [];
+    DB.tmpChanges   = data.tmpChanges   || [];
+    DB.lectures     = data.lectures     || [];
+    DB.assignments  = data.assignments  || [];
+    DB.policies     = data.policies     || [];
+    DB.workflow     = data.workflow     || [];
+    DB.dashboard    = data.dashboard    || null;
+
+    // fallback: load from localStorage if sheet is empty
+    if (!DB.observations.length) loadLocalFallback();
+
+    renderAll();
+    setSyncStatus('ok');
+    document.getElementById('lastSyncSb').textContent =
+      'آخر مزامنة: ' + new Date().toLocaleTimeString('ar-SA');
+    toast('✅ تمت المزامنة مع Google Sheets', 'success');
+  } catch(e) {
+    setSyncStatus('err');
+    toast('❌ فشل الاتصال — تعمل بالبيانات المحلية', 'error');
+    loadLocalFallback();
+    renderAll();
+  } finally { isSyncing = false; }
+}
+
+async function apiCall(action, sheetKey, id, data) {
+  setSyncStatus('load');
+  try {
+    const res = await api('POST', { action, sheet: sheetKey, id, data });
+    if (res.error) { toast('❌ خطأ: ' + res.error, 'error'); return false; }
+    setSyncStatus('ok');
+    return true;
+  } catch(e) {
+    setSyncStatus('err');
+    toast('⚠️ حُفظ محلياً — تعذّر الوصول للشيت', 'info');
+    return false;
+  }
+}
+
+function loadLocalFallback() {
+  const saved = localStorage.getItem('cbahi_data_v1');
+  if (!saved) return;
+  const d = JSON.parse(saved);
+  Object.keys(DB).forEach(k => { if (d[k]) DB[k] = d[k]; });
+}
+
+function saveLocal() {
+  localStorage.setItem('cbahi_data_v1', JSON.stringify(DB));
+}
+
+// ═══════════════════════════════════════════════════════════════
+// UI HELPERS
+// ═══════════════════════════════════════════════════════════════
+function setSyncStatus(state) {
+  const badge = document.getElementById('syncBadge');
+  const dot   = document.getElementById('apiDot');
+  const lbl   = document.getElementById('apiStatus');
+  if (state === 'ok') {
+    badge.className = 'sync-badge sync-ok'; badge.textContent = '✅ متصل';
+    dot.style.background = 'var(--green)'; dot.style.animation = '';
+    lbl.textContent = 'متصل بـ Google Sheets';
+  } else if (state === 'err') {
+    badge.className = 'sync-badge sync-err'; badge.textContent = '❌ غير متصل';
+    dot.style.background = 'var(--red)'; dot.style.animation = '';
+    lbl.textContent = 'غير متصل — بيانات محلية فقط';
+  } else {
+    badge.className = 'sync-badge sync-load'; badge.textContent = '⟳ مزامنة...';
+    dot.style.background = 'var(--gold)'; dot.style.animation = 'pulse 1s infinite';
+    lbl.textContent = 'جاري المزامنة...';
+  }
+}
+
+function toast(msg, type='info', dur=3500) {
+  const wrap = document.getElementById('toasts');
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.textContent = msg;
+  wrap.appendChild(el);
+  setTimeout(() => el.remove(), dur);
+}
+
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.overlay').forEach(el =>
+  el.addEventListener('click', e => { if(e.target===el) el.classList.remove('open'); }));
+
+function switchTab(id) {
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.pane').forEach(p=>p.classList.remove('active'));
+  document.querySelector(`[onclick="switchTab('${id}')"]`).classList.add('active');
+  document.getElementById('pane-'+id).classList.add('active');
+}
+
+function showSettings() { openModal('m-settings'); document.getElementById('cfg-url').value = GAS_URL; }
+async function saveSettings() {
+  GAS_URL = document.getElementById('cfg-url').value.trim();
+  localStorage.setItem(CFG_KEY, GAS_URL);
+  closeModal('m-settings');
+  toast('✅ تم حفظ الإعدادات', 'success');
+  await syncAll();
+}
+async function testConnection() {
+  try {
+    const url = document.getElementById('cfg-url').value.trim();
+    const res = await fetch(url + '?action=getDashboard');
+    const d = await res.json();
+    if (d.error) throw new Error(d.error);
+    toast('✅ الاتصال ناجح!', 'success');
+  } catch(e) { toast('❌ فشل الاتصال: ' + e.message, 'error'); }
+}
+
+// ─── Status pill ─────────────────────────────────────────────
+const statusCls = {
+  'مكتمل':'s-done','محلولة':'s-done','مكتملة':'s-done','موقع كامل':'s-done','نعم':'s-done',
+  'جارٍ':'s-prog','جارية':'s-prog','موقع جزئياً':'s-warn',
+  'معلق':'s-pend','معلقة':'s-pend','لم تبدأ':'s-crit','لم يوقع':'s-crit','لا':'s-crit'
+};
+function pill(txt){ return `<span class="pill ${statusCls[txt]||'s-pend'}">${txt}</span>`; }
+function priPill(p){ const m={'عالية':'s-crit','متوسطة':'s-warn','منخفضة':'s-pend'}; return `<span class="pill ${m[p]||'s-pend'}">${p}</span>`; }
+
+function actionBtns(editFn, delFn, id) {
+  return `<div style="display:flex;gap:4px">
+    <button class="btn btn-ghost" style="padding:3px 8px;font-size:10px" onclick="${editFn}('${id}')">تعديل</button>
+    <button class="btn btn-danger" style="padding:3px 8px;font-size:10px" onclick="${delFn}('${id}')">حذف</button>
+  </div>`;
+}
+
+const colors = ['#00c2ff','#10d97e','#a855f7','#f0b429','#ff7c2a','#ff4757','#0080ff'];
+const signatories = [
+  {title:'مدير الجودة',emoji:'🏆'},{title:'مدير طبي',emoji:'⚕️'},
+  {title:'مدير الفرع',emoji:'🏢'},{title:'رئيسة التمريض',emoji:'💊'},
+  {title:'مدير الموارد البشرية',emoji:'👥'},{title:'مهندس السلامة',emoji:'⚙️'},
+  {title:'الرئيس التنفيذي',emoji:'👔'}
+];
+
+// ═══════════════════════════════════════════════════════════════
+// RENDER FUNCTIONS
+// ═══════════════════════════════════════════════════════════════
+function renderAll() {
+  renderOverview(); renderObs(); renderReq(); renderTeam();
+  renderLoc(); renderLec(); renderAssign(); renderPol(); renderWf();
+  saveLocal();
+}
+
+// ─── Overview ────────────────────────────────────────────────
+function renderOverview() {
+  const st = DB.dashboard;
+  const obs = DB.observations; const reqs = DB.requirements;
+  const lecs = DB.lectures; const pols = DB.policies;
+
+  const cnt = (arr, f, v) => arr.filter(r=>r[f]===v).length;
+  const pct = (a,b) => b ? Math.round(a/b*100) : 0;
+
+  const obsDone = cnt(obs,'status','محلولة');
+  const reqDone = cnt(reqs,'status','مكتمل');
+  const lecDone = cnt(lecs,'done','نعم');
+  const polSigned = cnt(pols,'sigStatus','موقع كامل');
+  const finReqs = cnt(reqs,'financial','نعم');
+  const totalCost = reqs.reduce((s,r)=>s+(Number(r.cost)||0),0);
+
+  const overall = st?.overallProgress ??
+    Math.round([ pct(obsDone,obs.length||1), pct(reqDone,reqs.length||1),
+                 pct(lecDone,lecs.length||1), pct(polSigned,pols.length||1) ]
+               .reduce((a,b)=>a+b,0)/4);
+
+  document.getElementById('k-overall').textContent = overall + '%';
+  document.getElementById('pf-overall').style.width = overall + '%';
+  document.getElementById('k-obs').textContent = obsDone;
+  document.getElementById('pf-obs').style.width = pct(obsDone,obs.length) + '%';
+  document.getElementById('k-obs-sub').textContent = `من ${obs.length} ملاحظة`;
+  document.getElementById('k-fin').textContent = finReqs;
+  document.getElementById('k-cost').textContent = `التكلفة: ${totalCost.toLocaleString()} ريال`;
+
+  // Summary table
+  const sections = [
+    {label:'الملاحظات', total:obs.length, done:obsDone, pend:cnt(obs,'status','معلقة')},
+    {label:'المتطلبات', total:reqs.length, done:reqDone, pend:cnt(reqs,'status','معلق')},
+    {label:'المحاضرات', total:lecs.length, done:lecDone, pend:lecs.length-lecDone},
+    {label:'السياسات', total:pols.length, done:polSigned, pend:cnt(pols,'sigStatus','لم يوقع')},
+    {label:'الفريق', total:DB.team.length, done:DB.team.length, pend:0},
+    {label:'التكليفات', total:DB.assignments.length, done:cnt(DB.assignments,'status','مكتمل'), pend:cnt(DB.assignments,'status','معلق')},
+  ];
+  const pBar = (v,t) => {
+    const p = t ? Math.round(v/t*100) : 0;
+    const c = p>=80?'var(--green)':p>=40?'var(--gold)':'var(--red)';
+    return `<div style="display:flex;align-items:center;gap:6px"><div style="flex:1;height:5px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden"><div style="height:100%;width:${p}%;background:${c};border-radius:3px"></div></div><span style="font-size:10px;color:var(--text3);min-width:28px">${p}%</span></div>`;
+  };
+  document.getElementById('summary-tbody').innerHTML = sections.map(s=>`
+    <tr><td class="td-main">${s.label}</td>
+    <td class="num">${s.total}</td>
+    <td class="num" style="color:var(--green);font-weight:700">${s.done}</td>
+    <td class="num" style="color:var(--red)">${s.pend}</td>
+    <td style="min-width:100px">${pBar(s.done,s.total)}</td>
+    <td>${s.done===s.total&&s.total>0?pill('مكتمل'):s.done>0?pill('جارٍ'):pill('معلق')}</td>
+    </tr>`).join('');
+}
+
+// ─── Observations ────────────────────────────────────────────
+function renderObs() {
+  const done = DB.observations.filter(o=>o.status==='محلولة').length;
+  document.getElementById('obs-cnt').textContent = DB.observations.length;
+  document.getElementById('obs-solved').textContent = done + ' محلولة';
+  document.getElementById('obs-pend').textContent = (DB.observations.length-done) + ' معلقة';
+  document.getElementById('obs-tbody').innerHTML = DB.observations.map((o,i)=>`
+    <tr><td class="num">${i+1}</td>
+    <td class="td-main" style="max-width:260px">${o.text}</td>
+    <td>${priPill(o.priority||o.pri||'متوسطة')}</td>
+    <td>${o.owner||'–'}</td>
+    <td style="font-size:11px">${o.due||'–'}</td>
+    <td>${pill(o.status||'معلقة')}</td>
+    <td>${actionBtns('editObs','delObs',o.id)}</td></tr>`).join('');
+}
+
+// ─── Requirements ────────────────────────────────────────────
+function renderReq() {
+  const fin = DB.requirements.filter(r=>r.financial==='نعم').length;
+  document.getElementById('req-cnt').textContent = DB.requirements.length;
+  document.getElementById('req-fin-cnt').textContent = fin + ' تحتاج تمويل';
+  document.getElementById('req-tbody').innerHTML = DB.requirements.map((r,i)=>`
+    <tr><td class="num">${i+1}</td>
+    <td class="td-main" style="max-width:240px">${r.text}</td>
+    <td><span class="badge badge-purple" style="font-size:9px">${r.cat}</span></td>
+    <td>${priPill(r.priority||r.pri||'متوسطة')}</td>
+    <td style="direction:ltr;text-align:left;font-size:11px">${r.cost?Number(r.cost).toLocaleString()+' ر.س':'–'}</td>
+    <td>${r.financial==='نعم'?pill('نعم'):pill('لا')}</td>
+    <td>${pill(r.status||'معلق')}</td>
+    <td style="font-size:11px">${r.owner||'–'}</td>
+    <td>${actionBtns('editReq','delReq',r.id)}</td></tr>`).join('');
+}
+
+// ─── Team ─────────────────────────────────────────────────────
+function renderTeam() {
+  document.getElementById('team-grid').innerHTML = DB.team.map((t,i)=>`
+    <div class="team-card">
+      <div class="avatar" style="background:${colors[i%colors.length]}22;border-color:${colors[i%colors.length]};color:${colors[i%colors.length]}">${(t.name||'?').charAt(0)}</div>
+      <div class="team-info" style="flex:1">
+        <div class="tname">${t.name||''}</div>
+        <div class="trole">${t.role||''}</div>
+        <div class="tdept" style="color:${colors[i%colors.length]}">${t.dept||''} · ${t.branch||''}</div>
+        <div style="font-size:10px;color:var(--text3);margin-top:2px">${t.proj||''}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <button class="btn btn-ghost" style="padding:2px 7px;font-size:9px" onclick="editTeam('${t.id}')">✏️</button>
+        <button class="btn btn-danger" style="padding:2px 7px;font-size:9px" onclick="delTeam('${t.id}')">🗑️</button>
+      </div>
+    </div>`).join('');
+}
+
+// ─── Locations ────────────────────────────────────────────────
+function renderLoc() {
+  document.getElementById('loc-perm-grid').innerHTML = DB.locations.map(l=>`
+    <div class="loc-card">
+      <div class="loc-name">🏥 ${l.name||''} ${pill(l.status||'معلق')}</div>
+      <div class="loc-before">${l.before||''}</div>
+      <div class="loc-after">${l.after||''}</div>
+      <div style="margin-top:8px;display:flex;gap:4px">${actionBtns('editLoc','delLoc',l.id)}</div>
+    </div>`).join('');
+  document.getElementById('tmp-tbody').innerHTML = DB.tmpChanges.map(t=>`
+    <tr>
+    <td class="td-main">${t.item||''}</td>
+    <td style="font-size:11px">${t.loc||''}</td>
+    <td style="font-size:11px;color:var(--orange)">${t.change||''}</td>
+    <td style="font-size:11px;color:var(--green)">${t.restore||''}</td>
+    <td>${actionBtns('editTmp','delTmp',t.id)}</td></tr>`).join('');
+}
+
+// ─── Lectures ─────────────────────────────────────────────────
+function renderLec() {
+  const done = DB.lectures.filter(l=>l.done==='نعم').length;
+  document.getElementById('lec-cnt').textContent = DB.lectures.length;
+  document.getElementById('lec-done-cnt').textContent = done + ' منجزة';
+  document.getElementById('lec-tbody').innerHTML = DB.lectures.map((l,i)=>`
+    <tr><td class="num">${i+1}</td>
+    <td class="td-main">${l.title||''}</td>
+    <td style="font-size:11px;color:var(--accent)">${l.speaker||''}</td>
+    <td style="font-size:11px;color:var(--text3)">${l.alt||'–'}</td>
+    <td style="font-size:11px">${l.date||'–'}</td>
+    <td><span class="badge badge-purple" style="font-size:9px">${l.audience||l.aud||''}</span></td>
+    <td>${l.done==='نعم'?pill('✅ تمت'):pill('⏳ لم تتم')}</td>
+    <td>${actionBtns('editLec','delLec',l.id)}</td></tr>`).join('');
+}
+
+// ─── Assignments ──────────────────────────────────────────────
+function renderAssign() {
+  document.getElementById('assign-tbody').innerHTML = DB.assignments.map((a,i)=>`
+    <tr><td class="num">${i+1}</td>
+    <td class="td-main">${a.dept||''}</td>
+    <td><span class="badge badge-orange" style="font-size:9px">${a.type||''}</span></td>
+    <td style="font-size:11px;color:var(--text3);max-width:200px">${a.reason||''}</td>
+    <td style="font-size:11px">${a.time||''}</td>
+    <td style="font-size:11px;color:var(--accent)">${a.owner||''}</td>
+    <td>${pill(a.status||'معلق')}</td>
+    <td>${actionBtns('editAssign','delAssign',a.id)}</td></tr>`).join('');
+}
+
+// ─── Policies ─────────────────────────────────────────────────
+function renderPol() {
+  const signed = DB.policies.filter(p=>p.sigStatus==='موقع كامل').length;
+  document.getElementById('pol-cnt').textContent = DB.policies.length;
+  document.getElementById('pol-signed-cnt').textContent = signed + ' موقعة كاملاً';
+
+  document.getElementById('sig-grid').innerHTML = signatories.map(s=>{
+    const need = DB.policies.filter(p=>p.sigs&&p.sigs.includes(s.title)).length;
+    const done = DB.policies.filter(p=>p.sigs&&p.sigs.includes(s.title)&&p.sigStatus==='موقع كامل').length;
+    return `<div class="sig-card">
+      <div class="sig-emo">${s.emoji}</div>
+      <div class="sig-name">${s.title}</div>
+      <div class="sig-count">${done}/${need} سياسة</div>
+      ${done===need&&need>0?pill('مكتمل'):done>0?pill('جارٍ'):pill('معلق')}
+    </div>`;}).join('');
+
+  document.getElementById('pol-tbody').innerHTML = DB.policies.map((p,i)=>`
+    <tr><td class="num">${i+1}</td>
+    <td class="td-main">${p.name||''}</td>
+    <td style="font-size:11px">${p.dept||''}</td>
+    <td>${pill(p.content||'لم تبدأ')}</td>
+    <td style="font-size:11px;color:var(--text3)">${p.sigs||''}</td>
+    <td>${pill(p.sigStatus||'لم يوقع')}</td>
+    <td>${actionBtns('editPol','delPol',p.id)}</td></tr>`).join('');
+}
+
+// ─── Workflow ─────────────────────────────────────────────────
+function renderWf() {
+  document.getElementById('wf-list').innerHTML = DB.workflow.map((w,i)=>`
+    <div class="wf-step">
+      <div class="wf-num">${i+1}</div>
+      <div style="flex:1">
+        <div class="wf-title">${w.title||''}</div>
+        <div class="wf-desc">${w.desc||''}</div>
+        ${w.doc?`<div style="font-size:10px;color:var(--accent);margin-top:3px">📄 ${w.doc}</div>`:''}
+      </div>
+      ${actionBtns('editWf','delWf',w.id)}
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CRUD — Observations
+// ═══════════════════════════════════════════════════════════════
+function openObsModal(obs={}) {
+  document.getElementById('obs-eid').value = obs.id||'';
+  document.getElementById('m-obs-title').textContent = obs.id ? 'تعديل ملاحظة' : 'إضافة ملاحظة';
+  document.getElementById('obs-text').value  = obs.text||'';
+  document.getElementById('obs-pri').value   = obs.priority||obs.pri||'عالية';
+  document.getElementById('obs-owner').value = obs.owner||'';
+  document.getElementById('obs-due').value   = obs.due||'';
+  document.getElementById('obs-stat').value  = obs.status||'معلقة';
+  openModal('m-obs');
+}
+function editObs(id){ openObsModal(DB.observations.find(o=>String(o.id)===String(id))||{}); }
+async function delObs(id) {
+  if(!confirm('حذف هذه الملاحظة؟')) return;
+  DB.observations = DB.observations.filter(o=>String(o.id)!==String(id));
+  renderAll();
+  await apiCall('delete','observations',id);
+  toast('🗑️ تم الحذف', 'info');
+}
+async function saveObs() {
+  const id = document.getElementById('obs-eid').value;
+  const obj = { id:id||String(Date.now()), text:document.getElementById('obs-text').value,
+    priority:document.getElementById('obs-pri').value, owner:document.getElementById('obs-owner').value,
+    due:document.getElementById('obs-due').value, status:document.getElementById('obs-stat').value };
+  if(id) { const idx=DB.observations.findIndex(o=>String(o.id)===id); DB.observations[idx]={...DB.observations[idx],...obj}; }
+  else DB.observations.push(obj);
+  renderAll(); closeModal('m-obs');
+  await apiCall(id?'update':'add','observations',obj.id,obj);
+  toast('✅ تم الحفظ في Google Sheets', 'success');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CRUD — Requirements
+// ═══════════════════════════════════════════════════════════════
+function editReq(id){ const r=DB.requirements.find(x=>String(x.id)===String(id))||{}; document.getElementById('req-eid').value=r.id||''; document.getElementById('m-req-title').textContent='تعديل متطلب'; document.getElementById('req-text').value=r.text||''; document.getElementById('req-cat').value=r.cat||'سياسات وإجراءات'; document.getElementById('req-pri').value=r.priority||r.pri||'عالية'; document.getElementById('req-cost').value=r.cost||0; document.getElementById('req-fin').value=r.financial||'لا'; document.getElementById('req-stat').value=r.status||'معلق'; document.getElementById('req-owner').value=r.owner||''; openModal('m-req'); }
+async function delReq(id){ if(!confirm('حذف؟')) return; DB.requirements=DB.requirements.filter(r=>String(r.id)!==String(id)); renderAll(); await apiCall('delete','requirements',id); toast('🗑️ تم الحذف','info'); }
+async function saveReq(){ const id=document.getElementById('req-eid').value; const obj={id:id||String(Date.now()),text:document.getElementById('req-text').value,cat:document.getElementById('req-cat').value,priority:document.getElementById('req-pri').value,cost:document.getElementById('req-cost').value,financial:document.getElementById('req-fin').value,status:document.getElementById('req-stat').value,owner:document.getElementById('req-owner').value}; if(id){const idx=DB.requirements.findIndex(r=>String(r.id)===id);DB.requirements[idx]={...DB.requirements[idx],...obj};}else DB.requirements.push(obj); renderAll();closeModal('m-req'); await apiCall(id?'update':'add','requirements',obj.id,obj); toast('✅ تم الحفظ','success'); }
+
+// ═══════════════════════════════════════════════════════════════
+// CRUD — Team
+// ═══════════════════════════════════════════════════════════════
+function editTeam(id){ const t=DB.team.find(x=>String(x.id)===String(id))||{}; document.getElementById('team-eid').value=t.id||''; document.getElementById('team-name').value=t.name||''; document.getElementById('team-role').value=t.role||''; document.getElementById('team-dept').value=t.dept||''; document.getElementById('team-proj').value=t.proj||''; document.getElementById('team-branch').value=t.branch||'بريدة'; openModal('m-team'); }
+async function delTeam(id){ if(!confirm('حذف؟')) return; DB.team=DB.team.filter(t=>String(t.id)!==String(id)); renderAll(); await apiCall('delete','team',id); toast('🗑️ تم الحذف','info'); }
+async function saveTeam(){ const id=document.getElementById('team-eid').value; const obj={id:id||String(Date.now()),name:document.getElementById('team-name').value,role:document.getElementById('team-role').value,dept:document.getElementById('team-dept').value,proj:document.getElementById('team-proj').value,branch:document.getElementById('team-branch').value}; if(id){const idx=DB.team.findIndex(t=>String(t.id)===id);DB.team[idx]={...DB.team[idx],...obj};}else DB.team.push(obj); renderAll();closeModal('m-team'); await apiCall(id?'update':'add','team',obj.id,obj); toast('✅ تم الحفظ','success'); }
+
+// ═══════════════════════════════════════════════════════════════
+// CRUD — Locations & Temp
+// ═══════════════════════════════════════════════════════════════
+function editLoc(id){ const l=DB.locations.find(x=>String(x.id)===String(id))||{}; document.getElementById('loc-eid').value=l.id||''; document.getElementById('loc-name').value=l.name||''; document.getElementById('loc-branch').value=l.branch||'بريدة'; document.getElementById('loc-before').value=l.before||''; document.getElementById('loc-after').value=l.after||''; document.getElementById('loc-stat').value=l.status||'معلق'; document.getElementById('loc-owner').value=l.owner||''; openModal('m-loc'); }
+async function delLoc(id){ if(!confirm('حذف؟')) return; DB.locations=DB.locations.filter(l=>String(l.id)!==String(id)); renderAll(); await apiCall('delete','locations',id); toast('🗑️ تم الحذف','info'); }
+async function saveLoc(){ const id=document.getElementById('loc-eid').value; const obj={id:id||String(Date.now()),name:document.getElementById('loc-name').value,branch:document.getElementById('loc-branch').value,before:document.getElementById('loc-before').value,after:document.getElementById('loc-after').value,status:document.getElementById('loc-stat').value,owner:document.getElementById('loc-owner').value}; if(id){const idx=DB.locations.findIndex(l=>String(l.id)===id);DB.locations[idx]={...DB.locations[idx],...obj};}else DB.locations.push(obj); renderAll();closeModal('m-loc'); await apiCall(id?'update':'add','locations',obj.id,obj); toast('✅ تم الحفظ','success'); }
+
+function editTmp(id){ const t=DB.tmpChanges.find(x=>String(x.id)===String(id))||{}; document.getElementById('tmp-eid').value=t.id||''; document.getElementById('tmp-item').value=t.item||''; document.getElementById('tmp-loc').value=t.loc||''; document.getElementById('tmp-change').value=t.change||''; document.getElementById('tmp-restore').value=t.restore||''; document.getElementById('tmp-owner').value=t.owner||''; openModal('m-tmp'); }
+async function delTmp(id){ if(!confirm('حذف؟')) return; DB.tmpChanges=DB.tmpChanges.filter(t=>String(t.id)!==String(id)); renderAll(); await apiCall('delete','tmpChanges',id); toast('🗑️ تم الحذف','info'); }
+async function saveTmp(){ const id=document.getElementById('tmp-eid').value; const obj={id:id||String(Date.now()),item:document.getElementById('tmp-item').value,loc:document.getElementById('tmp-loc').value,change:document.getElementById('tmp-change').value,restore:document.getElementById('tmp-restore').value,owner:document.getElementById('tmp-owner').value}; if(id){const idx=DB.tmpChanges.findIndex(t=>String(t.id)===id);DB.tmpChanges[idx]={...DB.tmpChanges[idx],...obj};}else DB.tmpChanges.push(obj); renderAll();closeModal('m-tmp'); await apiCall(id?'update':'add','tmpChanges',obj.id,obj); toast('✅ تم الحفظ','success'); }
+
+// ═══════════════════════════════════════════════════════════════
+// CRUD — Lectures
+// ═══════════════════════════════════════════════════════════════
+function editLec(id){ const l=DB.lectures.find(x=>String(x.id)===String(id))||{}; document.getElementById('lec-eid').value=l.id||''; document.getElementById('lec-title').value=l.title||''; document.getElementById('lec-speaker').value=l.speaker||''; document.getElementById('lec-alt').value=l.alt||''; document.getElementById('lec-date').value=l.date||''; document.getElementById('lec-time').value=l.time||''; document.getElementById('lec-aud').value=l.audience||l.aud||'جميع الموظفين'; document.getElementById('lec-done').value=l.done||'لا'; openModal('m-lec'); }
+async function delLec(id){ if(!confirm('حذف؟')) return; DB.lectures=DB.lectures.filter(l=>String(l.id)!==String(id)); renderAll(); await apiCall('delete','lectures',id); toast('🗑️ تم الحذف','info'); }
+async function saveLec(){ const id=document.getElementById('lec-eid').value; const obj={id:id||String(Date.now()),title:document.getElementById('lec-title').value,speaker:document.getElementById('lec-speaker').value,alt:document.getElementById('lec-alt').value,date:document.getElementById('lec-date').value,time:document.getElementById('lec-time').value,audience:document.getElementById('lec-aud').value,done:document.getElementById('lec-done').value}; if(id){const idx=DB.lectures.findIndex(l=>String(l.id)===id);DB.lectures[idx]={...DB.lectures[idx],...obj};}else DB.lectures.push(obj); renderAll();closeModal('m-lec'); await apiCall(id?'update':'add','lectures',obj.id,obj); toast('✅ تم الحفظ','success'); }
+
+// ═══════════════════════════════════════════════════════════════
+// CRUD — Assignments
+// ═══════════════════════════════════════════════════════════════
+function editAssign(id){ const a=DB.assignments.find(x=>String(x.id)===String(id))||{}; document.getElementById('assign-eid').value=a.id||''; document.getElementById('assign-dept').value=a.dept||''; document.getElementById('assign-type').value=a.type||'تكليف رسمي موثق'; document.getElementById('assign-reason').value=a.reason||''; document.getElementById('assign-time').value=a.time||''; document.getElementById('assign-owner').value=a.owner||''; document.getElementById('assign-stat').value=a.status||'معلق'; openModal('m-assign'); }
+async function delAssign(id){ if(!confirm('حذف؟')) return; DB.assignments=DB.assignments.filter(a=>String(a.id)!==String(id)); renderAll(); await apiCall('delete','assignments',id); toast('🗑️ تم الحذف','info'); }
+async function saveAssign(){ const id=document.getElementById('assign-eid').value; const obj={id:id||String(Date.now()),dept:document.getElementById('assign-dept').value,type:document.getElementById('assign-type').value,reason:document.getElementById('assign-reason').value,time:document.getElementById('assign-time').value,owner:document.getElementById('assign-owner').value,status:document.getElementById('assign-stat').value}; if(id){const idx=DB.assignments.findIndex(a=>String(a.id)===id);DB.assignments[idx]={...DB.assignments[idx],...obj};}else DB.assignments.push(obj); renderAll();closeModal('m-assign'); await apiCall(id?'update':'add','assignments',obj.id,obj); toast('✅ تم الحفظ','success'); }
+
+// ═══════════════════════════════════════════════════════════════
+// CRUD — Policies
+// ═══════════════════════════════════════════════════════════════
+function editPol(id){ const p=DB.policies.find(x=>String(x.id)===String(id))||{}; document.getElementById('pol-eid').value=p.id||''; document.getElementById('pol-name').value=p.name||''; document.getElementById('pol-dept').value=p.dept||''; document.getElementById('pol-content').value=p.content||'لم تبدأ'; document.getElementById('pol-sigs').value=p.sigs||''; document.getElementById('pol-sigstat').value=p.sigStatus||'لم يوقع'; openModal('m-pol'); }
+async function delPol(id){ if(!confirm('حذف؟')) return; DB.policies=DB.policies.filter(p=>String(p.id)!==String(id)); renderAll(); await apiCall('delete','policies',id); toast('🗑️ تم الحذف','info'); }
+async function savePol(){ const id=document.getElementById('pol-eid').value; const obj={id:id||String(Date.now()),name:document.getElementById('pol-name').value,dept:document.getElementById('pol-dept').value,content:document.getElementById('pol-content').value,sigs:document.getElementById('pol-sigs').value,sigStatus:document.getElementById('pol-sigstat').value}; if(id){const idx=DB.policies.findIndex(p=>String(p.id)===id);DB.policies[idx]={...DB.policies[idx],...obj};}else DB.policies.push(obj); renderAll();closeModal('m-pol'); await apiCall(id?'update':'add','policies',obj.id,obj); toast('✅ تم الحفظ','success'); }
+
+// ═══════════════════════════════════════════════════════════════
+// CRUD — Workflow
+// ═══════════════════════════════════════════════════════════════
+function editWf(id){ const w=DB.workflow.find(x=>String(x.id)===String(id))||{}; document.getElementById('wf-eid').value=w.id||''; document.getElementById('wf-title-in').value=w.title||''; document.getElementById('wf-desc-in').value=w.desc||''; document.getElementById('wf-doc-in').value=w.doc||''; document.getElementById('wf-owner-in').value=w.owner||''; openModal('m-wf'); }
+async function delWf(id){ if(!confirm('حذف؟')) return; DB.workflow=DB.workflow.filter(w=>String(w.id)!==String(id)); renderAll(); await apiCall('delete','workflow',id); toast('🗑️ تم الحذف','info'); }
+async function saveWf(){ const id=document.getElementById('wf-eid').value; const obj={id:id||String(Date.now()),title:document.getElementById('wf-title-in').value,desc:document.getElementById('wf-desc-in').value,doc:document.getElementById('wf-doc-in').value,owner:document.getElementById('wf-owner-in').value}; if(id){const idx=DB.workflow.findIndex(w=>String(w.id)===id);DB.workflow[idx]={...DB.workflow[idx],...obj};}else DB.workflow.push(obj); renderAll();closeModal('m-wf'); await apiCall(id?'update':'add','workflow',obj.id,obj); toast('✅ تم الحفظ','success'); }
+
+// ═══════════════════════════════════════════════════════════════
+// COUNTDOWN
+// ═══════════════════════════════════════════════════════════════
+const SURVEY = new Date('2026-07-01');
+function updateCD() {
+  const diff = SURVEY - new Date();
+  if(diff<=0){ ['cd-d','cd-h','cd-m','cd-s'].forEach(id=>document.getElementById(id).textContent='0'); return; }
+  document.getElementById('cd-d').textContent = Math.floor(diff/86400000);
+  document.getElementById('cd-h').textContent = String(Math.floor((diff%86400000)/3600000)).padStart(2,'0');
+  document.getElementById('cd-m').textContent = String(Math.floor((diff%3600000)/60000)).padStart(2,'0');
+  document.getElementById('cd-s').textContent = String(Math.floor((diff%60000)/1000)).padStart(2,'0');
+  document.getElementById('k-days').textContent = Math.floor(diff/86400000);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════
+loadLocalFallback();
+renderAll();
+updateCD();
+setInterval(updateCD, 1000);
+
+// Auto-sync if GAS_URL is set
+if (GAS_URL) {
+  syncAll();
+  setInterval(syncAll, 5 * 60 * 1000); // auto-sync every 5 min
+} else {
+  setSyncStatus('err');
+  toast('⚙️ أدخل رابط Apps Script من زر الإعدادات لتفعيل المزامنة', 'info', 6000);
+}
+</script>
+</body>
+</html>

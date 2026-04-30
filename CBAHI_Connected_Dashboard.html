@@ -730,62 +730,44 @@ let isSyncing = false;
 // ═══════════════════════════════════════════════════════════════
 // API LAYER
 // ═══════════════════════════════════════════════════════════════
-// ── JSONP helper — bypasses CORS for GET requests ────────────
-function jsonpFetch(url) {
+// ════════════════════════════════════════════════════════════════
+// GAS API — JSONP only (only method that works from GitHub Pages)
+// ════════════════════════════════════════════════════════════════
+function gasGet(params) {
   return new Promise((resolve, reject) => {
-    const cbName = '_cb_' + Date.now();
+    const cbName = '_gas_' + Date.now() + '_' + Math.random().toString(36).slice(2);
     const script = document.createElement('script');
-    const timeout = setTimeout(() => {
-      delete window[cbName]; script.remove();
-      reject(new Error('JSONP timeout'));
-    }, 12000);
-    window[cbName] = (data) => {
-      clearTimeout(timeout); delete window[cbName]; script.remove();
-      resolve(data);
-    };
-    script.src = url + (url.includes('?') ? '&' : '?') + 'callback=' + cbName;
-    script.onerror = () => { clearTimeout(timeout); reject(new Error('JSONP script error')); };
+    const timer  = setTimeout(() => {
+      cleanup(); reject(new Error('timeout'));
+    }, 15000);
+    function cleanup() {
+      clearTimeout(timer);
+      delete window[cbName];
+      if (script.parentNode) script.parentNode.removeChild(script);
+    }
+    window[cbName] = (data) => { cleanup(); resolve(data); };
+    script.onerror  = () => { cleanup(); reject(new Error('script load failed')); };
+    const qs = Object.entries({ ...params, callback: cbName })
+      .map(([k,v]) => encodeURIComponent(k) + '=' + encodeURIComponent(v)).join('&');
+    script.src = GAS_URL + '?' + qs;
     document.head.appendChild(script);
   });
 }
 
-async function api(method, payload={}) {
-  if (!GAS_URL) {
-    toast('⚠️ لم يتم إعداد رابط Apps Script بعد', 'error');
-    showSettings();
-    throw new Error('No GAS URL');
-  }
+// All mutations go as GET params (JSONP POST-via-GET pattern)
+async function gasMutate(action, sheet, id, data) {
+  const params = { action };
+  if (sheet) params.sheet = sheet;
+  if (id)    params.id    = String(id);
+  if (data)  params.data  = JSON.stringify(data);
+  return gasGet(params);
+}
 
-  if (method === 'GET') {
-    // Try JSONP first (bypasses CORS), fallback to fetch
-    try {
-      return await jsonpFetch(GAS_URL + '?action=getData');
-    } catch(e) {
-      // Fallback: no-cors fetch won't work for reading, so try fetch with mode
-      const res = await fetch(GAS_URL + '?action=getData');
-      return res.json();
-    }
-  } else {
-    // POST — use no-cors workaround: encode as GET with callback
-    // Apps Script doesn't support true cross-origin POST from GitHub Pages
-    // Solution: send as GET with action param encoded
-    const params = new URLSearchParams({ action: payload.action });
-    if (payload.sheet) params.set('sheet', payload.sheet);
-    if (payload.id)    params.set('id', String(payload.id));
-    if (payload.data)  params.set('data', JSON.stringify(payload.data));
-    try {
-      return await jsonpFetch(GAS_URL + '?' + params.toString());
-    } catch(e) {
-      const res = await fetch(GAS_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'text/plain' },
-        body: JSON.stringify(payload)
-      });
-      // no-cors returns opaque response — assume success
-      return { success: true, offline: true };
-    }
-  }
+async function api(method, payload = {}) {
+  if (!GAS_URL) { toast('⚙️ أدخل رابط Apps Script في الإعدادات', 'error'); showSettings(); throw new Error('No GAS URL'); }
+  if (method === 'GET') return gasGet({ action: 'getData' });
+  const { action, sheet, data, id } = payload;
+  return gasMutate(action, sheet, id, data);
 }
 
 async function syncAll() {
@@ -793,7 +775,7 @@ async function syncAll() {
   isSyncing = true;
   setSyncStatus('load');
   try {
-    const data = await jsonpFetch(GAS_URL + '?action=getData');
+    const data = await gasGet({ action: 'getData' });
     if (data.error) throw new Error(data.error);
     DB.observations = data.observations || [];
     DB.requirements = data.requirements || [];
@@ -823,15 +805,16 @@ async function syncAll() {
 }
 
 async function apiCall(action, sheetKey, id, data) {
+  if (!GAS_URL) { saveLocal(); return true; }
   setSyncStatus('load');
   try {
-    const res = await api('POST', { action, sheet: sheetKey, id, data });
-    if (res.error) { toast('❌ خطأ: ' + res.error, 'error'); return false; }
+    const res = await gasMutate(action, sheetKey, id, data);
+    if (res && res.error) { toast('❌ ' + res.error, 'error'); setSyncStatus('err'); return false; }
     setSyncStatus('ok');
     return true;
   } catch(e) {
     setSyncStatus('err');
-    toast('⚠️ حُفظ محلياً — تعذّر الوصول للشيت', 'info');
+    toast('⚠️ حُفظ محلياً', 'info');
     return false;
   }
 }
@@ -902,7 +885,7 @@ async function testConnection() {
   try {
     const url = document.getElementById('cfg-url').value.trim();
     const res = await fetch(url + '?action=getDashboard');
-    const d = res_data;
+
     if (d.error) throw new Error(d.error);
     toast('✅ الاتصال ناجح!', 'success');
   } catch(e) { toast('❌ فشل الاتصال: ' + e.message, 'error'); }
@@ -1284,13 +1267,13 @@ const SIG_FIELDS = [
 async function fetchPolicies() {
   if (!GAS_URL) return;
   try {
-    const res_data = await jsonpFetch(GAS_URL + '?action=getPolicies&section=ALL');
-    const d = res_data;
+    const d = await gasGet({ action: 'getPolicies', section: 'ALL' });
+
     if (Array.isArray(d)) {
       POLICIES = d;
       saveLocal();
     }
-    const stats = await jsonpFetch(GAS_URL + '?action=getPolicyStats');
+    const stats = await gasGet({ action: 'getPolicyStats' });
 
     if (stats && stats.total) POL_STATS = stats;
     renderPoliciesTab();

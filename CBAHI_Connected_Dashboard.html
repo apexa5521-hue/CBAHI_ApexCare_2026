@@ -506,8 +506,9 @@ tr:hover td{background:rgba(0,194,255,.03)}
             <th>الرمز</th>
             <th>عنوان السياسة</th>
             <th>القسم</th>
-            <th>حالة المحتوى</th>
-            <th>التقدم</th>
+            <th>✍️ حالة الكتابة</th>
+            <th>التقدم %</th>
+            <th>🖊️ حالة التوقيع</th>
             <th style="background:rgba(13,148,136,.2);color:#0D9488;text-align:center">مدير الجودة</th>
             <th style="background:rgba(16,185,129,.2);color:#10B981;text-align:center">مدير طبي</th>
             <th style="background:rgba(124,58,237,.2);color:#7C3AED;text-align:center">مدير الفرع</th>
@@ -515,7 +516,6 @@ tr:hover td{background:rgba(0,194,255,.03)}
             <th style="background:rgba(249,115,22,.2);color:#F97316;text-align:center">مدير الموارد</th>
             <th style="background:rgba(239,68,68,.2);color:#EF4444;text-align:center">مهندس السلامة</th>
             <th style="background:rgba(13,31,60,.4);color:#93C5FD;text-align:center">الرئيس التنفيذي</th>
-            <th>% إدخال</th>
             <th>ملاحظات</th>
           </tr>
         </thead>
@@ -1443,7 +1443,7 @@ function renderPolSignatories() {
       <div style="font-size:20px;margin-bottom:6px">✍️</div>
       <div style="font-size:11px;font-weight:700;color:var(--text);margin-bottom:4px">${s.label}</div>
       <div style="font-size:22px;font-weight:900;color:${s.color};font-family:Cairo,sans-serif">${signed}</div>
-      <div style="font-size:10px;color:var(--text3);margin-bottom:6px">من ${total}</div>
+      <div style="font-size:10px;color:var(--text3);margin-bottom:6px">وقّع على ${signed} من ${total} سياسة</div>
       <div style="height:4px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden">
         <div style="height:100%;width:${pct}%;background:${s.color};border-radius:2px"></div>
       </div>
@@ -1485,23 +1485,25 @@ function renderPolTable() {
         onclick="toggleSig('${p.id}','${s.key}',this)">${p[s.key]||'⬜'}</td>`
     ).join('');
 
+    // Calculate sigStatus from individual signatures
+    const sigsDone = SIG_FIELDS.filter(s => p[s.key]==='✅').length;
+    const sigsTotal = SIG_FIELDS.length;
+    const sigStatus = sigsDone===0?'لم يوقع':sigsDone===sigsTotal?'موقع كامل':'موقع جزئياً ('+sigsDone+'/'+sigsTotal+')';
+    const sigStatusCls = sigsDone===sigsTotal?'s-done':sigsDone>0?'s-warn':'s-crit';
+
     return `<tr>
       <td class="num" style="color:var(--text3);font-size:10px">${i+1}</td>
       <td style="font-size:10px;font-weight:700;color:${meta.color};white-space:nowrap">${p.indexNo||''}</td>
-      <td class="td-main" style="font-size:11px;max-width:260px">${p.title||''}
-        ${p.notes?`<div style="font-size:9px;color:var(--orange);margin-top:2px">⚠️ ${p.notes}</div>`:''}</td>
+      <td class="td-main" style="font-size:11px;max-width:220px">${p.title||''}</td>
       <td style="text-align:center">
         <span style="font-size:9px;font-weight:700;color:${meta.color};background:${meta.light};
           padding:2px 7px;border-radius:10px">${p.section||''}</span></td>
       <td><span class="pill ${sCls}" style="font-size:10px;cursor:pointer"
         onclick="cycleStatus('${p.id}',this)">${p.contentReady||'لم تبدأ'}</span></td>
-      <td style="min-width:80px">${pBar}</td>
+      <td style="min-width:70px">${pBar}</td>
+      <td><span class="pill ${sigStatusCls}" style="font-size:10px;white-space:nowrap">${sigStatus}</span></td>
       ${sigs}
-      <td><input type="number" value="${pct}" min="0" max="100"
-        style="width:50px;background:var(--surface);border:1px solid var(--border);
-          border-radius:5px;color:var(--text);padding:3px 5px;font-size:11px;text-align:center"
-        onchange="updatePct('${p.id}',this.value)"></td>
-      <td style="font-size:10px;color:var(--text3)">${p.notes||''}</td>
+      <td style="font-size:10px;color:var(--text3);max-width:100px">${p.notes||''}</td>
     </tr>`;
   }).join('');
 }

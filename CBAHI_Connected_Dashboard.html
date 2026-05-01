@@ -247,8 +247,8 @@ tr:hover td{background:rgba(0,194,255,.03)}
   <button class="tab" onclick="switchTab('lectures')">🎓 المحاضرات</button>
   <button class="tab" onclick="switchTab('assignments')">📌 التكليفات</button>
   <button class="tab" onclick="switchTab('policies')">📜 السياسات</button>
-  <button class="tab" onclick="switchTab('workflow')">🔄 الورك فلو</button>
-    <button class="tab" onclick="switchTab('policies2')">📜 السياسات الكاملة (106)</button>
+  <button class="tab" onclick="switchTab('workflow')"> الورك فلو</button>
+    <button class="tab" onclick="switchTab('policies2')"> السياسات الكاملة (106)</button>
 </div>
 
 <div class="main">
@@ -981,7 +981,7 @@ async function testConnection() {
 }
 
 function updateCD() {
-  const diff = new Date('2026-07-01') - new Date();
+  const diff = new Date('2026-08-20') - new Date();
   if (diff <= 0) return;
   const set = (id, v) => { const el=document.getElementById(id); if(el) el.textContent=v; };
   set('cd-d', Math.floor(diff/86400000));

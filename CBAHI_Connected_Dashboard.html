@@ -247,8 +247,8 @@ tr:hover td{background:rgba(0,194,255,.03)}
   <button class="tab" onclick="switchTab('lectures')">🎓 المحاضرات</button>
   <button class="tab" onclick="switchTab('assignments')">📌 التكليفات</button>
   <button class="tab" onclick="switchTab('policies')">📜 السياسات</button>
-  <button class="tab" onclick="switchTab('workflow')"> الورك فلو</button>
-    <button class="tab" onclick="switchTab('policies2')"> السياسات الكاملة (106)</button>
+  <button class="tab" onclick="switchTab('workflow')">🔄 الورك فلو</button>
+    <button class="tab" onclick="switchTab('policies2')">📜 السياسات الكاملة (106)</button>
 </div>
 
 <div class="main">
@@ -880,6 +880,12 @@ async function syncAll() {
     setSyncStatus('ok');
     const sb = document.getElementById('lastSyncSb');
     if (sb) sb.textContent = 'آخر مزامنة: ' + new Date().toLocaleTimeString('ar-SA');
+    // Also populate POLICIES array from DB.policies (for policies2 tab)
+    if (DB.policies && DB.policies.length) {
+      POLICIES = DB.policies;
+      localStorage.setItem('cbahi_policies_v1', JSON.stringify(POLICIES));
+      renderPoliciesTab();
+    }
     toast('✅ تمت المزامنة', 'success');
   } catch(e) {
     setSyncStatus('err');
@@ -981,7 +987,7 @@ async function testConnection() {
 }
 
 function updateCD() {
-  const diff = new Date('2026-08-20') - new Date();
+  const diff = new Date('2026-07-01') - new Date();
   if (diff <= 0) return;
   const set = (id, v) => { const el=document.getElementById(id); if(el) el.textContent=v; };
   set('cd-d', Math.floor(diff/86400000));
@@ -1354,6 +1360,212 @@ if (GAS_URL) {
   const s = localStorage.getItem('cbahi_policies_v1');
   if (s) try { POLICIES=JSON.parse(s); renderPoliciesTab(); } catch(e) {}
 })();
+
+
+// ════════════════════════════════════════════════════════════════
+// POLICIES TAB — عرض الـ 106 سياسة
+// ════════════════════════════════════════════════════════════════
+
+function renderPoliciesTab() {
+  renderPolStats();
+  renderPolSectionBars();
+  renderPolSignatories();
+  renderPolTable();
+}
+
+function renderPolStats() {
+  const el = document.getElementById('pol2-stats');
+  if (!el) return;
+  const total   = POLICIES.length || 106;
+  const done    = POLICIES.filter(p => p.contentReady === 'مكتملة').length;
+  const inprog  = POLICIES.filter(p => p.contentReady === 'قيد الإعداد').length;
+  const notStart= total - done - inprog;
+  const avgPct  = POLICIES.length
+    ? Math.round(POLICIES.reduce((s,p)=>s+(Number(p.pct)||0),0)/POLICIES.length) : 0;
+
+  el.innerHTML = `
+    <div class="kpi blue"><div class="kpi-lbl">إجمالي السياسات</div>
+      <div class="kpi-val">${total}</div><div class="kpi-sub">من 5 أقسام</div></div>
+    <div class="kpi green"><div class="kpi-lbl">محتوى مكتمل</div>
+      <div class="kpi-val">${done}</div>
+      <div class="pbar"><div class="pfill green" style="width:${Math.round(done/total*100)}%"></div></div>
+      <div class="kpi-sub">${Math.round(done/total*100)}%</div></div>
+    <div class="kpi" style="border-color:rgba(240,180,41,.2)">
+      <div class="kpi-lbl">قيد الإعداد</div>
+      <div class="kpi-val" style="color:var(--gold)">${inprog}</div>
+      <div class="kpi-sub">${Math.round(inprog/total*100)}%</div></div>
+    <div class="kpi red"><div class="kpi-lbl">لم تبدأ</div>
+      <div class="kpi-val">${notStart}</div>
+      <div class="pbar"><div class="pfill" style="width:${Math.round(notStart/total*100)}%;background:var(--red)"></div></div>
+      <div class="kpi-sub">متبقية</div></div>
+    <div class="kpi blue" style="grid-column:span 2">
+      <div class="kpi-lbl">متوسط نسبة الإكمال</div>
+      <div class="kpi-val">${avgPct}%</div>
+      <div class="pbar"><div class="pfill blue" style="width:${avgPct}%"></div></div></div>
+  `;
+}
+
+function renderPolSectionBars() {
+  const el = document.getElementById('pol2-sections');
+  if (!el) return;
+  el.innerHTML = Object.entries(SECTIONS_META).map(([code, meta]) => {
+    const secPols = POLICIES.filter(p => p.section === code);
+    const total   = meta.count;
+    const done    = secPols.filter(p => p.contentReady === 'مكتملة').length;
+    const inprog  = secPols.filter(p => p.contentReady === 'قيد الإعداد').length;
+    const pct     = total ? Math.round(done/total*100) : 0;
+    return `<div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;
+      padding:14px;cursor:pointer" onclick="filterBySection('${code}')">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <span style="font-size:12px;font-weight:700;color:${meta.color}">${meta.label}</span>
+        <span style="font-size:11px;color:var(--text3)">${done}/${total}</span>
+      </div>
+      <div style="height:6px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden;margin-bottom:6px">
+        <div style="height:100%;width:${pct}%;background:${meta.color};border-radius:3px"></div>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <span style="font-size:10px;background:${meta.light};color:${meta.color};padding:2px 7px;border-radius:10px;font-weight:700">${pct}% مكتمل</span>
+        ${inprog>0?`<span style="font-size:10px;background:#FEF3C7;color:#92400E;padding:2px 7px;border-radius:10px">${inprog} جارٍ</span>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderPolSignatories() {
+  const el = document.getElementById('pol2-sigs');
+  if (!el) return;
+  el.innerHTML = SIG_FIELDS.map(s => {
+    const signed = POLICIES.filter(p => p[s.key] === '✅').length;
+    const total  = POLICIES.length || 106;
+    const pct    = total ? Math.round(signed/total*100) : 0;
+    return `<div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;
+      padding:14px;text-align:center">
+      <div style="font-size:20px;margin-bottom:6px">✍️</div>
+      <div style="font-size:11px;font-weight:700;color:var(--text);margin-bottom:4px">${s.label}</div>
+      <div style="font-size:22px;font-weight:900;color:${s.color};font-family:Cairo,sans-serif">${signed}</div>
+      <div style="font-size:10px;color:var(--text3);margin-bottom:6px">من ${total}</div>
+      <div style="height:4px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden">
+        <div style="height:100%;width:${pct}%;background:${s.color};border-radius:2px"></div>
+      </div>
+      <div style="font-size:10px;color:var(--text3);margin-top:4px">${pct}%</div>
+    </div>`;
+  }).join('');
+}
+
+function renderPolTable() {
+  const el = document.getElementById('pol2-tbody');
+  if (!el) return;
+
+  let filtered = [...POLICIES];
+  if (POL_FILTER_SEC !== 'ALL')    filtered = filtered.filter(p => p.section === POL_FILTER_SEC);
+  if (POL_FILTER_STATUS !== 'ALL') filtered = filtered.filter(p => p.contentReady === POL_FILTER_STATUS);
+  if (POL_SEARCH) {
+    const q = POL_SEARCH.toLowerCase();
+    filtered = filtered.filter(p =>
+      String(p.title||'').toLowerCase().includes(q) ||
+      String(p.indexNo||'').toLowerCase().includes(q));
+  }
+
+  const cntEl = document.getElementById('pol2-count');
+  if (cntEl) cntEl.textContent = filtered.length;
+
+  const statusCls2 = { 'مكتملة':'s-done', 'قيد الإعداد':'s-warn', 'لم تبدأ':'s-crit' };
+
+  el.innerHTML = filtered.map((p, i) => {
+    const meta = SECTIONS_META[p.section] || { color:'#6B7280', light:'#F3F4F6' };
+    const sCls = statusCls2[p.contentReady] || 's-pend';
+    const pct  = Number(p.pct) || 0;
+    const pBar = `<div style="display:flex;align-items:center;gap:4px">
+      <div style="flex:1;height:5px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden">
+        <div style="height:100%;width:${pct}%;background:${pct>=100?'var(--green)':pct>0?'var(--gold)':'var(--red)'};border-radius:2px"></div>
+      </div><span style="font-size:10px;color:var(--text3);min-width:26px">${pct}%</span></div>`;
+
+    const sigs = SIG_FIELDS.map(s =>
+      `<td style="text-align:center;font-size:14px;cursor:pointer"
+        onclick="toggleSig('${p.id}','${s.key}',this)">${p[s.key]||'⬜'}</td>`
+    ).join('');
+
+    return `<tr>
+      <td class="num" style="color:var(--text3);font-size:10px">${i+1}</td>
+      <td style="font-size:10px;font-weight:700;color:${meta.color};white-space:nowrap">${p.indexNo||''}</td>
+      <td class="td-main" style="font-size:11px;max-width:260px">${p.title||''}
+        ${p.notes?`<div style="font-size:9px;color:var(--orange);margin-top:2px">⚠️ ${p.notes}</div>`:''}</td>
+      <td style="text-align:center">
+        <span style="font-size:9px;font-weight:700;color:${meta.color};background:${meta.light};
+          padding:2px 7px;border-radius:10px">${p.section||''}</span></td>
+      <td><span class="pill ${sCls}" style="font-size:10px;cursor:pointer"
+        onclick="cycleStatus('${p.id}',this)">${p.contentReady||'لم تبدأ'}</span></td>
+      <td style="min-width:80px">${pBar}</td>
+      ${sigs}
+      <td><input type="number" value="${pct}" min="0" max="100"
+        style="width:50px;background:var(--surface);border:1px solid var(--border);
+          border-radius:5px;color:var(--text);padding:3px 5px;font-size:11px;text-align:center"
+        onchange="updatePct('${p.id}',this.value)"></td>
+      <td style="font-size:10px;color:var(--text3)">${p.notes||''}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ─── Interactions ─────────────────────────────────────────────
+const STATUS_CYCLE = ['لم تبدأ','قيد الإعداد','مكتملة'];
+
+async function cycleStatus(id, el) {
+  const p = POLICIES.find(x => String(x.id)===String(id));
+  if (!p) return;
+  const next = STATUS_CYCLE[(STATUS_CYCLE.indexOf(p.contentReady||'لم تبدأ')+1)%STATUS_CYCLE.length];
+  p.contentReady = next;
+  p.pct = next==='مكتملة'?100:next==='لم تبدأ'?0:p.pct;
+  el.className = 'pill ' + ({'مكتملة':'s-done','قيد الإعداد':'s-warn','لم تبدأ':'s-crit'}[next]||'s-pend');
+  el.textContent = next;
+  renderPolStats();
+  localStorage.setItem('cbahi_policies_v1', JSON.stringify(POLICIES));
+  await apiCall('updatePolicy','السياسات',id,{ contentReady:next, pct:p.pct });
+}
+
+async function toggleSig(id, field, el) {
+  const p = POLICIES.find(x => String(x.id)===String(id));
+  if (!p) return;
+  p[field] = p[field]==='✅' ? '⬜' : '✅';
+  el.textContent = p[field];
+  localStorage.setItem('cbahi_policies_v1', JSON.stringify(POLICIES));
+  await apiCall('updatePolicy','السياسات',id,{ [field]: p[field] });
+  toast(p[field]==='✅'?'✅ تم التوقيع':'⬜ تم الإلغاء', p[field]==='✅'?'success':'info', 2000);
+}
+
+async function updatePct(id, val) {
+  const p = POLICIES.find(x => String(x.id)===String(id));
+  if (!p) return;
+  p.pct = Math.min(100,Math.max(0,Number(val)));
+  p.contentReady = p.pct>=100?'مكتملة':p.pct>0?'قيد الإعداد':'لم تبدأ';
+  renderPoliciesTab();
+  localStorage.setItem('cbahi_policies_v1', JSON.stringify(POLICIES));
+  await apiCall('updatePolicy','السياسات',id,{ pct:p.pct, contentReady:p.contentReady });
+}
+
+function filterBySection(code) {
+  POL_FILTER_SEC = POL_FILTER_SEC===code ? 'ALL' : code;
+  const sel = document.getElementById('pol2-sec-select');
+  if (sel) sel.value = POL_FILTER_SEC;
+  renderPolTable();
+}
+
+function exportPoliciesCSV() {
+  const hdrs = ['Index','Title','Section','Content','%',
+    'مدير الجودة','مدير طبي','مدير الفرع','رئيسة التمريض',
+    'مدير الموارد','مهندس السلامة','الرئيس التنفيذي','Notes'];
+  const rows = POLICIES.map(p => [
+    p.indexNo,p.title,p.section,p.contentReady,p.pct,
+    p.sig_quality,p.sig_medical,p.sig_branch,p.sig_nursing,
+    p.sig_hr,p.sig_safety,p.sig_ceo,p.notes||''
+  ]);
+  const csv = [hdrs,...rows].map(r=>r.map(c=>`"${c||''}"`).join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(csv);
+  a.download = 'CBAHI_Policies_'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click();
+  toast('📥 تم التصدير','success');
+}
+
 
 </script>
 </body>

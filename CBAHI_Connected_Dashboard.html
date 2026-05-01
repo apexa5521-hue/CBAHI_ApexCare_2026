@@ -239,16 +239,16 @@ tr:hover td{background:rgba(0,194,255,.03)}
 
 <!-- TABS -->
 <div class="tabs">
-  <button class="tab active" onclick="switchTab('overview')">📊 نظرة عامة</button>
-  <button class="tab" onclick="switchTab('observations')">🔍 الملاحظات</button>
-  <button class="tab" onclick="switchTab('requirements')">📋 المتطلبات</button>
-  <button class="tab" onclick="switchTab('team')">👥 الفريق</button>
-  <button class="tab" onclick="switchTab('locations')">🏥 الأماكن</button>
-  <button class="tab" onclick="switchTab('lectures')">🎓 المحاضرات</button>
-  <button class="tab" onclick="switchTab('assignments')">📌 التكليفات</button>
+  <button class="tab active" onclick="switchTab('overview')"> نظرة عامة</button>
+  <button class="tab" onclick="switchTab('observations')"> الملاحظات</button>
+  <button class="tab" onclick="switchTab('requirements')"> المتطلبات</button>
+  <button class="tab" onclick="switchTab('team')"> الفريق</button>
+  <button class="tab" onclick="switchTab('locations')"> الإضافات و التعديلات </button>
+  <button class="tab" onclick="switchTab('lectures')"> المحاضرات التدريبية </button>
+  <button class="tab" onclick="switchTab('assignments')"> التكليفات</button>
   <button class="tab" onclick="switchTab('policies')">📜 السياسات</button>
   <button class="tab" onclick="switchTab('workflow')">🔄 الورك فلو</button>
-    <button class="tab" onclick="switchTab('policies2')">📜 السياسات الكاملة (106)</button>
+    <button class="tab" onclick="switchTab('policies2')"> حالة السياسات المكتوبة و توقيعها </button>
 </div>
 
 <div class="main">
@@ -264,9 +264,6 @@ tr:hover td{background:rgba(0,194,255,.03)}
   <!-- Countdown -->
   <div class="cd-grid">
     <div class="cd-box"><div class="cd-num" id="cd-d">–</div><div class="cd-lbl">يوم</div></div>
-    <div class="cd-box"><div class="cd-num" id="cd-h">–</div><div class="cd-lbl">ساعة</div></div>
-    <div class="cd-box"><div class="cd-num" id="cd-m">–</div><div class="cd-lbl">دقيقة</div></div>
-    <div class="cd-box"><div class="cd-num" id="cd-s">–</div><div class="cd-lbl">ثانية</div></div>
   </div>
   <!-- Summary Table -->
   <div class="tcard">
@@ -291,7 +288,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
   <div class="info-bar">ℹ️ جميع التعديلات تُحفظ تلقائياً في Google Sheets وتظهر فوراً</div>
   <div class="tcard">
     <div class="tcard-hdr">
-      <div class="tcard-title">📋 الملاحظات <span class="badge badge-blue" id="obs-cnt">0</span></div>
+      <div class="tcard-title"> الملاحظات <span class="badge badge-blue" id="obs-cnt">0</span></div>
       <div style="display:flex;gap:6px"><span class="badge badge-green" id="obs-solved">0 محلولة</span><span class="badge badge-red" id="obs-pend">0 معلقة</span></div>
     </div>
     <div class="tscroll">
@@ -326,8 +323,8 @@ tr:hover td{background:rgba(0,194,255,.03)}
 <!-- ═══ TEAM ═══ -->
 <div class="pane" id="pane-team">
   <div class="sec-hdr">
-    <div class="sec-icon" style="background:rgba(16,217,126,.1)">👥</div>
-    <div class="sec-title">الفريق الداخلي</div>
+    <div class="sec-icon" style="background:rgba(16,217,126,.1)">.</div>
+    <div class="sec-title">الفريق الداخلي (للدعم)</div>
     <div class="sec-line"></div>
     <button class="btn btn-primary" onclick="openModal('m-team')">+ إضافة</button>
   </div>
@@ -375,7 +372,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
   </div>
   <div class="tcard">
     <div class="tcard-hdr">
-      <div class="tcard-title">🎓 المحاضرات <span class="badge badge-blue" id="lec-cnt">0</span></div>
+      <div class="tcard-title"> المحاضرات <span class="badge badge-blue" id="lec-cnt">0</span></div>
       <span class="badge badge-green" id="lec-done-cnt">0 منجزة</span>
     </div>
     <div class="tscroll">
@@ -406,7 +403,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
 <!-- ═══ POLICIES ═══ -->
 <div class="pane" id="pane-policies">
   <div class="sec-hdr">
-    <div class="sec-icon" style="background:rgba(0,194,255,.1)">📜</div>
+    <div class="sec-icon" style="background:rgba(0,194,255,.1)"></div>
     <div class="sec-title">السياسات والموقعون</div>
     <div class="sec-line"></div>
     <button class="btn btn-primary" onclick="openModal('m-pol')">+ إضافة</button>

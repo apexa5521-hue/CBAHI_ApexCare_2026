@@ -3,9 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CBAHI – أبكس كير | متصل بـ Google Sheets</title>
+<title>CBAHI – أبكس كير | لوحة تحكم مشروع الاعتماد</title>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
 <style>
+
+
 :root {
   --bg:#0a0e1a; --surface:#111827; --surface2:#1a2235; --surface3:#1e2d45;
   --accent:#00c2ff; --accent2:#0080ff; --gold:#f0b429; --green:#10d97e;
@@ -206,10 +208,11 @@ tr:hover td{background:rgba(0,194,255,.03)}
 .sync-load{background:rgba(240,180,41,.1);color:var(--gold);border-color:rgba(240,180,41,.25)}
 
 @media print{.header{position:static}.pane{display:block!important}.tabs,.header-actions{display:none}.overlay{display:none!important}}
+
+
 </style>
 </head>
 <body>
-
 <!-- HEADER -->
 <div class="header">
   <div class="logo">
@@ -530,8 +533,8 @@ tr:hover td{background:rgba(0,194,255,.03)}
 <div class="overlay" id="m-settings">
   <div class="modal">
     <h3>⚙️ إعدادات الاتصال بـ Google Sheets</h3>
-    <div class="fg"><label>رابط Web App (Apps Script Deployment URL)</label>
-      <input type="text" id="cfg-url" placeholder="https://script.google.com/macros/s/YOUR_ID/exec"></div>
+    <div class="fg"><label>رابط Cloudflare Worker</label>
+      <input type="text" id="cfg-url" placeholder="https://cbahi-proxy.YOUR-NAME.workers.dev"></div>
     <div class="fg"><label>اختبار الاتصال</label>
       <button class="btn btn-ghost" style="width:100%" onclick="testConnection()">🔌 اختبار الآن</button></div>
     <div class="modal-footer">
@@ -711,13 +714,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
 <div class="toast-wrap" id="toasts"></div>
 
 <div class="spacer"></div>
-
 <script>
-// ═══════════════════════════════════════════════════════════════
-// CONFIG & STATE
-// ═══════════════════════════════════════════════════════════════
-const CFG_KEY = 'cbahi_gas_url';
-let GAS_URL = localStorage.getItem(CFG_KEY) || '';
 
 let DB = {
   observations:[], requirements:[], team:[],
@@ -725,124 +722,187 @@ let DB = {
   assignments:[], policies:[], workflow:[],
   dashboard: null
 };
-
 let isSyncing = false;
+let POLICIES = [];
+let POL_STATS = null;
+let POL_FILTER_SEC = 'ALL';
+let POL_FILTER_STATUS = 'ALL';
+let POL_SEARCH = '';
+const SECTIONS_META = {
+  IPC:  { label:'IPC – مكافحة العدوى',    color:'#0D9488', light:'#CCFBF1', count:28 },
+  PC:   { label:'PC – رعاية المرضى',       color:'#0080FF', light:'#D6E8FF', count:11 },
+  LD:   { label:'LD – القيادة',            color:'#7C3AED', light:'#EDE9FE', count:23 },
+  MOI:  { label:'MOI – إدارة المعلومات',   color:'#F97316', light:'#FFEDD5', count:9  },
+  FMS:  { label:'FMS – السلامة والمنشآت',  color:'#EF4444', light:'#FEE2E2', count:36 },
+};
+const SIG_FIELDS = [
+  { key:'sig_quality', label:'مدير الجودة',      color:'#0D9488' },
+  { key:'sig_medical', label:'مدير طبي',          color:'#10B981' },
+  { key:'sig_branch',  label:'مدير الفرع',        color:'#7C3AED' },
+  { key:'sig_nursing', label:'رئيسة التمريض',     color:'#F59E0B' },
+  { key:'sig_hr',      label:'مدير الموارد',      color:'#F97316' },
+  { key:'sig_safety',  label:'مهندس السلامة',     color:'#EF4444' },
+  { key:'sig_ceo',     label:'الرئيس التنفيذي',   color:'#0D1F3C' },
+];
 
-// ═══════════════════════════════════════════════════════════════
-// API LAYER
-// ═══════════════════════════════════════════════════════════════
+
 // ════════════════════════════════════════════════════════════════
-// GAS API — Pure JSONP, zero fetch(), zero CORS issues
-// Works 100% from GitHub Pages with Apps Script
+// GAS API — Direct fetch (no CORS when deployed correctly)
+// Requires: Execute as=Me, Who has access=Anyone
 // ════════════════════════════════════════════════════════════════
+const CFG_KEY = 'cbahi_gas_url';
+let GAS_URL = localStorage.getItem(CFG_KEY) || '';
 
-function gasCall(params) {
-  return new Promise((resolve, reject) => {
-    if (!GAS_URL) { reject(new Error('No GAS URL')); return; }
+async function callGAS(params) {
+  if (!GAS_URL) { showSettings(); throw new Error('أدخل رابط Apps Script'); }
+  
+  // Build query string
+  const qs = Object.keys(params)
+    .map(k => encodeURIComponent(k) + '=' +
+         encodeURIComponent(typeof params[k]==='object'
+           ? JSON.stringify(params[k]) : String(params[k])))
+    .join('&');
 
-    // Unique callback name
-    const cb = 'GAS_' + Date.now() + '_' + (Math.random()*1e9|0);
+  const url = GAS_URL + '?' + qs;
 
-    // Self-cleaning timeout
-    const tid = setTimeout(() => {
-      delete window[cb];
-      const el = document.getElementById(cb);
-      if (el) el.remove();
-      reject(new Error('Apps Script timeout — تأكد من صحة الرابط والـ deployment'));
-    }, 20000);
-
-    // Register global callback
-    window[cb] = function(data) {
-      clearTimeout(tid);
-      delete window[cb];
-      const el = document.getElementById(cb);
-      if (el) el.remove();
-      resolve(data);
-    };
-
-    // Build URL
-    const p = { ...params, callback: cb };
-    const qs = Object.keys(p)
-      .map(k => encodeURIComponent(k) + '=' + encodeURIComponent(
-        typeof p[k] === 'object' ? JSON.stringify(p[k]) : String(p[k])
-      )).join('&');
-
-    // Inject script tag
-    const s = document.createElement('script');
-    s.id  = cb;
-    s.src = GAS_URL + '?' + qs;
-    s.onerror = () => {
-      clearTimeout(tid);
-      delete window[cb];
-      s.remove();
-      reject(new Error('فشل تحميل السكريبت — تحقق من رابط Apps Script'));
-    };
-    document.head.appendChild(s);
+  // Use no-cors mode with redirect follow — works when GAS is set to "Anyone"
+  const res = await fetch(url, {
+    method: 'GET',
+    redirect: 'follow',
+    cache: 'no-cache',
   });
-}
 
-// GET — read data
-function gasGet(action, extra) {
-  return gasCall({ action, ...(extra||{}) });
-}
-
-// MUTATE — write/delete (sent as GET params via JSONP)
-function gasMutate(action, sheet, id, data) {
-  const p = { action };
-  if (sheet) p.sheet = sheet;
-  if (id)    p.id    = String(id);
-  if (data)  p.data  = JSON.stringify(data);
-  return gasCall(p);
-}
-
-// Legacy api() wrapper kept for compatibility
-async function api(method, payload = {}) {
-  if (!GAS_URL) {
-    toast('⚙️ أدخل رابط Apps Script في إعدادات الاتصال', 'error');
-    showSettings();
-    throw new Error('No GAS URL');
+  const text = await res.text();
+  
+  try {
+    return JSON.parse(text);
+  } catch(e) {
+    // HTML response = wrong deployment settings
+    if (text.includes('<html') || text.includes('Sign in')) {
+      throw new Error('Apps Script يطلب تسجيل دخول — تأكد: Who has access = Anyone (ليس Anyone with Google account)');
+    }
+    throw new Error('استجابة غير متوقعة من الخادم');
   }
-  if (method === 'GET') return gasGet('getData');
-  const { action, sheet, data, id } = payload;
-  return gasMutate(action, sheet, id, data);
+}
+
+async function gasGet(action, extra) {
+  return callGAS(Object.assign({ action }, extra || {}));
+}
+
+async function gasMutate(action, sheet, id, data) {
+  // All mutations go as GET (Apps Script handles them in doGet)
+  const p = { action, sheet: sheet||'', id: String(id||'') };
+  if (data) p.data = JSON.stringify(data);
+  return callGAS(p);
+}
+
+async function syncAll() {
+  if (isSyncing) return;
+  isSyncing = true;
+  setSyncStatus('load');
+  try {
+    const d = await gasGet('getData');
+    if (d.error) throw new Error(d.error);
+    ['observations','requirements','team','locations','tmpChanges',
+     'lectures','assignments','policies','workflow','dashboard']
+      .forEach(k => { if (d[k]) DB[k] = d[k]; });
+    renderAll();
+    setSyncStatus('ok');
+    const sb = document.getElementById('lastSyncSb');
+    if (sb) sb.textContent = 'آخر مزامنة: ' + new Date().toLocaleTimeString('ar-SA');
+    toast('✅ تمت المزامنة', 'success');
+  } catch(e) {
+    setSyncStatus('err');
+    loadLocalFallback(); renderAll();
+    toast('⚠️ ' + e.message, 'error');
+  } finally { isSyncing = false; }
 }
 
 async function apiCall(action, sheetKey, id, data) {
-  if (!GAS_URL) { saveLocal(); return true; }
-  setSyncStatus('load');
+  saveLocal(); setSyncStatus('load');
   try {
     const res = await gasMutate(action, sheetKey, id, data);
-    if (res && res.error) {
-      toast('❌ ' + res.error, 'error');
-      setSyncStatus('err');
-      return false;
-    }
+    if (res && res.error) { toast('❌ ' + res.error, 'error'); setSyncStatus('err'); return false; }
     setSyncStatus('ok');
-    toast('✅ حُفظ في Sheets', 'success', 2000);
+    toast('✅ حُفظ في Sheets', 'success', 1800);
     return true;
   } catch(e) {
     setSyncStatus('err');
-    toast('⚠️ حُفظ محلياً: ' + e.message, 'info');
+    toast('⚠️ ' + e.message, 'info');
     return false;
   }
+}
+
+function saveLocal() {
+  try { localStorage.setItem('cbahi_data_v1', JSON.stringify(DB)); } catch(e) {}
+}
+
+function loadLocalFallback() {
+  try {
+    const s = localStorage.getItem('cbahi_data_v1');
+    if (!s) return;
+    const d = JSON.parse(s);
+    Object.keys(DB).forEach(k => { if (d[k]) DB[k] = d[k]; });
+  } catch(e) {}
+}
+
+async function fetchPolicies() {
+  try {
+    const d = await gasGet('getPolicies', { section: 'ALL' });
+    if (Array.isArray(d)) {
+      POLICIES = d;
+      localStorage.setItem('cbahi_policies_v1', JSON.stringify(d));
+    }
+    const stats = await gasGet('getPolicyStats');
+    if (stats && stats.total) POL_STATS = stats;
+    renderPoliciesTab();
+  } catch(e) {
+    const s = localStorage.getItem('cbahi_policies_v1');
+    if (s) try { POLICIES=JSON.parse(s); renderPoliciesTab(); } catch(_) {}
+  }
+}
+
+async function syncFromTracker() {
+  toast('⏳ مزامنة...', 'info', 3000); setSyncStatus('load');
+  try {
+    const res = await gasGet('syncFromTracker');
+    if (res && res.success) { toast('✅ ' + res.count + ' سياسة', 'success'); await syncAll(); }
+    else { toast('❌ ' + ((res&&res.error)||'فشل'), 'error'); setSyncStatus('err'); }
+  } catch(e) { toast('❌ ' + e.message, 'error'); setSyncStatus('err'); }
+}
+
+async function syncToTracker() {
+  try {
+    const res = await gasGet('syncToTracker');
+    if (res && res.success) toast('✅ ' + res.updated + ' محدّث', 'success');
+    else toast('❌ ' + ((res&&res.error)||'فشل'), 'error');
+  } catch(e) { toast('❌ ' + e.message, 'error'); }
+}
+
+function showSettings() {
+  openModal('m-settings');
+  const el = document.getElementById('cfg-url');
+  if (el) el.value = GAS_URL;
+}
+
+async function saveSettings() {
+  GAS_URL = (document.getElementById('cfg-url').value || '').trim();
+  localStorage.setItem(CFG_KEY, GAS_URL);
+  closeModal('m-settings');
+  toast('✅ تم حفظ الرابط', 'success');
+  if (GAS_URL) await syncAll();
 }
 
 async function testConnection() {
   const url = (document.getElementById('cfg-url').value || '').trim();
   if (!url) { toast('❌ أدخل الرابط أولاً', 'error'); return; }
-  const prev = GAS_URL;
-  GAS_URL = url;
+  const prev = GAS_URL; GAS_URL = url;
   setSyncStatus('load');
   try {
-    const d = await gasGet('ping');
+    const d = await callGAS({ action: 'ping' });
     GAS_URL = prev;
-    if (d && d.ok) {
-      toast('✅ الاتصال ناجح! الخادم يعمل', 'success');
-      setSyncStatus('ok');
-    } else {
-      toast('⚠️ الرابط يعمل لكن استجابة غير متوقعة', 'info');
-      setSyncStatus('err');
-    }
+    if (d && d.ok) { toast('✅ الاتصال ناجح!', 'success'); setSyncStatus('ok'); }
+    else { toast('⚠️ الرابط يعمل لكن استجابة غير متوقعة: ' + JSON.stringify(d), 'info'); setSyncStatus('err'); }
   } catch(e) {
     GAS_URL = prev;
     setSyncStatus('err');
@@ -850,65 +910,15 @@ async function testConnection() {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════
-// UI HELPERS
-// ═══════════════════════════════════════════════════════════════
-function setSyncStatus(state) {
-  const badge = document.getElementById('syncBadge');
-  const dot   = document.getElementById('apiDot');
-  const lbl   = document.getElementById('apiStatus');
-  if (state === 'ok') {
-    badge.className = 'sync-badge sync-ok'; badge.textContent = '✅ متصل';
-    dot.style.background = 'var(--green)'; dot.style.animation = '';
-    lbl.textContent = 'متصل بـ Google Sheets';
-  } else if (state === 'err') {
-    badge.className = 'sync-badge sync-err'; badge.textContent = '❌ غير متصل';
-    dot.style.background = 'var(--red)'; dot.style.animation = '';
-    lbl.textContent = 'غير متصل — بيانات محلية فقط';
-  } else {
-    badge.className = 'sync-badge sync-load'; badge.textContent = '⟳ مزامنة...';
-    dot.style.background = 'var(--gold)'; dot.style.animation = 'pulse 1s infinite';
-    lbl.textContent = 'جاري المزامنة...';
-  }
-}
-
-function toast(msg, type='info', dur=3500) {
-  const wrap = document.getElementById('toasts');
-  const el = document.createElement('div');
-  el.className = `toast ${type}`;
-  el.textContent = msg;
-  wrap.appendChild(el);
-  setTimeout(() => el.remove(), dur);
-}
-
-function openModal(id) { document.getElementById(id).classList.add('open'); }
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-document.querySelectorAll('.overlay').forEach(el =>
-  el.addEventListener('click', e => { if(e.target===el) el.classList.remove('open'); }));
-
-function switchTab(id) {
-  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
-  document.querySelectorAll('.pane').forEach(p=>p.classList.remove('active'));
-  document.querySelector(`[onclick="switchTab('${id}')"]`).classList.add('active');
-  document.getElementById('pane-'+id).classList.add('active');
-}
-
-function showSettings() { openModal('m-settings'); document.getElementById('cfg-url').value = GAS_URL; }
-async function saveSettings() {
-  GAS_URL = document.getElementById('cfg-url').value.trim();
-  localStorage.setItem(CFG_KEY, GAS_URL);
-  closeModal('m-settings');
-  toast('✅ تم حفظ الإعدادات', 'success');
-  await syncAll();
-}
-async function testConnection() {
-  try {
-    const url = document.getElementById('cfg-url').value.trim();
-    const res = await fetch(url + '?action=getDashboard');
-
-    if (d.error) throw new Error(d.error);
-    toast('✅ الاتصال ناجح!', 'success');
-  } catch(e) { toast('❌ فشل الاتصال: ' + e.message, 'error'); }
+function updateCD() {
+  const diff = new Date('2026-07-01') - new Date();
+  if (diff <= 0) return;
+  const set = (id, v) => { const el=document.getElementById(id); if(el) el.textContent=v; };
+  set('cd-d', Math.floor(diff/86400000));
+  set('cd-h', String(Math.floor((diff%86400000)/3600000)).padStart(2,'0'));
+  set('cd-m', String(Math.floor((diff%3600000)/60000)).padStart(2,'0'));
+  set('cd-s', String(Math.floor((diff%60000)/1000)).padStart(2,'0'));
+  set('k-days', Math.floor(diff/86400000));
 }
 
 // ─── Status pill ─────────────────────────────────────────────
@@ -1254,301 +1264,26 @@ if (GAS_URL) {
 
 // ═══ POLICIES TAB PATCH ═══
 // ════════════════════════════════════════════════════════════════
-// PATCH — أضف هذا الكود في آخر <script> في CBAHI_Connected_Dashboard.html
-// يضيف تبويب السياسات الكاملة 106 + تزامن مع الشيت
-// ════════════════════════════════════════════════════════════════
+// PATCH — أضف هذا الكود في آخر 
 
-// ─── State ────────────────────────────────────────────────────
-let POLICIES = [];
-let POL_STATS = null;
-let POL_FILTER_SEC = 'ALL';
-let POL_FILTER_STATUS = 'ALL';
-let POL_SEARCH = '';
 
-const SECTIONS_META = {
-  IPC:  { label:'IPC – مكافحة العدوى',       color:'#0D9488', light:'#CCFBF1', count:28 },
-  PC:   { label:'PC – رعاية المرضى',          color:'#0080FF', light:'#D6E8FF', count:11 },
-  LD:   { label:'LD – القيادة',               color:'#7C3AED', light:'#EDE9FE', count:23 },
-  MOI:  { label:'MOI – إدارة المعلومات',      color:'#F97316', light:'#FFEDD5', count:9  },
-  FMS:  { label:'FMS – السلامة والمنشآت',     color:'#EF4444', light:'#FEE2E2', count:36 },
-};
-
-const SIG_FIELDS = [
-  { key:'sig_quality', label:'مدير الجودة',          color:'#0D9488' },
-  { key:'sig_medical', label:'مدير طبي',              color:'#10B981' },
-  { key:'sig_branch',  label:'مدير الفرع',            color:'#7C3AED' },
-  { key:'sig_nursing', label:'رئيسة التمريض',         color:'#F59E0B' },
-  { key:'sig_hr',      label:'مدير الموارد',          color:'#F97316' },
-  { key:'sig_safety',  label:'مهندس السلامة',         color:'#EF4444' },
-  { key:'sig_ceo',     label:'الرئيس التنفيذي',       color:'#0D1F3C' },
-];
-
-// ─── Fetch policies from GAS ──────────────────────────────────
-async function fetchPolicies() {
-  if (!GAS_URL) return;
-  try {
-    const d = await gasGet('getPolicies', { section: 'ALL' });
-
-    if (Array.isArray(d)) {
-      POLICIES = d;
-      saveLocal();
-    }
-    const stats = await gasGet('getPolicyStats');
-
-    if (stats && stats.total) POL_STATS = stats;
-    renderPoliciesTab();
-  } catch(e) {
-    // fallback to localStorage
-    const saved = localStorage.getItem('cbahi_policies_v1');
-    if (saved) POLICIES = JSON.parse(saved);
-    renderPoliciesTab();
-  }
+// ─── INIT ────────────────────────────────────────────────────
+loadLocalFallback();
+renderAll();
+updateCD();
+setInterval(updateCD, 1000);
+if (GAS_URL) {
+  syncAll();
+  setInterval(syncAll, 5 * 60 * 1000);
+  setTimeout(fetchPolicies, 2000);
+} else {
+  setSyncStatus('err');
+  toast('⚙️ أدخل رابط Apps Script من زر الإعدادات', 'info', 6000);
 }
-
-// ─── Save policies locally ────────────────────────────────────
-const _origSaveLocal = saveLocal;
-saveLocal = function() {
-  _origSaveLocal();
-  if (POLICIES.length) localStorage.setItem('cbahi_policies_v1', JSON.stringify(POLICIES));
-};
-
-// ─── Render Policies Tab ──────────────────────────────────────
-function renderPoliciesTab() {
-  renderPolStats();
-  renderPolSectionBars();
-  renderPolSignatories();
-  renderPolTable();
-}
-
-function renderPolStats() {
-  const total   = POLICIES.length || 106;
-  const done    = POLICIES.filter(p => p.contentReady === 'مكتملة').length;
-  const inprog  = POLICIES.filter(p => p.contentReady === 'قيد الإعداد').length;
-  const notStart= POLICIES.filter(p => p.contentReady === 'لم تبدأ').length;
-  const avgPct  = POLICIES.length
-    ? Math.round(POLICIES.reduce((s,p)=>s+(Number(p.pct)||0),0)/POLICIES.length) : 0;
-
-  const el = document.getElementById('pol2-stats');
-  if (!el) return;
-  el.innerHTML = `
-    <div class="kpi blue"><div class="kpi-lbl">إجمالي السياسات</div><div class="kpi-val">${total}</div><div class="kpi-sub">من 5 أقسام</div></div>
-    <div class="kpi green"><div class="kpi-lbl">محتوى مكتمل</div><div class="kpi-val">${done}</div>
-      <div class="pbar"><div class="pfill green" style="width:${Math.round(done/total*100)}%"></div></div>
-      <div class="kpi-sub">${Math.round(done/total*100)}%</div></div>
-    <div class="kpi" style="border-color:rgba(240,180,41,.2)"><div class="kpi-lbl">قيد الإعداد</div>
-      <div class="kpi-val" style="color:var(--gold)">${inprog}</div><div class="kpi-sub">${Math.round(inprog/total*100)}%</div></div>
-    <div class="kpi red"><div class="kpi-lbl">لم تبدأ</div><div class="kpi-val">${notStart}</div>
-      <div class="pbar"><div class="pfill" style="width:${Math.round(notStart/total*100)}%;background:var(--red)"></div></div>
-      <div class="kpi-sub">متبقية</div></div>
-    <div class="kpi blue" style="grid-column:span 2"><div class="kpi-lbl">متوسط نسبة الإكمال</div>
-      <div class="kpi-val">${avgPct}%</div>
-      <div class="pbar"><div class="pfill blue" style="width:${avgPct}%"></div></div></div>
-  `;
-}
-
-function renderPolSectionBars() {
-  const el = document.getElementById('pol2-sections');
-  if (!el) return;
-  el.innerHTML = Object.entries(SECTIONS_META).map(([code, meta]) => {
-    const secPols = POLICIES.filter(p => p.section === code);
-    const total   = meta.count;
-    const done    = secPols.filter(p => p.contentReady === 'مكتملة').length;
-    const inprog  = secPols.filter(p => p.contentReady === 'قيد الإعداد').length;
-    const pct     = total ? Math.round(done/total*100) : 0;
-    return `
-    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;cursor:pointer"
-         onclick="filterBySection('${code}')">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-        <span style="font-size:12px;font-weight:700;color:${meta.color}">${meta.label}</span>
-        <span style="font-size:11px;color:var(--text3)">${done}/${total}</span>
-      </div>
-      <div style="height:6px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden;margin-bottom:6px">
-        <div style="height:100%;width:${pct}%;background:${meta.color};border-radius:3px;transition:width .8s"></div>
-      </div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap">
-        <span style="font-size:10px;background:${meta.light};color:${meta.color};padding:2px 7px;border-radius:10px;font-weight:700">${pct}% مكتمل</span>
-        ${inprog>0?`<span style="font-size:10px;background:#FEF3C7;color:#92400E;padding:2px 7px;border-radius:10px">${inprog} جارٍ</span>`:''}
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function renderPolSignatories() {
-  const el = document.getElementById('pol2-sigs');
-  if (!el) return;
-  el.innerHTML = SIG_FIELDS.map(s => {
-    const signed  = POLICIES.filter(p => p[s.key] === '✅').length;
-    const total   = POLICIES.length || 106;
-    const pct     = total ? Math.round(signed/total*100) : 0;
-    return `
-    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center">
-      <div style="font-size:20px;margin-bottom:6px">✍️</div>
-      <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:4px">${s.label}</div>
-      <div style="font-size:20px;font-weight:900;color:${s.color};font-family:Cairo,sans-serif">${signed}</div>
-      <div style="font-size:10px;color:var(--text3);margin-bottom:6px">من ${total}</div>
-      <div style="height:4px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden">
-        <div style="height:100%;width:${pct}%;background:${s.color};border-radius:2px"></div>
-      </div>
-      <div style="font-size:10px;color:var(--text3);margin-top:4px">${pct}%</div>
-    </div>`;
-  }).join('');
-}
-
-function renderPolTable() {
-  const el = document.getElementById('pol2-tbody');
-  if (!el) return;
-
-  let filtered = POLICIES;
-  if (POL_FILTER_SEC !== 'ALL')    filtered = filtered.filter(p => p.section === POL_FILTER_SEC);
-  if (POL_FILTER_STATUS !== 'ALL') filtered = filtered.filter(p => p.contentReady === POL_FILTER_STATUS);
-  if (POL_SEARCH) {
-    const q = POL_SEARCH.toLowerCase();
-    filtered = filtered.filter(p =>
-      p.title.toLowerCase().includes(q) || p.indexNo.toLowerCase().includes(q));
-  }
-
-  document.getElementById('pol2-count').textContent = filtered.length;
-
-  el.innerHTML = filtered.map((p, i) => {
-    const meta = SECTIONS_META[p.section] || { color:'#6B7280', light:'#F3F4F6' };
-    const statusCls = p.contentReady==='مكتملة' ? 's-done'
-                    : p.contentReady==='قيد الإعداد' ? 's-warn' : 's-crit';
-    const pct = Number(p.pct) || 0;
-    const pctBar = `<div style="display:flex;align-items:center;gap:4px">
-      <div style="flex:1;height:5px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden">
-        <div style="height:100%;width:${pct}%;background:${pct>=100?'var(--green)':pct>0?'var(--gold)':'var(--red)'};border-radius:2px"></div>
-      </div>
-      <span style="font-size:10px;color:var(--text3);min-width:26px">${pct}%</span>
-    </div>`;
-    const sigs = SIG_FIELDS.map(s =>
-      `<td style="text-align:center;font-size:13px;cursor:pointer" onclick="toggleSig('${p.id}','${s.key}',this)">${p[s.key]||'⬜'}</td>`
-    ).join('');
-    return `<tr>
-      <td class="num" style="color:var(--text3);font-size:10px">${i+1}</td>
-      <td style="font-size:10px;font-weight:700;color:${meta.color};white-space:nowrap">${p.indexNo}</td>
-      <td class="td-main" style="font-size:11px;max-width:260px">${p.title}${p.notes?`<div style="font-size:9px;color:var(--orange);margin-top:2px">⚠️ ${p.notes}</div>`:''}</td>
-      <td style="text-align:center"><span style="font-size:9px;font-weight:700;color:${meta.color};background:${meta.light};padding:2px 7px;border-radius:10px">${p.section}</span></td>
-      <td><span class="pill ${statusCls}" style="font-size:10px;cursor:pointer" onclick="cycleStatus('${p.id}',this)">${p.contentReady||'لم تبدأ'}</span></td>
-      <td style="min-width:80px">${pctBar}</td>
-      ${sigs}
-      <td><input type="number" value="${pct}" min="0" max="100"
-          style="width:52px;background:var(--surface);border:1px solid var(--border);border-radius:5px;color:var(--text);padding:3px 5px;font-family:Tajawal,sans-serif;font-size:11px;text-align:center"
-          onchange="updatePct('${p.id}',this.value)"></td>
-      <td style="font-size:10px;color:var(--text3);max-width:120px">${p.notes||''}</td>
-    </tr>`;
-  }).join('');
-}
-
-// ─── Interactions ──────────────────────────────────────────────
-const STATUS_CYCLE = ['لم تبدأ','قيد الإعداد','مكتملة'];
-async function cycleStatus(id, el) {
-  const p = POLICIES.find(x => String(x.id)===String(id));
-  if (!p) return;
-  const cur = p.contentReady || 'لم تبدأ';
-  const next = STATUS_CYCLE[(STATUS_CYCLE.indexOf(cur)+1) % STATUS_CYCLE.length];
-  p.contentReady = next;
-  if (next === 'مكتملة') p.pct = 100;
-  if (next === 'لم تبدأ') p.pct = 0;
-  renderPoliciesTab();
-  saveLocal();
-  await apiCall('updatePolicy', CONFIG.SHEETS.POLICIES_FULL, id, { contentReady: next, pct: p.pct });
-  toast('✅ ' + next, 'success', 2000);
-}
-
-async function toggleSig(id, field, el) {
-  const p = POLICIES.find(x => String(x.id)===String(id));
-  if (!p) return;
-  p[field] = p[field]==='✅' ? '⬜' : '✅';
-  el.textContent = p[field];
-  saveLocal();
-  await apiCall('updatePolicy', CONFIG.SHEETS.POLICIES_FULL, id, { [field]: p[field] });
-  toast(p[field]==='✅' ? '✅ وقّع' : '⬜ أُلغي التوقيع', p[field]==='✅'?'success':'info', 2000);
-}
-
-async function updatePct(id, val) {
-  const p = POLICIES.find(x => String(x.id)===String(id));
-  if (!p) return;
-  p.pct = Math.min(100, Math.max(0, Number(val)));
-  if (p.pct === 100) p.contentReady = 'مكتملة';
-  else if (p.pct > 0) p.contentReady = 'قيد الإعداد';
-  else p.contentReady = 'لم تبدأ';
-  renderPoliciesTab();
-  saveLocal();
-  await apiCall('updatePolicy', CONFIG.SHEETS.POLICIES_FULL, id, { pct: p.pct, contentReady: p.contentReady });
-}
-
-function filterBySection(code) {
-  POL_FILTER_SEC = POL_FILTER_SEC === code ? 'ALL' : code;
-  renderPolTable();
-  document.getElementById('pol2-sec-select').value = POL_FILTER_SEC;
-}
-
-// ─── Mark All in section ──────────────────────────────────────
-async function markSectionDone(section) {
-  if (!confirm(`تعليم جميع سياسات ${section} كـ "مكتملة"؟`)) return;
-  POLICIES.filter(p => p.section === section).forEach(p => {
-    p.contentReady = 'مكتملة'; p.pct = 100;
-  });
-  renderPoliciesTab(); saveLocal();
-  toast(`✅ تم تعليم ${section} كمكتملة`, 'success');
-}
-
-// ─── Export visible to CSV ────────────────────────────────────
-function exportPoliciesCSV() {
-  const headers = ['Index','Title','Section','Content','%','مدير الجودة','مدير طبي','مدير الفرع','رئيسة التمريض','مدير الموارد','مهندس السلامة','الرئيس التنفيذي','Notes'];
-  const rows = POLICIES.map(p => [
-    p.indexNo, p.title, p.section, p.contentReady, p.pct,
-    p.sig_quality,p.sig_medical,p.sig_branch,p.sig_nursing,
-    p.sig_hr,p.sig_safety,p.sig_ceo, p.notes||''
-  ]);
-  const csv = [headers, ...rows].map(r => r.map(c => `"${c||''}"`).join(',')).join('\n');
-  const a = document.createElement('a');
-  a.href = 'data:text/csv;charset=utf-8,\uFEFF' + encodeURIComponent(csv);
-  a.download = 'CBAHI_Policies_' + new Date().toISOString().slice(0,10) + '.csv';
-  a.click();
-  toast('📥 تم التصدير', 'success');
-}
-
-
-// Auto-fetch policies on load
-if (GAS_URL) fetchPolicies();
-else { const saved=localStorage.getItem("cbahi_policies_v1"); if(saved){POLICIES=JSON.parse(saved);renderPoliciesTab();} }
-
-// ─── Sync from Tracker ───────────────────────────────────────
-async function syncFromTracker() {
-  if (!GAS_URL) { toast('⚙️ أدخل رابط Apps Script أولاً', 'error'); return; }
-  toast('⏳ جاري المزامنة مع شيت السياسات...', 'info', 4000);
-  setSyncStatus('load');
-  try {
-    const res = await gasGet('syncFromTracker');
-    if (res && res.success) {
-      toast(`✅ تمت المزامنة — ${res.count} سياسة`, 'success');
-      await syncAll(); // refresh all data
-    } else {
-      toast('❌ ' + (res && res.error ? res.error : 'فشلت المزامنة'), 'error');
-      setSyncStatus('err');
-    }
-  } catch(e) {
-    toast('❌ ' + e.message, 'error');
-    setSyncStatus('err');
-  }
-}
-
-// ─── Push to Tracker ─────────────────────────────────────────
-async function syncToTracker() {
-  if (!GAS_URL) { toast('⚙️ أدخل رابط Apps Script أولاً', 'error'); return; }
-  toast('⏳ جاري الدفع إلى شيت Tracker...', 'info', 4000);
-  try {
-    const res = await gasGet('syncToTracker');
-    if (res && res.success) {
-      toast(`✅ تم الدفع — ${res.updated} محدّث`, 'success');
-    } else {
-      toast('❌ ' + (res && res.error ? res.error : 'فشل'), 'error');
-    }
-  } catch(e) {
-    toast('❌ ' + e.message, 'error');
-  }
-}
+(function(){
+  const s = localStorage.getItem('cbahi_policies_v1');
+  if (s) try { POLICIES=JSON.parse(s); renderPoliciesTab(); } catch(e) {}
+})();
 
 </script>
 </body>

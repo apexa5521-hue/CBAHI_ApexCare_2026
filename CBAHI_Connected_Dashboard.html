@@ -533,8 +533,8 @@ tr:hover td{background:rgba(0,194,255,.03)}
 <div class="overlay" id="m-settings">
   <div class="modal">
     <h3>⚙️ إعدادات الاتصال بـ Google Sheets</h3>
-    <div class="fg"><label>رابط Cloudflare Worker</label>
-      <input type="text" id="cfg-url" placeholder="https://cbahi-proxy.YOUR-NAME.workers.dev"></div>
+    <div class="fg"><label>رابط Apps Script (Web App URL)</label>
+      <input type="text" id="cfg-url" placeholder="https://script.google.com/macros/s/YOUR_ID/exec"></div>
     <div class="fg"><label>اختبار الاتصال</label>
       <button class="btn btn-ghost" style="width:100%" onclick="testConnection()">🔌 اختبار الآن</button></div>
     <div class="modal-footer">
@@ -817,35 +817,42 @@ const CFG_KEY = 'cbahi_gas_url';
 let GAS_URL = localStorage.getItem(CFG_KEY) || '';
 
 async function callGAS(params) {
-  if (!GAS_URL) { showSettings(); throw new Error('أدخل رابط Apps Script'); }
-  
-  // Build query string
-  const qs = Object.keys(params)
-    .map(k => encodeURIComponent(k) + '=' +
-         encodeURIComponent(typeof params[k]==='object'
-           ? JSON.stringify(params[k]) : String(params[k])))
-    .join('&');
-
-  const url = GAS_URL + '?' + qs;
-
-  // Use no-cors mode with redirect follow — works when GAS is set to "Anyone"
-  const res = await fetch(url, {
-    method: 'GET',
-    redirect: 'follow',
-    cache: 'no-cache',
-  });
-
-  const text = await res.text();
-  
-  try {
-    return JSON.parse(text);
-  } catch(e) {
-    // HTML response = wrong deployment settings
-    if (text.includes('<html') || text.includes('Sign in')) {
-      throw new Error('Apps Script يطلب تسجيل دخول — تأكد: Who has access = Anyone (ليس Anyone with Google account)');
-    }
-    throw new Error('استجابة غير متوقعة من الخادم');
+  if (!GAS_URL) {
+    showSettings();
+    throw new Error('أدخل رابط Apps Script');
   }
+  return new Promise(function(resolve, reject) {
+    const cb  = 'GAS_' + Date.now() + '_' + (Math.random()*1e9|0);
+    const tid = setTimeout(function() {
+      delete window[cb];
+      const el = document.getElementById(cb);
+      if (el) el.remove();
+      reject(new Error('انتهت مهلة الاتصال — تأكد: Who has access = Anyone'));
+    }, 15000);
+    window[cb] = function(data) {
+      clearTimeout(tid);
+      delete window[cb];
+      const el = document.getElementById(cb);
+      if (el) el.remove();
+      if (data && data.error) reject(new Error(data.error));
+      else resolve(data);
+    };
+    const p = Object.assign({}, params, { callback: cb });
+    const qs = Object.keys(p).map(function(k) {
+      return encodeURIComponent(k) + '=' +
+        encodeURIComponent(typeof p[k]==='object' ? JSON.stringify(p[k]) : String(p[k]));
+    }).join('&');
+    const s = document.createElement('script');
+    s.id = cb;
+    s.src = GAS_URL + '?' + qs;
+    s.onerror = function() {
+      clearTimeout(tid);
+      delete window[cb];
+      s.remove();
+      reject(new Error('فشل تحميل الاستجابة — تحقق من رابط Apps Script'));
+    };
+    document.head.appendChild(s);
+  });
 }
 
 async function gasGet(action, extra) {

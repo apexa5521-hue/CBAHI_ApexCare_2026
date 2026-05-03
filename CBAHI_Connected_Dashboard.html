@@ -780,7 +780,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
   <div class="modal">
     <h3>⚙️ إعدادات الاتصال بـ Google Sheets</h3>
     <div class="fg"><label>رابط Apps Script (Web App URL)</label>
-      <input type="text" id="cfg-url" placeholder="https://script.google.com/macros/s/YOUR_ID/exec"></div>
+      <input type="text" id="cfg-url" placeholder="https://script.google.com/macros/s/AKfycbw_5gH8qdAKIhhzehghWRearD7F-vO-ipPXcRKQzZfhdSVsAejwCdlfJj6FqihEWpKHqA/exec"></div>
     <div class="fg"><label>اختبار الاتصال</label>
       <button class="btn btn-ghost" style="width:100%" onclick="testConnection()">🔌 اختبار الآن</button></div>
     <div class="modal-footer">
@@ -997,7 +997,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
     <div class="info-bar">💡 أدخل رابط Web App الخاص بـ Google Sheet ملفات الموظفين</div>
     <div class="fg">
       <label>رابط Apps Script (Web App URL)</label>
-      <input type="text" id="staff-sheet-url" placeholder="https://script.google.com/macros/s/YOUR_ID/exec">
+      <input type="text" id="staff-sheet-url" placeholder="https://script.google.com/macros/s/AKfycbwDWE-3g2ANgDRYDkjUnMo8kENY_LQZqRJFSu3rKbsc0Yae-QLEaETiupz3pqvZisIU5w/exec">
     </div>
     <div class="fg">
       <label>اسم الشيت (Tab Name)</label>
@@ -1192,15 +1192,15 @@ async function syncAll() {
     const d = await gasGet('getData');
     if (d.error) throw new Error(d.error);
     ['observations','requirements','team','locations','tmpChanges',
-     'lectures','assignments','policies','workflow','dashboard']
+     'lectures','assignments','licenses','ovrDocs','dashboard']
       .forEach(k => { if (d[k]) DB[k] = d[k]; });
     renderAll();
     setSyncStatus('ok');
     const sb = document.getElementById('lastSyncSb');
     if (sb) sb.textContent = 'آخر مزامنة: ' + new Date().toLocaleTimeString('ar-SA');
-    // Also populate POLICIES array from DB.policies (for policies2 tab)
-    if (DB.policies && DB.policies.length) {
-      POLICIES = DB.policies;
+    // Also populate POLICIES array if exists (for policies2 tab)
+    if (d.policies && d.policies.length) {
+      POLICIES = d.policies;
       localStorage.setItem('cbahi_policies_v1', JSON.stringify(POLICIES));
       renderPoliciesTab();
     }
@@ -1384,7 +1384,7 @@ function renderOverview() {
     {label:'الملاحظات', total:obs.length, done:obsDone, pend:cnt(obs,'status','معلقة')},
     {label:'المتطلبات', total:reqs.length, done:reqDone, pend:cnt(reqs,'status','معلق')},
     {label:'المحاضرات', total:lecs.length, done:lecDone, pend:lecs.length-lecDone},
-    {label:'السياسات', total:pols.length, done:polSigned, pend:cnt(pols,'sigStatus','لم يوقع')},
+    {label:'الرخص والعقود', total:lics.length, done:licActive, pend:cnt(lics,'status','منتهية')},
     {label:'الفريق', total:DB.team.length, done:DB.team.length, pend:0},
     {label:'التكليفات', total:DB.assignments.length, done:cnt(DB.assignments,'status','مكتمل'), pend:cnt(DB.assignments,'status','معلق')},
   ];

@@ -230,7 +230,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
 <div class="status-bar">
   <div class="sb-item"><div class="sb-dot" id="apiDot" style="background:var(--gold);animation:pulse 1s infinite"></div><span id="apiStatus">جاري الاتصال بـ Google Sheets...</span></div>
   <div class="sb-item">📅 تاريخ البداية: <strong>10/02/2026</strong></div>
-  <div class="sb-item">🎯 التاريخ المستهدف لنهاية المشروع: <strong style="color:var(--gold)">20/08/2026</strong></div>
+  <div class="sb-item">🎯 موعد الاستطلاع: <strong style="color:var(--gold)">01/07/2026</strong></div>
   <div class="sb-item" id="lastSyncSb">آخر مزامنة: –</div>
   <div class="sb-item" style="margin-right:auto">
     <button class="btn btn-ghost" style="padding:3px 10px;font-size:10px" onclick="showSettings()">⚙️ إعدادات الاتصال</button>
@@ -708,7 +708,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
     </div>
     <div style="display:flex;gap:24px;justify-content:center;margin-top:18px;flex-wrap:wrap">
       <div><span style="color:var(--text3);font-size:11px">⏰ الأيام المتبقية</span> <strong id="prog-days" style="color:var(--gold);font-size:18px;margin-right:8px">–</strong></div>
-      <div><span style="color:var(--text3);font-size:11px">📅 التاريخ المستهدف لنهاية المشروع</span> <strong style="color:var(--accent);font-size:14px;margin-right:8px">20/08/2026</strong></div>
+      <div><span style="color:var(--text3);font-size:11px">📅 موعد الاستطلاع</span> <strong style="color:var(--accent);font-size:14px;margin-right:8px">01/07/2026</strong></div>
       <div><span style="color:var(--text3);font-size:11px">🚀 تاريخ البداية</span> <strong style="color:var(--text2);font-size:14px;margin-right:8px">10/02/2026</strong></div>
     </div>
   </div>
@@ -721,6 +721,15 @@ tr:hover td{background:rgba(0,194,255,.03)}
   </div>
 
   <div id="pillars-grid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px"></div>
+
+  <!-- Policy Signatures Details -->
+  <div class="sec-hdr" style="margin-top:24px">
+    <div class="sec-icon" style="background:rgba(124,58,237,.1)">✍️</div>
+    <div class="sec-title">تفاصيل توقيع السياسات (106 سياسة)</div>
+    <div class="sec-line"></div>
+  </div>
+
+  <div id="signatures-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;margin-bottom:24px"></div>
 
   <!-- Action items -->
   <div class="sec-hdr" style="margin-top:24px">
@@ -1305,7 +1314,7 @@ async function testConnection() {
 }
 
 function updateCD() {
-  const diff = new Date('2026-08-20') - new Date();
+  const diff = new Date('2026-07-01') - new Date();
   if (diff <= 0) return;
   const set = (id, v) => { const el=document.getElementById(id); if(el) el.textContent=v; };
   set('cd-d', Math.floor(diff/86400000));
@@ -1580,7 +1589,7 @@ async function saveAssign(){ const id=document.getElementById('assign-eid').valu
 // ═══════════════════════════════════════════════════════════════
 // COUNTDOWN
 // ═══════════════════════════════════════════════════════════════
-const SURVEY = new Date('2026-08-20');
+const SURVEY = new Date('2026-07-01');
 function updateCD() {
   const diff = SURVEY - new Date();
   if(diff<=0){ ['cd-d','cd-h','cd-m','cd-s'].forEach(id=>document.getElementById(id).textContent='0'); return; }
@@ -1991,9 +2000,72 @@ function renderProgressDashboard() {
   
   const days = document.getElementById('prog-days');
   if (days) {
-    const diff = new Date('2026-08-20') - new Date();
+    const diff = new Date('2026-07-01') - new Date();
     days.textContent = Math.max(0, Math.floor(diff/86400000));
   }
+  
+  // Render signatures grid
+  renderSignaturesGrid();
+}
+
+function renderSignaturesGrid() {
+  const grid = document.getElementById('signatures-grid');
+  if (!grid) return;
+  
+  if (!POLICIES || POLICIES.length === 0) {
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--text3)">⏳ لا توجد بيانات سياسات بعد...</div>';
+    return;
+  }
+  
+  const totalPolicies = POLICIES.length;
+  const writingComplete = POLICIES.filter(p => p.contentReady === 'مكتملة').length;
+  const writingPct = totalPolicies ? Math.round(writingComplete / totalPolicies * 100) : 0;
+  
+  // Card for Policy Writing
+  let cards = [`<div style="background:var(--surface);border:1px solid #0080FF33;border-radius:10px;padding:16px;position:relative;overflow:hidden">
+    <div style="position:absolute;top:0;right:0;width:60px;height:60px;background:#0080FF;opacity:.08;border-radius:50%;transform:translate(15px,-15px)"></div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+      <span style="font-size:24px">✍️</span>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:800;color:var(--text)">كتابة السياسات</div>
+        <div style="font-size:10px;color:var(--text3)">${writingComplete} من ${totalPolicies} سياسة</div>
+      </div>
+      <div style="font-size:26px;font-weight:900;color:#0080FF;font-family:Cairo,sans-serif">${writingPct}%</div>
+    </div>
+    <div style="height:6px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden">
+      <div style="height:100%;width:${writingPct}%;background:#0080FF;border-radius:3px;transition:width .6s;box-shadow:0 0 6px #0080FF88"></div>
+    </div>
+    <div style="font-size:9px;color:var(--text3);margin-top:6px">${writingPct >= 90 ? '✅ ممتاز' : writingPct >= 70 ? '🟡 جيد' : '⚠️ يحتاج عمل'}</div>
+  </div>`];
+  
+  // Cards for each signatory
+  SIG_FIELDS.forEach(sig => {
+    const signed = POLICIES.filter(p => p[sig.key] === '✅').length;
+    const required = POLICIES.filter(p => {
+      // Check if this signatory is required for this policy
+      // For now, assume all signatories are required for all policies
+      return true;
+    }).length;
+    const pct = required ? Math.round(signed / required * 100) : 0;
+    
+    cards.push(`<div style="background:var(--surface);border:1px solid ${sig.color}33;border-radius:10px;padding:16px;position:relative;overflow:hidden">
+      <div style="position:absolute;top:0;right:0;width:60px;height:60px;background:${sig.color};opacity:.08;border-radius:50%;transform:translate(15px,-15px)"></div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <span style="font-size:24px">🖊️</span>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:800;color:var(--text)">${sig.label}</div>
+          <div style="font-size:10px;color:var(--text3)">${signed} من ${required} سياسة</div>
+        </div>
+        <div style="font-size:26px;font-weight:900;color:${sig.color};font-family:Cairo,sans-serif">${pct}%</div>
+      </div>
+      <div style="height:6px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden">
+        <div style="height:100%;width:${pct}%;background:${sig.color};border-radius:3px;transition:width .6s;box-shadow:0 0 6px ${sig.color}88"></div>
+      </div>
+      <div style="font-size:9px;color:var(--text3);margin-top:6px">${pct >= 90 ? '✅ ممتاز' : pct >= 70 ? '🟡 جيد' : pct >= 50 ? '⚠️ متوسط' : '🚨 متأخر'}</div>
+    </div>`);
+  });
+  
+  grid.innerHTML = cards.join('');
 }
 
 // Override renderAll to also update progress dashboard

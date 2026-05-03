@@ -780,7 +780,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
   <div class="modal">
     <h3>⚙️ إعدادات الاتصال بـ Google Sheets</h3>
     <div class="fg"><label>رابط Apps Script (Web App URL)</label>
-      <input type="text" id="cfg-url" placeholder="https://script.google.com/macros/s/AKfycbx9aa0UGzwiSXhf9oc0UIkPW02VW1stpHn7w6Z4zY9DwuJiNaThWBdd9xHhUPqHL2_jmw/exec"></div>
+      <input type="text" id="cfg-url" placeholder="https://script.google.com/macros/s/YOUR_ID/exec"></div>
     <div class="fg"><label>اختبار الاتصال</label>
       <button class="btn btn-ghost" style="width:100%" onclick="testConnection()">🔌 اختبار الآن</button></div>
     <div class="modal-footer">
@@ -997,11 +997,11 @@ tr:hover td{background:rgba(0,194,255,.03)}
     <div class="info-bar">💡 أدخل رابط Web App الخاص بـ Google Sheet ملفات الموظفين</div>
     <div class="fg">
       <label>رابط Apps Script (Web App URL)</label>
-      <input type="text" id="staff-sheet-url" placeholder="https://script.google.com/macros/s/AKfycbweWxHoiqRm4QFUUtee-igpDnD-8rG29RoQmNYKuETXmRFaaCrjO63lzYj-Mw_vmr2t/exec">
+      <input type="text" id="staff-sheet-url" placeholder="https://script.google.com/macros/s/YOUR_ID/exec">
     </div>
     <div class="fg">
       <label>اسم الشيت (Tab Name)</label>
-      <input type="text" id="staff-sheet-name" placeholder="Staff_Files" value="HR_Tracker">
+      <input type="text" id="staff-sheet-name" placeholder="Staff_Files" value="Staff_Files">
     </div>
     <div class="fg">
       <label>عمود اسم الموظف</label>
@@ -1009,7 +1009,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
     </div>
     <div class="fg">
       <label>عمود القسم</label>
-      <input type="text" id="staff-col-dept" placeholder="D" value="D">
+      <input type="text" id="staff-col-dept" placeholder="B" value="B">
     </div>
     <div class="fg">
       <label>عمود المسمى الوظيفي</label>
@@ -1017,7 +1017,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
     </div>
     <div class="fg">
       <label>عمود نسبة الإنجاز (%)</label>
-      <input type="text" id="staff-col-progress" placeholder="S" value="S">
+      <input type="text" id="staff-col-progress" placeholder="D" value="D">
     </div>
     <div class="modal-footer">
       <button class="btn btn-danger" onclick="closeModal('m-staff-sheet')">إلغاء</button>
@@ -1107,6 +1107,8 @@ let POL_STATS = null;
 let POL_FILTER_SEC = 'ALL';
 let POL_FILTER_STATUS = 'ALL';
 let POL_SEARCH = '';
+let STAFF_FILES_DATA = [];
+let STAFF_SHEET_CONFIG = null;
 const SECTIONS_META = {
   IPC:  { label:'IPC – مكافحة العدوى',    color:'#0D9488', light:'#CCFBF1', count:28 },
   PC:   { label:'PC – رعاية المرضى',       color:'#0080FF', light:'#D6E8FF', count:11 },
@@ -1349,8 +1351,10 @@ function renderAll() {
 // ─── Overview ────────────────────────────────────────────────
 function renderOverview() {
   const st = DB.dashboard;
-  const obs = DB.observations; const reqs = DB.requirements;
-  const lecs = DB.lectures; const pols = DB.policies;
+  const obs = DB.observations || []; 
+  const reqs = DB.requirements || [];
+  const lecs = DB.lectures || [];
+  const lics = DB.licenses || [];
 
   const cnt = (arr, f, v) => arr.filter(r=>r[f]===v).length;
   const pct = (a,b) => b ? Math.round(a/b*100) : 0;
@@ -1358,13 +1362,13 @@ function renderOverview() {
   const obsDone = cnt(obs,'status','محلولة');
   const reqDone = cnt(reqs,'status','مكتمل');
   const lecDone = cnt(lecs,'done','نعم');
-  const polSigned = cnt(pols,'sigStatus','موقع كامل');
+  const licActive = cnt(lics,'status','نشطة');
   const finReqs = cnt(reqs,'financial','نعم');
   const totalCost = reqs.reduce((s,r)=>s+(Number(r.cost)||0),0);
 
   const overall = st?.overallProgress ??
     Math.round([ pct(obsDone,obs.length||1), pct(reqDone,reqs.length||1),
-                 pct(lecDone,lecs.length||1), pct(polSigned,pols.length||1) ]
+                 pct(lecDone,lecs.length||1), pct(licActive,lics.length||1) ]
                .reduce((a,b)=>a+b,0)/4);
 
   document.getElementById('k-overall').textContent = overall + '%';
@@ -2202,9 +2206,6 @@ async function deleteOVR(id) {
 // STAFF FILES FUNCTIONS
 // ════════════════════════════════════════════════════════════════
 
-let STAFF_FILES_DATA = [];
-let STAFF_SHEET_CONFIG = null;
-
 function loadStaffSheetConfig() {
   try {
     const cfg = localStorage.getItem('cbahi_staff_sheet_config');
@@ -2218,11 +2219,11 @@ function openStaffSheetSettings() {
   loadStaffSheetConfig();
   const cfg = STAFF_SHEET_CONFIG || {};
   document.getElementById('staff-sheet-url').value = cfg.url || '';
-  document.getElementById('staff-sheet-name').value = cfg.sheetName || 'HR_Tracker';
+  document.getElementById('staff-sheet-name').value = cfg.sheetName || 'Staff_Files';
   document.getElementById('staff-col-name').value = cfg.colName || 'A';
-  document.getElementById('staff-col-dept').value = cfg.colDept || 'D';
+  document.getElementById('staff-col-dept').value = cfg.colDept || 'B';
   document.getElementById('staff-col-title').value = cfg.colTitle || 'C';
-  document.getElementById('staff-col-progress').value = cfg.colProgress || 'E';
+  document.getElementById('staff-col-progress').value = cfg.colProgress || 'D';
   openModal('m-staff-sheet');
 }
 

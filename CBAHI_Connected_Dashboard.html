@@ -230,7 +230,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
 <div class="status-bar">
   <div class="sb-item"><div class="sb-dot" id="apiDot" style="background:var(--gold);animation:pulse 1s infinite"></div><span id="apiStatus">جاري الاتصال بـ Google Sheets...</span></div>
   <div class="sb-item">📅 تاريخ البداية: <strong>10/02/2026</strong></div>
-  <div class="sb-item">🎯 موعد الاستطلاع: <strong style="color:var(--gold)">01/07/2026</strong></div>
+  <div class="sb-item">🎯 التاريخ المستهدف لنهاية المشروع: <strong style="color:var(--gold)">20/08/2026</strong></div>
   <div class="sb-item" id="lastSyncSb">آخر مزامنة: –</div>
   <div class="sb-item" style="margin-right:auto">
     <button class="btn btn-ghost" style="padding:3px 10px;font-size:10px" onclick="showSettings()">⚙️ إعدادات الاتصال</button>
@@ -708,7 +708,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
     </div>
     <div style="display:flex;gap:24px;justify-content:center;margin-top:18px;flex-wrap:wrap">
       <div><span style="color:var(--text3);font-size:11px">⏰ الأيام المتبقية</span> <strong id="prog-days" style="color:var(--gold);font-size:18px;margin-right:8px">–</strong></div>
-      <div><span style="color:var(--text3);font-size:11px">📅 موعد الاستطلاع</span> <strong style="color:var(--accent);font-size:14px;margin-right:8px">01/07/2026</strong></div>
+      <div><span style="color:var(--text3);font-size:11px">📅 التاريخ المستهدف لنهاية المشروع</span> <strong style="color:var(--accent);font-size:14px;margin-right:8px">20/08/2026</strong></div>
       <div><span style="color:var(--text3);font-size:11px">🚀 تاريخ البداية</span> <strong style="color:var(--text2);font-size:14px;margin-right:8px">10/02/2026</strong></div>
     </div>
   </div>
@@ -1305,7 +1305,7 @@ async function testConnection() {
 }
 
 function updateCD() {
-  const diff = new Date('2026-07-01') - new Date();
+  const diff = new Date('2026-08-20') - new Date();
   if (diff <= 0) return;
   const set = (id, v) => { const el=document.getElementById(id); if(el) el.textContent=v; };
   set('cd-d', Math.floor(diff/86400000));
@@ -1580,7 +1580,7 @@ async function saveAssign(){ const id=document.getElementById('assign-eid').valu
 // ═══════════════════════════════════════════════════════════════
 // COUNTDOWN
 // ═══════════════════════════════════════════════════════════════
-const SURVEY = new Date('2026-07-01');
+const SURVEY = new Date('2026-08-20');
 function updateCD() {
   const diff = SURVEY - new Date();
   if(diff<=0){ ['cd-d','cd-h','cd-m','cd-s'].forEach(id=>document.getElementById(id).textContent='0'); return; }
@@ -1991,7 +1991,7 @@ function renderProgressDashboard() {
   
   const days = document.getElementById('prog-days');
   if (days) {
-    const diff = new Date('2026-07-01') - new Date();
+    const diff = new Date('2026-08-20') - new Date();
     days.textContent = Math.max(0, Math.floor(diff/86400000));
   }
 }

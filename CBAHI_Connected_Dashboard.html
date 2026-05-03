@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CBAHI – ابكس كير | لوحة تحكم مشروع الاعتماد</title>
+<title>CBAHI – أبكس كير | لوحة تحكم مشروع الاعتماد</title>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
 <style>
 
@@ -216,12 +216,12 @@ tr:hover td{background:rgba(0,194,255,.03)}
 <!-- HEADER -->
 <div class="header">
   <div class="logo">
-    <div class="logo-icon"></div>
-    <div><div class="logo-text">CBAHI Project – متابعة مشروع سباهي</div><div class="logo-sub">CBAHI PROJECT DASHBOARD</div></div>
+    <div class="logo-icon">AC</div>
+    <div><div class="logo-text">APEX CARE – أبكس كير</div><div class="logo-sub">CBAHI PROJECT DASHBOARD</div></div>
   </div>
   <div class="header-actions">
     <span class="sync-badge sync-load" id="syncBadge">⟳ جاري الاتصال</span>
-    <button class="btn btn-ghost" onclick="syncAll()">🔄 سحب البيانات من الشيت</button>
+    <button class="btn btn-ghost" onclick="syncAll()">🔄 مزامنة</button>
     <button class="btn btn-gold" onclick="window.print()">🖨️</button>
   </div>
 </div>
@@ -229,26 +229,28 @@ tr:hover td{background:rgba(0,194,255,.03)}
 <!-- STATUS BAR -->
 <div class="status-bar">
   <div class="sb-item"><div class="sb-dot" id="apiDot" style="background:var(--gold);animation:pulse 1s infinite"></div><span id="apiStatus">جاري الاتصال بـ Google Sheets...</span></div>
-  <div class="sb-item"> تاريخ البداية: <strong>10/02/2026</strong></div>
-  <div class="sb-item"> الموعد المتوقع لجاهزية المنشأة : <strong style="color:var(--gold)">20/08/2026</strong></div>
+  <div class="sb-item">📅 تاريخ البداية: <strong>10/02/2026</strong></div>
+  <div class="sb-item">🎯 موعد الاستطلاع: <strong style="color:var(--gold)">01/07/2026</strong></div>
   <div class="sb-item" id="lastSyncSb">آخر مزامنة: –</div>
   <div class="sb-item" style="margin-right:auto">
-    <button class="btn btn-ghost" style="padding:3px 10px;font-size:10px" onclick="showSettings()">⚙️ إعدادات الاتصال (لاينصح بتعديل الاعداد)</button>
+    <button class="btn btn-ghost" style="padding:3px 10px;font-size:10px" onclick="showSettings()">⚙️ إعدادات الاتصال</button>
   </div>
 </div>
 
 <!-- TABS -->
 <div class="tabs">
-  <button class="tab active" onclick="switchTab('overview')"> نظرة عامة</button>
-  <button class="tab" onclick="switchTab('observations')"> الملاحظات</button>
-  <button class="tab" onclick="switchTab('requirements')"> المتطلبات</button>
-  <button class="tab" onclick="switchTab('team')"> الفريق</button>
-  <button class="tab" onclick="switchTab('locations')"> الإضافات و التعديلات </button>
-  <button class="tab" onclick="switchTab('lectures')"> المحاضرات التدريبية </button>
-  <button class="tab" onclick="switchTab('assignments')"> التكليفات</button>
-  <button class="tab" onclick="switchTab('policies')"> السياسات</button>
-  <button class="tab" onclick="switchTab('workflow')"> الورك فلو</button>
-    <button class="tab" onclick="switchTab('policies2')"> حالة السياسات المكتوبة و توقيع المعنيين </button>
+  <button class="tab active" onclick="switchTab('overview')">📊 نظرة عامة</button>
+  <button class="tab" onclick="switchTab('observations')">🔍 الملاحظات</button>
+  <button class="tab" onclick="switchTab('requirements')">📋 المتطلبات</button>
+  <button class="tab" onclick="switchTab('team')">👥 الفريق</button>
+  <button class="tab" onclick="switchTab('locations')">🏥 الأماكن</button>
+  <button class="tab" onclick="switchTab('lectures')">🎓 المحاضرات</button>
+  <button class="tab" onclick="switchTab('assignments')">📌 التكليفات</button>
+  <button class="tab" onclick="switchTab('licenses')">📜 الرخص والعقود</button>
+  <button class="tab" onclick="switchTab('ovr_docs')">📂 OVR Manual Checklists</button>
+  <button class="tab" onclick="switchTab('staff_files')">👥 ملفات الموظفين</button>
+  <button class="tab" onclick="switchTab('progress')" style="background:linear-gradient(135deg,#10d97e,#0080ff);color:#fff;font-weight:800">🎯 لوحة الإنجاز الكلي</button>
+  <button class="tab" onclick="switchTab('policies2')">📜 السياسات الكاملة (106)</button>
 </div>
 
 <div class="main">
@@ -257,9 +259,16 @@ tr:hover td{background:rgba(0,194,255,.03)}
 <div class="pane active" id="pane-overview">
   <div class="kpi-grid">
     <div class="kpi blue"><div class="kpi-lbl">نسبة الإنجاز الكلية</div><div class="kpi-val" id="k-overall">–</div><div class="pbar"><div class="pfill blue" id="pf-overall" style="width:0%"></div></div><div class="kpi-sub">متوسط جميع الأقسام</div></div>
-    <div class="kpi gold"><div class="kpi-lbl">الأيام المتبقية</div><div class="cd-num" id="cd-d">–</div><div class="kpi-sub"> حتى 20 أغسطس 2026</div></div>
+    <div class="kpi gold"><div class="kpi-lbl">الأيام المتبقية</div><div class="kpi-val" id="k-days">–</div><div class="kpi-sub">حتى 01 يوليو 2026</div></div>
     <div class="kpi green"><div class="kpi-lbl">ملاحظات محلولة</div><div class="kpi-val" id="k-obs">–</div><div class="pbar"><div class="pfill green" id="pf-obs" style="width:0%"></div></div><div class="kpi-sub" id="k-obs-sub">من 0</div></div>
     <div class="kpi red"><div class="kpi-lbl">متطلبات تحتاج تمويل</div><div class="kpi-val" id="k-fin">–</div><div class="kpi-sub" id="k-cost">التكلفة: –</div></div>
+  </div>
+  <!-- Countdown -->
+  <div class="cd-grid">
+    <div class="cd-box"><div class="cd-num" id="cd-d">–</div><div class="cd-lbl">يوم</div></div>
+    <div class="cd-box"><div class="cd-num" id="cd-h">–</div><div class="cd-lbl">ساعة</div></div>
+    <div class="cd-box"><div class="cd-num" id="cd-m">–</div><div class="cd-lbl">دقيقة</div></div>
+    <div class="cd-box"><div class="cd-num" id="cd-s">–</div><div class="cd-lbl">ثانية</div></div>
   </div>
   <!-- Summary Table -->
   <div class="tcard">
@@ -284,7 +293,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
   <div class="info-bar">ℹ️ جميع التعديلات تُحفظ تلقائياً في Google Sheets وتظهر فوراً</div>
   <div class="tcard">
     <div class="tcard-hdr">
-      <div class="tcard-title"> الملاحظات <span class="badge badge-blue" id="obs-cnt">0</span></div>
+      <div class="tcard-title">📋 الملاحظات <span class="badge badge-blue" id="obs-cnt">0</span></div>
       <div style="display:flex;gap:6px"><span class="badge badge-green" id="obs-solved">0 محلولة</span><span class="badge badge-red" id="obs-pend">0 معلقة</span></div>
     </div>
     <div class="tscroll">
@@ -319,8 +328,8 @@ tr:hover td{background:rgba(0,194,255,.03)}
 <!-- ═══ TEAM ═══ -->
 <div class="pane" id="pane-team">
   <div class="sec-hdr">
-    <div class="sec-icon" style="background:rgba(16,217,126,.1)">.</div>
-    <div class="sec-title">الفريق الداخلي (للدعم)</div>
+    <div class="sec-icon" style="background:rgba(16,217,126,.1)">👥</div>
+    <div class="sec-title">الفريق الداخلي</div>
     <div class="sec-line"></div>
     <button class="btn btn-primary" onclick="openModal('m-team')">+ إضافة</button>
   </div>
@@ -368,7 +377,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
   </div>
   <div class="tcard">
     <div class="tcard-hdr">
-      <div class="tcard-title"> المحاضرات <span class="badge badge-blue" id="lec-cnt">0</span></div>
+      <div class="tcard-title">🎓 المحاضرات <span class="badge badge-blue" id="lec-cnt">0</span></div>
       <span class="badge badge-green" id="lec-done-cnt">0 منجزة</span>
     </div>
     <div class="tscroll">
@@ -396,39 +405,207 @@ tr:hover td{background:rgba(0,194,255,.03)}
   </div>
 </div>
 
-<!-- ═══ POLICIES ═══ -->
-<div class="pane" id="pane-policies">
+<!-- ═══ LICENSES & CONTRACTS ═══ -->
+<div class="pane" id="pane-licenses">
   <div class="sec-hdr">
-    <div class="sec-icon" style="background:rgba(0,194,255,.1)"></div>
-    <div class="sec-title">السياسات والموقعون</div>
+    <div class="sec-icon" style="background:rgba(239,68,68,.1)">📜</div>
+    <div class="sec-title">الرخص والعقود والاتفاقيات</div>
     <div class="sec-line"></div>
-    <button class="btn btn-primary" onclick="openModal('m-pol')">+ إضافة</button>
+    <button class="btn btn-primary" onclick="openModal('m-license')">+ إضافة</button>
   </div>
-  <div class="sig-grid" id="sig-grid"></div>
+  <div class="info-bar">ℹ️ تسجيل الرخص النشطة والعقود السارية والاتفاقيات الطبية مع مواعيد السريان والانتهاء</div>
   <div class="tcard">
     <div class="tcard-hdr">
-      <div class="tcard-title">📄 السياسات <span class="badge badge-blue" id="pol-cnt">0</span></div>
-      <span class="badge badge-green" id="pol-signed-cnt">0 موقعة كاملاً</span>
+      <div class="tcard-title">📋 الرخص والعقود <span class="badge badge-blue" id="lic-cnt">0</span></div>
+      <div style="display:flex;gap:6px">
+        <span class="badge badge-green" id="lic-active">0 نشطة</span>
+        <span class="badge badge-red" id="lic-expired">0 منتهية</span>
+        <span class="badge badge-orange" id="lic-expiring">0 قريبة الانتهاء</span>
+      </div>
     </div>
     <div class="tscroll">
-      <table><thead><tr><th class="num">#</th><th>اسم السياسة</th><th>القسم</th><th>جاهزية المحتوى</th><th>الموقعون المطلوبون</th><th>حالة التوقيع</th><th></th></tr></thead>
-      <tbody id="pol-tbody"></tbody></table>
+      <table>
+        <thead>
+          <tr>
+            <th class="num">#</th>
+            <th>النوع</th>
+            <th>الاسم/التفاصيل</th>
+            <th>الجهة</th>
+            <th>تاريخ السريان</th>
+            <th>تاريخ الانتهاء</th>
+            <th>الحالة</th>
+            <th>إجراء</th>
+          </tr>
+        </thead>
+        <tbody id="lic-tbody"></tbody>
+      </table>
     </div>
-    <button class="add-row" onclick="openModal('m-pol')">+ إضافة سياسة</button>
+    <button class="add-row" onclick="openModal('m-license')">+ إضافة رخصة/عقد/اتفاقية</button>
   </div>
 </div>
 
-<!-- ═══ WORKFLOW ═══ -->
-<div class="pane" id="pane-workflow">
+<!-- ═══ OVR MANUAL CHECKLISTS ═══ -->
+<div class="pane" id="pane-ovr_docs">
   <div class="sec-hdr">
-    <div class="sec-icon" style="background:rgba(0,194,255,.1)">🔄</div>
-    <div class="sec-title">ورك فلو ملفات المرضى</div>
+    <div class="sec-icon" style="background:rgba(249,115,22,.1)">📂</div>
+    <div class="sec-title">OVR Manual Checklists</div>
     <div class="sec-line"></div>
-    <button class="btn btn-primary" onclick="openModal('m-wf')">+ إضافة</button>
+    <button class="btn btn-primary" onclick="openModal('m-ovr')">+ إضافة مستند</button>
   </div>
+  <div class="info-bar">ℹ️ المستندات التي تم إعدادها ووضعها بالعيادات مع التكاليف إن وجدت</div>
+  
+  <!-- Stats Cards -->
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px">
+    <div class="kpi blue">
+      <div class="kpi-lbl">OVR Reports</div>
+      <div class="kpi-val" id="ovr-reports-val">0</div>
+      <div class="kpi-sub">نسخ مطبوعة وموزعة</div>
+    </div>
+    <div class="kpi purple">
+      <div class="kpi-lbl">Manuals</div>
+      <div class="kpi-val" id="ovr-manuals-val">0</div>
+      <div class="kpi-sub">أدلة موزعة</div>
+    </div>
+    <div class="kpi green">
+      <div class="kpi-lbl">Checklists</div>
+      <div class="kpi-val" id="ovr-checks-val">0</div>
+      <div class="kpi-sub">قوائم معتمدة</div>
+    </div>
+  </div>
+
   <div class="tcard">
-    <div class="wf-list" id="wf-list"></div>
-    <button class="add-row" onclick="openModal('m-wf')">+ إضافة خطوة</button>
+    <div class="tcard-hdr">
+      <div class="tcard-title">📄 المستندات <span class="badge badge-blue" id="ovr-cnt">0</span></div>
+      <span class="badge badge-gold" id="ovr-cost">التكلفة الإجمالية: 0 ريال</span>
+    </div>
+    <div class="tscroll">
+      <table>
+        <thead>
+          <tr>
+            <th class="num">#</th>
+            <th>النوع</th>
+            <th>اسم المستند</th>
+            <th>العيادة/المكان</th>
+            <th>العدد</th>
+            <th>التكلفة</th>
+            <th>الحالة</th>
+            <th>ملاحظات</th>
+            <th>إجراء</th>
+          </tr>
+        </thead>
+        <tbody id="ovr-tbody"></tbody>
+      </table>
+    </div>
+    <button class="add-row" onclick="openModal('m-ovr')">+ إضافة مستند</button>
+  </div>
+</div>
+
+<!-- ═══ STAFF FILES ═══ -->
+<div class="pane" id="pane-staff_files">
+  <div class="sec-hdr">
+    <div class="sec-icon" style="background:rgba(245,158,11,.1)">👥</div>
+    <div class="sec-title">ملفات الموظفين</div>
+    <div class="sec-line"></div>
+    <button class="btn btn-ghost" onclick="syncStaffFiles()">🔄 مزامنة من Google Sheet</button>
+  </div>
+  
+  <div class="info-bar">
+    ℹ️ البيانات تُسحب من Google Sheet الخاص بملفات الموظفين. اضغط زر المزامنة لتحديث البيانات.
+    <button class="btn btn-primary" style="margin-right:auto;padding:5px 12px;font-size:11px" onclick="openStaffSheetSettings()">⚙️ إعدادات Sheet</button>
+  </div>
+
+  <!-- Overall Progress -->
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px">
+    <div class="kpi blue">
+      <div class="kpi-lbl">نسبة الإنجاز الإجمالية</div>
+      <div class="kpi-val" id="staff-overall">–%</div>
+      <div class="pbar"><div class="pfill blue" id="staff-overall-bar" style="width:0%"></div></div>
+    </div>
+    <div class="kpi green">
+      <div class="kpi-lbl">ملفات مكتملة</div>
+      <div class="kpi-val" id="staff-complete">0</div>
+      <div class="kpi-sub" id="staff-complete-sub">من 0 موظف</div>
+    </div>
+    <div class="kpi gold">
+      <div class="kpi-lbl">ملفات قيد العمل</div>
+      <div class="kpi-val" id="staff-progress">0</div>
+    </div>
+    <div class="kpi red">
+      <div class="kpi-lbl">ملفات ناقصة</div>
+      <div class="kpi-val" id="staff-incomplete">0</div>
+    </div>
+  </div>
+
+  <!-- By Department -->
+  <div class="sec-hdr" style="margin-top:20px">
+    <div class="sec-icon" style="background:rgba(99,102,241,.1)">📊</div>
+    <div class="sec-title">التفصيل حسب القسم</div>
+    <div class="sec-line"></div>
+  </div>
+
+  <div class="tcard">
+    <div class="tcard-hdr">
+      <div class="tcard-title">📋 ملفات الموظفين حسب القسم</div>
+    </div>
+    <div class="tscroll">
+      <table>
+        <thead>
+          <tr>
+            <th class="num">#</th>
+            <th>القسم</th>
+            <th class="num">الإجمالي</th>
+            <th class="num">مكتمل</th>
+            <th class="num">قيد العمل</th>
+            <th class="num">ناقص</th>
+            <th class="num">نسبة الإنجاز</th>
+            <th>الحالة</th>
+          </tr>
+        </thead>
+        <tbody id="staff-dept-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Detailed List -->
+  <div class="sec-hdr" style="margin-top:20px">
+    <div class="sec-icon" style="background:rgba(139,92,246,.1)">📝</div>
+    <div class="sec-title">القائمة التفصيلية</div>
+    <div class="sec-line"></div>
+  </div>
+
+  <div class="tcard">
+    <div class="tcard-hdr">
+      <div class="tcard-title">📄 ملفات الموظفين <span class="badge badge-blue" id="staff-total-cnt">0</span></div>
+      <div style="display:flex;gap:8px">
+        <select id="staff-dept-filter" onchange="filterStaffTable()" 
+          style="padding:5px 10px;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:11px">
+          <option value="ALL">كل الأقسام</option>
+        </select>
+        <select id="staff-status-filter" onchange="filterStaffTable()"
+          style="padding:5px 10px;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:11px">
+          <option value="ALL">كل الحالات</option>
+          <option value="مكتمل">✅ مكتمل</option>
+          <option value="قيد العمل">⏳ قيد العمل</option>
+          <option value="ناقص">❌ ناقص</option>
+        </select>
+      </div>
+    </div>
+    <div class="tscroll">
+      <table>
+        <thead>
+          <tr>
+            <th class="num">#</th>
+            <th>اسم الموظف</th>
+            <th>القسم</th>
+            <th>المسمى الوظيفي</th>
+            <th class="num">نسبة الإنجاز %</th>
+            <th>الحالة</th>
+            <th>آخر تحديث</th>
+          </tr>
+        </thead>
+        <tbody id="staff-list-tbody"></tbody>
+      </table>
+    </div>
   </div>
 </div>
 
@@ -514,6 +691,82 @@ tr:hover td{background:rgba(0,194,255,.03)}
         </thead>
         <tbody id="pol2-tbody"></tbody>
       </table>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══ TOTAL PROGRESS DASHBOARD ═══ -->
+<div class="pane" id="pane-progress">
+
+  <!-- Hero KPI: Total Progress -->
+  <div style="background:linear-gradient(135deg,#0a1628,#0d1f3c);border:1px solid var(--border);border-radius:var(--radius);padding:28px;margin-bottom:20px;text-align:center;position:relative;overflow:hidden">
+    <div style="font-size:13px;color:var(--text3);font-weight:700;letter-spacing:2px;margin-bottom:10px">نسبة الإنجاز الكلية لمشروع CBAHI</div>
+    <div id="total-progress-num" style="font-size:80px;font-weight:900;font-family:'Cairo',sans-serif;background:linear-gradient(135deg,#10d97e,#00c2ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1;margin-bottom:14px">0%</div>
+    <div style="height:14px;background:rgba(255,255,255,.06);border-radius:7px;overflow:hidden;margin:0 auto;max-width:600px">
+      <div id="total-progress-bar" style="height:100%;width:0%;background:linear-gradient(90deg,#0080ff,#10d97e,#00c2ff);border-radius:7px;transition:width 1.2s ease;box-shadow:0 0 20px rgba(16,217,126,.5)"></div>
+    </div>
+    <div style="display:flex;gap:24px;justify-content:center;margin-top:18px;flex-wrap:wrap">
+      <div><span style="color:var(--text3);font-size:11px">⏰ الأيام المتبقية</span> <strong id="prog-days" style="color:var(--gold);font-size:18px;margin-right:8px">–</strong></div>
+      <div><span style="color:var(--text3);font-size:11px">📅 موعد الاستطلاع</span> <strong style="color:var(--accent);font-size:14px;margin-right:8px">01/07/2026</strong></div>
+      <div><span style="color:var(--text3);font-size:11px">🚀 تاريخ البداية</span> <strong style="color:var(--text2);font-size:14px;margin-right:8px">10/02/2026</strong></div>
+    </div>
+  </div>
+
+  <!-- Weighted Pillars -->
+  <div class="sec-hdr">
+    <div class="sec-icon" style="background:rgba(0,194,255,.1)">⚖️</div>
+    <div class="sec-title">المحاور الموزونة (10 محاور = 100%)</div>
+    <div class="sec-line"></div>
+  </div>
+
+  <div id="pillars-grid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px"></div>
+
+  <!-- Action items -->
+  <div class="sec-hdr" style="margin-top:24px">
+    <div class="sec-icon" style="background:rgba(255,124,42,.1)">⚡</div>
+    <div class="sec-title">إجراءات سريعة</div>
+    <div class="sec-line"></div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px">
+    <button class="btn btn-primary" style="padding:14px;font-size:13px" onclick="switchTab('policies2')">📜 إدارة السياسات (106)</button>
+    <button class="btn btn-ghost" style="padding:14px;font-size:13px" onclick="switchTab('observations')">🔍 إدارة الملاحظات</button>
+    <button class="btn btn-ghost" style="padding:14px;font-size:13px" onclick="switchTab('requirements')">📋 إدارة المتطلبات</button>
+    <button class="btn btn-ghost" style="padding:14px;font-size:13px" onclick="switchTab('lectures')">🎓 المحاضرات</button>
+    <button class="btn btn-ghost" style="padding:14px;font-size:13px" onclick="openExtras()">📂 رخص وعقود ومستندات</button>
+    <button class="btn btn-gold" style="padding:14px;font-size:13px" onclick="syncAll()">🔄 مزامنة كل البيانات</button>
+  </div>
+</div>
+
+<!-- Extras Modal — رخص / عقود / مستندات / موظفين -->
+<div class="overlay" id="m-extras">
+  <div class="modal" style="max-width:600px">
+    <h3>📂 الرخص والعقود والمستندات</h3>
+    <div class="info-bar">💡 سجل الإنجاز السريع لكل بند يدخل في النسبة الإجمالية</div>
+
+    <div class="fg"><label>📜 الرخص المُجدّدة (من إجمالي 10 رخص)</label>
+      <input type="number" id="ex-licenses" min="0" max="10" placeholder="0-10"></div>
+    <div class="fg"><label>📝 العقود السارية (من إجمالي 8 عقود)</label>
+      <input type="number" id="ex-contracts" min="0" max="8" placeholder="0-8"></div>
+    <div class="fg"><label>🤝 الاتفاقيات الطبية (CPR, Lab, الإحالات...) — من 5</label>
+      <input type="number" id="ex-agreements" min="0" max="5" placeholder="0-5"></div>
+    <div class="fg"><label>📄 OVR Report نسخ مطبوعة وموزعة (نعم/لا)</label>
+      <select id="ex-ovr"><option value="0">لا</option><option value="1">نعم</option></select></div>
+    <div class="fg"><label>📘 Manual مكافحة العدوى مطبوع وموزع</label>
+      <select id="ex-manual"><option value="0">لا</option><option value="1">نعم</option></select></div>
+    <div class="fg"><label>✅ Checklists معتمدة وموزعة (من 12 قائمة)</label>
+      <input type="number" id="ex-checklists" min="0" max="12" placeholder="0-12"></div>
+    <div class="fg"><label>📝 محاضرات جسر — تم الإبلاغ عنها (من المحاضرات المنجزة)</label>
+      <select id="ex-jisr"><option value="none">لم يُبلَّغ بعد</option><option value="partial">بعضها</option><option value="all">الكل</option></select></div>
+    <div class="fg"><label>👥 ملفات الموظفين المكتملة (نسبة %)</label>
+      <input type="number" id="ex-staff" min="0" max="100" placeholder="0-100"></div>
+    <div class="fg"><label>🤝 تعاون الفريق (نسبة %)</label>
+      <input type="number" id="ex-team" min="0" max="100" placeholder="0-100"></div>
+
+    <div class="modal-footer">
+      <button class="btn btn-danger" onclick="closeModal('m-extras')">إلغاء</button>
+      <button class="btn btn-primary" onclick="saveExtras()">💾 حفظ</button>
     </div>
   </div>
 </div>
@@ -670,35 +923,105 @@ tr:hover td{background:rgba(0,194,255,.03)}
   </div>
 </div>
 
-<!-- Policy Modal -->
-<div class="overlay" id="m-pol">
+<!-- License/Contract Modal -->
+<div class="overlay" id="m-license">
   <div class="modal">
-    <h3>📜 إضافة سياسة</h3>
-    <input type="hidden" id="pol-eid">
-    <div class="fg"><label>اسم السياسة</label><input type="text" id="pol-name" placeholder="اسم السياسة"></div>
-    <div class="fg"><label>القسم</label><input type="text" id="pol-dept" placeholder="القسم المعني"></div>
-    <div class="fg"><label>جاهزية المحتوى</label><select id="pol-content"><option>مكتملة</option><option>قيد الإعداد</option><option>لم تبدأ</option></select></div>
-    <div class="fg"><label>الموقعون المطلوبون</label><input type="text" id="pol-sigs" placeholder="مثال: مدير الجودة، مدير طبي"></div>
-    <div class="fg"><label>حالة التوقيع</label><select id="pol-sigstat"><option>لم يوقع</option><option>موقع جزئياً</option><option>موقع كامل</option></select></div>
+    <h3>📜 إضافة/تعديل رخصة أو عقد</h3>
+    <input type="hidden" id="lic-eid">
+    <div class="fg">
+      <label>النوع</label>
+      <select id="lic-type">
+        <option value="رخصة">رخصة</option>
+        <option value="عقد">عقد</option>
+        <option value="اتفاقية">اتفاقية</option>
+      </select>
+    </div>
+    <div class="fg"><label>الاسم/التفاصيل</label><input type="text" id="lic-name" placeholder="مثال: رخصة مزاولة المهنة"></div>
+    <div class="fg"><label>الجهة</label><input type="text" id="lic-entity" placeholder="مثال: وزارة الصحة"></div>
+    <div class="fg"><label>تاريخ السريان</label><input type="date" id="lic-start"></div>
+    <div class="fg"><label>تاريخ الانتهاء</label><input type="date" id="lic-end"></div>
+    <div class="fg"><label>الحالة</label>
+      <select id="lic-status">
+        <option value="نشطة">✅ نشطة</option>
+        <option value="قريبة الانتهاء">⚠️ قريبة الانتهاء</option>
+        <option value="منتهية">❌ منتهية</option>
+        <option value="قيد التجديد">🔄 قيد التجديد</option>
+      </select>
+    </div>
     <div class="modal-footer">
-      <button class="btn btn-danger" onclick="closeModal('m-pol')">إلغاء</button>
-      <button class="btn btn-primary" onclick="savePol()">💾 حفظ</button>
+      <button class="btn btn-danger" onclick="closeModal('m-license')">إلغاء</button>
+      <button class="btn btn-primary" onclick="saveLicense()">💾 حفظ</button>
     </div>
   </div>
 </div>
 
-<!-- Workflow Modal -->
-<div class="overlay" id="m-wf">
+<!-- OVR Document Modal -->
+<div class="overlay" id="m-ovr">
   <div class="modal">
-    <h3>🔄 إضافة خطوة</h3>
-    <input type="hidden" id="wf-eid">
-    <div class="fg"><label>عنوان الخطوة</label><input type="text" id="wf-title-in" placeholder="عنوان الخطوة"></div>
-    <div class="fg"><label>وصف الخطوة</label><textarea id="wf-desc-in" rows="3" placeholder="التفاصيل..."></textarea></div>
-    <div class="fg"><label>الوثيقة / النموذج</label><input type="text" id="wf-doc-in" placeholder="النموذج المطلوب"></div>
-    <div class="fg"><label>المسؤول</label><input type="text" id="wf-owner-in" placeholder="المسؤول عن الخطوة"></div>
+    <h3>📂 إضافة/تعديل مستند</h3>
+    <input type="hidden" id="ovr-eid">
+    <div class="fg">
+      <label>النوع</label>
+      <select id="ovr-type">
+        <option value="OVR Report">OVR Report</option>
+        <option value="Manual">Manual (دليل)</option>
+        <option value="Checklist">Checklist (قائمة تدقيق)</option>
+        <option value="أخرى">أخرى</option>
+      </select>
+    </div>
+    <div class="fg"><label>اسم المستند</label><input type="text" id="ovr-name" placeholder="مثال: OVR Report - Branch A"></div>
+    <div class="fg"><label>العيادة/المكان</label><input type="text" id="ovr-location" placeholder="مثال: عيادة بريدة الرئيسية"></div>
+    <div class="fg"><label>العدد (النسخ)</label><input type="number" id="ovr-qty" min="0" placeholder="0"></div>
+    <div class="fg"><label>التكلفة (ريال)</label><input type="number" id="ovr-cost-val" min="0" step="0.01" placeholder="0.00"></div>
+    <div class="fg">
+      <label>الحالة</label>
+      <select id="ovr-status">
+        <option value="جاهز وموزع">✅ جاهز وموزع</option>
+        <option value="قيد الطباعة">🖨️ قيد الطباعة</option>
+        <option value="قيد الإعداد">⏳ قيد الإعداد</option>
+        <option value="لم يبدأ">❌ لم يبدأ</option>
+      </select>
+    </div>
+    <div class="fg"><label>ملاحظات</label><textarea id="ovr-notes" rows="2" placeholder="ملاحظات إضافية..."></textarea></div>
     <div class="modal-footer">
-      <button class="btn btn-danger" onclick="closeModal('m-wf')">إلغاء</button>
-      <button class="btn btn-primary" onclick="saveWf()">💾 حفظ</button>
+      <button class="btn btn-danger" onclick="closeModal('m-ovr')">إلغاء</button>
+      <button class="btn btn-primary" onclick="saveOVR()">💾 حفظ</button>
+    </div>
+  </div>
+</div>
+
+<!-- Staff Sheet Settings Modal -->
+<div class="overlay" id="m-staff-sheet">
+  <div class="modal">
+    <h3>⚙️ إعدادات Google Sheet لملفات الموظفين</h3>
+    <div class="info-bar">💡 أدخل رابط Web App الخاص بـ Google Sheet ملفات الموظفين</div>
+    <div class="fg">
+      <label>رابط Apps Script (Web App URL)</label>
+      <input type="text" id="staff-sheet-url" placeholder="https://script.google.com/macros/s/YOUR_ID/exec">
+    </div>
+    <div class="fg">
+      <label>اسم الشيت (Tab Name)</label>
+      <input type="text" id="staff-sheet-name" placeholder="Staff_Files" value="Staff_Files">
+    </div>
+    <div class="fg">
+      <label>عمود اسم الموظف</label>
+      <input type="text" id="staff-col-name" placeholder="A" value="A">
+    </div>
+    <div class="fg">
+      <label>عمود القسم</label>
+      <input type="text" id="staff-col-dept" placeholder="B" value="B">
+    </div>
+    <div class="fg">
+      <label>عمود المسمى الوظيفي</label>
+      <input type="text" id="staff-col-title" placeholder="C" value="C">
+    </div>
+    <div class="fg">
+      <label>عمود نسبة الإنجاز (%)</label>
+      <input type="text" id="staff-col-progress" placeholder="D" value="D">
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-danger" onclick="closeModal('m-staff-sheet')">إلغاء</button>
+      <button class="btn btn-primary" onclick="saveStaffSheetSettings()">💾 حفظ</button>
     </div>
   </div>
 </div>
@@ -775,7 +1098,7 @@ document.addEventListener('DOMContentLoaded', function() {
 let DB = {
   observations:[], requirements:[], team:[],
   locations:[], tmpChanges:[], lectures:[],
-  assignments:[], policies:[], workflow:[],
+  assignments:[], licenses:[], ovrDocs:[], staffFiles:[],
   dashboard: null
 };
 let isSyncing = false;
@@ -980,7 +1303,7 @@ async function testConnection() {
 }
 
 function updateCD() {
-  const diff = new Date('2026-08-20') - new Date();
+  const diff = new Date('2026-07-01') - new Date();
   if (diff <= 0) return;
   const set = (id, v) => { const el=document.getElementById(id); if(el) el.textContent=v; };
   set('cd-d', Math.floor(diff/86400000));
@@ -1019,7 +1342,7 @@ const signatories = [
 // ═══════════════════════════════════════════════════════════════
 function renderAll() {
   renderOverview(); renderObs(); renderReq(); renderTeam();
-  renderLoc(); renderLec(); renderAssign(); renderPol(); renderWf();
+  renderLoc(); renderLec(); renderAssign();
   saveLocal();
 }
 
@@ -1175,45 +1498,6 @@ function renderAssign() {
 }
 
 // ─── Policies ─────────────────────────────────────────────────
-function renderPol() {
-  const signed = DB.policies.filter(p=>p.sigStatus==='موقع كامل').length;
-  document.getElementById('pol-cnt').textContent = DB.policies.length;
-  document.getElementById('pol-signed-cnt').textContent = signed + ' موقعة كاملاً';
-
-  document.getElementById('sig-grid').innerHTML = signatories.map(s=>{
-    const need = DB.policies.filter(p=>p.sigs&&p.sigs.includes(s.title)).length;
-    const done = DB.policies.filter(p=>p.sigs&&p.sigs.includes(s.title)&&p.sigStatus==='موقع كامل').length;
-    return `<div class="sig-card">
-      <div class="sig-emo">${s.emoji}</div>
-      <div class="sig-name">${s.title}</div>
-      <div class="sig-count">${done}/${need} سياسة</div>
-      ${done===need&&need>0?pill('مكتمل'):done>0?pill('جارٍ'):pill('معلق')}
-    </div>`;}).join('');
-
-  document.getElementById('pol-tbody').innerHTML = DB.policies.map((p,i)=>`
-    <tr><td class="num">${i+1}</td>
-    <td class="td-main">${p.name||''}</td>
-    <td style="font-size:11px">${p.dept||''}</td>
-    <td>${pill(p.content||'لم تبدأ')}</td>
-    <td style="font-size:11px;color:var(--text3)">${p.sigs||''}</td>
-    <td>${pill(p.sigStatus||'لم يوقع')}</td>
-    <td>${actionBtns('editPol','delPol',p.id)}</td></tr>`).join('');
-}
-
-// ─── Workflow ─────────────────────────────────────────────────
-function renderWf() {
-  document.getElementById('wf-list').innerHTML = DB.workflow.map((w,i)=>`
-    <div class="wf-step">
-      <div class="wf-num">${i+1}</div>
-      <div style="flex:1">
-        <div class="wf-title">${w.title||''}</div>
-        <div class="wf-desc">${w.desc||''}</div>
-        ${w.doc?`<div style="font-size:10px;color:var(--accent);margin-top:3px">📄 ${w.doc}</div>`:''}
-      </div>
-      ${actionBtns('editWf','delWf',w.id)}
-    </div>`).join('');
-}
-
 // ═══════════════════════════════════════════════════════════════
 // CRUD — Observations
 // ═══════════════════════════════════════════════════════════════
@@ -1289,21 +1573,10 @@ async function saveAssign(){ const id=document.getElementById('assign-eid').valu
 // ═══════════════════════════════════════════════════════════════
 // CRUD — Policies
 // ═══════════════════════════════════════════════════════════════
-function editPol(id){ const p=DB.policies.find(x=>String(x.id)===String(id))||{}; document.getElementById('pol-eid').value=p.id||''; document.getElementById('pol-name').value=p.name||''; document.getElementById('pol-dept').value=p.dept||''; document.getElementById('pol-content').value=p.content||'لم تبدأ'; document.getElementById('pol-sigs').value=p.sigs||''; document.getElementById('pol-sigstat').value=p.sigStatus||'لم يوقع'; openModal('m-pol'); }
-async function delPol(id){ if(!confirm('حذف؟')) return; DB.policies=DB.policies.filter(p=>String(p.id)!==String(id)); renderAll(); await apiCall('delete','policies',id); toast('🗑️ تم الحذف','info'); }
-async function savePol(){ const id=document.getElementById('pol-eid').value; const obj={id:id||String(Date.now()),name:document.getElementById('pol-name').value,dept:document.getElementById('pol-dept').value,content:document.getElementById('pol-content').value,sigs:document.getElementById('pol-sigs').value,sigStatus:document.getElementById('pol-sigstat').value}; if(id){const idx=DB.policies.findIndex(p=>String(p.id)===id);DB.policies[idx]={...DB.policies[idx],...obj};}else DB.policies.push(obj); renderAll();closeModal('m-pol'); await apiCall(id?'update':'add','policies',obj.id,obj); toast('✅ تم الحفظ','success'); }
-
-// ═══════════════════════════════════════════════════════════════
-// CRUD — Workflow
-// ═══════════════════════════════════════════════════════════════
-function editWf(id){ const w=DB.workflow.find(x=>String(x.id)===String(id))||{}; document.getElementById('wf-eid').value=w.id||''; document.getElementById('wf-title-in').value=w.title||''; document.getElementById('wf-desc-in').value=w.desc||''; document.getElementById('wf-doc-in').value=w.doc||''; document.getElementById('wf-owner-in').value=w.owner||''; openModal('m-wf'); }
-async function delWf(id){ if(!confirm('حذف؟')) return; DB.workflow=DB.workflow.filter(w=>String(w.id)!==String(id)); renderAll(); await apiCall('delete','workflow',id); toast('🗑️ تم الحذف','info'); }
-async function saveWf(){ const id=document.getElementById('wf-eid').value; const obj={id:id||String(Date.now()),title:document.getElementById('wf-title-in').value,desc:document.getElementById('wf-desc-in').value,doc:document.getElementById('wf-doc-in').value,owner:document.getElementById('wf-owner-in').value}; if(id){const idx=DB.workflow.findIndex(w=>String(w.id)===id);DB.workflow[idx]={...DB.workflow[idx],...obj};}else DB.workflow.push(obj); renderAll();closeModal('m-wf'); await apiCall(id?'update':'add','workflow',obj.id,obj); toast('✅ تم الحفظ','success'); }
-
 // ═══════════════════════════════════════════════════════════════
 // COUNTDOWN
 // ═══════════════════════════════════════════════════════════════
-const SURVEY = new Date('2026-08-20');
+const SURVEY = new Date('2026-07-01');
 function updateCD() {
   const diff = SURVEY - new Date();
   if(diff<=0){ ['cd-d','cd-h','cd-m','cd-s'].forEach(id=>document.getElementById(id).textContent='0'); return; }
@@ -1560,6 +1833,566 @@ function exportPoliciesCSV() {
   a.click();
   toast('📥 تم التصدير','success');
 }
+
+
+
+
+// ════════════════════════════════════════════════════════════════
+// WEIGHTED PROGRESS DASHBOARD
+// ════════════════════════════════════════════════════════════════
+const PILLARS = [
+  { key:'policy_writing',  label:'كتابة السياسات (106)',          weight:25, icon:'✍️', color:'#0080FF' },
+  { key:'policy_signing',  label:'توقيع السياسات',                weight:20, icon:'🖊️', color:'#7C3AED' },
+  { key:'staff_files',     label:'ملفات الموظفين',                weight:15, icon:'👥', color:'#F59E0B' },
+  { key:'requirements',    label:'المتطلبات',                     weight:10, icon:'📋', color:'#10D97E' },
+  { key:'lectures',        label:'المحاضرات + جسر',                weight:10, icon:'🎓', color:'#0D9488' },
+  { key:'documents',       label:'OVR / Manual / Checklists',     weight:8,  icon:'📂', color:'#F97316' },
+  { key:'licenses',        label:'الرخص والعقود والاتفاقيات',     weight:5,  icon:'📜', color:'#EF4444' },
+  { key:'assignments',     label:'التكليفات',                     weight:3,  icon:'📌', color:'#8B5CF6' },
+  { key:'team',            label:'تعاون الفريق',                  weight:2,  icon:'🤝', color:'#06B6D4' },
+  { key:'observations',    label:'الملاحظات',                     weight:2,  icon:'🔍', color:'#FF7C2A' },
+];
+
+function getExtras() {
+  try { return JSON.parse(localStorage.getItem('cbahi_extras_v1') || '{}'); }
+  catch(e) { return {}; }
+}
+
+function saveExtras() {
+  const ex = {
+    licenses:    Number(document.getElementById('ex-licenses').value)    || 0,
+    contracts:   Number(document.getElementById('ex-contracts').value)   || 0,
+    agreements:  Number(document.getElementById('ex-agreements').value)  || 0,
+    ovr:         Number(document.getElementById('ex-ovr').value)         || 0,
+    manual:      Number(document.getElementById('ex-manual').value)      || 0,
+    checklists:  Number(document.getElementById('ex-checklists').value)  || 0,
+    jisr:        document.getElementById('ex-jisr').value,
+    staff:       Number(document.getElementById('ex-staff').value)       || 0,
+    team:        Number(document.getElementById('ex-team').value)        || 0,
+  };
+  localStorage.setItem('cbahi_extras_v1', JSON.stringify(ex));
+  closeModal('m-extras');
+  toast('✅ تم الحفظ', 'success');
+  renderProgressDashboard();
+}
+
+function openExtras() {
+  const ex = getExtras();
+  document.getElementById('ex-licenses').value   = ex.licenses   || '';
+  document.getElementById('ex-contracts').value  = ex.contracts  || '';
+  document.getElementById('ex-agreements').value = ex.agreements || '';
+  document.getElementById('ex-ovr').value        = ex.ovr        || 0;
+  document.getElementById('ex-manual').value     = ex.manual     || 0;
+  document.getElementById('ex-checklists').value = ex.checklists || '';
+  document.getElementById('ex-jisr').value       = ex.jisr       || 'none';
+  document.getElementById('ex-staff').value      = ex.staff      || '';
+  document.getElementById('ex-team').value       = ex.team       || '';
+  openModal('m-extras');
+}
+
+function calcPillarPct(key) {
+  const ex = getExtras();
+  switch(key) {
+    case 'policy_writing': {
+      if (!POLICIES.length) return 0;
+      const done = POLICIES.filter(p => p.contentReady === 'مكتملة').length;
+      return Math.round(done / POLICIES.length * 100);
+    }
+    case 'policy_signing': {
+      if (!POLICIES.length) return 0;
+      let total = 0, signed = 0;
+      POLICIES.forEach(p => {
+        SIG_FIELDS.forEach(s => { total++; if (p[s.key] === '✅') signed++; });
+      });
+      return total ? Math.round(signed / total * 100) : 0;
+    }
+    case 'staff_files':
+      return ex.staff || 0;
+    case 'requirements': {
+      if (!DB.requirements.length) return 0;
+      const done = DB.requirements.filter(r => r.status === 'مكتمل').length;
+      return Math.round(done / DB.requirements.length * 100);
+    }
+    case 'lectures': {
+      if (!DB.lectures.length) return 0;
+      const done = DB.lectures.filter(l => l.done === 'نعم').length;
+      const lecPct = Math.round(done / DB.lectures.length * 100);
+      const jisrBonus = ex.jisr === 'all' ? 100 : ex.jisr === 'partial' ? 50 : 0;
+      return Math.round((lecPct * 0.7) + (jisrBonus * 0.3));
+    }
+    case 'documents': {
+      const total = 14; // ovr(1) + manual(1) + checklists(12)
+      const got = (ex.ovr || 0) + (ex.manual || 0) + (ex.checklists || 0);
+      return Math.round(got / total * 100);
+    }
+    case 'licenses': {
+      const total = 23; // 10 + 8 + 5
+      const got = (ex.licenses || 0) + (ex.contracts || 0) + (ex.agreements || 0);
+      return Math.round(got / total * 100);
+    }
+    case 'assignments': {
+      if (!DB.assignments.length) return 0;
+      const done = DB.assignments.filter(a => a.status === 'مكتمل').length;
+      return Math.round(done / DB.assignments.length * 100);
+    }
+    case 'team':
+      return ex.team || 0;
+    case 'observations': {
+      if (!DB.observations.length) return 0;
+      const done = DB.observations.filter(o => o.status === 'محلولة').length;
+      return Math.round(done / DB.observations.length * 100);
+    }
+  }
+  return 0;
+}
+
+function renderProgressDashboard() {
+  let totalWeighted = 0;
+  const grid = document.getElementById('pillars-grid');
+  if (!grid) return;
+  
+  grid.innerHTML = PILLARS.map(p => {
+    const pct = calcPillarPct(p.key);
+    const contribution = (pct * p.weight / 100).toFixed(1);
+    totalWeighted += parseFloat(contribution);
+    const alert = pct < 30 ? '🚨' : pct < 60 ? '⚠️' : pct < 90 ? '🟡' : '✅';
+    return `<div style="background:var(--surface);border:1px solid ${p.color}33;border-radius:12px;padding:14px;position:relative;overflow:hidden">
+      <div style="position:absolute;top:0;right:0;width:80px;height:80px;background:${p.color};opacity:.06;border-radius:50%;transform:translate(20px,-20px)"></div>
+      <div style="display:flex;align-items:start;justify-content:space-between;margin-bottom:8px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:18px">${p.icon}</span>
+          <div>
+            <div style="font-size:12px;font-weight:800;color:var(--text)">${p.label}</div>
+            <div style="font-size:10px;color:var(--text3)">الوزن: ${p.weight}% من الإجمالي</div>
+          </div>
+        </div>
+        <div style="text-align:left">
+          <div style="font-size:22px;font-weight:900;color:${p.color};font-family:Cairo,sans-serif;line-height:1">${pct}%</div>
+          <div style="font-size:9px;color:var(--text3)">يساهم بـ ${contribution}%</div>
+        </div>
+      </div>
+      <div style="height:8px;background:rgba(255,255,255,.06);border-radius:4px;overflow:hidden">
+        <div style="height:100%;width:${pct}%;background:${p.color};border-radius:4px;transition:width .8s;box-shadow:0 0 8px ${p.color}66"></div>
+      </div>
+      <div style="font-size:10px;color:var(--text3);margin-top:6px">${alert} ${pct < 30 ? 'تأخير حرج' : pct < 60 ? 'يحتاج عمل' : pct < 90 ? 'تقدم جيد' : 'ممتاز'}</div>
+    </div>`;
+  }).join('');
+
+  // Update hero
+  const total = Math.round(totalWeighted);
+  const heroNum = document.getElementById('total-progress-num');
+  const heroBar = document.getElementById('total-progress-bar');
+  if (heroNum) heroNum.textContent = total + '%';
+  if (heroBar) heroBar.style.width = total + '%';
+  
+  const days = document.getElementById('prog-days');
+  if (days) {
+    const diff = new Date('2026-07-01') - new Date();
+    days.textContent = Math.max(0, Math.floor(diff/86400000));
+  }
+}
+
+// Override renderAll to also update progress dashboard
+const _origRenderAll = renderAll;
+renderAll = function() {
+  _origRenderAll();
+  renderProgressDashboard();
+  renderLicenses();
+  renderOVRDocs();
+};
+
+// Render once on load
+setTimeout(renderProgressDashboard, 500);
+
+
+// ════════════════════════════════════════════════════════════════
+// LICENSES & CONTRACTS FUNCTIONS
+// ════════════════════════════════════════════════════════════════
+
+function renderLicenses() {
+  const tbody = document.getElementById('lic-tbody');
+  if (!tbody) return;
+  
+  const licenses = DB.licenses || [];
+  let activeCount = 0, expiredCount = 0, expiringCount = 0;
+  
+  tbody.innerHTML = licenses.map((lic, idx) => {
+    const statusClass = lic.status === 'نشطة' ? 's-done' : 
+                        lic.status === 'منتهية' ? 's-crit' : 
+                        lic.status === 'قريبة الانتهاء' ? 's-warn' : 's-prog';
+    
+    if (lic.status === 'نشطة') activeCount++;
+    else if (lic.status === 'منتهية') expiredCount++;
+    else if (lic.status === 'قريبة الانتهاء') expiringCount++;
+    
+    return `<tr>
+      <td class="num">${idx + 1}</td>
+      <td class="td-main">${lic.type || '–'}</td>
+      <td>${lic.name || '–'}</td>
+      <td>${lic.entity || '–'}</td>
+      <td>${lic.startDate || '–'}</td>
+      <td>${lic.endDate || '–'}</td>
+      <td><span class="pill ${statusClass}">${lic.status || '–'}</span></td>
+      <td>
+        <button class="btn btn-ghost" style="padding:4px 10px;font-size:10px" onclick="editLicense('${lic.id}')">✏️</button>
+        <button class="btn btn-danger" style="padding:4px 10px;font-size:10px" onclick="deleteLicense('${lic.id}')">🗑️</button>
+      </td>
+    </tr>`;
+  }).join('');
+  
+  const cnt = document.getElementById('lic-cnt');
+  const active = document.getElementById('lic-active');
+  const expired = document.getElementById('lic-expired');
+  const expiring = document.getElementById('lic-expiring');
+  
+  if (cnt) cnt.textContent = licenses.length;
+  if (active) active.textContent = `${activeCount} نشطة`;
+  if (expired) expired.textContent = `${expiredCount} منتهية`;
+  if (expiring) expiring.textContent = `${expiringCount} قريبة الانتهاء`;
+}
+
+function editLicense(id) {
+  const lic = DB.licenses.find(x => String(x.id) === String(id)) || {};
+  document.getElementById('lic-eid').value = lic.id || '';
+  document.getElementById('lic-type').value = lic.type || 'رخصة';
+  document.getElementById('lic-name').value = lic.name || '';
+  document.getElementById('lic-entity').value = lic.entity || '';
+  document.getElementById('lic-start').value = lic.startDate || '';
+  document.getElementById('lic-end').value = lic.endDate || '';
+  document.getElementById('lic-status').value = lic.status || 'نشطة';
+  openModal('m-license');
+}
+
+async function saveLicense() {
+  const id = document.getElementById('lic-eid').value;
+  const obj = {
+    id: id || String(Date.now()),
+    type: document.getElementById('lic-type').value,
+    name: document.getElementById('lic-name').value,
+    entity: document.getElementById('lic-entity').value,
+    startDate: document.getElementById('lic-start').value,
+    endDate: document.getElementById('lic-end').value,
+    status: document.getElementById('lic-status').value
+  };
+  
+  if (id) {
+    const idx = DB.licenses.findIndex(l => String(l.id) === id);
+    DB.licenses[idx] = {...DB.licenses[idx], ...obj};
+  } else {
+    DB.licenses.push(obj);
+  }
+  
+  renderAll();
+  closeModal('m-license');
+  await apiCall(id ? 'update' : 'add', 'licenses', obj.id, obj);
+  toast('✅ تم حفظ الرخصة/العقد', 'success');
+}
+
+async function deleteLicense(id) {
+  if (!confirm('هل تريد حذف هذا العنصر؟')) return;
+  DB.licenses = DB.licenses.filter(l => String(l.id) !== String(id));
+  renderAll();
+  await apiCall('delete', 'licenses', id);
+  toast('🗑️ تم الحذف', 'info');
+}
+
+
+// ════════════════════════════════════════════════════════════════
+// OVR DOCUMENTS FUNCTIONS
+// ════════════════════════════════════════════════════════════════
+
+function renderOVRDocs() {
+  const tbody = document.getElementById('ovr-tbody');
+  if (!tbody) return;
+  
+  const docs = DB.ovrDocs || [];
+  let totalCost = 0;
+  let reportsCount = 0, manualsCount = 0, checklistsCount = 0;
+  
+  tbody.innerHTML = docs.map((doc, idx) => {
+    const statusClass = doc.status === 'جاهز وموزع' ? 's-done' : 
+                        doc.status === 'قيد الطباعة' ? 's-prog' : 
+                        doc.status === 'قيد الإعداد' ? 's-warn' : 's-pend';
+    
+    const cost = parseFloat(doc.cost) || 0;
+    totalCost += cost;
+    
+    if (doc.type === 'OVR Report') reportsCount += parseInt(doc.qty) || 0;
+    else if (doc.type === 'Manual') manualsCount += parseInt(doc.qty) || 0;
+    else if (doc.type === 'Checklist') checklistsCount += parseInt(doc.qty) || 0;
+    
+    return `<tr>
+      <td class="num">${idx + 1}</td>
+      <td class="td-main">${doc.type || '–'}</td>
+      <td>${doc.name || '–'}</td>
+      <td>${doc.location || '–'}</td>
+      <td class="num">${doc.qty || 0}</td>
+      <td class="num">${cost.toFixed(2)} ريال</td>
+      <td><span class="pill ${statusClass}">${doc.status || '–'}</span></td>
+      <td style="font-size:10px;color:var(--text3)">${doc.notes || '–'}</td>
+      <td>
+        <button class="btn btn-ghost" style="padding:4px 10px;font-size:10px" onclick="editOVR('${doc.id}')">✏️</button>
+        <button class="btn btn-danger" style="padding:4px 10px;font-size:10px" onclick="deleteOVR('${doc.id}')">🗑️</button>
+      </td>
+    </tr>`;
+  }).join('');
+  
+  const cnt = document.getElementById('ovr-cnt');
+  const costEl = document.getElementById('ovr-cost');
+  const reportsVal = document.getElementById('ovr-reports-val');
+  const manualsVal = document.getElementById('ovr-manuals-val');
+  const checksVal = document.getElementById('ovr-checks-val');
+  
+  if (cnt) cnt.textContent = docs.length;
+  if (costEl) costEl.textContent = `التكلفة الإجمالية: ${totalCost.toFixed(2)} ريال`;
+  if (reportsVal) reportsVal.textContent = reportsCount;
+  if (manualsVal) manualsVal.textContent = manualsCount;
+  if (checksVal) checksVal.textContent = checklistsCount;
+}
+
+function editOVR(id) {
+  const doc = DB.ovrDocs.find(x => String(x.id) === String(id)) || {};
+  document.getElementById('ovr-eid').value = doc.id || '';
+  document.getElementById('ovr-type').value = doc.type || 'OVR Report';
+  document.getElementById('ovr-name').value = doc.name || '';
+  document.getElementById('ovr-location').value = doc.location || '';
+  document.getElementById('ovr-qty').value = doc.qty || 0;
+  document.getElementById('ovr-cost-val').value = doc.cost || 0;
+  document.getElementById('ovr-status').value = doc.status || 'قيد الإعداد';
+  document.getElementById('ovr-notes').value = doc.notes || '';
+  openModal('m-ovr');
+}
+
+async function saveOVR() {
+  const id = document.getElementById('ovr-eid').value;
+  const obj = {
+    id: id || String(Date.now()),
+    type: document.getElementById('ovr-type').value,
+    name: document.getElementById('ovr-name').value,
+    location: document.getElementById('ovr-location').value,
+    qty: document.getElementById('ovr-qty').value,
+    cost: document.getElementById('ovr-cost-val').value,
+    status: document.getElementById('ovr-status').value,
+    notes: document.getElementById('ovr-notes').value
+  };
+  
+  if (id) {
+    const idx = DB.ovrDocs.findIndex(d => String(d.id) === id);
+    DB.ovrDocs[idx] = {...DB.ovrDocs[idx], ...obj};
+  } else {
+    DB.ovrDocs.push(obj);
+  }
+  
+  renderAll();
+  closeModal('m-ovr');
+  await apiCall(id ? 'update' : 'add', 'ovrDocs', obj.id, obj);
+  toast('✅ تم حفظ المستند', 'success');
+}
+
+async function deleteOVR(id) {
+  if (!confirm('هل تريد حذف هذا المستند؟')) return;
+  DB.ovrDocs = DB.ovrDocs.filter(d => String(d.id) !== String(id));
+  renderAll();
+  await apiCall('delete', 'ovrDocs', id);
+  toast('🗑️ تم الحذف', 'info');
+}
+
+
+// ════════════════════════════════════════════════════════════════
+// STAFF FILES FUNCTIONS
+// ════════════════════════════════════════════════════════════════
+
+let STAFF_FILES_DATA = [];
+let STAFF_SHEET_CONFIG = null;
+
+function loadStaffSheetConfig() {
+  try {
+    const cfg = localStorage.getItem('cbahi_staff_sheet_config');
+    if (cfg) STAFF_SHEET_CONFIG = JSON.parse(cfg);
+  } catch (e) {
+    console.error('Error loading staff sheet config:', e);
+  }
+}
+
+function openStaffSheetSettings() {
+  loadStaffSheetConfig();
+  const cfg = STAFF_SHEET_CONFIG || {};
+  document.getElementById('staff-sheet-url').value = cfg.url || '';
+  document.getElementById('staff-sheet-name').value = cfg.sheetName || 'Staff_Files';
+  document.getElementById('staff-col-name').value = cfg.colName || 'A';
+  document.getElementById('staff-col-dept').value = cfg.colDept || 'B';
+  document.getElementById('staff-col-title').value = cfg.colTitle || 'C';
+  document.getElementById('staff-col-progress').value = cfg.colProgress || 'D';
+  openModal('m-staff-sheet');
+}
+
+function saveStaffSheetSettings() {
+  const cfg = {
+    url: document.getElementById('staff-sheet-url').value,
+    sheetName: document.getElementById('staff-sheet-name').value,
+    colName: document.getElementById('staff-col-name').value,
+    colDept: document.getElementById('staff-col-dept').value,
+    colTitle: document.getElementById('staff-col-title').value,
+    colProgress: document.getElementById('staff-col-progress').value
+  };
+  
+  localStorage.setItem('cbahi_staff_sheet_config', JSON.stringify(cfg));
+  STAFF_SHEET_CONFIG = cfg;
+  closeModal('m-staff-sheet');
+  toast('✅ تم حفظ الإعدادات', 'success');
+}
+
+async function syncStaffFiles() {
+  if (!STAFF_SHEET_CONFIG || !STAFF_SHEET_CONFIG.url) {
+    toast('⚠️ يرجى تكوين إعدادات Google Sheet أولاً', 'error');
+    openStaffSheetSettings();
+    return;
+  }
+  
+  try {
+    toast('🔄 جاري المزامنة...', 'info');
+    
+    const response = await fetch(STAFF_SHEET_CONFIG.url + '?action=getStaffFiles');
+    const data = await response.json();
+    
+    if (data.success && data.data) {
+      STAFF_FILES_DATA = data.data;
+      renderStaffFiles();
+      toast('✅ تمت المزامنة بنجاح', 'success');
+    } else {
+      throw new Error(data.error || 'فشل في جلب البيانات');
+    }
+  } catch (error) {
+    console.error('Staff sync error:', error);
+    toast('❌ خطأ في المزامنة: ' + error.message, 'error');
+  }
+}
+
+function renderStaffFiles() {
+  const files = STAFF_FILES_DATA || [];
+  
+  // Overall stats
+  const totalFiles = files.length;
+  let completeCount = 0;
+  let progressCount = 0;
+  let incompleteCount = 0;
+  let totalProgress = 0;
+  
+  files.forEach(f => {
+    const prog = parseFloat(f.progress) || 0;
+    totalProgress += prog;
+    
+    if (prog >= 100) completeCount++;
+    else if (prog > 0) progressCount++;
+    else incompleteCount++;
+  });
+  
+  const overallProgress = totalFiles > 0 ? (totalProgress / totalFiles).toFixed(1) : 0;
+  
+  const overallEl = document.getElementById('staff-overall');
+  const overallBar = document.getElementById('staff-overall-bar');
+  const completeEl = document.getElementById('staff-complete');
+  const completeSub = document.getElementById('staff-complete-sub');
+  const progressEl = document.getElementById('staff-progress');
+  const incompleteEl = document.getElementById('staff-incomplete');
+  
+  if (overallEl) overallEl.textContent = `${overallProgress}%`;
+  if (overallBar) overallBar.style.width = `${overallProgress}%`;
+  if (completeEl) completeEl.textContent = completeCount;
+  if (completeSub) completeSub.textContent = `من ${totalFiles} موظف`;
+  if (progressEl) progressEl.textContent = progressCount;
+  if (incompleteEl) incompleteEl.textContent = incompleteCount;
+  
+  // By department
+  const deptStats = {};
+  files.forEach(f => {
+    const dept = f.department || 'غير محدد';
+    if (!deptStats[dept]) {
+      deptStats[dept] = { total: 0, complete: 0, progress: 0, incomplete: 0, totalProg: 0 };
+    }
+    deptStats[dept].total++;
+    const prog = parseFloat(f.progress) || 0;
+    deptStats[dept].totalProg += prog;
+    
+    if (prog >= 100) deptStats[dept].complete++;
+    else if (prog > 0) deptStats[dept].progress++;
+    else deptStats[dept].incomplete++;
+  });
+  
+  const deptTbody = document.getElementById('staff-dept-tbody');
+  if (deptTbody) {
+    deptTbody.innerHTML = Object.keys(deptStats).sort().map((dept, idx) => {
+      const stats = deptStats[dept];
+      const avgProg = stats.total > 0 ? (stats.totalProg / stats.total).toFixed(1) : 0;
+      const statusClass = avgProg >= 90 ? 's-done' : avgProg >= 50 ? 's-prog' : avgProg > 0 ? 's-warn' : 's-pend';
+      
+      return `<tr>
+        <td class="num">${idx + 1}</td>
+        <td class="td-main">${dept}</td>
+        <td class="num">${stats.total}</td>
+        <td class="num">${stats.complete}</td>
+        <td class="num">${stats.progress}</td>
+        <td class="num">${stats.incomplete}</td>
+        <td class="num" style="font-weight:700">${avgProg}%</td>
+        <td><span class="pill ${statusClass}">${avgProg >= 90 ? '✅ ممتاز' : avgProg >= 50 ? '⏳ جيد' : avgProg > 0 ? '⚠️ ضعيف' : '❌ لم يبدأ'}</span></td>
+      </tr>`;
+    }).join('');
+  }
+  
+  // Populate department filter
+  const deptFilter = document.getElementById('staff-dept-filter');
+  if (deptFilter) {
+    const depts = [...new Set(files.map(f => f.department || 'غير محدد'))].sort();
+    const currentValue = deptFilter.value;
+    deptFilter.innerHTML = '<option value="ALL">كل الأقسام</option>' + 
+      depts.map(d => `<option value="${d}">${d}</option>`).join('');
+    if (currentValue) deptFilter.value = currentValue;
+  }
+  
+  // Detailed list
+  filterStaffTable();
+  
+  const totalCnt = document.getElementById('staff-total-cnt');
+  if (totalCnt) totalCnt.textContent = totalFiles;
+}
+
+function filterStaffTable() {
+  const files = STAFF_FILES_DATA || [];
+  const deptFilter = document.getElementById('staff-dept-filter')?.value || 'ALL';
+  const statusFilter = document.getElementById('staff-status-filter')?.value || 'ALL';
+  
+  const filtered = files.filter(f => {
+    const prog = parseFloat(f.progress) || 0;
+    const status = prog >= 100 ? 'مكتمل' : prog > 0 ? 'قيد العمل' : 'ناقص';
+    
+    const matchDept = deptFilter === 'ALL' || f.department === deptFilter;
+    const matchStatus = statusFilter === 'ALL' || status === statusFilter;
+    
+    return matchDept && matchStatus;
+  });
+  
+  const tbody = document.getElementById('staff-list-tbody');
+  if (tbody) {
+    tbody.innerHTML = filtered.map((f, idx) => {
+      const prog = parseFloat(f.progress) || 0;
+      const status = prog >= 100 ? 'مكتمل' : prog > 0 ? 'قيد العمل' : 'ناقص';
+      const statusClass = status === 'مكتمل' ? 's-done' : status === 'قيد العمل' ? 's-prog' : 's-pend';
+      
+      return `<tr>
+        <td class="num">${idx + 1}</td>
+        <td class="td-main">${f.name || '–'}</td>
+        <td>${f.department || '–'}</td>
+        <td>${f.jobTitle || '–'}</td>
+        <td class="num" style="font-weight:700">${prog}%</td>
+        <td><span class="pill ${statusClass}">${status}</span></td>
+        <td style="font-size:10px;color:var(--text3)">${f.lastUpdate || '–'}</td>
+      </tr>`;
+    }).join('');
+  }
+}
+
+// Load staff sheet config on page load
+loadStaffSheetConfig();
 
 
 </script>

@@ -1001,7 +1001,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
     </div>
     <div class="fg">
       <label>اسم الشيت (Tab Name)</label>
-      <input type="text" id="staff-sheet-name" placeholder="Staff_Files" value="Staff_Files">
+      <input type="text" id="staff-sheet-name" placeholder="Staff_Files" value="HR_Tracker">
     </div>
     <div class="fg">
       <label>عمود اسم الموظف</label>
@@ -1009,7 +1009,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
     </div>
     <div class="fg">
       <label>عمود القسم</label>
-      <input type="text" id="staff-col-dept" placeholder="B" value="B">
+      <input type="text" id="staff-col-dept" placeholder="D" value="D">
     </div>
     <div class="fg">
       <label>عمود المسمى الوظيفي</label>
@@ -1017,7 +1017,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
     </div>
     <div class="fg">
       <label>عمود نسبة الإنجاز (%)</label>
-      <input type="text" id="staff-col-progress" placeholder="D" value="D">
+      <input type="text" id="staff-col-progress" placeholder="S" value="S">
     </div>
     <div class="modal-footer">
       <button class="btn btn-danger" onclick="closeModal('m-staff-sheet')">إلغاء</button>
@@ -2218,11 +2218,11 @@ function openStaffSheetSettings() {
   loadStaffSheetConfig();
   const cfg = STAFF_SHEET_CONFIG || {};
   document.getElementById('staff-sheet-url').value = cfg.url || '';
-  document.getElementById('staff-sheet-name').value = cfg.sheetName || 'Staff_Files';
+  document.getElementById('staff-sheet-name').value = cfg.sheetName || 'HR_Tracker';
   document.getElementById('staff-col-name').value = cfg.colName || 'A';
-  document.getElementById('staff-col-dept').value = cfg.colDept || 'B';
+  document.getElementById('staff-col-dept').value = cfg.colDept || 'D';
   document.getElementById('staff-col-title').value = cfg.colTitle || 'C';
-  document.getElementById('staff-col-progress').value = cfg.colProgress || 'D';
+  document.getElementById('staff-col-progress').value = cfg.colProgress || 'E';
   openModal('m-staff-sheet');
 }
 

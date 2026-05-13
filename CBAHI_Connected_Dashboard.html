@@ -288,7 +288,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
     <div class="sec-icon" style="background:rgba(255,71,87,.1)">🔍</div>
     <div class="sec-title">الملاحظات المبدئية</div>
     <div class="sec-line"></div>
-    <button class="btn btn-primary" onclick="openModal('m-obs')">+ إضافة</button>
+    <button class="btn btn-primary" onclick="openNewObs()">+ إضافة</button>
   </div>
   <div class="info-bar">ℹ️ جميع التعديلات تُحفظ تلقائياً في Google Sheets وتظهر فوراً</div>
   <div class="tcard">
@@ -300,7 +300,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
       <table><thead><tr><th class="num">#</th><th>الملاحظة</th><th>الأولوية</th><th>المسؤول</th><th>الموعد</th><th>الحالة</th><th>إجراء</th></tr></thead>
       <tbody id="obs-tbody"></tbody></table>
     </div>
-    <button class="add-row" onclick="openModal('m-obs')">+ إضافة ملاحظة</button>
+    <button class="add-row" onclick="openNewObs()">+ إضافة ملاحظة</button>
   </div>
 </div>
 
@@ -310,7 +310,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
     <div class="sec-icon" style="background:rgba(168,85,247,.1)">📋</div>
     <div class="sec-title">المتطلبات الكاملة</div>
     <div class="sec-line"></div>
-    <button class="btn btn-primary" onclick="openModal('m-req')">+ إضافة</button>
+    <button class="btn btn-primary" onclick="openNewReq()">+ إضافة</button>
   </div>
   <div class="tcard">
     <div class="tcard-hdr">
@@ -321,7 +321,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
       <table><thead><tr><th class="num">#</th><th>المتطلب</th><th>الفئة</th><th>الأولوية</th><th>التكلفة</th><th>تمويل؟</th><th>الحالة</th><th>المسؤول</th><th></th></tr></thead>
       <tbody id="req-tbody"></tbody></table>
     </div>
-    <button class="add-row" onclick="openModal('m-req')">+ إضافة متطلب</button>
+    <button class="add-row" onclick="openNewReq()">+ إضافة متطلب</button>
   </div>
 </div>
 
@@ -411,7 +411,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
     <div class="sec-icon" style="background:rgba(239,68,68,.1)">📜</div>
     <div class="sec-title">الرخص والعقود والاتفاقيات</div>
     <div class="sec-line"></div>
-    <button class="btn btn-primary" onclick="openModal('m-license')">+ إضافة</button>
+    <button class="btn btn-primary" onclick="openNewLicense()">+ إضافة</button>
   </div>
   <div class="info-bar">ℹ️ تسجيل الرخص النشطة والعقود السارية والاتفاقيات الطبية مع مواعيد السريان والانتهاء</div>
   <div class="tcard">
@@ -440,7 +440,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
         <tbody id="lic-tbody"></tbody>
       </table>
     </div>
-    <button class="add-row" onclick="openModal('m-license')">+ إضافة رخصة/عقد/اتفاقية</button>
+    <button class="add-row" onclick="openNewLicense()">+ إضافة رخصة/عقد/اتفاقية</button>
   </div>
 </div>
 
@@ -450,7 +450,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
     <div class="sec-icon" style="background:rgba(249,115,22,.1)">📂</div>
     <div class="sec-title">OVR Manual Checklists</div>
     <div class="sec-line"></div>
-    <button class="btn btn-primary" onclick="openModal('m-ovr')">+ إضافة مستند</button>
+    <button class="btn btn-primary" onclick="openNewOVR()">+ إضافة مستند</button>
   </div>
   <div class="info-bar">ℹ️ المستندات التي تم إعدادها ووضعها بالعيادات مع التكاليف إن وجدت</div>
   
@@ -496,7 +496,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
         <tbody id="ovr-tbody"></tbody>
       </table>
     </div>
-    <button class="add-row" onclick="openModal('m-ovr')">+ إضافة مستند</button>
+    <button class="add-row" onclick="openNewOVR()">+ إضافة مستند</button>
   </div>
 </div>
 
@@ -1524,6 +1524,7 @@ function openObsModal(obs={}) {
   document.getElementById('obs-stat').value  = obs.status||'معلقة';
   openModal('m-obs');
 }
+function openNewObs(){ openObsModal({}); }
 function editObs(id){ openObsModal(DB.observations.find(o=>String(o.id)===String(id))||{}); }
 async function delObs(id) {
   if(!confirm('حذف هذه الملاحظة؟')) return;
@@ -1548,6 +1549,7 @@ async function saveObs() {
 // CRUD — Requirements
 // ═══════════════════════════════════════════════════════════════
 function editReq(id){ const r=DB.requirements.find(x=>String(x.id)===String(id))||{}; document.getElementById('req-eid').value=r.id||''; document.getElementById('m-req-title').textContent='تعديل متطلب'; document.getElementById('req-text').value=r.text||''; document.getElementById('req-cat').value=r.cat||'سياسات وإجراءات'; document.getElementById('req-pri').value=r.priority||r.pri||'عالية'; document.getElementById('req-cost').value=r.cost||0; document.getElementById('req-fin').value=r.financial||'لا'; document.getElementById('req-stat').value=r.status||'معلق'; document.getElementById('req-owner').value=r.owner||''; openModal('m-req'); }
+function openNewReq(){ document.getElementById('req-eid').value=''; document.getElementById('m-req-title').textContent='إضافة متطلب'; document.getElementById('req-text').value=''; document.getElementById('req-cat').value='سياسات وإجراءات'; document.getElementById('req-pri').value='عالية'; document.getElementById('req-cost').value=0; document.getElementById('req-fin').value='لا'; document.getElementById('req-stat').value='معلق'; document.getElementById('req-owner').value=''; openModal('m-req'); }
 async function delReq(id){ if(!confirm('حذف؟')) return; DB.requirements=DB.requirements.filter(r=>String(r.id)!==String(id)); renderAll(); await apiCall('delete','requirements',id); toast('🗑️ تم الحذف','info'); }
 async function saveReq(){ const id=document.getElementById('req-eid').value; const obj={id:id||String(Date.now()),text:document.getElementById('req-text').value,cat:document.getElementById('req-cat').value,priority:document.getElementById('req-pri').value,cost:document.getElementById('req-cost').value,financial:document.getElementById('req-fin').value,status:document.getElementById('req-stat').value,owner:document.getElementById('req-owner').value}; if(id){const idx=DB.requirements.findIndex(r=>String(r.id)===id);DB.requirements[idx]={...DB.requirements[idx],...obj};}else DB.requirements.push(obj); renderAll();closeModal('m-req'); await apiCall(id?'update':'add','requirements',obj.id,obj); toast('✅ تم الحفظ','success'); }
 
@@ -2138,6 +2140,16 @@ function editLicense(id) {
   document.getElementById('lic-status').value = lic.status || 'نشطة';
   openModal('m-license');
 }
+function openNewLicense() {
+  document.getElementById('lic-eid').value = '';
+  document.getElementById('lic-type').value = 'رخصة';
+  document.getElementById('lic-name').value = '';
+  document.getElementById('lic-entity').value = '';
+  document.getElementById('lic-start').value = '';
+  document.getElementById('lic-end').value = '';
+  document.getElementById('lic-status').value = 'نشطة';
+  openModal('m-license');
+}
 
 async function saveLicense() {
   const id = document.getElementById('lic-eid').value;
@@ -2248,6 +2260,17 @@ function editOVR(id) {
   document.getElementById('ovr-cost-val').value = doc.cost || 0;
   document.getElementById('ovr-status').value = doc.status || 'قيد الإعداد';
   document.getElementById('ovr-notes').value = doc.notes || '';
+  openModal('m-ovr');
+}
+function openNewOVR() {
+  document.getElementById('ovr-eid').value = '';
+  document.getElementById('ovr-type').value = 'OVR Report';
+  document.getElementById('ovr-name').value = '';
+  document.getElementById('ovr-location').value = '';
+  document.getElementById('ovr-qty').value = 0;
+  document.getElementById('ovr-cost-val').value = 0;
+  document.getElementById('ovr-status').value = 'قيد الإعداد';
+  document.getElementById('ovr-notes').value = '';
   openModal('m-ovr');
 }
 

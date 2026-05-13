@@ -2148,19 +2148,31 @@ async function saveLicense() {
     entity: document.getElementById('lic-entity').value,
     startDate: document.getElementById('lic-start').value,
     endDate: document.getElementById('lic-end').value,
-    status: document.getElementById('lic-status').value
+    status: document.getElementById('lic-status').value,
+    notes: ''
   };
   
   if (id) {
     const idx = DB.licenses.findIndex(l => String(l.id) === id);
-    DB.licenses[idx] = {...DB.licenses[idx], ...obj};
+    if (idx > -1) {
+      DB.licenses[idx] = {...DB.licenses[idx], ...obj};
+      renderAll();
+      closeModal('m-license');
+      // جرب update أولاً، إذا فشل استخدم delete+add
+      const res = await gasMutate('update', 'licenses', obj.id, obj);
+      if (res && res.error && res.error.includes('not found')) {
+        await gasMutate('delete', 'licenses', obj.id);
+        await gasMutate('add', 'licenses', obj.id, obj);
+      }
+    }
   } else {
     DB.licenses.push(obj);
+    renderAll();
+    closeModal('m-license');
+    await apiCall('add', 'licenses', obj.id, obj);
   }
   
-  renderAll();
-  closeModal('m-license');
-  await apiCall(id ? 'update' : 'add', 'licenses', obj.id, obj);
+  saveLocal();
   toast('✅ تم حفظ الرخصة/العقد', 'success');
 }
 

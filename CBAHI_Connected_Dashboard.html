@@ -926,6 +926,41 @@ tr:hover td{background:rgba(0,194,255,.03)}
 // ═══════════════════════════════════════════════════════════════
 // UI HELPERS
 // ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
+// HELPER FUNCTIONS
+// ═══════════════════════════════════════════════════════════════
+
+// Safe HTML update - checks if element exists before updating
+function safeUpdate(id, content, type = 'auto') {
+  const el = document.getElementById(id);
+  if (!el) return false;
+  try {
+    // Auto-detect: if content looks like HTML, use innerHTML, else textContent
+    if (type === 'auto') {
+      type = (typeof content === 'string' && content.includes('<')) ? 'innerHTML' : 'textContent';
+    }
+    
+    if (type === 'innerHTML') {
+      el.innerHTML = content;
+    } else if (type === 'textContent') {
+      el.textContent = content;
+    }
+    return true;
+  } catch(e) {
+    console.warn(`⚠️ Error updating ${id}:`, e.message);
+    return false;
+  }
+}
+
+// Wrap render functions to catch errors
+function safeRender(fn, name) {
+  try {
+    fn();
+  } catch(e) {
+    console.warn(`⚠️ Error in ${name}:`, e.message);
+  }
+}
+
 function setSyncStatus(state) {
   const badge = document.getElementById('syncBadge');
   const dot   = document.getElementById('apiDot');
@@ -1232,8 +1267,15 @@ const signatories = [
 // RENDER FUNCTIONS
 // ═══════════════════════════════════════════════════════════════
 function renderAll() {
-  renderOverview(); renderObs(); renderReq(); renderTeam();
-  renderLoc(); renderLec(); renderAssign(); renderPol(); renderWf();
+  safeRender(renderOverview, 'renderOverview');
+  safeRender(renderObs, 'renderObs');
+  safeRender(renderReq, 'renderReq');
+  safeRender(renderTeam, 'renderTeam');
+  safeRender(renderLoc, 'renderLoc');
+  safeRender(renderLec, 'renderLec');
+  safeRender(renderAssign, 'renderAssign');
+  safeRender(renderPol, 'renderPol');
+  safeRender(renderWf, 'renderWf');
   saveLocal();
 }
 
@@ -1258,13 +1300,13 @@ function renderOverview() {
                  pct(lecDone,lecs.length||1), pct(polSigned,pols.length||1) ]
                .reduce((a,b)=>a+b,0)/4);
 
-  document.getElementById('k-overall').textContent = overall + '%';
+  safeUpdate('k-overall', overall + '%';
   document.getElementById('pf-overall').style.width = overall + '%';
-  document.getElementById('k-obs').textContent = obsDone;
+  safeUpdate('k-obs', obsDone;
   document.getElementById('pf-obs').style.width = pct(obsDone,obs.length) + '%';
-  document.getElementById('k-obs-sub').textContent = `من ${obs.length} ملاحظة`;
-  document.getElementById('k-fin').textContent = finReqs;
-  document.getElementById('k-cost').textContent = `التكلفة: ${totalCost.toLocaleString()} ريال`;
+  safeUpdate('k-obs-sub', `من ${obs.length} ملاحظة`;
+  safeUpdate('k-fin', finReqs;
+  safeUpdate('k-cost', `التكلفة: ${totalCost.toLocaleString()} ريال`;
 
   // Summary table
   const sections = [
@@ -1280,38 +1322,38 @@ function renderOverview() {
     const c = p>=80?'var(--green)':p>=40?'var(--gold)':'var(--red)';
     return `<div style="display:flex;align-items:center;gap:6px"><div style="flex:1;height:5px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden"><div style="height:100%;width:${p}%;background:${c};border-radius:3px"></div></div><span style="font-size:10px;color:var(--text3);min-width:28px">${p}%</span></div>`;
   };
-  document.getElementById('summary-tbody').innerHTML = sections.map(s=>`
+  safeUpdate('summary-tbody', sections.map(s=>`
     <tr><td class="td-main">${s.label}</td>
     <td class="num">${s.total}</td>
     <td class="num" style="color:var(--green);font-weight:700">${s.done}</td>
     <td class="num" style="color:var(--red)">${s.pend}</td>
     <td style="min-width:100px">${pBar(s.done,s.total)}</td>
     <td>${s.done===s.total&&s.total>0?pill('مكتمل'):s.done>0?pill('جارٍ'):pill('معلق')}</td>
-    </tr>`).join('');
+    </tr>`).join(''));
 }
 
 // ─── Observations ────────────────────────────────────────────
 function renderObs() {
   const done = DB.observations.filter(o=>o.status==='محلولة').length;
-  document.getElementById('obs-cnt').textContent = DB.observations.length;
-  document.getElementById('obs-solved').textContent = done + ' محلولة';
-  document.getElementById('obs-pend').textContent = (DB.observations.length-done) + ' معلقة';
-  document.getElementById('obs-tbody').innerHTML = DB.observations.map((o,i)=>`
+  safeUpdate('obs-cnt', DB.observations.length);
+  safeUpdate('obs-solved', done + ' محلولة');
+  safeUpdate('obs-pend', (DB.observations.length-done) + ' معلقة');
+  safeUpdate('obs-tbody', DB.observations.map((o,i)=>`
     <tr><td class="num">${i+1}</td>
     <td class="td-main" style="max-width:260px">${o.text}</td>
     <td>${priPill(o.priority||o.pri||'متوسطة')}</td>
     <td>${o.owner||'–'}</td>
     <td style="font-size:11px">${o.due||'–'}</td>
     <td>${pill(o.status||'معلقة')}</td>
-    <td>${actionBtns('editObs','delObs',o.id)}</td></tr>`).join('');
+    <td>${actionBtns('editObs','delObs',o.id)}</td></tr>`))).join(''));
 }
 
 // ─── Requirements ────────────────────────────────────────────
 function renderReq() {
   const fin = DB.requirements.filter(r=>r.financial==='نعم').length;
-  document.getElementById('req-cnt').textContent = DB.requirements.length;
-  document.getElementById('req-fin-cnt').textContent = fin + ' تحتاج تمويل';
-  document.getElementById('req-tbody').innerHTML = DB.requirements.map((r,i)=>`
+  safeUpdate('req-cnt', DB.requirements.length);
+  safeUpdate('req-fin-cnt', fin + ' تحتاج تمويل');
+  safeUpdate('req-tbody', DB.requirements.map((r,i)=>`
     <tr><td class="num">${i+1}</td>
     <td class="td-main" style="max-width:240px">${r.text}</td>
     <td><span class="badge badge-purple" style="font-size:9px">${r.cat}</span></td>
@@ -1320,12 +1362,12 @@ function renderReq() {
     <td>${r.financial==='نعم'?pill('نعم'):pill('لا')}</td>
     <td>${pill(r.status||'معلق')}</td>
     <td style="font-size:11px">${r.owner||'–'}</td>
-    <td>${actionBtns('editReq','delReq',r.id)}</td></tr>`).join('');
+    <td>${actionBtns('editReq','delReq',r.id)}</td></tr>`))).join(''));
 }
 
 // ─── Team ─────────────────────────────────────────────────────
 function renderTeam() {
-  document.getElementById('team-grid').innerHTML = DB.team.map((t,i)=>`
+  safeUpdate('team-grid', DB.team.map((t,i)=>`
     <div class="team-card">
       <div class="avatar" style="background:${colors[i%colors.length]}22;border-color:${colors[i%colors.length]};color:${colors[i%colors.length]}">${(t.name||'?').charAt(0)}</div>
       <div class="team-info" style="flex:1">
@@ -1338,33 +1380,33 @@ function renderTeam() {
         <button class="btn btn-ghost" style="padding:2px 7px;font-size:9px" onclick="editTeam('${t.id}')">✏️</button>
         <button class="btn btn-danger" style="padding:2px 7px;font-size:9px" onclick="delTeam('${t.id}')">🗑️</button>
       </div>
-    </div>`).join('');
+    </div>`))).join(''));
 }
 
 // ─── Locations ────────────────────────────────────────────────
 function renderLoc() {
-  document.getElementById('loc-perm-grid').innerHTML = DB.locations.map(l=>`
+  safeUpdate('loc-perm-grid', DB.locations.map(l=>`
     <div class="loc-card">
       <div class="loc-name">🏥 ${l.name||''} ${pill(l.status||'معلق')}</div>
       <div class="loc-before">${l.before||''}</div>
       <div class="loc-after">${l.after||''}</div>
       <div style="margin-top:8px;display:flex;gap:4px">${actionBtns('editLoc','delLoc',l.id)}</div>
-    </div>`).join('');
-  document.getElementById('tmp-tbody').innerHTML = DB.tmpChanges.map(t=>`
+    </div>`))).join(''));
+  safeUpdate('tmp-tbody', DB.tmpChanges.map(t=>`
     <tr>
     <td class="td-main">${t.item||''}</td>
     <td style="font-size:11px">${t.loc||''}</td>
     <td style="font-size:11px;color:var(--orange)">${t.change||''}</td>
     <td style="font-size:11px;color:var(--green)">${t.restore||''}</td>
-    <td>${actionBtns('editTmp','delTmp',t.id)}</td></tr>`).join('');
+    <td>${actionBtns('editTmp','delTmp',t.id)}</td></tr>`))).join(''));
 }
 
 // ─── Lectures ─────────────────────────────────────────────────
 function renderLec() {
   const done = DB.lectures.filter(l=>l.done==='نعم').length;
-  document.getElementById('lec-cnt').textContent = DB.lectures.length;
-  document.getElementById('lec-done-cnt').textContent = done + ' منجزة';
-  document.getElementById('lec-tbody').innerHTML = DB.lectures.map((l,i)=>`
+  safeUpdate('lec-cnt', DB.lectures.length;
+  safeUpdate('lec-done-cnt', done + ' منجزة';
+  safeUpdate('lec-tbody', DB.lectures.map((l,i)=>`
     <tr><td class="num">${i+1}</td>
     <td class="td-main">${l.title||''}</td>
     <td style="font-size:11px;color:var(--accent)">${l.speaker||''}</td>
@@ -1372,12 +1414,12 @@ function renderLec() {
     <td style="font-size:11px">${l.date||'–'}</td>
     <td><span class="badge badge-purple" style="font-size:9px">${l.audience||l.aud||''}</span></td>
     <td>${l.done==='نعم'?pill('✅ تمت'):pill('⏳ لم تتم')}</td>
-    <td>${actionBtns('editLec','delLec',l.id)}</td></tr>`).join('');
+    <td>${actionBtns('editLec','delLec',l.id)}</td></tr>`))).join(''));
 }
 
 // ─── Assignments ──────────────────────────────────────────────
 function renderAssign() {
-  document.getElementById('assign-tbody').innerHTML = DB.assignments.map((a,i)=>`
+  safeUpdate('assign-tbody', DB.assignments.map((a,i)=>`
     <tr><td class="num">${i+1}</td>
     <td class="td-main">${a.dept||''}</td>
     <td><span class="badge badge-orange" style="font-size:9px">${a.type||''}</span></td>
@@ -1385,16 +1427,16 @@ function renderAssign() {
     <td style="font-size:11px">${a.time||''}</td>
     <td style="font-size:11px;color:var(--accent)">${a.owner||''}</td>
     <td>${pill(a.status||'معلق')}</td>
-    <td>${actionBtns('editAssign','delAssign',a.id)}</td></tr>`).join('');
+    <td>${actionBtns('editAssign','delAssign',a.id)}</td></tr>`))).join(''));
 }
 
 // ─── Policies ─────────────────────────────────────────────────
 function renderPol() {
   const signed = DB.policies.filter(p=>p.sigStatus==='موقع كامل').length;
-  document.getElementById('pol-cnt').textContent = DB.policies.length;
-  document.getElementById('pol-signed-cnt').textContent = signed + ' موقعة كاملاً';
+  safeUpdate('pol-cnt', DB.policies.length;
+  safeUpdate('pol-signed-cnt', signed + ' موقعة كاملاً';
 
-  document.getElementById('sig-grid').innerHTML = signatories.map(s=>{
+  safeUpdate('sig-grid', signatories.map(s=>{
     const need = DB.policies.filter(p=>p.sigs&&p.sigs.includes(s.title)).length;
     const done = DB.policies.filter(p=>p.sigs&&p.sigs.includes(s.title)&&p.sigStatus==='موقع كامل').length;
     return `<div class="sig-card">
@@ -1402,21 +1444,24 @@ function renderPol() {
       <div class="sig-name">${s.title}</div>
       <div class="sig-count">${done}/${need} سياسة</div>
       ${done===need&&need>0?pill('مكتمل'):done>0?pill('جارٍ'):pill('معلق')}
-    </div>`;}).join('');
+    </div>`;}))).join(''));
 
-  document.getElementById('pol-tbody').innerHTML = DB.policies.map((p,i)=>`
+  safeUpdate('pol-tbody', DB.policies.map((p,i)=>`
     <tr><td class="num">${i+1}</td>
     <td class="td-main">${p.name||''}</td>
     <td style="font-size:11px">${p.dept||''}</td>
     <td>${pill(p.content||'لم تبدأ')}</td>
     <td style="font-size:11px;color:var(--text3)">${p.sigs||''}</td>
     <td>${pill(p.sigStatus||'لم يوقع')}</td>
-    <td>${actionBtns('editPol','delPol',p.id)}</td></tr>`).join('');
+    <td>${actionBtns('editPol','delPol',p.id)}</td></tr>`))).join(''));
 }
 
 // ─── Workflow ─────────────────────────────────────────────────
 function renderWf() {
-  document.getElementById('wf-list').innerHTML = DB.workflow.map((w,i)=>`
+  const el = document.getElementById('wf-list');
+  if (!el) return; // العنصر غير موجود في الصفحة
+  
+  el.innerHTML = DB.workflow.map((w,i)=>`
     <div class="wf-step">
       <div class="wf-num">${i+1}</div>
       <div style="flex:1">
@@ -1425,7 +1470,7 @@ function renderWf() {
         ${w.doc?`<div style="font-size:10px;color:var(--accent);margin-top:3px">📄 ${w.doc}</div>`:''}
       </div>
       ${actionBtns('editWf','delWf',w.id)}
-    </div>`).join('');
+    </div>`))).join(''));
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1433,7 +1478,7 @@ function renderWf() {
 // ═══════════════════════════════════════════════════════════════
 function openObsModal(obs={}) {
   document.getElementById('obs-eid').value = obs.id||'';
-  document.getElementById('m-obs-title').textContent = obs.id ? 'تعديل ملاحظة' : 'إضافة ملاحظة';
+  safeUpdate('m-obs-title', obs.id ? 'تعديل ملاحظة' : 'إضافة ملاحظة';
   document.getElementById('obs-text').value  = obs.text||'';
   document.getElementById('obs-pri').value   = obs.priority||obs.pri||'عالية';
   document.getElementById('obs-owner').value = obs.owner||'';
@@ -1594,11 +1639,11 @@ const SURVEY = new Date('2026-08-20');
 function updateCD() {
   const diff = SURVEY - new Date();
   if(diff<=0){ ['cd-d','cd-h','cd-m','cd-s'].forEach(id=>document.getElementById(id).textContent='0'); return; }
-  document.getElementById('cd-d').textContent = Math.floor(diff/86400000);
-  document.getElementById('cd-h').textContent = String(Math.floor((diff%86400000)/3600000)).padStart(2,'0');
-  document.getElementById('cd-m').textContent = String(Math.floor((diff%3600000)/60000)).padStart(2,'0');
-  document.getElementById('cd-s').textContent = String(Math.floor((diff%60000)/1000)).padStart(2,'0');
-  document.getElementById('k-days').textContent = Math.floor(diff/86400000);
+  safeUpdate('cd-d', Math.floor(diff/86400000);
+  safeUpdate('cd-h', String(Math.floor((diff%86400000)/3600000)).padStart(2,'0');
+  safeUpdate('cd-m', String(Math.floor((diff%3600000)/60000)).padStart(2,'0');
+  safeUpdate('cd-s', String(Math.floor((diff%60000)/1000)).padStart(2,'0');
+  safeUpdate('k-days', Math.floor(diff/86400000);
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1708,7 +1753,7 @@ function renderPolSectionBars() {
         ${inprog>0?`<span style="font-size:10px;background:#FEF3C7;color:#92400E;padding:2px 7px;border-radius:10px">${inprog} جارٍ</span>`:''}
       </div>
     </div>`;
-  }).join('');
+  }))).join(''));
 }
 
 function renderPolSignatories() {
@@ -1729,7 +1774,7 @@ function renderPolSignatories() {
       </div>
       <div style="font-size:10px;color:var(--text3);margin-top:4px">${pct}%</div>
     </div>`;
-  }).join('');
+  }))).join(''));
 }
 
 function renderPolTable() {
@@ -1763,7 +1808,7 @@ function renderPolTable() {
     const sigs = SIG_FIELDS.map(s =>
       `<td style="text-align:center;font-size:14px;cursor:pointer"
         onclick="toggleSig('${p.id}','${s.key}',this)">${p[s.key]||'⬜'}</td>`
-    ).join('');
+    ))).join(''));
 
     // Calculate sigStatus from individual signatures
     const sigsDone = SIG_FIELDS.filter(s => p[s.key]==='✅').length;
@@ -1785,7 +1830,7 @@ function renderPolTable() {
       ${sigs}
       <td style="font-size:10px;color:var(--text3);max-width:100px">${p.notes||''}</td>
     </tr>`;
-  }).join('');
+  }))).join(''));
 }
 
 // ─── Interactions ─────────────────────────────────────────────
@@ -2036,7 +2081,7 @@ function renderProgressDashboard() {
       </div>
       <div style="font-size:10px;color:var(--text3);margin-top:6px">${alert} ${pct < 30 ? 'تأخير حرج' : pct < 60 ? 'يحتاج عمل' : pct < 90 ? 'تقدم جيد' : 'ممتاز'}</div>
     </div>`;
-  }).join('');
+  }))).join(''));
 
   // Update hero
   const total = Math.round(totalWeighted);
@@ -2163,14 +2208,14 @@ function renderPatientFiles() {
         <button class="btn-icon" onclick="deletePatientFile('${p.id}')" title="حذف">🗑️</button>
       </td>
     </tr>`;
-  }).join('');
+  }))).join(''));
   
   // Update summary if latest report exists
   if (DB.patientFiles.length > 0) {
     const latest = DB.patientFiles[DB.patientFiles.length - 1];
-    document.getElementById('pf-total').textContent = latest.total;
-    document.getElementById('pf-complete').textContent = latest.complete;
-    document.getElementById('pf-incomplete').textContent = latest.incomplete;
+    safeUpdate('pf-total', latest.total;
+    safeUpdate('pf-complete', latest.complete;
+    safeUpdate('pf-incomplete', latest.incomplete;
     
     // Update report area
     const reportArea = document.getElementById('pf-report-area');
@@ -2241,9 +2286,9 @@ function updatePatientFileStats() {
     incomplete: acc.incomplete + p.incomplete
   }), {total: 0, complete: 0, incomplete: 0});
   
-  document.getElementById('pf-total').textContent = totals.total;
-  document.getElementById('pf-complete').textContent = totals.complete;
-  document.getElementById('pf-incomplete').textContent = totals.incomplete;
+  safeUpdate('pf-total', totals.total;
+  safeUpdate('pf-complete', totals.complete;
+  safeUpdate('pf-incomplete', totals.incomplete;
   
   toast('✅ تم التحديث', 'success');
 }

@@ -218,7 +218,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
     <div style="max-width:1400px;margin:0 auto;display:flex;align-items:center;justify-content:space-between">
       <div>
         <h1 style="margin:0;font-size:28px;font-weight:900;letter-spacing:-0.5px">صفحة متابعة مشروع اعتماد CBAHI</h1>
-        <p style="margin:6px 0 0;opacity:.85;font-size:14px">APEX CARE Clinics | بريدة </p>
+        <p style="margin:6px 0 0;opacity:.85;font-size:14px">APEX CARE Dental Clinic | بريدة وعنيزة</p>
       </div>
       <div style="text-align:left">
         <div style="font-size:12px;opacity:.7;margin-bottom:4px">الوقت المتوقع لجاهزية المنشأة</div>
@@ -231,7 +231,8 @@ tr:hover td{background:rgba(0,194,255,.03)}
 <!-- HEADER -->
 <div class="header">
   <div class="logo">
-    <div><div class="logo-text"></div><div class="logo-sub"></div></div>
+    <div class="logo-icon">AC</div>
+    <div><div class="logo-text">APEX CARE – أبكس كير</div><div class="logo-sub">CBAHI PROJECT DASHBOARD</div></div>
   </div>
   <div class="header-actions">
     <span class="sync-badge sync-load" id="syncBadge">⟳ جاري الاتصال</span>
@@ -253,17 +254,17 @@ tr:hover td{background:rgba(0,194,255,.03)}
 
 <!-- TABS -->
 <div class="tabs">
-  <button class="tab active" onclick="switchTab('overview')"> نظرة عامة</button>
+  <button class="tab active" onclick="switchTab('overview')">📊 نظرة عامة</button>
   <button class="tab" onclick="switchTab('observations')">الملاحظات</button>
   <button class="tab" onclick="switchTab('requirements')">المتطلبات</button>
   <button class="tab" onclick="switchTab('team')">الفريق</button>
-  <button class="tab" onclick="switchTab('locations')">التعديلات</button>
+  <button class="tab" onclick="switchTab('locations')">الأماكن</button>
   <button class="tab" onclick="switchTab('lectures')">المحاضرات</button>
   <button class="tab" onclick="switchTab('assignments')">التكليفات</button>
   <button class="tab" onclick="switchTab('policies')">السياسات</button>
   <button class="tab" onclick="switchTab('progress')" style="background:linear-gradient(135deg,#10d97e,#0080ff);color:#fff;font-weight:800">لوحة الإنجاز</button>
     <button class="tab" onclick="switchTab('workflow')">المستندات</button>
-    <button class="tab" onclick="switchTab('policies2')"> السياسات الكاملة </button>
+    <button class="tab" onclick="switchTab('policies2')">📜 السياسات الكاملة (106)</button>
     <button class="tab" onclick="switchTab('patient-files')">ملفات المرضى</button>
 </div>
 
@@ -1050,44 +1051,44 @@ const CFG_KEY = 'cbahi_gas_url';
 let GAS_URL = localStorage.getItem(CFG_KEY) || '';
 
 async function callGAS(params) {
-  if (!GAS_URL) {
-    showSettings();
-    throw new Error('أدخل رابط Apps Script');
-  }
-  return new Promise(function(resolve, reject) {
-    const cb  = 'GAS_' + Date.now() + '_' + (Math.random()*1e9|0);
-    const tid = setTimeout(function() {
-      delete window[cb];
-      const el = document.getElementById(cb);
-      if (el) el.remove();
-      reject(new Error('انتهت مهلة الاتصال — تأكد: Who has access = Anyone'));
-    }, 15000);
-    window[cb] = function(data) {
-      clearTimeout(tid);
-      delete window[cb];
-      const el = document.getElementById(cb);
-      if (el) el.remove();
-      if (data && data.error) reject(new Error(data.error));
-      else resolve(data);
+  return new Promise((resolve, reject) => {
+    if (!GAS_URL) {
+      reject(new Error('GAS_URL not configured'));
+      return;
+    }
+    
+    const callback = 'cb_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    const timeout = setTimeout(() => {
+      cleanup();
+      reject(new Error('Request timeout'));
+    }, 10000); // 10 second timeout
+    
+    window[callback] = (data) => {
+      clearTimeout(timeout);
+      cleanup();
+      resolve(data);
     };
-    const p = Object.assign({}, params, { callback: cb });
-    const qs = Object.keys(p).map(function(k) {
-      return encodeURIComponent(k) + '=' +
-        encodeURIComponent(typeof p[k]==='object' ? JSON.stringify(p[k]) : String(p[k]));
-    }).join('&');
-    const s = document.createElement('script');
-    s.id = cb;
-    s.src = GAS_URL + '?' + qs;
-    s.onerror = function() {
-      clearTimeout(tid);
-      delete window[cb];
-      s.remove();
-      reject(new Error('فشل تحميل الاستجابة — تحقق من رابط Apps Script'));
+    
+    function cleanup() {
+      delete window[callback];
+      if (script.parentNode) script.parentNode.removeChild(script);
+    }
+    
+    const script = document.createElement('script');
+    const qs = Object.entries(params)
+      .map(([k,v]) => k + '=' + encodeURIComponent(typeof v === 'object' ? JSON.stringify(v) : v))
+      .join('&');
+    
+    script.src = GAS_URL + '?' + qs + '&callback=' + callback;
+    script.onerror = () => {
+      clearTimeout(timeout);
+      cleanup();
+      reject(new Error('Script load failed'));
     };
-    document.head.appendChild(s);
+    
+    document.head.appendChild(script);
   });
 }
-
 async function gasGet(action, extra) {
   return callGAS(Object.assign({ action }, extra || {}));
 }
@@ -1100,33 +1101,58 @@ async function gasMutate(action, sheet, id, data) {
 }
 
 async function syncAll() {
-  if (isSyncing) return;
-  isSyncing = true;
+  if (!GAS_URL) {
+    toast('⚠️ قم بإعداد رابط Apps Script أولاً', 'error', 3000);
+    openModal('m-settings');
+    return;
+  }
+  
   setSyncStatus('load');
+  toast('🔄 جاري المزامنة...', 'info', 1500);
+  
   try {
-    const d = await gasGet('getData');
-    if (d.error) throw new Error(d.error);
-    ['observations','requirements','team','locations','tmpChanges',
-     'lectures','assignments','policies','workflow','dashboard']
-      .forEach(k => { if (d[k]) DB[k] = d[k]; });
-    renderAll();
-    setSyncStatus('ok');
-    const sb = document.getElementById('lastSyncSb');
-    if (sb) sb.textContent = 'آخر مزامنة: ' + new Date().toLocaleTimeString('ar-SA');
-    // Also populate POLICIES array from DB.policies (for policies2 tab)
-    if (DB.policies && DB.policies.length) {
-      POLICIES = DB.policies;
-      localStorage.setItem('cbahi_policies_v1', JSON.stringify(POLICIES));
-      renderPoliciesTab();
-    }
-    toast('✅ تمت المزامنة', 'success');
-  } catch(e) {
+    // Fetch data in background - don't wait
+    callGAS({ action: 'getData' })
+      .then(data => {
+        if (data && !data.error) {
+          // Update local DB
+          DB.observations = data.observations || [];
+          DB.requirements = data.requirements || [];
+          DB.team = data.team || [];
+          DB.locations = data.locations || [];
+          DB.tmpChanges = data.tmpChanges || [];
+          DB.lectures = data.lectures || [];
+          DB.assignments = data.assignments || [];
+          DB.policies = data.policies || [];
+          DB.workflow = data.workflow || [];
+          DB.patientFiles = data.patientFiles || [];
+          
+          POLICIES = data.policies || [];
+          
+          saveLocal('data', DB);
+          saveLocal('policies', POLICIES);
+          
+          renderAll();
+          setSyncStatus('ok');
+          toast('✅ تمت المزامنة', 'success');
+        } else {
+          throw new Error(data.error || 'Unknown error');
+        }
+      })
+      .catch(err => {
+        console.error('Sync error:', err);
+        setSyncStatus('err');
+        toast('⚠️ فشلت المزامنة - البيانات المحلية محفوظة', 'error', 3000);
+      });
+    
+    // Return immediately - sync happens in background
+    
+  } catch(err) {
+    console.error('Sync error:', err);
     setSyncStatus('err');
-    loadLocalFallback(); renderAll();
-    toast('⚠️ ' + e.message, 'error');
-  } finally { isSyncing = false; }
+    toast('⚠️ فشلت المزامنة', 'error');
+  }
 }
-
 async function apiCall(action, sheetKey, id, data) {
   saveLocal(); setSyncStatus('load');
   try {
@@ -1483,7 +1509,7 @@ async function saveObs() {
   if(id) { const idx=DB.observations.findIndex(o=>String(o.id)===id); DB.observations[idx]={...DB.observations[idx],...obj}; }
   else DB.observations.push(obj);
   renderAll(); closeModal('m-obs');
-  await apiCall(id?'update':'add','observations',obj.id,obj);
+  Promise.resolve(apiCall(id?'update':'add','observations',obj.id,obj);).catch(e => console.error("Sync error:", e));
   toast('✅ تم الحفظ في Google Sheets', 'success');
 }
 
@@ -1492,21 +1518,21 @@ async function saveObs() {
 // ═══════════════════════════════════════════════════════════════
 function editReq(id){ const r=DB.requirements.find(x=>String(x.id)===String(id))||{}; document.getElementById('req-eid').value=r.id||''; document.getElementById('m-req-title').textContent='تعديل متطلب'; document.getElementById('req-text').value=r.text||''; document.getElementById('req-cat').value=r.cat||'سياسات وإجراءات'; document.getElementById('req-pri').value=r.priority||r.pri||'عالية'; document.getElementById('req-cost').value=r.cost||0; document.getElementById('req-fin').value=r.financial||'لا'; document.getElementById('req-stat').value=r.status||'معلق'; document.getElementById('req-owner').value=r.owner||''; openModal('m-req'); }
 async function delReq(id){ if(!confirm('حذف؟')) return; DB.requirements=DB.requirements.filter(r=>String(r.id)!==String(id)); renderAll(); await apiCall('delete','requirements',id); toast('🗑️ تم الحذف','info'); }
-async function saveReq(){ const id=document.getElementById('req-eid').value; const obj={id:id||String(Date.now()),text:document.getElementById('req-text').value,cat:document.getElementById('req-cat').value,priority:document.getElementById('req-pri').value,cost:document.getElementById('req-cost').value,financial:document.getElementById('req-fin').value,status:document.getElementById('req-stat').value,owner:document.getElementById('req-owner').value}; if(id){const idx=DB.requirements.findIndex(r=>String(r.id)===id);DB.requirements[idx]={...DB.requirements[idx],...obj};}else DB.requirements.push(obj); renderAll();closeModal('m-req'); await apiCall(id?'update':'add','requirements',obj.id,obj); toast('✅ تم الحفظ','success'); }
+async function saveReq(){ const id=document.getElementById('req-eid').value; const obj={id:id||String(Date.now()),text:document.getElementById('req-text').value,cat:document.getElementById('req-cat').value,priority:document.getElementById('req-pri').value,cost:document.getElementById('req-cost').value,financial:document.getElementById('req-fin').value,status:document.getElementById('req-stat').value,owner:document.getElementById('req-owner').value}; if(id){const idx=DB.requirements.findIndex(r=>String(r.id)===id);DB.requirements[idx]={...DB.requirements[idx],...obj};}else DB.requirements.push(obj); renderAll();closeModal('m-req'); Promise.resolve(apiCall(id?'update':'add','requirements',obj.id,obj);).catch(e => console.error("Sync error:", e)); toast('✅ تم الحفظ','success'); }
 
 // ═══════════════════════════════════════════════════════════════
 // CRUD — Team
 // ═══════════════════════════════════════════════════════════════
 function editTeam(id){ const t=DB.team.find(x=>String(x.id)===String(id))||{}; document.getElementById('team-eid').value=t.id||''; document.getElementById('team-name').value=t.name||''; document.getElementById('team-role').value=t.role||''; document.getElementById('team-dept').value=t.dept||''; document.getElementById('team-proj').value=t.proj||''; document.getElementById('team-branch').value=t.branch||'بريدة'; openModal('m-team'); }
 async function delTeam(id){ if(!confirm('حذف؟')) return; DB.team=DB.team.filter(t=>String(t.id)!==String(id)); renderAll(); await apiCall('delete','team',id); toast('🗑️ تم الحذف','info'); }
-async function saveTeam(){ const id=document.getElementById('team-eid').value; const obj={id:id||String(Date.now()),name:document.getElementById('team-name').value,role:document.getElementById('team-role').value,dept:document.getElementById('team-dept').value,proj:document.getElementById('team-proj').value,branch:document.getElementById('team-branch').value,participation:'جيدة'}; if(id){const idx=DB.team.findIndex(t=>String(t.id)===id);DB.team[idx]={...DB.team[idx],...obj};}else DB.team.push(obj); renderAll();closeModal('m-team'); await apiCall(id?'update':'add','team',obj.id,obj); toast('✅ تم الحفظ','success'); }
+async function saveTeam(){ const id=document.getElementById('team-eid').value; const obj={id:id||String(Date.now()),name:document.getElementById('team-name').value,role:document.getElementById('team-role').value,dept:document.getElementById('team-dept').value,proj:document.getElementById('team-proj').value,branch:document.getElementById('team-branch').value,participation:'جيدة'}; if(id){const idx=DB.team.findIndex(t=>String(t.id)===id);DB.team[idx]={...DB.team[idx],...obj};}else DB.team.push(obj); renderAll();closeModal('m-team'); Promise.resolve(apiCall(id?'update':'add','team',obj.id,obj);).catch(e => console.error("Sync error:", e)); toast('✅ تم الحفظ','success'); }
 
 // ═══════════════════════════════════════════════════════════════
 // CRUD — Locations & Temp
 // ═══════════════════════════════════════════════════════════════
 function editLoc(id){ const l=DB.locations.find(x=>String(x.id)===String(id))||{}; document.getElementById('loc-eid').value=l.id||''; document.getElementById('loc-name').value=l.name||''; document.getElementById('loc-branch').value=l.branch||'بريدة'; document.getElementById('loc-before').value=l.before||''; document.getElementById('loc-after').value=l.after||''; document.getElementById('loc-stat').value=l.status||'معلق'; document.getElementById('loc-owner').value=l.owner||''; openModal('m-loc'); }
 async function delLoc(id){ if(!confirm('حذف؟')) return; DB.locations=DB.locations.filter(l=>String(l.id)!==String(id)); renderAll(); await apiCall('delete','locations',id); toast('🗑️ تم الحذف','info'); }
-async function saveLoc(){ const id=document.getElementById('loc-eid').value; const obj={id:id||String(Date.now()),name:document.getElementById('loc-name').value,branch:document.getElementById('loc-branch').value,before:document.getElementById('loc-before').value,after:document.getElementById('loc-after').value,status:document.getElementById('loc-stat').value,owner:document.getElementById('loc-owner').value}; if(id){const idx=DB.locations.findIndex(l=>String(l.id)===id);DB.locations[idx]={...DB.locations[idx],...obj};}else DB.locations.push(obj); renderAll();closeModal('m-loc'); await apiCall(id?'update':'add','locations',obj.id,obj); toast('✅ تم الحفظ','success'); }
+async function saveLoc(){ const id=document.getElementById('loc-eid').value; const obj={id:id||String(Date.now()),name:document.getElementById('loc-name').value,branch:document.getElementById('loc-branch').value,before:document.getElementById('loc-before').value,after:document.getElementById('loc-after').value,status:document.getElementById('loc-stat').value,owner:document.getElementById('loc-owner').value}; if(id){const idx=DB.locations.findIndex(l=>String(l.id)===id);DB.locations[idx]={...DB.locations[idx],...obj};}else DB.locations.push(obj); renderAll();closeModal('m-loc'); Promise.resolve(apiCall(id?'update':'add','locations',obj.id,obj);).catch(e => console.error("Sync error:", e)); toast('✅ تم الحفظ','success'); }
 
 function editTmp(id){ const t=DB.tmpChanges.find(x=>String(x.id)===String(id))||{}; document.getElementById('tmp-eid').value=t.id||''; document.getElementById('tmp-item').value=t.item||''; document.getElementById('tmp-loc').value=t.loc||''; document.getElementById('tmp-change').value=t.change||''; document.getElementById('tmp-restore').value=t.restore||''; document.getElementById('tmp-owner').value=t.owner||''; openModal('m-tmp'); }
 async function delTmp(id){ if(!confirm('حذف؟')) return; DB.tmpChanges=DB.tmpChanges.filter(t=>String(t.id)!==String(id)); renderAll(); await apiCall('delete','tmpChanges',id); toast('🗑️ تم الحذف','info'); }
@@ -1517,14 +1543,14 @@ async function saveTmp(){ const id=document.getElementById('tmp-eid').value; con
 // ═══════════════════════════════════════════════════════════════
 function editLec(id){ const l=DB.lectures.find(x=>String(x.id)===String(id))||{}; document.getElementById('lec-eid').value=l.id||''; document.getElementById('lec-title').value=l.title||''; document.getElementById('lec-speaker').value=l.speaker||''; document.getElementById('lec-alt').value=l.alt||''; document.getElementById('lec-date').value=l.date||''; document.getElementById('lec-time').value=l.time||''; document.getElementById('lec-aud').value=l.audience||l.aud||'جميع الموظفين'; document.getElementById('lec-done').value=l.done||'لا'; openModal('m-lec'); }
 async function delLec(id){ if(!confirm('حذف؟')) return; DB.lectures=DB.lectures.filter(l=>String(l.id)!==String(id)); renderAll(); await apiCall('delete','lectures',id); toast('🗑️ تم الحذف','info'); }
-async function saveLec(){ const id=document.getElementById('lec-eid').value; const obj={id:id||String(Date.now()),title:document.getElementById('lec-title').value,speaker:document.getElementById('lec-speaker').value,alt:document.getElementById('lec-alt').value,date:document.getElementById('lec-date').value,time:document.getElementById('lec-time').value,audience:document.getElementById('lec-aud').value,done:document.getElementById('lec-done').value}; if(id){const idx=DB.lectures.findIndex(l=>String(l.id)===id);DB.lectures[idx]={...DB.lectures[idx],...obj};}else DB.lectures.push(obj); renderAll();closeModal('m-lec'); await apiCall(id?'update':'add','lectures',obj.id,obj); toast('✅ تم الحفظ','success'); }
+async function saveLec(){ const id=document.getElementById('lec-eid').value; const obj={id:id||String(Date.now()),title:document.getElementById('lec-title').value,speaker:document.getElementById('lec-speaker').value,alt:document.getElementById('lec-alt').value,date:document.getElementById('lec-date').value,time:document.getElementById('lec-time').value,audience:document.getElementById('lec-aud').value,done:document.getElementById('lec-done').value}; if(id){const idx=DB.lectures.findIndex(l=>String(l.id)===id);DB.lectures[idx]={...DB.lectures[idx],...obj};}else DB.lectures.push(obj); renderAll();closeModal('m-lec'); Promise.resolve(apiCall(id?'update':'add','lectures',obj.id,obj);).catch(e => console.error("Sync error:", e)); toast('✅ تم الحفظ','success'); }
 
 // ═══════════════════════════════════════════════════════════════
 // CRUD — Assignments
 // ═══════════════════════════════════════════════════════════════
 function editAssign(id){ const a=DB.assignments.find(x=>String(x.id)===String(id))||{}; document.getElementById('assign-eid').value=a.id||''; document.getElementById('assign-dept').value=a.dept||''; document.getElementById('assign-type').value=a.type||'تكليف رسمي موثق'; document.getElementById('assign-reason').value=a.reason||''; document.getElementById('assign-time').value=a.time||''; document.getElementById('assign-owner').value=a.owner||''; document.getElementById('assign-stat').value=a.status||'معلق'; openModal('m-assign'); }
 async function delAssign(id){ if(!confirm('حذف؟')) return; DB.assignments=DB.assignments.filter(a=>String(a.id)!==String(id)); renderAll(); await apiCall('delete','assignments',id); toast('🗑️ تم الحذف','info'); }
-async function saveAssign(){ const id=document.getElementById('assign-eid').value; const obj={id:id||String(Date.now()),dept:document.getElementById('assign-dept').value,type:document.getElementById('assign-type').value,reason:document.getElementById('assign-reason').value,time:document.getElementById('assign-time').value,owner:document.getElementById('assign-owner').value,status:document.getElementById('assign-stat').value}; if(id){const idx=DB.assignments.findIndex(a=>String(a.id)===id);DB.assignments[idx]={...DB.assignments[idx],...obj};}else DB.assignments.push(obj); renderAll();closeModal('m-assign'); await apiCall(id?'update':'add','assignments',obj.id,obj); toast('✅ تم الحفظ','success'); }
+async function saveAssign(){ const id=document.getElementById('assign-eid').value; const obj={id:id||String(Date.now()),dept:document.getElementById('assign-dept').value,type:document.getElementById('assign-type').value,reason:document.getElementById('assign-reason').value,time:document.getElementById('assign-time').value,owner:document.getElementById('assign-owner').value,status:document.getElementById('assign-stat').value}; if(id){const idx=DB.assignments.findIndex(a=>String(a.id)===id);DB.assignments[idx]={...DB.assignments[idx],...obj};}else DB.assignments.push(obj); renderAll();closeModal('m-assign'); Promise.resolve(apiCall(id?'update':'add','assignments',obj.id,obj);).catch(e => console.error("Sync error:", e)); toast('✅ تم الحفظ','success'); }
 
 // ═══════════════════════════════════════════════════════════════
 // CRUD — Policies
@@ -2310,6 +2336,52 @@ renderAll = function() {
   _origRenderAll2();
   renderPatientFiles();
 };
+
+
+
+// ════════════════════════════════════════════════════════════════
+// AUTO-SYNC WITH DEBOUNCING
+// ════════════════════════════════════════════════════════════════
+let syncTimeout = null;
+let pendingChanges = [];
+
+function queueSync(action, sheet, id, data) {
+  if (!GAS_URL) return;
+  
+  pendingChanges.push({ action, sheet, id, data, timestamp: Date.now() });
+  
+  // Debounce - wait 2 seconds after last change
+  clearTimeout(syncTimeout);
+  syncTimeout = setTimeout(() => {
+    flushSyncQueue();
+  }, 2000);
+}
+
+function flushSyncQueue() {
+  if (!pendingChanges.length || !GAS_URL) return;
+  
+  const changes = [...pendingChanges];
+  pendingChanges = [];
+  
+  // Send all changes in background
+  changes.forEach(change => {
+    callGAS({
+      action: change.action,
+      sheet: change.sheet,
+      id: change.id,
+      data: change.data
+    }).catch(err => {
+      console.error('Background sync error:', err);
+      // Re-queue failed changes
+      pendingChanges.push(change);
+    });
+  });
+}
+
+// Flush queue before page unload
+window.addEventListener('beforeunload', () => {
+  flushSyncQueue();
+});
 
 </script>
 </body>

@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CBAHI – أبكس كير | لوحة تحكم مشروع الاعتماد</title>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
 <style>
 
@@ -217,7 +218,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
     <div style="max-width:1400px;margin:0 auto;display:flex;align-items:center;justify-content:space-between">
       <div>
         <h1 style="margin:0;font-size:28px;font-weight:900;letter-spacing:-0.5px">صفحة متابعة مشروع اعتماد CBAHI</h1>
-        <p style="margin:6px 0 0;opacity:.85;font-size:14px">APEX CARE ClinicS | بريدة </p>
+        <p style="margin:6px 0 0;opacity:.85;font-size:14px">APEX CARE Clinics | بريدة </p>
       </div>
       <div style="text-align:left">
         <div style="font-size:12px;opacity:.7;margin-bottom:4px">الوقت المتوقع لجاهزية المنشأة</div>
@@ -230,10 +231,11 @@ tr:hover td{background:rgba(0,194,255,.03)}
 <!-- HEADER -->
 <div class="header">
   <div class="logo">
+    <div><div class="logo-text"></div><div class="logo-sub"></div></div>
   </div>
   <div class="header-actions">
     <span class="sync-badge sync-load" id="syncBadge">⟳ جاري الاتصال</span>
-    <button class="btn btn-ghost" onclick="syncAll()">🔄 مزامنة البيانات لعرضها على اللوحة</button>
+    <button class="btn btn-ghost" onclick="syncAll()">🔄 مزامنة</button>
     <button class="btn btn-gold" onclick="window.print()">🖨️</button>
   </div>
 </div>
@@ -242,7 +244,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
 <div class="status-bar">
   <div class="sb-item"><div class="sb-dot" id="apiDot" style="background:var(--gold);animation:pulse 1s infinite"></div><span id="apiStatus">جاري الاتصال بـ Google Sheets...</span></div>
   <div class="sb-item">📅 تاريخ البداية: <strong>10/02/2026</strong></div>
-  <div class="sb-item">🎯 الوقت المتوقع لجاهزية المنشأة: <strong style="color:var(--gold)">20/07/2026</strong></div>
+  <div class="sb-item">🎯 الوقت المتوقع لجاهزية المنشأة: <strong style="color:var(--gold)">20/08/2026</strong></div>
   <div class="sb-item" id="lastSyncSb">آخر مزامنة: –</div>
   <div class="sb-item" style="margin-right:auto">
     <button class="btn btn-ghost" style="padding:3px 10px;font-size:10px" onclick="showSettings()">⚙️ إعدادات الاتصال</button>
@@ -251,18 +253,18 @@ tr:hover td{background:rgba(0,194,255,.03)}
 
 <!-- TABS -->
 <div class="tabs">
-  <button class="tab active" onclick="switchTab('overview')">نظرة عامة</button>
+  <button class="tab active" onclick="switchTab('overview')"> نظرة عامة</button>
   <button class="tab" onclick="switchTab('observations')">الملاحظات</button>
   <button class="tab" onclick="switchTab('requirements')">المتطلبات</button>
   <button class="tab" onclick="switchTab('team')">الفريق</button>
   <button class="tab" onclick="switchTab('locations')">التعديلات</button>
   <button class="tab" onclick="switchTab('lectures')">المحاضرات</button>
   <button class="tab" onclick="switchTab('assignments')">التكليفات</button>
-  <button class="tab" onclick="switchTab('policies')">توقيع السياسات</button>
+  <button class="tab" onclick="switchTab('policies')">السياسات</button>
   <button class="tab" onclick="switchTab('progress')" style="background:linear-gradient(135deg,#10d97e,#0080ff);color:#fff;font-weight:800">لوحة الإنجاز</button>
     <button class="tab" onclick="switchTab('workflow')">المستندات</button>
     <button class="tab" onclick="switchTab('policies2')"> السياسات الكاملة </button>
-    <button class="tab" onclick="switchTab('patient-files')"> ملفات المرضى المكتملة</button>
+    <button class="tab" onclick="switchTab('patient-files')">ملفات المرضى</button>
 </div>
 
 <div class="main">
@@ -271,7 +273,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
 <div class="pane active" id="pane-overview">
   <div class="kpi-grid">
     <div class="kpi blue"><div class="kpi-lbl">نسبة الإنجاز الكلية</div><div class="kpi-val" id="k-overall">–</div><div class="pbar"><div class="pfill blue" id="pf-overall" style="width:0%"></div></div><div class="kpi-sub">متوسط جميع الأقسام</div></div>
-    <div class="kpi gold"><div class="kpi-lbl">الأيام المتبقية</div><div class="kpi-val" id="k-days">–</div><div class="kpi-sub">حتى 01 أغسطس 2026</div></div>
+    <div class="kpi gold"><div class="kpi-lbl">الأيام المتبقية</div><div class="kpi-val" id="k-days">–</div><div class="kpi-sub">حتى 01 يوليو 2026</div></div>
     <div class="kpi green"><div class="kpi-lbl">ملاحظات محلولة</div><div class="kpi-val" id="k-obs">–</div><div class="pbar"><div class="pfill green" id="pf-obs" style="width:0%"></div></div><div class="kpi-sub" id="k-obs-sub">من 0</div></div>
     <div class="kpi red"><div class="kpi-lbl">متطلبات تحتاج تمويل</div><div class="kpi-val" id="k-fin">–</div><div class="kpi-sub" id="k-cost">التكلفة: –</div></div>
   </div>
@@ -305,7 +307,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
   <div class="info-bar">ℹ️ جميع التعديلات تُحفظ تلقائياً في Google Sheets وتظهر فوراً</div>
   <div class="tcard">
     <div class="tcard-hdr">
-      <div class="tcard-title"> الملاحظات <span class="badge badge-blue" id="obs-cnt">0</span></div>
+      <div class="tcard-title">📋 الملاحظات <span class="badge badge-blue" id="obs-cnt">0</span></div>
       <div style="display:flex;gap:6px"><span class="badge badge-green" id="obs-solved">0 محلولة</span><span class="badge badge-red" id="obs-pend">0 معلقة</span></div>
     </div>
     <div class="tscroll">
@@ -326,7 +328,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
   </div>
   <div class="tcard">
     <div class="tcard-hdr">
-      <div class="tcard-title"> المتطلبات <span class="badge badge-blue" id="req-cnt">0</span></div>
+      <div class="tcard-title">📌 المتطلبات <span class="badge badge-blue" id="req-cnt">0</span></div>
       <span class="badge badge-gold" id="req-fin-cnt">0 تحتاج تمويل</span>
     </div>
     <div class="tscroll">
@@ -382,14 +384,14 @@ tr:hover td{background:rgba(0,194,255,.03)}
 <!-- ═══ LECTURES ═══ -->
 <div class="pane" id="pane-lectures">
   <div class="sec-hdr">
-    <div class="sec-icon" style="background:rgba(240,180,41,.1)"></div>
-    <div class="sec-title">المحاضرات التدريبية المجدولة</div>
+    <div class="sec-icon" style="background:rgba(240,180,41,.1)">🎓</div>
+    <div class="sec-title">المحاضرات المجدولة</div>
     <div class="sec-line"></div>
     <button class="btn btn-primary" onclick="openModal('m-lec')">+ إضافة</button>
   </div>
   <div class="tcard">
     <div class="tcard-hdr">
-      <div class="tcard-title"> المحاضرات <span class="badge badge-blue" id="lec-cnt">0</span></div>
+      <div class="tcard-title">🎓 المحاضرات <span class="badge badge-blue" id="lec-cnt">0</span></div>
       <span class="badge badge-green" id="lec-done-cnt">0 منجزة</span>
     </div>
     <div class="tscroll">
@@ -420,7 +422,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
 <!-- ═══ POLICIES ═══ -->
 <div class="pane" id="pane-policies">
   <div class="sec-hdr">
-    <div class="sec-icon" style="background:rgba(0,194,255,.1)">.</div>
+    <div class="sec-icon" style="background:rgba(0,194,255,.1)">📜</div>
     <div class="sec-title">السياسات والموقعون</div>
     <div class="sec-line"></div>
     <button class="btn btn-primary" onclick="openModal('m-pol')">+ إضافة</button>
@@ -428,7 +430,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
   <div class="sig-grid" id="sig-grid"></div>
   <div class="tcard">
     <div class="tcard-hdr">
-      <div class="tcard-title"> السياسات <span class="badge badge-blue" id="pol-cnt">0</span></div>
+      <div class="tcard-title">📄 السياسات <span class="badge badge-blue" id="pol-cnt">0</span></div>
       <span class="badge badge-green" id="pol-signed-cnt">0 موقعة كاملاً</span>
     </div>
     <div class="tscroll">
@@ -444,7 +446,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
   
   <!-- Header -->
   <div style="background:linear-gradient(135deg,#7C3AED,#0080FF);border-radius:12px;padding:24px;margin-bottom:20px;color:white">
-    <h2 style="margin:0 0 8px;font-size:24px;font-weight:900"> المستندات</h2>
+    <h2 style="margin:0 0 8px;font-size:24px;font-weight:900">📁 المستندات</h2>
     <p style="margin:0;opacity:.9;font-size:13px">إدارة روابط المستندات والملفات المهمة للمشروع</p>
   </div>
 
@@ -643,9 +645,9 @@ tr:hover td{background:rgba(0,194,255,.03)}
       <div id="total-progress-bar" style="height:100%;width:0%;background:linear-gradient(90deg,#0080ff,#10d97e,#00c2ff);border-radius:7px;transition:width 1.2s ease;box-shadow:0 0 20px rgba(16,217,126,.5)"></div>
     </div>
     <div style="display:flex;gap:24px;justify-content:center;margin-top:18px;flex-wrap:wrap">
-      <div><span style="color:var(--text3);font-size:11px"> الأيام المتبقية</span> <strong id="prog-days" style="color:var(--gold);font-size:18px;margin-right:8px">–</strong></div>
-      <div><span style="color:var(--text3);font-size:11px"> الوقت المتوقع لجاهزية المنشأة</span> <strong style="color:var(--accent);font-size:14px;margin-right:8px">20/08/2026</strong></div>
-      <div><span style="color:var(--text3);font-size:11px"> تاريخ البداية</span> <strong style="color:var(--text2);font-size:14px;margin-right:8px">10/02/2026</strong></div>
+      <div><span style="color:var(--text3);font-size:11px">⏰ الأيام المتبقية</span> <strong id="prog-days" style="color:var(--gold);font-size:18px;margin-right:8px">–</strong></div>
+      <div><span style="color:var(--text3);font-size:11px">📅 الوقت المتوقع لجاهزية المنشأة</span> <strong style="color:var(--accent);font-size:14px;margin-right:8px">20/08/2026</strong></div>
+      <div><span style="color:var(--text3);font-size:11px">🚀 تاريخ البداية</span> <strong style="color:var(--text2);font-size:14px;margin-right:8px">10/02/2026</strong></div>
     </div>
   </div>
 
@@ -666,11 +668,11 @@ tr:hover td{background:rgba(0,194,255,.03)}
   </div>
 
   <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px">
-    <button class="btn btn-primary" style="padding:14px;font-size:13px" onclick="switchTab('policies2')"> إدارة السياسات (106)</button>
-    <button class="btn btn-ghost" style="padding:14px;font-size:13px" onclick="switchTab('observations')"> إدارة الملاحظات</button>
-    <button class="btn btn-ghost" style="padding:14px;font-size:13px" onclick="switchTab('requirements')"> إدارة المتطلبات</button>
-    <button class="btn btn-ghost" style="padding:14px;font-size:13px" onclick="switchTab('lectures')"> المحاضرات</button>
-    <button class="btn btn-ghost" style="padding:14px;font-size:13px" onclick="openExtras()"> رخص وعقود ومستندات</button>
+    <button class="btn btn-primary" style="padding:14px;font-size:13px" onclick="switchTab('policies2')">📜 إدارة السياسات (106)</button>
+    <button class="btn btn-ghost" style="padding:14px;font-size:13px" onclick="switchTab('observations')">🔍 إدارة الملاحظات</button>
+    <button class="btn btn-ghost" style="padding:14px;font-size:13px" onclick="switchTab('requirements')">📋 إدارة المتطلبات</button>
+    <button class="btn btn-ghost" style="padding:14px;font-size:13px" onclick="switchTab('lectures')">🎓 المحاضرات</button>
+    <button class="btn btn-ghost" style="padding:14px;font-size:13px" onclick="openExtras()">📂 رخص وعقود ومستندات</button>
     <button class="btn btn-gold" style="padding:14px;font-size:13px" onclick="syncAll()">🔄 مزامنة كل البيانات</button>
   </div>
 </div>
@@ -678,11 +680,11 @@ tr:hover td{background:rgba(0,194,255,.03)}
 <!-- Extras Modal — رخص / عقود / مستندات / موظفين -->
 <div class="overlay" id="m-extras">
   <div class="modal" style="max-width:600px">
-    <h3> الرخص والعقود والمستندات</h3>
+    <h3>📂 الرخص والعقود والمستندات</h3>
     <div class="info-bar">💡 سجل الإنجاز السريع لكل بند يدخل في النسبة الإجمالية</div>
 
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px">
-      <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:10px"> الرخص والعقود</div>
+      <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:10px">📜 الرخص والعقود</div>
       <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px">
         <div class="fg"><label>رخصة البلدية</label>
           <select id="ex-lic-baladiya"><option value="0">❌</option><option value="1">✅</option></select></div>
@@ -699,7 +701,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
       </div>
     </div>
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px">
-      <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:10px"> العقود السارية</div>
+      <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:10px">📝 العقود السارية</div>
       <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px">
         <div class="fg"><label>عقد النفايات الطبية</label>
           <select id="ex-cnt-waste"><option value="0">❌</option><option value="1">✅</option></select></div>
@@ -712,7 +714,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
       </div>
     </div>
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px">
-      <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:10px"> الاتفاقيات الطبية</div>
+      <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:10px">🤝 الاتفاقيات الطبية</div>
       <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px">
         <div class="fg"><label>اتفاقية CPR (إنعاش)</label>
           <select id="ex-agr-cpr"><option value="0">❌</option><option value="1">✅</option></select></div>
@@ -805,7 +807,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
 <!-- Team Modal -->
 <div class="overlay" id="m-team">
   <div class="modal">
-    <h3> إضافة عضو</h3>
+    <h3>👥 إضافة عضو</h3>
     <input type="hidden" id="team-eid">
     <div class="fg"><label>الاسم</label><input type="text" id="team-name" placeholder="الاسم"></div>
     <div class="fg"><label>المسمى الوظيفي</label><input type="text" id="team-role" placeholder="المسمى"></div>
@@ -857,7 +859,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
 <!-- Lecture Modal -->
 <div class="overlay" id="m-lec">
   <div class="modal">
-    <h3> إضافة محاضرة</h3>
+    <h3>🎓 إضافة محاضرة</h3>
     <input type="hidden" id="lec-eid">
     <div class="fg"><label>عنوان المحاضرة</label><input type="text" id="lec-title" placeholder="عنوان المحاضرة"></div>
     <div class="fg"><label>الملقي الأساسي</label><input type="text" id="lec-speaker" placeholder="الاسم"></div>
@@ -878,7 +880,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
 <!-- Assignment Modal -->
 <div class="overlay" id="m-assign">
   <div class="modal">
-    <h3> إضافة تكليف</h3>
+    <h3>📌 إضافة تكليف</h3>
     <input type="hidden" id="assign-eid">
     <div class="fg"><label>القسم</label><input type="text" id="assign-dept" placeholder="القسم"></div>
     <div class="fg"><label>نوع التكليف</label><select id="assign-type">
@@ -899,7 +901,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
 <!-- Policy Modal -->
 <div class="overlay" id="m-pol">
   <div class="modal">
-    <h3> إضافة سياسة</h3>
+    <h3>📜 إضافة سياسة</h3>
     <input type="hidden" id="pol-eid">
     <div class="fg"><label>اسم السياسة</label><input type="text" id="pol-name" placeholder="اسم السياسة"></div>
     <div class="fg"><label>القسم</label><input type="text" id="pol-dept" placeholder="القسم المعني"></div>
@@ -916,7 +918,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
 <!-- Workflow Modal -->
 <div class="overlay" id="m-wf">
   <div class="modal">
-    <h3> إضافة مستند</h3>
+    <h3>🔄 إضافة خطوة</h3>
     <input type="hidden" id="wf-eid">
     <div class="fg"><label>عنوان المستند</label><input type="text" id="wf-title-in" placeholder="عنوان المستند"></div>
     <div class="fg"><label>وصف المستند</label><textarea id="wf-desc-in" rows="3" placeholder="التفاصيل..."></textarea></div>
@@ -980,59 +982,14 @@ function closeModal(id) {
 }
 
 function switchTab(id) {
-  document.querySelectorAll('.tab').forEach(function(b){ b.classList.remove('active'); });
-  document.querySelectorAll('.pane').forEach(function(p){ p.classList.remove('active'); });
-  const btn = document.querySelector('[onclick="switchTab(\''+id+'\')"]');
-  if (btn) btn.classList.add('active');
-  const pane = document.getElementById('pane-'+id);
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.pane').forEach(p => p.classList.remove('active'));
+  const tab = document.querySelector(`button.tab[onclick*="${id}"]`);
+  const pane = document.getElementById('pane-' + id);
+  if (tab) tab.classList.add('active');
   if (pane) pane.classList.add('active');
 }
 
-// Close modals on overlay click
-document.addEventListener('DOMContentLoaded', function() {
-  document.querySelectorAll('.overlay').forEach(function(el) {
-    el.addEventListener('click', function(e) {
-      if (e.target === el) el.classList.remove('open');
-    });
-  });
-});
-
-
-let DB = {
-  observations:[], requirements:[], team:[],
-  locations:[], tmpChanges:[], lectures:[],
-  assignments:[], policies:[], workflow:[],
-  dashboard: null
-};
-let isSyncing = false;
-let POLICIES = [];
-let POL_STATS = null;
-let POL_FILTER_SEC = 'ALL';
-let POL_FILTER_STATUS = 'ALL';
-let POL_SEARCH = '';
-const SECTIONS_META = {
-  IPC:  { label:'IPC – مكافحة العدوى',    color:'#0D9488', light:'#CCFBF1', count:28 },
-  PC:   { label:'PC – رعاية المرضى',       color:'#0080FF', light:'#D6E8FF', count:11 },
-  LD:   { label:'LD – القيادة',            color:'#7C3AED', light:'#EDE9FE', count:23 },
-  MOI:  { label:'MOI – إدارة المعلومات',   color:'#F97316', light:'#FFEDD5', count:9  },
-  FMS:  { label:'FMS – السلامة والمنشآت',  color:'#EF4444', light:'#FEE2E2', count:36 },
-};
-const SIG_FIELDS = [
-  { key:'sig_quality', label:'مدير الجودة',      color:'#0D9488' },
-  { key:'sig_medical', label:'مدير طبي',          color:'#10B981' },
-  { key:'sig_branch',  label:'مدير الفرع',        color:'#7C3AED' },
-  { key:'sig_nursing', label:'رئيسة التمريض',     color:'#F59E0B' },
-  { key:'sig_hr',      label:'مدير الموارد',      color:'#F97316' },
-  { key:'sig_safety',  label:'مهندس السلامة',     color:'#EF4444' },
-  { key:'sig_ceo',     label:'الرئيس التنفيذي',   color:'#0D1F3C' },
-];
-
-
-
-// ════════════════════════════════════════════════════════════════
-// DOCUMENTS UPLOAD SUPPORT
-// ════════════════════════════════════════════════════════════════
-let selectedFile = null;
 
 function switchUploadMethod(method) {
   // Update buttons
@@ -1071,38 +1028,11 @@ function handleFileSelected(input) {
   }
 }
 
-async function uploadToGoogleDrive(file, category) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    
-    reader.onload = async function(e) {
-      const base64Data = e.target.result.split(',')[1];
-      
-      try {
-        const result = await callGAS({
-          action: 'uploadFile',
-          fileData: JSON.stringify({
-            fileName: file.name,
-            fileData: base64Data,
-            mimeType: file.type,
-            category: category
-          })
-        });
-        
-        if (result.success) {
-          resolve(result);
-        } else {
-          reject(new Error(result.error || 'Upload failed'));
-        }
-      } catch(err) {
-        reject(err);
-      }
-    };
-    
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}  
+async function uploadToGoogleDrive(file, folderName) {
+  // This would require Google Drive API integration
+  // For now, return a placeholder
+  toast('⚠️ رفع Google Drive يتطلب إعداد API', 'info', 3000);
+  
   // Placeholder - في الواقع يجب استخدام Google Drive API
   return {
     success: false,

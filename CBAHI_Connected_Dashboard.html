@@ -248,7 +248,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
   <button class="tab" onclick="switchTab('assignments')">📌 التكليفات</button>
   <button class="tab" onclick="switchTab('policies')">📜 السياسات</button>
   <button class="tab" onclick="switchTab('progress')" style="background:linear-gradient(135deg,#10d97e,#0080ff);color:#fff;font-weight:800">🎯 لوحة الإنجاز الكلي</button>
-    <button class="tab" onclick="switchTab('workflow')">🔄 الورك فلو</button>
+    <button class="tab" onclick="switchTab('workflow')">📁 المستندات</button>
     <button class="tab" onclick="switchTab('policies2')">📜 السياسات الكاملة (106)</button>
 </div>
 
@@ -1417,9 +1417,19 @@ async function savePol(){ const id=document.getElementById('pol-eid').value; con
 // ═══════════════════════════════════════════════════════════════
 // CRUD — Workflow
 // ═══════════════════════════════════════════════════════════════
-function editWf(id){ const w=DB.workflow.find(x=>String(x.id)===String(id))||{}; document.getElementById('wf-eid').value=w.id||''; document.getElementById('wf-title-in').value=w.title||''; document.getElementById('wf-desc-in').value=w.desc||''; document.getElementById('wf-doc-in').value=w.doc||''; document.getElementById('wf-owner-in').value=w.owner||''; openModal('m-wf'); }
+function editWf(id){
+  const w=DB.workflow.find(x=>String(x.id)===id);
+  if(!w) return;
+  document.getElementById('wf-eid').value=w.id||'';
+  document.getElementById('wf-title-in').value=w.title||'';
+  document.getElementById('wf-doc-in').value=w.doc||'';
+  document.getElementById('wf-cat-in').value=w.category||'أخرى';
+  document.getElementById('wf-desc-in').value=w.desc||'';
+  document.getElementById('wf-owner-in').value=w.owner||'';
+  openModal('m-add-wf');
+}
 async function delWf(id){ if(!confirm('حذف؟')) return; DB.workflow=DB.workflow.filter(w=>String(w.id)!==String(id)); renderAll(); await apiCall('delete','workflow',id); toast('🗑️ تم الحذف','info'); }
-async function saveWf(){ const id=document.getElementById('wf-eid').value; const obj={id:id||String(Date.now()),title:document.getElementById('wf-title-in').value,desc:document.getElementById('wf-desc-in').value,doc:document.getElementById('wf-doc-in').value,owner:document.getElementById('wf-owner-in').value}; if(id){const idx=DB.workflow.findIndex(w=>String(w.id)===id);DB.workflow[idx]={...DB.workflow[idx],...obj};}else DB.workflow.push(obj); renderAll();closeModal('m-wf'); await apiCall(id?'update':'add','workflow',obj.id,obj); toast('✅ تم الحفظ','success'); }
+async function saveWf(){ const id=document.getElementById('wf-eid').value; const obj={id:id||String(Date.now()),title:document.getElementById('wf-title-in').value,doc:document.getElementById('wf-doc-in').value,category:document.getElementById('wf-cat-in').value,desc:document.getElementById('wf-desc-in').value,owner:document.getElementById('wf-owner-in').value}; if(id){const idx=DB.workflow.findIndex(w=>String(w.id)===id);DB.workflow[idx]={...DB.workflow[idx],...obj};}else DB.workflow.push(obj); renderAll();closeModal('m-wf'); await apiCall(id?'update':'add','workflow',obj.id,obj); toast('✅ تم الحفظ','success'); }
 
 // ═══════════════════════════════════════════════════════════════
 // COUNTDOWN

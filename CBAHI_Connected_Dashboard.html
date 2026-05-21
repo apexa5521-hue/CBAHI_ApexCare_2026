@@ -1061,7 +1061,7 @@ async function callGAS(params) {
     const timeout = setTimeout(() => {
       cleanup();
       reject(new Error('Request timeout'));
-    }, 10000); // 10 second timeout
+    }, 10000);
     
     window[callback] = (data) => {
       clearTimeout(timeout);
@@ -1071,7 +1071,9 @@ async function callGAS(params) {
     
     function cleanup() {
       delete window[callback];
-      if (script.parentNode) script.parentNode.removeChild(script);
+      if (script && script.parentNode) {
+        script.parentNode.removeChild(script);
+      }
     }
     
     const script = document.createElement('script');
@@ -1089,6 +1091,8 @@ async function callGAS(params) {
     document.head.appendChild(script);
   });
 }
+
+
 async function gasGet(action, extra) {
   return callGAS(Object.assign({ action }, extra || {}));
 }

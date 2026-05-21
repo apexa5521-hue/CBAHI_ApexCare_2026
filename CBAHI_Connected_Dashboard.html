@@ -213,6 +213,21 @@ tr:hover td{background:rgba(0,194,255,.03)}
 </style>
 </head>
 <body>
+  <!-- Professional Header -->
+  <div style="background:linear-gradient(135deg,#0D1F3C,#1A3560);color:white;padding:24px 40px;box-shadow:0 4px 12px rgba(0,0,0,.15)">
+    <div style="max-width:1400px;margin:0 auto;display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <h1 style="margin:0;font-size:28px;font-weight:900;letter-spacing:-0.5px">صفحة متابعة مشروع اعتماد CBAHI</h1>
+        <p style="margin:6px 0 0;opacity:.85;font-size:14px">APEX CARE Dental Clinic | بريدة وعنيزة</p>
+      </div>
+      <div style="text-align:left">
+        <div style="font-size:12px;opacity:.7;margin-bottom:4px">الوقت المتوقع لجاهزية المنشأة</div>
+        <div style="font-size:22px;font-weight:800;font-family:Cairo,sans-serif">20 أغسطس 2026</div>
+      </div>
+    </div>
+  </div>
+
+
 <!-- HEADER -->
 <div class="header">
   <div class="logo">
@@ -221,7 +236,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
   </div>
   <div class="header-actions">
     <span class="sync-badge sync-load" id="syncBadge">⟳ جاري الاتصال</span>
-    <button class="btn btn-ghost" onclick="syncAll()">🔄 مزامنة</button>
+    <button class="btn btn-ghost" onclick="syncAll()">🔄 مزامنة البيانات لعرضها على اللوحة</button>
     <button class="btn btn-gold" onclick="window.print()">🖨️</button>
   </div>
 </div>
@@ -230,7 +245,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
 <div class="status-bar">
   <div class="sb-item"><div class="sb-dot" id="apiDot" style="background:var(--gold);animation:pulse 1s infinite"></div><span id="apiStatus">جاري الاتصال بـ Google Sheets...</span></div>
   <div class="sb-item">📅 تاريخ البداية: <strong>10/02/2026</strong></div>
-  <div class="sb-item">🎯 الوقت المتوقع لجاهزية المنشأة: <strong style="color:var(--gold)">20/08/2026</strong></div>
+  <div class="sb-item">🎯 الوقت المتوقع لجاهزية المنشأة: <strong style="color:var(--gold)">20/07/2026</strong></div>
   <div class="sb-item" id="lastSyncSb">آخر مزامنة: –</div>
   <div class="sb-item" style="margin-right:auto">
     <button class="btn btn-ghost" style="padding:3px 10px;font-size:10px" onclick="showSettings()">⚙️ إعدادات الاتصال</button>
@@ -239,18 +254,18 @@ tr:hover td{background:rgba(0,194,255,.03)}
 
 <!-- TABS -->
 <div class="tabs">
-  <button class="tab active" onclick="switchTab('overview')">📊 نظرة عامة</button>
-  <button class="tab" onclick="switchTab('observations')">🔍 الملاحظات</button>
-  <button class="tab" onclick="switchTab('requirements')">📋 المتطلبات</button>
-  <button class="tab" onclick="switchTab('team')">👥 الفريق</button>
-  <button class="tab" onclick="switchTab('locations')">🏥 الأماكن</button>
-  <button class="tab" onclick="switchTab('lectures')">🎓 المحاضرات</button>
-  <button class="tab" onclick="switchTab('assignments')">📌 التكليفات</button>
-  <button class="tab" onclick="switchTab('policies')">📜 السياسات</button>
-  <button class="tab" onclick="switchTab('progress')" style="background:linear-gradient(135deg,#10d97e,#0080ff);color:#fff;font-weight:800">🎯 لوحة الإنجاز الكلي</button>
-    <button class="tab" onclick="switchTab('workflow')">📁 المستندات</button>
-    <button class="tab" onclick="switchTab('policies2')">📜 السياسات الكاملة (106)</button>
-    <button class="tab" onclick="switchTab('patient-files')">📂 ملفات المرضى</button>
+  <button class="tab active" onclick="switchTab('overview')"> نظرة عامة</button>
+  <button class="tab" onclick="switchTab('observations')">الملاحظات</button>
+  <button class="tab" onclick="switchTab('requirements')">المتطلبات</button>
+  <button class="tab" onclick="switchTab('team')">الفريق</button>
+  <button class="tab" onclick="switchTab('locations')">الأماكن</button>
+  <button class="tab" onclick="switchTab('lectures')">المحاضرات</button>
+  <button class="tab" onclick="switchTab('assignments')">التكليفات</button>
+  <button class="tab" onclick="switchTab('policies')">السياسات</button>
+  <button class="tab" onclick="switchTab('progress')" style="background:linear-gradient(135deg,#10d97e,#0080ff);color:#fff;font-weight:800">لوحة الإنجاز</button>
+    <button class="tab" onclick="switchTab('workflow')">المستندات</button>
+    <button class="tab" onclick="switchTab('policies2')"> السياسات الكاملة (106)</button>
+    <button class="tab" onclick="switchTab('patient-files')"> ملفات المرضى المكتملة</button>
 </div>
 
 <div class="main">
@@ -259,7 +274,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
 <div class="pane active" id="pane-overview">
   <div class="kpi-grid">
     <div class="kpi blue"><div class="kpi-lbl">نسبة الإنجاز الكلية</div><div class="kpi-val" id="k-overall">–</div><div class="pbar"><div class="pfill blue" id="pf-overall" style="width:0%"></div></div><div class="kpi-sub">متوسط جميع الأقسام</div></div>
-    <div class="kpi gold"><div class="kpi-lbl">الأيام المتبقية</div><div class="kpi-val" id="k-days">–</div><div class="kpi-sub">حتى 01 يوليو 2026</div></div>
+    <div class="kpi gold"><div class="kpi-lbl">الأيام المتبقية</div><div class="kpi-val" id="k-days">–</div><div class="kpi-sub">حتى 01 أغسطس 2026</div></div>
     <div class="kpi green"><div class="kpi-lbl">ملاحظات محلولة</div><div class="kpi-val" id="k-obs">–</div><div class="pbar"><div class="pfill green" id="pf-obs" style="width:0%"></div></div><div class="kpi-sub" id="k-obs-sub">من 0</div></div>
     <div class="kpi red"><div class="kpi-lbl">متطلبات تحتاج تمويل</div><div class="kpi-val" id="k-fin">–</div><div class="kpi-sub" id="k-cost">التكلفة: –</div></div>
   </div>
@@ -293,7 +308,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
   <div class="info-bar">ℹ️ جميع التعديلات تُحفظ تلقائياً في Google Sheets وتظهر فوراً</div>
   <div class="tcard">
     <div class="tcard-hdr">
-      <div class="tcard-title">📋 الملاحظات <span class="badge badge-blue" id="obs-cnt">0</span></div>
+      <div class="tcard-title"> الملاحظات <span class="badge badge-blue" id="obs-cnt">0</span></div>
       <div style="display:flex;gap:6px"><span class="badge badge-green" id="obs-solved">0 محلولة</span><span class="badge badge-red" id="obs-pend">0 معلقة</span></div>
     </div>
     <div class="tscroll">
@@ -314,7 +329,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
   </div>
   <div class="tcard">
     <div class="tcard-hdr">
-      <div class="tcard-title">📌 المتطلبات <span class="badge badge-blue" id="req-cnt">0</span></div>
+      <div class="tcard-title"> المتطلبات <span class="badge badge-blue" id="req-cnt">0</span></div>
       <span class="badge badge-gold" id="req-fin-cnt">0 تحتاج تمويل</span>
     </div>
     <div class="tscroll">
@@ -370,14 +385,14 @@ tr:hover td{background:rgba(0,194,255,.03)}
 <!-- ═══ LECTURES ═══ -->
 <div class="pane" id="pane-lectures">
   <div class="sec-hdr">
-    <div class="sec-icon" style="background:rgba(240,180,41,.1)">🎓</div>
-    <div class="sec-title">المحاضرات المجدولة</div>
+    <div class="sec-icon" style="background:rgba(240,180,41,.1)"></div>
+    <div class="sec-title">المحاضرات التدريبية المجدولة</div>
     <div class="sec-line"></div>
     <button class="btn btn-primary" onclick="openModal('m-lec')">+ إضافة</button>
   </div>
   <div class="tcard">
     <div class="tcard-hdr">
-      <div class="tcard-title">🎓 المحاضرات <span class="badge badge-blue" id="lec-cnt">0</span></div>
+      <div class="tcard-title"> المحاضرات <span class="badge badge-blue" id="lec-cnt">0</span></div>
       <span class="badge badge-green" id="lec-done-cnt">0 منجزة</span>
     </div>
     <div class="tscroll">
@@ -408,7 +423,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
 <!-- ═══ POLICIES ═══ -->
 <div class="pane" id="pane-policies">
   <div class="sec-hdr">
-    <div class="sec-icon" style="background:rgba(0,194,255,.1)">📜</div>
+    <div class="sec-icon" style="background:rgba(0,194,255,.1)">.</div>
     <div class="sec-title">السياسات والموقعون</div>
     <div class="sec-line"></div>
     <button class="btn btn-primary" onclick="openModal('m-pol')">+ إضافة</button>
@@ -416,7 +431,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
   <div class="sig-grid" id="sig-grid"></div>
   <div class="tcard">
     <div class="tcard-hdr">
-      <div class="tcard-title">📄 السياسات <span class="badge badge-blue" id="pol-cnt">0</span></div>
+      <div class="tcard-title"> السياسات <span class="badge badge-blue" id="pol-cnt">0</span></div>
       <span class="badge badge-green" id="pol-signed-cnt">0 موقعة كاملاً</span>
     </div>
     <div class="tscroll">
@@ -429,20 +444,42 @@ tr:hover td{background:rgba(0,194,255,.03)}
 
 <!-- ═══ WORKFLOW ═══ -->
 <div class="pane" id="pane-workflow">
-  <div class="sec-hdr">
-    <div class="sec-icon" style="background:rgba(0,194,255,.1)">🔄</div>
-    <div class="sec-title">ورك فلو ملفات المرضى</div>
-    <div class="sec-line"></div>
-    <button class="btn btn-primary" onclick="openModal('m-wf')">+ إضافة</button>
+  
+  <!-- Header -->
+  <div style="background:linear-gradient(135deg,#7C3AED,#0080FF);border-radius:12px;padding:24px;margin-bottom:20px;color:white">
+    <h2 style="margin:0 0 8px;font-size:24px;font-weight:900"> المستندات</h2>
+    <p style="margin:0;opacity:.9;font-size:13px">إدارة روابط المستندات والملفات المهمة للمشروع</p>
   </div>
-  <div class="tcard">
-    <div class="wf-list" id="wf-list"></div>
-    <button class="add-row" onclick="openModal('m-wf')">+ إضافة خطوة</button>
+
+  <!-- Actions -->
+  <div style="display:flex;gap:12px;margin-bottom:20px">
+    <button class="btn btn-primary" onclick="openModal('m-add-wf')">➕ إضافة مستند</button>
+    <button class="btn btn-ghost" onclick="exportCSV('workflow','المستندات')">📥 تصدير CSV</button>
+    <div style="flex:1"></div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 16px;display:flex;align-items:center;gap:8px">
+      <span style="font-size:11px;color:var(--text3)">الإجمالي:</span>
+      <strong style="color:var(--accent);font-size:16px" id="wf-cnt">0</strong>
+    </div>
   </div>
+
+  <!-- Table -->
+  <table id="wf-table" class="tbl">
+    <thead>
+      <tr>
+        <th class="num">#</th>
+        <th>المستند</th>
+        <th>التصنيف</th>
+        <th>المسؤول</th>
+        <th>إجراءات</th>
+      </tr>
+    </thead>
+    <tbody id="wf-tbody">
+      <tr><td colspan="5" style="text-align:center;color:var(--text3);padding:40px">لا توجد مستندات</td></tr>
+    </tbody>
+  </table>
+
 </div>
 
-
-<!-- ═══ POLICIES FULL 106 ═══ -->
 <div class="pane" id="pane-policies2">
   <!-- Stats row -->
   <div class="kpi-grid" id="pol2-stats" style="grid-template-columns:repeat(6,1fr);margin-bottom:16px"></div>
@@ -609,9 +646,9 @@ tr:hover td{background:rgba(0,194,255,.03)}
       <div id="total-progress-bar" style="height:100%;width:0%;background:linear-gradient(90deg,#0080ff,#10d97e,#00c2ff);border-radius:7px;transition:width 1.2s ease;box-shadow:0 0 20px rgba(16,217,126,.5)"></div>
     </div>
     <div style="display:flex;gap:24px;justify-content:center;margin-top:18px;flex-wrap:wrap">
-      <div><span style="color:var(--text3);font-size:11px">⏰ الأيام المتبقية</span> <strong id="prog-days" style="color:var(--gold);font-size:18px;margin-right:8px">–</strong></div>
-      <div><span style="color:var(--text3);font-size:11px">📅 الوقت المتوقع لجاهزية المنشأة</span> <strong style="color:var(--accent);font-size:14px;margin-right:8px">20/08/2026</strong></div>
-      <div><span style="color:var(--text3);font-size:11px">🚀 تاريخ البداية</span> <strong style="color:var(--text2);font-size:14px;margin-right:8px">10/02/2026</strong></div>
+      <div><span style="color:var(--text3);font-size:11px"> الأيام المتبقية</span> <strong id="prog-days" style="color:var(--gold);font-size:18px;margin-right:8px">–</strong></div>
+      <div><span style="color:var(--text3);font-size:11px"> الوقت المتوقع لجاهزية المنشأة</span> <strong style="color:var(--accent);font-size:14px;margin-right:8px">20/08/2026</strong></div>
+      <div><span style="color:var(--text3);font-size:11px"> تاريخ البداية</span> <strong style="color:var(--text2);font-size:14px;margin-right:8px">10/02/2026</strong></div>
     </div>
   </div>
 
@@ -632,11 +669,11 @@ tr:hover td{background:rgba(0,194,255,.03)}
   </div>
 
   <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px">
-    <button class="btn btn-primary" style="padding:14px;font-size:13px" onclick="switchTab('policies2')">📜 إدارة السياسات (106)</button>
-    <button class="btn btn-ghost" style="padding:14px;font-size:13px" onclick="switchTab('observations')">🔍 إدارة الملاحظات</button>
-    <button class="btn btn-ghost" style="padding:14px;font-size:13px" onclick="switchTab('requirements')">📋 إدارة المتطلبات</button>
-    <button class="btn btn-ghost" style="padding:14px;font-size:13px" onclick="switchTab('lectures')">🎓 المحاضرات</button>
-    <button class="btn btn-ghost" style="padding:14px;font-size:13px" onclick="openExtras()">📂 رخص وعقود ومستندات</button>
+    <button class="btn btn-primary" style="padding:14px;font-size:13px" onclick="switchTab('policies2')"> إدارة السياسات (106)</button>
+    <button class="btn btn-ghost" style="padding:14px;font-size:13px" onclick="switchTab('observations')"> إدارة الملاحظات</button>
+    <button class="btn btn-ghost" style="padding:14px;font-size:13px" onclick="switchTab('requirements')"> إدارة المتطلبات</button>
+    <button class="btn btn-ghost" style="padding:14px;font-size:13px" onclick="switchTab('lectures')"> المحاضرات</button>
+    <button class="btn btn-ghost" style="padding:14px;font-size:13px" onclick="openExtras()"> رخص وعقود ومستندات</button>
     <button class="btn btn-gold" style="padding:14px;font-size:13px" onclick="syncAll()">🔄 مزامنة كل البيانات</button>
   </div>
 </div>
@@ -644,11 +681,11 @@ tr:hover td{background:rgba(0,194,255,.03)}
 <!-- Extras Modal — رخص / عقود / مستندات / موظفين -->
 <div class="overlay" id="m-extras">
   <div class="modal" style="max-width:600px">
-    <h3>📂 الرخص والعقود والمستندات</h3>
+    <h3> الرخص والعقود والمستندات</h3>
     <div class="info-bar">💡 سجل الإنجاز السريع لكل بند يدخل في النسبة الإجمالية</div>
 
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px">
-      <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:10px">📜 الرخص والعقود</div>
+      <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:10px"> الرخص والعقود</div>
       <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px">
         <div class="fg"><label>رخصة البلدية</label>
           <select id="ex-lic-baladiya"><option value="0">❌</option><option value="1">✅</option></select></div>
@@ -665,7 +702,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
       </div>
     </div>
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px">
-      <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:10px">📝 العقود السارية</div>
+      <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:10px"> العقود السارية</div>
       <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px">
         <div class="fg"><label>عقد النفايات الطبية</label>
           <select id="ex-cnt-waste"><option value="0">❌</option><option value="1">✅</option></select></div>
@@ -678,7 +715,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
       </div>
     </div>
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px">
-      <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:10px">🤝 الاتفاقيات الطبية</div>
+      <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:10px"> الاتفاقيات الطبية</div>
       <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px">
         <div class="fg"><label>اتفاقية CPR (إنعاش)</label>
           <select id="ex-agr-cpr"><option value="0">❌</option><option value="1">✅</option></select></div>
@@ -771,7 +808,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
 <!-- Team Modal -->
 <div class="overlay" id="m-team">
   <div class="modal">
-    <h3>👥 إضافة عضو</h3>
+    <h3> إضافة عضو</h3>
     <input type="hidden" id="team-eid">
     <div class="fg"><label>الاسم</label><input type="text" id="team-name" placeholder="الاسم"></div>
     <div class="fg"><label>المسمى الوظيفي</label><input type="text" id="team-role" placeholder="المسمى"></div>
@@ -823,7 +860,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
 <!-- Lecture Modal -->
 <div class="overlay" id="m-lec">
   <div class="modal">
-    <h3>🎓 إضافة محاضرة</h3>
+    <h3> إضافة محاضرة</h3>
     <input type="hidden" id="lec-eid">
     <div class="fg"><label>عنوان المحاضرة</label><input type="text" id="lec-title" placeholder="عنوان المحاضرة"></div>
     <div class="fg"><label>الملقي الأساسي</label><input type="text" id="lec-speaker" placeholder="الاسم"></div>
@@ -844,7 +881,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
 <!-- Assignment Modal -->
 <div class="overlay" id="m-assign">
   <div class="modal">
-    <h3>📌 إضافة تكليف</h3>
+    <h3> إضافة تكليف</h3>
     <input type="hidden" id="assign-eid">
     <div class="fg"><label>القسم</label><input type="text" id="assign-dept" placeholder="القسم"></div>
     <div class="fg"><label>نوع التكليف</label><select id="assign-type">
@@ -865,7 +902,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
 <!-- Policy Modal -->
 <div class="overlay" id="m-pol">
   <div class="modal">
-    <h3>📜 إضافة سياسة</h3>
+    <h3> إضافة سياسة</h3>
     <input type="hidden" id="pol-eid">
     <div class="fg"><label>اسم السياسة</label><input type="text" id="pol-name" placeholder="اسم السياسة"></div>
     <div class="fg"><label>القسم</label><input type="text" id="pol-dept" placeholder="القسم المعني"></div>
@@ -882,12 +919,12 @@ tr:hover td{background:rgba(0,194,255,.03)}
 <!-- Workflow Modal -->
 <div class="overlay" id="m-wf">
   <div class="modal">
-    <h3>🔄 إضافة خطوة</h3>
+    <h3> إضافة مستند</h3>
     <input type="hidden" id="wf-eid">
-    <div class="fg"><label>عنوان الخطوة</label><input type="text" id="wf-title-in" placeholder="عنوان الخطوة"></div>
-    <div class="fg"><label>وصف الخطوة</label><textarea id="wf-desc-in" rows="3" placeholder="التفاصيل..."></textarea></div>
+    <div class="fg"><label>عنوان المستند</label><input type="text" id="wf-title-in" placeholder="عنوان المستند"></div>
+    <div class="fg"><label>وصف المستند</label><textarea id="wf-desc-in" rows="3" placeholder="التفاصيل..."></textarea></div>
     <div class="fg"><label>الوثيقة / النموذج</label><input type="text" id="wf-doc-in" placeholder="النموذج المطلوب"></div>
-    <div class="fg"><label>المسؤول</label><input type="text" id="wf-owner-in" placeholder="المسؤول عن الخطوة"></div>
+    <div class="fg"><label>المسؤول</label><input type="text" id="wf-owner-in" placeholder="المسؤول عن المستند"></div>
     <div class="modal-footer">
       <button class="btn btn-danger" onclick="closeModal('m-wf')">إلغاء</button>
       <button class="btn btn-primary" onclick="saveWf()">💾 حفظ</button>
@@ -992,6 +1029,63 @@ const SIG_FIELDS = [
   { key:'sig_safety',  label:'مهندس السلامة',     color:'#EF4444' },
   { key:'sig_ceo',     label:'الرئيس التنفيذي',   color:'#0D1F3C' },
 ];
+
+
+
+// ════════════════════════════════════════════════════════════════
+// DOCUMENTS UPLOAD SUPPORT
+// ════════════════════════════════════════════════════════════════
+let selectedFile = null;
+
+function switchUploadMethod(method) {
+  // Update buttons
+  document.querySelectorAll('.upload-method-btn').forEach(btn => {
+    if (btn.dataset.method === method) {
+      btn.style.borderColor = 'var(--accent)';
+      btn.style.background = 'rgba(0,128,255,.1)';
+      btn.style.color = 'var(--accent)';
+    } else {
+      btn.style.borderColor = 'var(--border)';
+      btn.style.background = 'transparent';
+      btn.style.color = 'var(--text2)';
+    }
+  });
+  
+  // Show/hide fields
+  if (method === 'link') {
+    document.getElementById('link-method-fields').style.display = 'block';
+    document.getElementById('upload-method-fields').style.display = 'none';
+    document.getElementById('wf-doc-in').required = true;
+    selectedFile = null;
+  } else {
+    document.getElementById('link-method-fields').style.display = 'none';
+    document.getElementById('upload-method-fields').style.display = 'block';
+    document.getElementById('wf-doc-in').required = false;
+  }
+}
+
+function handleFileSelected(input) {
+  if (input.files && input.files[0]) {
+    selectedFile = input.files[0];
+    const nameSpan = document.getElementById('file-selected-name');
+    nameSpan.textContent = selectedFile.name;
+    nameSpan.style.color = 'var(--accent)';
+    nameSpan.style.fontWeight = '600';
+  }
+}
+
+async function uploadToGoogleDrive(file, folderName) {
+  // This would require Google Drive API integration
+  // For now, return a placeholder
+  toast('⚠️ رفع Google Drive يتطلب إعداد API', 'info', 3000);
+  
+  // Placeholder - في الواقع يجب استخدام Google Drive API
+  return {
+    success: false,
+    url: null,
+    message: 'Google Drive API غير مُفعّل'
+  };
+}
 
 
 // ════════════════════════════════════════════════════════════════
@@ -1499,8 +1593,101 @@ function editWf(id){
   document.getElementById('wf-owner-in').value=w.owner||'';
   openModal('m-add-wf');
 }
-async function delWf(id){ if(!confirm('حذف؟')) return; DB.workflow=DB.workflow.filter(w=>String(w.id)!==String(id)); renderAll(); await apiCall('delete','workflow',id); toast('🗑️ تم الحذف','info'); }
-async function saveWf(){ const id=document.getElementById('wf-eid').value; const obj={id:id||String(Date.now()),title:document.getElementById('wf-title-in').value,doc:document.getElementById('wf-doc-in').value,category:document.getElementById('wf-cat-in').value,desc:document.getElementById('wf-desc-in').value,owner:document.getElementById('wf-owner-in').value}; if(id){const idx=DB.workflow.findIndex(w=>String(w.id)===id);DB.workflow[idx]={...DB.workflow[idx],...obj};}else DB.workflow.push(obj); renderAll();closeModal('m-wf'); await apiCall(id?'update':'add','workflow',obj.id,obj); toast('✅ تم الحفظ','success'); }
+async function delWf(id){
+  if (!confirm('هل تريد حذف هذا المستند؟')) return;
+  
+  DB.workflow = DB.workflow.filter(w => String(w.id) !== id);
+  saveLocal('data', DB);
+  renderAll();
+  
+  if (GAS_URL) {
+    try {
+      await callGAS({action: 'delete', sheet: 'workflow', id});
+      toast('✅ حُذف من Google Sheets', 'success');
+    } catch(e) {
+      toast('✅ حُذف محلياً', 'info');
+    }
+  } else {
+    toast('✅ تم الحذف', 'success');
+  }
+}
+async function saveWf(){
+  const id = document.getElementById('wf-eid').value;
+  const title = document.getElementById('wf-title-in').value;
+  let doc = document.getElementById('wf-doc-in').value;
+  const category = document.getElementById('wf-cat-in').value;
+  const desc = document.getElementById('wf-desc-in').value;
+  const owner = document.getElementById('wf-owner-in').value;
+  
+  if (!title) {
+    toast('⚠️ أدخل اسم المستند', 'error');
+    return;
+  }
+  
+  // Handle file upload
+  if (selectedFile) {
+    toast('📤 جاري رفع الملف...', 'info', 2000);
+    
+    // In production, this would upload to Google Drive
+    // For now, we'll store file info locally
+    const fileInfo = {
+      name: selectedFile.name,
+      size: selectedFile.size,
+      type: selectedFile.type,
+      uploadDate: new Date().toISOString()
+    };
+    
+    // Placeholder URL - في الواقع سيكون رابط Google Drive
+    doc = `local://files/${selectedFile.name}`;
+    
+    toast('⚠️ ملاحظة: الرفع لـ Google Drive يتطلب إعداد API', 'info', 3000);
+  }
+  
+  if (!doc && !selectedFile) {
+    toast('⚠️ أدخل رابط المستند أو اختر ملف', 'error');
+    return;
+  }
+  
+  const obj = {
+    id: id || String(Date.now()),
+    title, doc, category, desc, owner,
+    createdAt: id ? undefined : new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+  
+  // Update local DB
+  if (id) {
+    const idx = DB.workflow.findIndex(w => String(w.id) === id);
+    if (idx > -1) DB.workflow[idx] = {...DB.workflow[idx], ...obj};
+  } else {
+    DB.workflow.push(obj);
+  }
+  
+  saveLocal('data', DB);
+  renderAll();
+  closeModal('m-add-wf');
+  
+  // Reset file selection
+  selectedFile = null;
+  if (document.getElementById('file-selected-name')) {
+    document.getElementById('file-selected-name').textContent = 'اضغط لاختيار ملف...';
+  }
+  
+  // Sync to backend
+  if (GAS_URL) {
+    try {
+      setSyncStatus('load');
+      await callGAS({action: id ? 'update' : 'add', sheet: 'workflow', id: obj.id, data: obj});
+      setSyncStatus('ok');
+      toast('✅ تم الحفظ بنجاح', 'success');
+    } catch(e) {
+      setSyncStatus('err');
+      toast('✅ حُفظ محلياً فقط', 'info');
+    }
+  } else {
+    toast('✅ تم الحفظ', 'success');
+  }
+}
 
 // ═══════════════════════════════════════════════════════════════
 // COUNTDOWN

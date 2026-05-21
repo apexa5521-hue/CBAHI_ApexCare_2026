@@ -250,6 +250,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
   <button class="tab" onclick="switchTab('progress')" style="background:linear-gradient(135deg,#10d97e,#0080ff);color:#fff;font-weight:800">🎯 لوحة الإنجاز الكلي</button>
     <button class="tab" onclick="switchTab('workflow')">📁 المستندات</button>
     <button class="tab" onclick="switchTab('policies2')">📜 السياسات الكاملة (106)</button>
+    <button class="tab" onclick="switchTab('patient-files')">📂 ملفات المرضى</button>
 </div>
 
 <div class="main">
@@ -526,6 +527,76 @@ tr:hover td{background:rgba(0,194,255,.03)}
   </div>
 </div>
 
+
+
+<!-- ═══ PATIENT FILES TRACKER ═══ -->
+<div class="pane" id="pane-patient-files">
+  
+  <!-- Summary Cards -->
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px">
+    <div style="background:linear-gradient(135deg,#0080FF,#0D9488);border-radius:12px;padding:20px;color:white">
+      <div style="font-size:12px;opacity:.9;margin-bottom:6px">📊 إجمالي الملفات</div>
+      <div style="font-size:36px;font-weight:900;font-family:Cairo,sans-serif" id="pf-total">0</div>
+    </div>
+    <div style="background:linear-gradient(135deg,#10D97E,#0D9488);border-radius:12px;padding:20px;color:white">
+      <div style="font-size:12px;opacity:.9;margin-bottom:6px">✅ المكتملة</div>
+      <div style="font-size:36px;font-weight:900;font-family:Cairo,sans-serif" id="pf-complete">0</div>
+    </div>
+    <div style="background:linear-gradient(135deg,#F97316,#EF4444);border-radius:12px;padding:20px;color:white">
+      <div style="font-size:12px;opacity:.9;margin-bottom:6px">⚠️ الناقصة</div>
+      <div style="font-size:36px;font-weight:900;font-family:Cairo,sans-serif" id="pf-incomplete">0</div>
+    </div>
+  </div>
+
+  <!-- Period Selection + Actions -->
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:20px">
+    <div style="display:grid;grid-template-columns:1fr 1fr auto auto;gap:12px;align-items:end">
+      <div class="fg" style="margin:0">
+        <label>📅 من تاريخ</label>
+        <input type="date" id="pf-from" style="width:100%">
+      </div>
+      <div class="fg" style="margin:0">
+        <label>📅 إلى تاريخ</label>
+        <input type="date" id="pf-to" style="width:100%">
+      </div>
+      <button class="btn btn-primary" onclick="updatePatientFileStats()" style="height:42px">🔄 تحديث</button>
+      <button class="btn btn-ghost" onclick="openPatientFileModal()" style="height:42px">📊 رفع تقرير</button>
+    </div>
+  </div>
+
+  <!-- Report Display Area -->
+  <div id="pf-report-area" style="background:var(--surface);border:2px dashed var(--border);border-radius:12px;padding:40px;text-align:center;color:var(--text3);margin-bottom:20px">
+    <div style="font-size:48px;margin-bottom:12px">📄</div>
+    <div style="font-size:14px;font-weight:600;margin-bottom:6px">لا يوجد تقرير محمّل</div>
+    <div style="font-size:12px">اضغط "📊 رفع تقرير" لإضافة ملف PDF</div>
+  </div>
+
+  <!-- History Table -->
+  <div class="sec-hdr">
+    <div class="sec-icon" style="background:rgba(0,128,255,.1)">📊</div>
+    <div class="sec-title">سجل التقارير</div>
+    <div class="sec-line"></div>
+  </div>
+
+  <table class="tbl">
+    <thead>
+      <tr>
+        <th class="num">#</th>
+        <th>الفترة</th>
+        <th>الإجمالي</th>
+        <th>المكتمل</th>
+        <th>الناقص</th>
+        <th>النسبة %</th>
+        <th>التقرير</th>
+        <th>إجراءات</th>
+      </tr>
+    </thead>
+    <tbody id="pf-history-tbody">
+      <tr><td colspan="8" style="text-align:center;color:var(--text3);padding:40px">لا توجد تقارير</td></tr>
+    </tbody>
+  </table>
+
+</div>
 
 <!-- ═══ TOTAL PROGRESS DASHBOARD ═══ -->
 <div class="pane" id="pane-progress">
@@ -1907,6 +1978,236 @@ renderAll = function() {
 setTimeout(renderProgressDashboard, 500);
 
 
+
+
+// ════════════════════════════════════════════════════════════════
+// PATIENT FILES TRACKER
+// ════════════════════════════════════════════════════════════════
+if (!DB.patientFiles) DB.patientFiles = [];
+
+function openPatientFileModal() {
+  document.getElementById('pf-edit-id').value = '';
+  document.getElementById('pf-modal-from').value = '';
+  document.getElementById('pf-modal-to').value = '';
+  document.getElementById('pf-modal-total').value = '';
+  document.getElementById('pf-modal-complete').value = '';
+  document.getElementById('pf-modal-incomplete').value = '';
+  document.getElementById('pf-modal-report').value = '';
+  document.getElementById('pf-modal-notes').value = '';
+  openModal('m-patient-file');
+}
+
+async function savePatientFileReport() {
+  const id = document.getElementById('pf-edit-id').value;
+  const from = document.getElementById('pf-modal-from').value;
+  const to = document.getElementById('pf-modal-to').value;
+  const total = Number(document.getElementById('pf-modal-total').value) || 0;
+  const complete = Number(document.getElementById('pf-modal-complete').value) || 0;
+  const incomplete = Number(document.getElementById('pf-modal-incomplete').value) || 0;
+  const report = document.getElementById('pf-modal-report').value;
+  const notes = document.getElementById('pf-modal-notes').value;
+  
+  if (!from || !to || total === 0) {
+    toast('⚠️ املأ الحقول المطلوبة', 'error');
+    return;
+  }
+  
+  const pct = Math.round(complete / total * 100);
+  
+  const obj = {
+    id: id || String(Date.now()),
+    from, to, total, complete, incomplete, pct, report, notes,
+    createdAt: id ? undefined : new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+  
+  if (id) {
+    const idx = DB.patientFiles.findIndex(p => String(p.id) === id);
+    if (idx > -1) DB.patientFiles[idx] = {...DB.patientFiles[idx], ...obj};
+  } else {
+    DB.patientFiles.push(obj);
+  }
+  
+  saveLocal('data', DB);
+  renderPatientFiles();
+  closeModal('m-patient-file');
+  
+  // Sync to backend
+  if (GAS_URL) {
+    try {
+      await callGAS({action: id ? 'update' : 'add', sheet: 'patientFiles', id: obj.id, data: obj});
+      toast('✅ حُفظ في Google Sheets', 'success');
+    } catch(e) {
+      toast('✅ حُفظ محلياً', 'info');
+    }
+  } else {
+    toast('✅ تم الحفظ', 'success');
+  }
+}
+
+function renderPatientFiles() {
+  const tbody = document.getElementById('pf-history-tbody');
+  if (!tbody) return;
+  
+  if (!DB.patientFiles || DB.patientFiles.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text3);padding:40px">لا توجد تقارير</td></tr>';
+    return;
+  }
+  
+  tbody.innerHTML = DB.patientFiles.map((p, i) => {
+    const pct = p.pct || 0;
+    const pctColor = pct >= 90 ? '#10D97E' : pct >= 70 ? '#F97316' : '#EF4444';
+    
+    return `<tr>
+      <td class="num">${i+1}</td>
+      <td style="font-size:12px;white-space:nowrap">${p.from} → ${p.to}</td>
+      <td style="text-align:center;font-weight:700">${p.total}</td>
+      <td style="text-align:center;color:#10D97E;font-weight:700">${p.complete}</td>
+      <td style="text-align:center;color:#EF4444;font-weight:700">${p.incomplete}</td>
+      <td style="text-align:center">
+        <span style="font-weight:700;color:${pctColor}">${pct}%</span>
+      </td>
+      <td style="text-align:center">
+        ${p.report 
+          ? `<a href="${p.report}" target="_blank" style="color:var(--accent);text-decoration:none;font-weight:600">📄 عرض</a>`
+          : '<span style="color:var(--text3);font-size:11px">–</span>'
+        }
+      </td>
+      <td>
+        <button class="btn-icon" onclick="editPatientFile('${p.id}')" title="تعديل">✏️</button>
+        <button class="btn-icon" onclick="deletePatientFile('${p.id}')" title="حذف">🗑️</button>
+      </td>
+    </tr>`;
+  }).join('');
+  
+  // Update summary if latest report exists
+  if (DB.patientFiles.length > 0) {
+    const latest = DB.patientFiles[DB.patientFiles.length - 1];
+    document.getElementById('pf-total').textContent = latest.total;
+    document.getElementById('pf-complete').textContent = latest.complete;
+    document.getElementById('pf-incomplete').textContent = latest.incomplete;
+    
+    // Update report area
+    const reportArea = document.getElementById('pf-report-area');
+    if (latest.report) {
+      reportArea.innerHTML = `
+        <div style="font-size:48px;margin-bottom:12px">✅</div>
+        <div style="font-size:14px;font-weight:600;margin-bottom:12px;color:var(--text)">تقرير الفترة: ${latest.from} → ${latest.to}</div>
+        <a href="${latest.report}" target="_blank" class="btn btn-primary" style="display:inline-flex;align-items:center;gap:8px;text-decoration:none">
+          📄 عرض التقرير المفصل
+        </a>
+        <div style="margin-top:12px;font-size:12px;color:var(--text3)">نسبة الإكتمال: ${latest.pct}%</div>
+      `;
+    }
+  }
+}
+
+function editPatientFile(id) {
+  const p = DB.patientFiles.find(x => String(x.id) === id);
+  if (!p) return;
+  
+  document.getElementById('pf-edit-id').value = p.id;
+  document.getElementById('pf-modal-from').value = p.from;
+  document.getElementById('pf-modal-to').value = p.to;
+  document.getElementById('pf-modal-total').value = p.total;
+  document.getElementById('pf-modal-complete').value = p.complete;
+  document.getElementById('pf-modal-incomplete').value = p.incomplete;
+  document.getElementById('pf-modal-report').value = p.report || '';
+  document.getElementById('pf-modal-notes').value = p.notes || '';
+  openModal('m-patient-file');
+}
+
+async function deletePatientFile(id) {
+  if (!confirm('هل تريد حذف هذا التقرير؟')) return;
+  DB.patientFiles = DB.patientFiles.filter(p => String(p.id) !== id);
+  saveLocal('data', DB);
+  renderPatientFiles();
+  
+  if (GAS_URL) {
+    try {
+      await callGAS({action: 'delete', sheet: 'patientFiles', id});
+    } catch(e) {}
+  }
+  toast('✅ تم الحذف', 'success');
+}
+
+function updatePatientFileStats() {
+  const from = document.getElementById('pf-from').value;
+  const to = document.getElementById('pf-to').value;
+  
+  if (!from || !to) {
+    toast('⚠️ اختر الفترة أولاً', 'info');
+    return;
+  }
+  
+  // Filter reports by date range
+  const filtered = DB.patientFiles.filter(p => {
+    return p.from >= from && p.to <= to;
+  });
+  
+  if (filtered.length === 0) {
+    toast('لا توجد تقارير في هذه الفترة', 'info');
+    return;
+  }
+  
+  const totals = filtered.reduce((acc, p) => ({
+    total: acc.total + p.total,
+    complete: acc.complete + p.complete,
+    incomplete: acc.incomplete + p.incomplete
+  }), {total: 0, complete: 0, incomplete: 0});
+  
+  document.getElementById('pf-total').textContent = totals.total;
+  document.getElementById('pf-complete').textContent = totals.complete;
+  document.getElementById('pf-incomplete').textContent = totals.incomplete;
+  
+  toast('✅ تم التحديث', 'success');
+}
+
+// Update renderAll to include patient files
+const _origRenderAll2 = renderAll;
+renderAll = function() {
+  _origRenderAll2();
+  renderPatientFiles();
+};
+
 </script>
 </body>
 </html>
+
+<!-- Patient File Report Modal -->
+<div class="overlay" id="m-patient-file">
+  <div class="modal" style="max-width:560px">
+    <div style="background:linear-gradient(135deg,#0080FF,#10D97E);padding:20px;margin:-20px -20px 20px;border-radius:12px 12px 0 0">
+      <h3 style="margin:0;color:white;font-size:18px">📊 رفع تقرير ملفات المرضى</h3>
+      <p style="margin:6px 0 0;color:rgba(255,255,255,.8);font-size:12px">سجّل إحصائيات الفترة وارفع التقرير المفصل</p>
+    </div>
+
+    <input type="hidden" id="pf-edit-id">
+    
+    <div class="fg"><label>📅 من تاريخ</label>
+      <input type="date" id="pf-modal-from" required></div>
+    
+    <div class="fg"><label>📅 إلى تاريخ</label>
+      <input type="date" id="pf-modal-to" required></div>
+    
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+      <div class="fg"><label>📊 إجمالي الملفات</label>
+        <input type="number" id="pf-modal-total" min="0" required></div>
+      <div class="fg"><label>✅ المكتمل</label>
+        <input type="number" id="pf-modal-complete" min="0" required></div>
+      <div class="fg"><label>⚠️ الناقص</label>
+        <input type="number" id="pf-modal-incomplete" min="0" required></div>
+    </div>
+
+    <div class="fg"><label>📄 رابط التقرير (PDF أو Google Drive)</label>
+      <input type="url" id="pf-modal-report" placeholder="https://drive.google.com/file/d/... أو رابط آخر"></div>
+    
+    <div class="fg"><label>💬 ملاحظات</label>
+      <textarea id="pf-modal-notes" rows="2" placeholder="أي ملاحظات إضافية"></textarea></div>
+
+    <div class="modal-footer">
+      <button class="btn btn-danger" onclick="closeModal('m-patient-file')">إلغاء</button>
+      <button class="btn btn-primary" onclick="savePatientFileReport()">💾 حفظ</button>
+    </div>
+  </div>
+</div>

@@ -1071,11 +1071,38 @@ function handleFileSelected(input) {
   }
 }
 
-async function uploadToGoogleDrive(file, folderName) {
-  // This would require Google Drive API integration
-  // For now, return a placeholder
-  toast('⚠️ رفع Google Drive يتطلب إعداد API', 'info', 3000);
-  
+async function uploadToGoogleDrive(file, category) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    
+    reader.onload = async function(e) {
+      const base64Data = e.target.result.split(',')[1];
+      
+      try {
+        const result = await callGAS({
+          action: 'uploadFile',
+          fileData: JSON.stringify({
+            fileName: file.name,
+            fileData: base64Data,
+            mimeType: file.type,
+            category: category
+          })
+        });
+        
+        if (result.success) {
+          resolve(result);
+        } else {
+          reject(new Error(result.error || 'Upload failed'));
+        }
+      } catch(err) {
+        reject(err);
+      }
+    };
+    
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}  
   // Placeholder - في الواقع يجب استخدام Google Drive API
   return {
     success: false,

@@ -210,9 +210,730 @@ tr:hover td{background:rgba(0,194,255,.03)}
 
 
 </style>
+</head>
+<body>
+  <!-- Professional Header -->
+  <div style="background:linear-gradient(135deg,#0D1F3C,#1A3560);color:white;padding:24px 40px;box-shadow:0 4px 12px rgba(0,0,0,.15)">
+    <div style="max-width:1400px;margin:0 auto;display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <h1 style="margin:0;font-size:28px;font-weight:900;letter-spacing:-0.5px">صفحة متابعة مشروع اعتماد CBAHI</h1>
+        <p style="margin:6px 0 0;opacity:.85;font-size:14px">APEX CARE ClinicS | بريدة </p>
+      </div>
+      <div style="text-align:left">
+        <div style="font-size:12px;opacity:.7;margin-bottom:4px">الوقت المتوقع لجاهزية المنشأة</div>
+        <div style="font-size:22px;font-weight:800;font-family:Cairo,sans-serif">20 أغسطس 2026</div>
+      </div>
+    </div>
+  </div>
 
+
+<!-- HEADER -->
+<div class="header">
+  <div class="logo">
+  </div>
+  <div class="header-actions">
+    <span class="sync-badge sync-load" id="syncBadge">⟳ جاري الاتصال</span>
+    <button class="btn btn-ghost" onclick="syncAll()">🔄 مزامنة البيانات لعرضها على اللوحة</button>
+    <button class="btn btn-gold" onclick="window.print()">🖨️</button>
+  </div>
+</div>
+
+<!-- STATUS BAR -->
+<div class="status-bar">
+  <div class="sb-item"><div class="sb-dot" id="apiDot" style="background:var(--gold);animation:pulse 1s infinite"></div><span id="apiStatus">جاري الاتصال بـ Google Sheets...</span></div>
+  <div class="sb-item">📅 تاريخ البداية: <strong>10/02/2026</strong></div>
+  <div class="sb-item">🎯 الوقت المتوقع لجاهزية المنشأة: <strong style="color:var(--gold)">20/07/2026</strong></div>
+  <div class="sb-item" id="lastSyncSb">آخر مزامنة: –</div>
+  <div class="sb-item" style="margin-right:auto">
+    <button class="btn btn-ghost" style="padding:3px 10px;font-size:10px" onclick="showSettings()">⚙️ إعدادات الاتصال</button>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('overview')">نظرة عامة</button>
+  <button class="tab" onclick="switchTab('observations')">الملاحظات</button>
+  <button class="tab" onclick="switchTab('requirements')">المتطلبات</button>
+  <button class="tab" onclick="switchTab('team')">الفريق</button>
+  <button class="tab" onclick="switchTab('locations')">التعديلات</button>
+  <button class="tab" onclick="switchTab('lectures')">المحاضرات</button>
+  <button class="tab" onclick="switchTab('assignments')">التكليفات</button>
+  <button class="tab" onclick="switchTab('policies')">توقيع السياسات</button>
+  <button class="tab" onclick="switchTab('progress')" style="background:linear-gradient(135deg,#10d97e,#0080ff);color:#fff;font-weight:800">لوحة الإنجاز</button>
+    <button class="tab" onclick="switchTab('workflow')">المستندات</button>
+    <button class="tab" onclick="switchTab('policies2')"> السياسات الكاملة </button>
+    <button class="tab" onclick="switchTab('patient-files')"> ملفات المرضى المكتملة</button>
+</div>
+
+<div class="main">
+
+<!-- ═══ OVERVIEW ═══ -->
+<div class="pane active" id="pane-overview">
+  <div class="kpi-grid">
+    <div class="kpi blue"><div class="kpi-lbl">نسبة الإنجاز الكلية</div><div class="kpi-val" id="k-overall">–</div><div class="pbar"><div class="pfill blue" id="pf-overall" style="width:0%"></div></div><div class="kpi-sub">متوسط جميع الأقسام</div></div>
+    <div class="kpi gold"><div class="kpi-lbl">الأيام المتبقية</div><div class="kpi-val" id="k-days">–</div><div class="kpi-sub">حتى 01 أغسطس 2026</div></div>
+    <div class="kpi green"><div class="kpi-lbl">ملاحظات محلولة</div><div class="kpi-val" id="k-obs">–</div><div class="pbar"><div class="pfill green" id="pf-obs" style="width:0%"></div></div><div class="kpi-sub" id="k-obs-sub">من 0</div></div>
+    <div class="kpi red"><div class="kpi-lbl">متطلبات تحتاج تمويل</div><div class="kpi-val" id="k-fin">–</div><div class="kpi-sub" id="k-cost">التكلفة: –</div></div>
+  </div>
+  <!-- Countdown -->
+  <div class="cd-grid">
+    <div class="cd-box"><div class="cd-num" id="cd-d">–</div><div class="cd-lbl">يوم</div></div>
+    <div class="cd-box"><div class="cd-num" id="cd-h">–</div><div class="cd-lbl">ساعة</div></div>
+    <div class="cd-box"><div class="cd-num" id="cd-m">–</div><div class="cd-lbl">دقيقة</div></div>
+    <div class="cd-box"><div class="cd-num" id="cd-s">–</div><div class="cd-lbl">ثانية</div></div>
+  </div>
+  <!-- Summary Table -->
+  <div class="tcard">
+    <div class="tcard-hdr"><div class="tcard-title">📊 ملخص التقدم حسب القسم</div></div>
+    <div class="tscroll">
+      <table>
+        <thead><tr><th>القسم</th><th class="num">الإجمالي</th><th class="num">منجز</th><th class="num">معلق</th><th class="num">النسبة</th><th>الحالة</th></tr></thead>
+        <tbody id="summary-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ OBSERVATIONS ═══ -->
+<div class="pane" id="pane-observations">
+  <div class="sec-hdr">
+    <div class="sec-icon" style="background:rgba(255,71,87,.1)">🔍</div>
+    <div class="sec-title">الملاحظات المبدئية</div>
+    <div class="sec-line"></div>
+    <button class="btn btn-primary" onclick="openModal('m-obs')">+ إضافة</button>
+  </div>
+  <div class="info-bar">ℹ️ جميع التعديلات تُحفظ تلقائياً في Google Sheets وتظهر فوراً</div>
+  <div class="tcard">
+    <div class="tcard-hdr">
+      <div class="tcard-title"> الملاحظات <span class="badge badge-blue" id="obs-cnt">0</span></div>
+      <div style="display:flex;gap:6px"><span class="badge badge-green" id="obs-solved">0 محلولة</span><span class="badge badge-red" id="obs-pend">0 معلقة</span></div>
+    </div>
+    <div class="tscroll">
+      <table><thead><tr><th class="num">#</th><th>الملاحظة</th><th>الأولوية</th><th>المسؤول</th><th>الموعد</th><th>الحالة</th><th>إجراء</th></tr></thead>
+      <tbody id="obs-tbody"></tbody></table>
+    </div>
+    <button class="add-row" onclick="openModal('m-obs')">+ إضافة ملاحظة</button>
+  </div>
+</div>
+
+<!-- ═══ REQUIREMENTS ═══ -->
+<div class="pane" id="pane-requirements">
+  <div class="sec-hdr">
+    <div class="sec-icon" style="background:rgba(168,85,247,.1)">📋</div>
+    <div class="sec-title">المتطلبات الكاملة</div>
+    <div class="sec-line"></div>
+    <button class="btn btn-primary" onclick="openModal('m-req')">+ إضافة</button>
+  </div>
+  <div class="tcard">
+    <div class="tcard-hdr">
+      <div class="tcard-title"> المتطلبات <span class="badge badge-blue" id="req-cnt">0</span></div>
+      <span class="badge badge-gold" id="req-fin-cnt">0 تحتاج تمويل</span>
+    </div>
+    <div class="tscroll">
+      <table><thead><tr><th class="num">#</th><th>المتطلب</th><th>الفئة</th><th>الأولوية</th><th>التكلفة</th><th>تمويل؟</th><th>الحالة</th><th>المسؤول</th><th></th></tr></thead>
+      <tbody id="req-tbody"></tbody></table>
+    </div>
+    <button class="add-row" onclick="openModal('m-req')">+ إضافة متطلب</button>
+  </div>
+</div>
+
+<!-- ═══ TEAM ═══ -->
+<div class="pane" id="pane-team">
+  <div class="sec-hdr">
+    <div class="sec-icon" style="background:rgba(16,217,126,.1)">👥</div>
+    <div class="sec-title">الفريق الداخلي</div>
+    <div class="sec-line"></div>
+    <button class="btn btn-primary" onclick="openModal('m-team')">+ إضافة</button>
+  </div>
+  <div class="team-grid" id="team-grid"></div>
+  <button class="add-row" style="margin-top:10px;border-radius:8px" onclick="openModal('m-team')">+ إضافة عضو</button>
+</div>
+
+<!-- ═══ LOCATIONS ═══ -->
+<div class="pane" id="pane-locations">
+  <div class="two-col">
+    <div>
+      <div class="sec-hdr">
+        <div class="sec-icon" style="background:rgba(0,194,255,.1)">🏥</div>
+        <div class="sec-title">تعديلات دائمة</div>
+        <div class="sec-line"></div>
+        <button class="btn btn-primary" onclick="openModal('m-loc')">+</button>
+      </div>
+      <div class="loc-grid" id="loc-perm-grid"></div>
+    </div>
+    <div>
+      <div class="sec-hdr">
+        <div class="sec-icon" style="background:rgba(255,124,42,.1)">🔄</div>
+        <div class="sec-title">تعديلات مؤقتة (أثناء الزيارة)</div>
+        <div class="sec-line"></div>
+        <button class="btn btn-primary" onclick="openModal('m-tmp')">+</button>
+      </div>
+      <div class="tcard">
+        <div class="tscroll">
+          <table><thead><tr><th>العنصر</th><th>المكان</th><th>التعديل</th><th>يُعاد</th><th></th></tr></thead>
+          <tbody id="tmp-tbody"></tbody></table>
+        </div>
+        <button class="add-row" onclick="openModal('m-tmp')">+ إضافة تعديل مؤقت</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ LECTURES ═══ -->
+<div class="pane" id="pane-lectures">
+  <div class="sec-hdr">
+    <div class="sec-icon" style="background:rgba(240,180,41,.1)"></div>
+    <div class="sec-title">المحاضرات التدريبية المجدولة</div>
+    <div class="sec-line"></div>
+    <button class="btn btn-primary" onclick="openModal('m-lec')">+ إضافة</button>
+  </div>
+  <div class="tcard">
+    <div class="tcard-hdr">
+      <div class="tcard-title"> المحاضرات <span class="badge badge-blue" id="lec-cnt">0</span></div>
+      <span class="badge badge-green" id="lec-done-cnt">0 منجزة</span>
+    </div>
+    <div class="tscroll">
+      <table><thead><tr><th class="num">#</th><th>العنوان</th><th>الملقي</th><th>البديل</th><th>التاريخ</th><th>الجمهور</th><th>تمت؟</th><th></th></tr></thead>
+      <tbody id="lec-tbody"></tbody></table>
+    </div>
+    <button class="add-row" onclick="openModal('m-lec')">+ إضافة محاضرة</button>
+  </div>
+</div>
+
+<!-- ═══ ASSIGNMENTS ═══ -->
+<div class="pane" id="pane-assignments">
+  <div class="sec-hdr">
+    <div class="sec-icon" style="background:rgba(255,124,42,.1)">📌</div>
+    <div class="sec-title">التكليفات</div>
+    <div class="sec-line"></div>
+    <button class="btn btn-primary" onclick="openModal('m-assign')">+ إضافة</button>
+  </div>
+  <div class="tcard">
+    <div class="tscroll">
+      <table><thead><tr><th class="num">#</th><th>القسم</th><th>النوع</th><th>السبب</th><th>الوقت</th><th>المسؤول</th><th>الحالة</th><th></th></tr></thead>
+      <tbody id="assign-tbody"></tbody></table>
+    </div>
+    <button class="add-row" onclick="openModal('m-assign')">+ إضافة تكليف</button>
+  </div>
+</div>
+
+<!-- ═══ POLICIES ═══ -->
+<div class="pane" id="pane-policies">
+  <div class="sec-hdr">
+    <div class="sec-icon" style="background:rgba(0,194,255,.1)">.</div>
+    <div class="sec-title">السياسات والموقعون</div>
+    <div class="sec-line"></div>
+    <button class="btn btn-primary" onclick="openModal('m-pol')">+ إضافة</button>
+  </div>
+  <div class="sig-grid" id="sig-grid"></div>
+  <div class="tcard">
+    <div class="tcard-hdr">
+      <div class="tcard-title"> السياسات <span class="badge badge-blue" id="pol-cnt">0</span></div>
+      <span class="badge badge-green" id="pol-signed-cnt">0 موقعة كاملاً</span>
+    </div>
+    <div class="tscroll">
+      <table><thead><tr><th class="num">#</th><th>اسم السياسة</th><th>القسم</th><th>جاهزية المحتوى</th><th>الموقعون المطلوبون</th><th>حالة التوقيع</th><th></th></tr></thead>
+      <tbody id="pol-tbody"></tbody></table>
+    </div>
+    <button class="add-row" onclick="openModal('m-pol')">+ إضافة سياسة</button>
+  </div>
+</div>
+
+<!-- ═══ WORKFLOW ═══ -->
+<div class="pane" id="pane-workflow">
+  
+  <!-- Header -->
+  <div style="background:linear-gradient(135deg,#7C3AED,#0080FF);border-radius:12px;padding:24px;margin-bottom:20px;color:white">
+    <h2 style="margin:0 0 8px;font-size:24px;font-weight:900"> المستندات</h2>
+    <p style="margin:0;opacity:.9;font-size:13px">إدارة روابط المستندات والملفات المهمة للمشروع</p>
+  </div>
+
+  <!-- Actions -->
+  <div style="display:flex;gap:12px;margin-bottom:20px">
+    <button class="btn btn-primary" onclick="openModal('m-add-wf')">➕ إضافة مستند</button>
+    <button class="btn btn-ghost" onclick="exportCSV('workflow','المستندات')">📥 تصدير CSV</button>
+    <div style="flex:1"></div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 16px;display:flex;align-items:center;gap:8px">
+      <span style="font-size:11px;color:var(--text3)">الإجمالي:</span>
+      <strong style="color:var(--accent);font-size:16px" id="wf-cnt">0</strong>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <table id="wf-table" class="tbl">
+    <thead>
+      <tr>
+        <th class="num">#</th>
+        <th>المستند</th>
+        <th>التصنيف</th>
+        <th>المسؤول</th>
+        <th>إجراءات</th>
+      </tr>
+    </thead>
+    <tbody id="wf-tbody">
+      <tr><td colspan="5" style="text-align:center;color:var(--text3);padding:40px">لا توجد مستندات</td></tr>
+    </tbody>
+  </table>
+
+</div>
+
+<div class="pane" id="pane-policies2">
+  <!-- Stats row -->
+  <div class="kpi-grid" id="pol2-stats" style="grid-template-columns:repeat(6,1fr);margin-bottom:16px"></div>
+
+  <!-- Section bars -->
+  <div class="sec-hdr">
+    <div class="sec-icon" style="background:rgba(0,194,255,.1)">📊</div>
+    <div class="sec-title">التقدم حسب القسم</div>
+    <div class="sec-line"></div>
+    <button class="btn btn-ghost" onclick="fetchPolicies()">🔄 مزامنة</button>
+    <button class="btn btn-primary" onclick="syncFromTracker()" title="سحب من شيت Tracker إلى CBAHI">📥 سحب من Tracker</button>
+    <button class="btn btn-gold" onclick="exportPoliciesCSV()">📥 CSV</button>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:20px" id="pol2-sections"></div>
+
+  <!-- Signatories -->
+  <div class="sec-hdr">
+    <div class="sec-icon" style="background:rgba(168,85,247,.1)">✍️</div>
+    <div class="sec-title">حالة التوقيعات</div>
+    <div class="sec-line"></div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:10px;margin-bottom:20px" id="pol2-sigs"></div>
+
+  <!-- Table -->
+  <div class="sec-hdr">
+    <div class="sec-icon" style="background:rgba(16,217,126,.1)">📋</div>
+    <div class="sec-title">السياسات الكاملة</div>
+    <div class="sec-line"></div>
+    <span class="badge badge-blue" id="pol2-count">0</span>
+  </div>
+
+  <!-- Filters -->
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:center">
+    <select id="pol2-sec-select" onchange="POL_FILTER_SEC=this.value;renderPolTable()"
+      style="padding:7px 12px;background:var(--surface);border:1px solid var(--border);border-radius:7px;color:var(--text);font-family:Tajawal,sans-serif;font-size:12px">
+      <option value="ALL">كل الأقسام</option>
+      <option value="IPC">IPC – مكافحة العدوى (28)</option>
+      <option value="PC">PC – رعاية المرضى (11)</option>
+      <option value="LD">LD – القيادة (23)</option>
+      <option value="MOI">MOI – إدارة المعلومات (9)</option>
+      <option value="FMS">FMS – السلامة (36)</option>
+    </select>
+    <select onchange="POL_FILTER_STATUS=this.value;renderPolTable()"
+      style="padding:7px 12px;background:var(--surface);border:1px solid var(--border);border-radius:7px;color:var(--text);font-family:Tajawal,sans-serif;font-size:12px">
+      <option value="ALL">كل الحالات</option>
+      <option value="مكتملة">✅ مكتملة</option>
+      <option value="قيد الإعداد">⏳ قيد الإعداد</option>
+      <option value="لم تبدأ">❌ لم تبدأ</option>
+    </select>
+    <input type="text" placeholder="🔍 بحث..." oninput="POL_SEARCH=this.value;renderPolTable()"
+      style="padding:7px 12px;background:var(--surface);border:1px solid var(--border);border-radius:7px;color:var(--text);font-family:Tajawal,sans-serif;font-size:12px;flex:1;min-width:150px">
+    <button class="btn btn-ghost" onclick="POL_FILTER_SEC='ALL';POL_FILTER_STATUS='ALL';POL_SEARCH='';renderPolTable()">مسح</button>
+  </div>
+
+  <div class="info-bar">💡 اضغط على الحالة لتغييرها · اضغط ⬜ لتسجيل التوقيع · عدّل النسبة مباشرة · كل تعديل يُحفظ في Google Sheets فوراً</div>
+
+  <div class="tcard">
+    <div class="tscroll">
+      <table>
+        <thead>
+          <tr>
+            <th class="num">#</th>
+            <th>الرمز</th>
+            <th>عنوان السياسة</th>
+            <th>القسم</th>
+            <th>✍️ حالة الكتابة</th>
+            <th>التقدم %</th>
+            <th>🖊️ حالة التوقيع</th>
+            <th style="background:rgba(13,148,136,.2);color:#0D9488;text-align:center">مدير الجودة</th>
+            <th style="background:rgba(16,185,129,.2);color:#10B981;text-align:center">مدير طبي</th>
+            <th style="background:rgba(124,58,237,.2);color:#7C3AED;text-align:center">مدير الفرع</th>
+            <th style="background:rgba(245,158,11,.2);color:#F59E0B;text-align:center">رئيسة التمريض</th>
+            <th style="background:rgba(249,115,22,.2);color:#F97316;text-align:center">مدير الموارد</th>
+            <th style="background:rgba(239,68,68,.2);color:#EF4444;text-align:center">مهندس السلامة</th>
+            <th style="background:rgba(13,31,60,.4);color:#93C5FD;text-align:center">الرئيس التنفيذي</th>
+            <th>ملاحظات</th>
+          </tr>
+        </thead>
+        <tbody id="pol2-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- ═══ PATIENT FILES TRACKER ═══ -->
+<div class="pane" id="pane-patient-files">
+  
+  <!-- Summary Cards -->
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px">
+    <div style="background:linear-gradient(135deg,#0080FF,#0D9488);border-radius:12px;padding:20px;color:white">
+      <div style="font-size:12px;opacity:.9;margin-bottom:6px">📊 إجمالي الملفات</div>
+      <div style="font-size:36px;font-weight:900;font-family:Cairo,sans-serif" id="pf-total">0</div>
+    </div>
+    <div style="background:linear-gradient(135deg,#10D97E,#0D9488);border-radius:12px;padding:20px;color:white">
+      <div style="font-size:12px;opacity:.9;margin-bottom:6px">✅ المكتملة</div>
+      <div style="font-size:36px;font-weight:900;font-family:Cairo,sans-serif" id="pf-complete">0</div>
+    </div>
+    <div style="background:linear-gradient(135deg,#F97316,#EF4444);border-radius:12px;padding:20px;color:white">
+      <div style="font-size:12px;opacity:.9;margin-bottom:6px">⚠️ الناقصة</div>
+      <div style="font-size:36px;font-weight:900;font-family:Cairo,sans-serif" id="pf-incomplete">0</div>
+    </div>
+  </div>
+
+  <!-- Period Selection + Actions -->
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:20px">
+    <div style="display:grid;grid-template-columns:1fr 1fr auto auto;gap:12px;align-items:end">
+      <div class="fg" style="margin:0">
+        <label>📅 من تاريخ</label>
+        <input type="date" id="pf-from" style="width:100%">
+      </div>
+      <div class="fg" style="margin:0">
+        <label>📅 إلى تاريخ</label>
+        <input type="date" id="pf-to" style="width:100%">
+      </div>
+      <button class="btn btn-primary" onclick="updatePatientFileStats()" style="height:42px">🔄 تحديث</button>
+      <button class="btn btn-ghost" onclick="openPatientFileModal()" style="height:42px">📊 رفع تقرير</button>
+    </div>
+  </div>
+
+  <!-- Report Display Area -->
+  <div id="pf-report-area" style="background:var(--surface);border:2px dashed var(--border);border-radius:12px;padding:40px;text-align:center;color:var(--text3);margin-bottom:20px">
+    <div style="font-size:48px;margin-bottom:12px">📄</div>
+    <div style="font-size:14px;font-weight:600;margin-bottom:6px">لا يوجد تقرير محمّل</div>
+    <div style="font-size:12px">اضغط "📊 رفع تقرير" لإضافة ملف PDF</div>
+  </div>
+
+  <!-- History Table -->
+  <div class="sec-hdr">
+    <div class="sec-icon" style="background:rgba(0,128,255,.1)">📊</div>
+    <div class="sec-title">سجل التقارير</div>
+    <div class="sec-line"></div>
+  </div>
+
+  <table class="tbl">
+    <thead>
+      <tr>
+        <th class="num">#</th>
+        <th>الفترة</th>
+        <th>الإجمالي</th>
+        <th>المكتمل</th>
+        <th>الناقص</th>
+        <th>النسبة %</th>
+        <th>التقرير</th>
+        <th>إجراءات</th>
+      </tr>
+    </thead>
+    <tbody id="pf-history-tbody">
+      <tr><td colspan="8" style="text-align:center;color:var(--text3);padding:40px">لا توجد تقارير</td></tr>
+    </tbody>
+  </table>
+
+</div>
+
+<!-- ═══ TOTAL PROGRESS DASHBOARD ═══ -->
+<div class="pane" id="pane-progress">
+
+  <!-- Hero KPI: Total Progress -->
+  <div style="background:linear-gradient(135deg,#0a1628,#0d1f3c);border:1px solid var(--border);border-radius:var(--radius);padding:28px;margin-bottom:20px;text-align:center;position:relative;overflow:hidden">
+    <div style="font-size:13px;color:var(--text3);font-weight:700;letter-spacing:2px;margin-bottom:10px">نسبة الإنجاز الكلية لمشروع CBAHI</div>
+    <div id="total-progress-num" style="font-size:80px;font-weight:900;font-family:'Cairo',sans-serif;background:linear-gradient(135deg,#10d97e,#00c2ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1;margin-bottom:14px">0%</div>
+    <div style="height:14px;background:rgba(255,255,255,.06);border-radius:7px;overflow:hidden;margin:0 auto;max-width:600px">
+      <div id="total-progress-bar" style="height:100%;width:0%;background:linear-gradient(90deg,#0080ff,#10d97e,#00c2ff);border-radius:7px;transition:width 1.2s ease;box-shadow:0 0 20px rgba(16,217,126,.5)"></div>
+    </div>
+    <div style="display:flex;gap:24px;justify-content:center;margin-top:18px;flex-wrap:wrap">
+      <div><span style="color:var(--text3);font-size:11px"> الأيام المتبقية</span> <strong id="prog-days" style="color:var(--gold);font-size:18px;margin-right:8px">–</strong></div>
+      <div><span style="color:var(--text3);font-size:11px"> الوقت المتوقع لجاهزية المنشأة</span> <strong style="color:var(--accent);font-size:14px;margin-right:8px">20/08/2026</strong></div>
+      <div><span style="color:var(--text3);font-size:11px"> تاريخ البداية</span> <strong style="color:var(--text2);font-size:14px;margin-right:8px">10/02/2026</strong></div>
+    </div>
+  </div>
+
+  <!-- Weighted Pillars -->
+  <div class="sec-hdr">
+    <div class="sec-icon" style="background:rgba(0,194,255,.1)">⚖️</div>
+    <div class="sec-title">المحاور الموزونة (10 محاور = 100%)</div>
+    <div class="sec-line"></div>
+  </div>
+
+  <div id="pillars-grid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px"></div>
+
+  <!-- Action items -->
+  <div class="sec-hdr" style="margin-top:24px">
+    <div class="sec-icon" style="background:rgba(255,124,42,.1)">⚡</div>
+    <div class="sec-title">إجراءات سريعة</div>
+    <div class="sec-line"></div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px">
+    <button class="btn btn-primary" style="padding:14px;font-size:13px" onclick="switchTab('policies2')"> إدارة السياسات (106)</button>
+    <button class="btn btn-ghost" style="padding:14px;font-size:13px" onclick="switchTab('observations')"> إدارة الملاحظات</button>
+    <button class="btn btn-ghost" style="padding:14px;font-size:13px" onclick="switchTab('requirements')"> إدارة المتطلبات</button>
+    <button class="btn btn-ghost" style="padding:14px;font-size:13px" onclick="switchTab('lectures')"> المحاضرات</button>
+    <button class="btn btn-ghost" style="padding:14px;font-size:13px" onclick="openExtras()"> رخص وعقود ومستندات</button>
+    <button class="btn btn-gold" style="padding:14px;font-size:13px" onclick="syncAll()">🔄 مزامنة كل البيانات</button>
+  </div>
+</div>
+
+<!-- Extras Modal — رخص / عقود / مستندات / موظفين -->
+<div class="overlay" id="m-extras">
+  <div class="modal" style="max-width:600px">
+    <h3> الرخص والعقود والمستندات</h3>
+    <div class="info-bar">💡 سجل الإنجاز السريع لكل بند يدخل في النسبة الإجمالية</div>
+
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px">
+      <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:10px"> الرخص والعقود</div>
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px">
+        <div class="fg"><label>رخصة البلدية</label>
+          <select id="ex-lic-baladiya"><option value="0">❌</option><option value="1">✅</option></select></div>
+        <div class="fg"><label>رخصة الدفاع المدني</label>
+          <select id="ex-lic-defaa"><option value="0">❌</option><option value="1">✅</option></select></div>
+        <div class="fg"><label>رخصة الهلال الأحمر</label>
+          <select id="ex-lic-hilal"><option value="0">❌</option><option value="1">✅</option></select></div>
+        <div class="fg"><label>ترخيص وزارة الصحة</label>
+          <select id="ex-lic-health"><option value="0">❌</option><option value="1">✅</option></select></div>
+        <div class="fg"><label>شهادة CBAHI السابقة</label>
+          <select id="ex-lic-cbahi"><option value="0">❌</option><option value="1">✅</option></select></div>
+        <div class="fg"><label>رخص أخرى (عدد)</label>
+          <input type="number" id="ex-lic-other" min="0" max="5" placeholder="0-5"></div>
+      </div>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px">
+      <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:10px"> العقود السارية</div>
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px">
+        <div class="fg"><label>عقد النفايات الطبية</label>
+          <select id="ex-cnt-waste"><option value="0">❌</option><option value="1">✅</option></select></div>
+        <div class="fg"><label>عقد الأشعة (إن وجد)</label>
+          <select id="ex-cnt-xray"><option value="0">❌</option><option value="1">✅</option></select></div>
+        <div class="fg"><label>عقد المختبر (إن وجد)</label>
+          <select id="ex-cnt-lab"><option value="0">❌</option><option value="1">✅</option></select></div>
+        <div class="fg"><label>عقود أخرى (عدد)</label>
+          <input type="number" id="ex-cnt-other" min="0" max="5" placeholder="0-5"></div>
+      </div>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px">
+      <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:10px"> الاتفاقيات الطبية</div>
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px">
+        <div class="fg"><label>اتفاقية CPR (إنعاش)</label>
+          <select id="ex-agr-cpr"><option value="0">❌</option><option value="1">✅</option></select></div>
+        <div class="fg"><label>اتفاقية المختبر المرجعي</label>
+          <select id="ex-agr-lab"><option value="0">❌</option><option value="1">✅</option></select></div>
+        <div class="fg"><label>اتفاقية الإحالات (مستشفى)</label>
+          <select id="ex-agr-referral"><option value="0">❌</option><option value="1">✅</option></select></div>
+        <div class="fg"><label>اتفاقيات أخرى (عدد)</label>
+          <input type="number" id="ex-agr-other" min="0" max="2" placeholder="0-2"></div>
+      </div>
+    </div>
+    <div class="fg"><label>📄 OVR Report نسخ مطبوعة وموزعة (نعم/لا)</label>
+      <select id="ex-ovr"><option value="0">لا</option><option value="1">نعم</option></select></div>
+    <div class="fg"><label>📘 Manual مكافحة العدوى مطبوع وموزع</label>
+      <select id="ex-manual"><option value="0">لا</option><option value="1">نعم</option></select></div>
+    <div class="fg"><label>✅ Checklists معتمدة وموزعة (من 12 قائمة)</label>
+      <input type="number" id="ex-checklists" min="0" max="12" placeholder="0-12"></div>
+    <div class="fg"><label>📝 محاضرات جسر — تم الإبلاغ عنها (من المحاضرات المنجزة)</label>
+      <select id="ex-jisr"><option value="none">لم يُبلَّغ بعد</option><option value="partial">بعضها</option><option value="all">الكل</option></select></div>
+    <div class="fg"><label>👥 ملفات الموظفين المكتملة (نسبة %)</label>
+      <input type="number" id="ex-staff" min="0" max="100" placeholder="0-100"></div>
+    <div class="fg"><label>🤝 تعاون الفريق (نسبة %)</label>
+      <input type="number" id="ex-team" min="0" max="100" placeholder="0-100"></div>
+
+    <div class="modal-footer">
+      <button class="btn btn-danger" onclick="closeModal('m-extras')">إلغاء</button>
+      <button class="btn btn-primary" onclick="saveExtras()">💾 حفظ</button>
+    </div>
+  </div>
+</div>
+
+</div><!-- /main -->
+
+<!-- ═══ MODALS ═══ -->
+
+<!-- Settings -->
+<div class="overlay" id="m-settings">
+  <div class="modal">
+    <h3>⚙️ إعدادات الاتصال بـ Google Sheets</h3>
+    <div class="fg"><label>رابط Apps Script (Web App URL)</label>
+      <input type="text" id="cfg-url" placeholder="https://script.google.com/macros/s/YOUR_ID/exec"></div>
+    <div class="fg"><label>اختبار الاتصال</label>
+      <button class="btn btn-ghost" style="width:100%" onclick="testConnection()">🔌 اختبار الآن</button></div>
+    <div class="modal-footer">
+      <button class="btn btn-danger" onclick="closeModal('m-settings')">إغلاق</button>
+      <button class="btn btn-primary" onclick="saveSettings()">💾 حفظ</button>
+    </div>
+  </div>
+</div>
+
+<!-- Observation Modal -->
+<div class="overlay" id="m-obs">
+  <div class="modal">
+    <h3>🔍 <span id="m-obs-title">إضافة ملاحظة</span></h3>
+    <input type="hidden" id="obs-eid">
+    <div class="fg"><label>نص الملاحظة</label><textarea id="obs-text" rows="3" placeholder="وصف الملاحظة..."></textarea></div>
+    <div class="fg"><label>الأولوية</label><select id="obs-pri"><option>عالية</option><option>متوسطة</option><option>منخفضة</option></select></div>
+    <div class="fg"><label>المسؤول</label><input type="text" id="obs-owner" placeholder="اسم المسؤول"></div>
+    <div class="fg"><label>الموعد النهائي</label><input type="date" id="obs-due"></div>
+    <div class="fg"><label>الحالة</label><select id="obs-stat"><option>معلقة</option><option>جارية</option><option>محلولة</option></select></div>
+    <div class="modal-footer">
+      <button class="btn btn-danger" onclick="closeModal('m-obs')">إلغاء</button>
+      <button class="btn btn-primary" onclick="saveObs()">💾 حفظ</button>
+    </div>
+  </div>
+</div>
+
+<!-- Requirement Modal -->
+<div class="overlay" id="m-req">
+  <div class="modal">
+    <h3>📋 <span id="m-req-title">إضافة متطلب</span></h3>
+    <input type="hidden" id="req-eid">
+    <div class="fg"><label>المتطلب</label><textarea id="req-text" rows="2" placeholder="وصف المتطلب..."></textarea></div>
+    <div class="fg"><label>الفئة</label><select id="req-cat">
+      <option>سياسات وإجراءات</option><option>بنية تحتية</option><option>تدريب وتأهيل</option>
+      <option>أجهزة ومعدات</option><option>سجلات وملفات</option><option>سلامة بيئية</option>
+      <option>مستلزمات</option><option>أخرى</option></select></div>
+    <div class="fg"><label>الأولوية</label><select id="req-pri"><option>عالية</option><option>متوسطة</option><option>منخفضة</option></select></div>
+    <div class="fg"><label>التكلفة التقديرية (ريال)</label><input type="number" id="req-cost" placeholder="0" min="0"></div>
+    <div class="fg"><label>يحتاج دعم مالي؟</label><select id="req-fin"><option value="لا">لا</option><option value="نعم">نعم</option></select></div>
+    <div class="fg"><label>الحالة</label><select id="req-stat"><option>معلق</option><option>جارٍ</option><option>مكتمل</option></select></div>
+    <div class="fg"><label>المسؤول</label><input type="text" id="req-owner" placeholder="اسم المسؤول"></div>
+    <div class="modal-footer">
+      <button class="btn btn-danger" onclick="closeModal('m-req')">إلغاء</button>
+      <button class="btn btn-primary" onclick="saveReq()">💾 حفظ</button>
+    </div>
+  </div>
+</div>
+
+<!-- Team Modal -->
+<div class="overlay" id="m-team">
+  <div class="modal">
+    <h3> إضافة عضو</h3>
+    <input type="hidden" id="team-eid">
+    <div class="fg"><label>الاسم</label><input type="text" id="team-name" placeholder="الاسم"></div>
+    <div class="fg"><label>المسمى الوظيفي</label><input type="text" id="team-role" placeholder="المسمى"></div>
+    <div class="fg"><label>القسم</label><input type="text" id="team-dept" placeholder="القسم"></div>
+    <div class="fg"><label>دوره في CBAHI</label><input type="text" id="team-proj" placeholder="دور في المشروع"></div>
+    <div class="fg"><label>الفرع</label><select id="team-branch"><option>بريدة</option><option>عنيزة</option><option>كلا الفرعين</option></select></div>
+    <div class="modal-footer">
+      <button class="btn btn-danger" onclick="closeModal('m-team')">إلغاء</button>
+      <button class="btn btn-primary" onclick="saveTeam()">💾 حفظ</button>
+    </div>
+  </div>
+</div>
+
+<!-- Location Modal -->
+<div class="overlay" id="m-loc">
+  <div class="modal">
+    <h3>🏥 إضافة مكان (تعديل دائم)</h3>
+    <input type="hidden" id="loc-eid">
+    <div class="fg"><label>اسم المكان</label><input type="text" id="loc-name" placeholder="مثال: غرفة الانتظار"></div>
+    <div class="fg"><label>الفرع</label><select id="loc-branch"><option>بريدة</option><option>عنيزة</option><option>كلا الفرعين</option></select></div>
+    <div class="fg"><label>الوضع الحالي (قبل)</label><textarea id="loc-before" rows="2"></textarea></div>
+    <div class="fg"><label>المطلوب (بعد)</label><textarea id="loc-after" rows="2"></textarea></div>
+    <div class="fg"><label>الحالة</label><select id="loc-stat"><option>معلق</option><option>جارٍ</option><option>مكتمل</option></select></div>
+    <div class="fg"><label>المسؤول</label><input type="text" id="loc-owner" placeholder="اسم المسؤول"></div>
+    <div class="modal-footer">
+      <button class="btn btn-danger" onclick="closeModal('m-loc')">إلغاء</button>
+      <button class="btn btn-primary" onclick="saveLoc()">💾 حفظ</button>
+    </div>
+  </div>
+</div>
+
+<!-- Temp Modal -->
+<div class="overlay" id="m-tmp">
+  <div class="modal">
+    <h3>🔄 تعديل مؤقت أثناء الزيارة</h3>
+    <input type="hidden" id="tmp-eid">
+    <div class="fg"><label>العنصر</label><input type="text" id="tmp-item" placeholder="ما الشيء؟"></div>
+    <div class="fg"><label>المكان الحالي</label><input type="text" id="tmp-loc" placeholder="وين موجود؟"></div>
+    <div class="fg"><label>التعديل المؤقت</label><textarea id="tmp-change" rows="2"></textarea></div>
+    <div class="fg"><label>يُعاد لمكانه</label><input type="text" id="tmp-restore" placeholder="متى يُعاد؟"></div>
+    <div class="fg"><label>المسؤول</label><input type="text" id="tmp-owner" placeholder="اسم المسؤول"></div>
+    <div class="modal-footer">
+      <button class="btn btn-danger" onclick="closeModal('m-tmp')">إلغاء</button>
+      <button class="btn btn-primary" onclick="saveTmp()">💾 حفظ</button>
+    </div>
+  </div>
+</div>
+
+<!-- Lecture Modal -->
+<div class="overlay" id="m-lec">
+  <div class="modal">
+    <h3> إضافة محاضرة</h3>
+    <input type="hidden" id="lec-eid">
+    <div class="fg"><label>عنوان المحاضرة</label><input type="text" id="lec-title" placeholder="عنوان المحاضرة"></div>
+    <div class="fg"><label>الملقي الأساسي</label><input type="text" id="lec-speaker" placeholder="الاسم"></div>
+    <div class="fg"><label>البديل (نيابةً)</label><input type="text" id="lec-alt" placeholder="اسم البديل"></div>
+    <div class="fg"><label>التاريخ</label><input type="date" id="lec-date"></div>
+    <div class="fg"><label>الوقت</label><input type="time" id="lec-time"></div>
+    <div class="fg"><label>الجمهور المستهدف</label><select id="lec-aud">
+      <option>جميع الموظفين</option><option>الكادر التمريضي</option><option>الكادر الطبي</option>
+      <option>الإداريون</option><option>فريق الجودة</option><option>التمريض والصيدلة</option></select></div>
+    <div class="fg"><label>هل تمت؟</label><select id="lec-done"><option value="لا">لا</option><option value="نعم">نعم</option></select></div>
+    <div class="modal-footer">
+      <button class="btn btn-danger" onclick="closeModal('m-lec')">إلغاء</button>
+      <button class="btn btn-primary" onclick="saveLec()">💾 حفظ</button>
+    </div>
+  </div>
+</div>
+
+<!-- Assignment Modal -->
+<div class="overlay" id="m-assign">
+  <div class="modal">
+    <h3> إضافة تكليف</h3>
+    <input type="hidden" id="assign-eid">
+    <div class="fg"><label>القسم</label><input type="text" id="assign-dept" placeholder="القسم"></div>
+    <div class="fg"><label>نوع التكليف</label><select id="assign-type">
+      <option>تكليف رسمي موثق</option><option>تكليف كتابي</option>
+      <option>تفويض صلاحيات</option><option>مهمة ميدانية</option>
+      <option>تكليف تدريبي إلزامي</option></select></div>
+    <div class="fg"><label>السبب والهدف</label><textarea id="assign-reason" rows="2"></textarea></div>
+    <div class="fg"><label>الوقت المطلوب</label><input type="text" id="assign-time" placeholder="يومي / أسبوعي / مرة واحدة"></div>
+    <div class="fg"><label>المسؤول</label><input type="text" id="assign-owner" placeholder="اسم المسؤول"></div>
+    <div class="fg"><label>الحالة</label><select id="assign-stat"><option>معلق</option><option>جارٍ</option><option>مكتمل</option></select></div>
+    <div class="modal-footer">
+      <button class="btn btn-danger" onclick="closeModal('m-assign')">إلغاء</button>
+      <button class="btn btn-primary" onclick="saveAssign()">💾 حفظ</button>
+    </div>
+  </div>
+</div>
+
+<!-- Policy Modal -->
+<div class="overlay" id="m-pol">
+  <div class="modal">
+    <h3> إضافة سياسة</h3>
+    <input type="hidden" id="pol-eid">
+    <div class="fg"><label>اسم السياسة</label><input type="text" id="pol-name" placeholder="اسم السياسة"></div>
+    <div class="fg"><label>القسم</label><input type="text" id="pol-dept" placeholder="القسم المعني"></div>
+    <div class="fg"><label>جاهزية المحتوى</label><select id="pol-content"><option>مكتملة</option><option>قيد الإعداد</option><option>لم تبدأ</option></select></div>
+    <div class="fg"><label>الموقعون المطلوبون</label><input type="text" id="pol-sigs" placeholder="مثال: مدير الجودة، مدير طبي"></div>
+    <div class="fg"><label>حالة التوقيع</label><select id="pol-sigstat"><option>لم يوقع</option><option>موقع جزئياً</option><option>موقع كامل</option></select></div>
+    <div class="modal-footer">
+      <button class="btn btn-danger" onclick="closeModal('m-pol')">إلغاء</button>
+      <button class="btn btn-primary" onclick="savePol()">💾 حفظ</button>
+    </div>
+  </div>
+</div>
+
+<!-- Workflow Modal -->
+<div class="overlay" id="m-wf">
+  <div class="modal">
+    <h3> إضافة مستند</h3>
+    <input type="hidden" id="wf-eid">
+    <div class="fg"><label>عنوان المستند</label><input type="text" id="wf-title-in" placeholder="عنوان المستند"></div>
+    <div class="fg"><label>وصف المستند</label><textarea id="wf-desc-in" rows="3" placeholder="التفاصيل..."></textarea></div>
+    <div class="fg"><label>الوثيقة / النموذج</label><input type="text" id="wf-doc-in" placeholder="النموذج المطلوب"></div>
+    <div class="fg"><label>المسؤول</label><input type="text" id="wf-owner-in" placeholder="المسؤول عن المستند"></div>
+    <div class="modal-footer">
+      <button class="btn btn-danger" onclick="closeModal('m-wf')">إلغاء</button>
+      <button class="btn btn-primary" onclick="saveWf()">💾 حفظ</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST CONTAINER -->
+<div class="toast-wrap" id="toasts"></div>
+
+<div class="spacer"></div>
 <script>
-
 
 // ═══════════════════════════════════════════════════════════════
 // UI HELPERS
@@ -259,19 +980,59 @@ function closeModal(id) {
 }
 
 function switchTab(id) {
-  document.querySelectorAll('.tab').forEach(function(b) {
-    b.classList.remove('active');
-  });
-  document.querySelectorAll('.pane').forEach(function(p) {
-    p.classList.remove('active');
-  });
-  
-  var tab = document.querySelector('button.tab[onclick*="' + id + '"]');
-  var pane = document.getElementById('pane-' + id);
-  
-  if (tab) tab.classList.add('active');
+  document.querySelectorAll('.tab').forEach(function(b){ b.classList.remove('active'); });
+  document.querySelectorAll('.pane').forEach(function(p){ p.classList.remove('active'); });
+  const btn = document.querySelector('[onclick="switchTab(\''+id+'\')"]');
+  if (btn) btn.classList.add('active');
+  const pane = document.getElementById('pane-'+id);
   if (pane) pane.classList.add('active');
 }
+
+// Close modals on overlay click
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.overlay').forEach(function(el) {
+    el.addEventListener('click', function(e) {
+      if (e.target === el) el.classList.remove('open');
+    });
+  });
+});
+
+
+let DB = {
+  observations:[], requirements:[], team:[],
+  locations:[], tmpChanges:[], lectures:[],
+  assignments:[], policies:[], workflow:[],
+  dashboard: null
+};
+let isSyncing = false;
+let POLICIES = [];
+let POL_STATS = null;
+let POL_FILTER_SEC = 'ALL';
+let POL_FILTER_STATUS = 'ALL';
+let POL_SEARCH = '';
+const SECTIONS_META = {
+  IPC:  { label:'IPC – مكافحة العدوى',    color:'#0D9488', light:'#CCFBF1', count:28 },
+  PC:   { label:'PC – رعاية المرضى',       color:'#0080FF', light:'#D6E8FF', count:11 },
+  LD:   { label:'LD – القيادة',            color:'#7C3AED', light:'#EDE9FE', count:23 },
+  MOI:  { label:'MOI – إدارة المعلومات',   color:'#F97316', light:'#FFEDD5', count:9  },
+  FMS:  { label:'FMS – السلامة والمنشآت',  color:'#EF4444', light:'#FEE2E2', count:36 },
+};
+const SIG_FIELDS = [
+  { key:'sig_quality', label:'مدير الجودة',      color:'#0D9488' },
+  { key:'sig_medical', label:'مدير طبي',          color:'#10B981' },
+  { key:'sig_branch',  label:'مدير الفرع',        color:'#7C3AED' },
+  { key:'sig_nursing', label:'رئيسة التمريض',     color:'#F59E0B' },
+  { key:'sig_hr',      label:'مدير الموارد',      color:'#F97316' },
+  { key:'sig_safety',  label:'مهندس السلامة',     color:'#EF4444' },
+  { key:'sig_ceo',     label:'الرئيس التنفيذي',   color:'#0D1F3C' },
+];
+
+
+
+// ════════════════════════════════════════════════════════════════
+// DOCUMENTS UPLOAD SUPPORT
+// ════════════════════════════════════════════════════════════════
+let selectedFile = null;
 
 function switchUploadMethod(method) {
   // Update buttons
@@ -1620,732 +2381,7 @@ renderAll = function() {
   renderPatientFiles();
 ;
 
-
 </script>
-</head>
-<body>
-  <!-- Professional Header -->
-  <div style="background:linear-gradient(135deg,#0D1F3C,#1A3560);color:white;padding:24px 40px;box-shadow:0 4px 12px rgba(0,0,0,.15)">
-    <div style="max-width:1400px;margin:0 auto;display:flex;align-items:center;justify-content:space-between">
-      <div>
-        <h1 style="margin:0;font-size:28px;font-weight:900;letter-spacing:-0.5px">صفحة متابعة مشروع اعتماد CBAHI</h1>
-        <p style="margin:6px 0 0;opacity:.85;font-size:14px">APEX CARE ClinicS | بريدة </p>
-      </div>
-      <div style="text-align:left">
-        <div style="font-size:12px;opacity:.7;margin-bottom:4px">الوقت المتوقع لجاهزية المنشأة</div>
-        <div style="font-size:22px;font-weight:800;font-family:Cairo,sans-serif">20 أغسطس 2026</div>
-      </div>
-    </div>
-  </div>
-
-
-<!-- HEADER -->
-<div class="header">
-  <div class="logo">
-  </div>
-  <div class="header-actions">
-    <span class="sync-badge sync-load" id="syncBadge">⟳ جاري الاتصال</span>
-    <button class="btn btn-ghost" onclick="syncAll()">🔄 مزامنة البيانات لعرضها على اللوحة</button>
-    <button class="btn btn-gold" onclick="window.print()">🖨️</button>
-  </div>
-</div>
-
-<!-- STATUS BAR -->
-<div class="status-bar">
-  <div class="sb-item"><div class="sb-dot" id="apiDot" style="background:var(--gold);animation:pulse 1s infinite"></div><span id="apiStatus">جاري الاتصال بـ Google Sheets...</span></div>
-  <div class="sb-item">📅 تاريخ البداية: <strong>10/02/2026</strong></div>
-  <div class="sb-item">🎯 الوقت المتوقع لجاهزية المنشأة: <strong style="color:var(--gold)">20/07/2026</strong></div>
-  <div class="sb-item" id="lastSyncSb">آخر مزامنة: –</div>
-  <div class="sb-item" style="margin-right:auto">
-    <button class="btn btn-ghost" style="padding:3px 10px;font-size:10px" onclick="showSettings()">⚙️ إعدادات الاتصال</button>
-  </div>
-</div>
-
-<!-- TABS -->
-<div class="tabs">
-  <button class="tab active" onclick="switchTab('overview')">نظرة عامة</button>
-  <button class="tab" onclick="switchTab('observations')">الملاحظات</button>
-  <button class="tab" onclick="switchTab('requirements')">المتطلبات</button>
-  <button class="tab" onclick="switchTab('team')">الفريق</button>
-  <button class="tab" onclick="switchTab('locations')">التعديلات</button>
-  <button class="tab" onclick="switchTab('lectures')">المحاضرات</button>
-  <button class="tab" onclick="switchTab('assignments')">التكليفات</button>
-  <button class="tab" onclick="switchTab('policies')">توقيع السياسات</button>
-  <button class="tab" onclick="switchTab('progress')" style="background:linear-gradient(135deg,#10d97e,#0080ff);color:#fff;font-weight:800">لوحة الإنجاز</button>
-    <button class="tab" onclick="switchTab('workflow')">المستندات</button>
-    <button class="tab" onclick="switchTab('policies2')"> السياسات الكاملة </button>
-    <button class="tab" onclick="switchTab('patient-files')"> ملفات المرضى المكتملة</button>
-</div>
-
-<div class="main">
-
-<!-- ═══ OVERVIEW ═══ -->
-<div class="pane active" id="pane-overview">
-  <div class="kpi-grid">
-    <div class="kpi blue"><div class="kpi-lbl">نسبة الإنجاز الكلية</div><div class="kpi-val" id="k-overall">–</div><div class="pbar"><div class="pfill blue" id="pf-overall" style="width:0%"></div></div><div class="kpi-sub">متوسط جميع الأقسام</div></div>
-    <div class="kpi gold"><div class="kpi-lbl">الأيام المتبقية</div><div class="kpi-val" id="k-days">–</div><div class="kpi-sub">حتى 01 أغسطس 2026</div></div>
-    <div class="kpi green"><div class="kpi-lbl">ملاحظات محلولة</div><div class="kpi-val" id="k-obs">–</div><div class="pbar"><div class="pfill green" id="pf-obs" style="width:0%"></div></div><div class="kpi-sub" id="k-obs-sub">من 0</div></div>
-    <div class="kpi red"><div class="kpi-lbl">متطلبات تحتاج تمويل</div><div class="kpi-val" id="k-fin">–</div><div class="kpi-sub" id="k-cost">التكلفة: –</div></div>
-  </div>
-  <!-- Countdown -->
-  <div class="cd-grid">
-    <div class="cd-box"><div class="cd-num" id="cd-d">–</div><div class="cd-lbl">يوم</div></div>
-    <div class="cd-box"><div class="cd-num" id="cd-h">–</div><div class="cd-lbl">ساعة</div></div>
-    <div class="cd-box"><div class="cd-num" id="cd-m">–</div><div class="cd-lbl">دقيقة</div></div>
-    <div class="cd-box"><div class="cd-num" id="cd-s">–</div><div class="cd-lbl">ثانية</div></div>
-  </div>
-  <!-- Summary Table -->
-  <div class="tcard">
-    <div class="tcard-hdr"><div class="tcard-title">📊 ملخص التقدم حسب القسم</div></div>
-    <div class="tscroll">
-      <table>
-        <thead><tr><th>القسم</th><th class="num">الإجمالي</th><th class="num">منجز</th><th class="num">معلق</th><th class="num">النسبة</th><th>الحالة</th></tr></thead>
-        <tbody id="summary-tbody"></tbody>
-      </table>
-    </div>
-  </div>
-</div>
-
-<!-- ═══ OBSERVATIONS ═══ -->
-<div class="pane" id="pane-observations">
-  <div class="sec-hdr">
-    <div class="sec-icon" style="background:rgba(255,71,87,.1)">🔍</div>
-    <div class="sec-title">الملاحظات المبدئية</div>
-    <div class="sec-line"></div>
-    <button class="btn btn-primary" onclick="openModal('m-obs')">+ إضافة</button>
-  </div>
-  <div class="info-bar">ℹ️ جميع التعديلات تُحفظ تلقائياً في Google Sheets وتظهر فوراً</div>
-  <div class="tcard">
-    <div class="tcard-hdr">
-      <div class="tcard-title"> الملاحظات <span class="badge badge-blue" id="obs-cnt">0</span></div>
-      <div style="display:flex;gap:6px"><span class="badge badge-green" id="obs-solved">0 محلولة</span><span class="badge badge-red" id="obs-pend">0 معلقة</span></div>
-    </div>
-    <div class="tscroll">
-      <table><thead><tr><th class="num">#</th><th>الملاحظة</th><th>الأولوية</th><th>المسؤول</th><th>الموعد</th><th>الحالة</th><th>إجراء</th></tr></thead>
-      <tbody id="obs-tbody"></tbody></table>
-    </div>
-    <button class="add-row" onclick="openModal('m-obs')">+ إضافة ملاحظة</button>
-  </div>
-</div>
-
-<!-- ═══ REQUIREMENTS ═══ -->
-<div class="pane" id="pane-requirements">
-  <div class="sec-hdr">
-    <div class="sec-icon" style="background:rgba(168,85,247,.1)">📋</div>
-    <div class="sec-title">المتطلبات الكاملة</div>
-    <div class="sec-line"></div>
-    <button class="btn btn-primary" onclick="openModal('m-req')">+ إضافة</button>
-  </div>
-  <div class="tcard">
-    <div class="tcard-hdr">
-      <div class="tcard-title"> المتطلبات <span class="badge badge-blue" id="req-cnt">0</span></div>
-      <span class="badge badge-gold" id="req-fin-cnt">0 تحتاج تمويل</span>
-    </div>
-    <div class="tscroll">
-      <table><thead><tr><th class="num">#</th><th>المتطلب</th><th>الفئة</th><th>الأولوية</th><th>التكلفة</th><th>تمويل؟</th><th>الحالة</th><th>المسؤول</th><th></th></tr></thead>
-      <tbody id="req-tbody"></tbody></table>
-    </div>
-    <button class="add-row" onclick="openModal('m-req')">+ إضافة متطلب</button>
-  </div>
-</div>
-
-<!-- ═══ TEAM ═══ -->
-<div class="pane" id="pane-team">
-  <div class="sec-hdr">
-    <div class="sec-icon" style="background:rgba(16,217,126,.1)">👥</div>
-    <div class="sec-title">الفريق الداخلي</div>
-    <div class="sec-line"></div>
-    <button class="btn btn-primary" onclick="openModal('m-team')">+ إضافة</button>
-  </div>
-  <div class="team-grid" id="team-grid"></div>
-  <button class="add-row" style="margin-top:10px;border-radius:8px" onclick="openModal('m-team')">+ إضافة عضو</button>
-</div>
-
-<!-- ═══ LOCATIONS ═══ -->
-<div class="pane" id="pane-locations">
-  <div class="two-col">
-    <div>
-      <div class="sec-hdr">
-        <div class="sec-icon" style="background:rgba(0,194,255,.1)">🏥</div>
-        <div class="sec-title">تعديلات دائمة</div>
-        <div class="sec-line"></div>
-        <button class="btn btn-primary" onclick="openModal('m-loc')">+</button>
-      </div>
-      <div class="loc-grid" id="loc-perm-grid"></div>
-    </div>
-    <div>
-      <div class="sec-hdr">
-        <div class="sec-icon" style="background:rgba(255,124,42,.1)">🔄</div>
-        <div class="sec-title">تعديلات مؤقتة (أثناء الزيارة)</div>
-        <div class="sec-line"></div>
-        <button class="btn btn-primary" onclick="openModal('m-tmp')">+</button>
-      </div>
-      <div class="tcard">
-        <div class="tscroll">
-          <table><thead><tr><th>العنصر</th><th>المكان</th><th>التعديل</th><th>يُعاد</th><th></th></tr></thead>
-          <tbody id="tmp-tbody"></tbody></table>
-        </div>
-        <button class="add-row" onclick="openModal('m-tmp')">+ إضافة تعديل مؤقت</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ═══ LECTURES ═══ -->
-<div class="pane" id="pane-lectures">
-  <div class="sec-hdr">
-    <div class="sec-icon" style="background:rgba(240,180,41,.1)"></div>
-    <div class="sec-title">المحاضرات التدريبية المجدولة</div>
-    <div class="sec-line"></div>
-    <button class="btn btn-primary" onclick="openModal('m-lec')">+ إضافة</button>
-  </div>
-  <div class="tcard">
-    <div class="tcard-hdr">
-      <div class="tcard-title"> المحاضرات <span class="badge badge-blue" id="lec-cnt">0</span></div>
-      <span class="badge badge-green" id="lec-done-cnt">0 منجزة</span>
-    </div>
-    <div class="tscroll">
-      <table><thead><tr><th class="num">#</th><th>العنوان</th><th>الملقي</th><th>البديل</th><th>التاريخ</th><th>الجمهور</th><th>تمت؟</th><th></th></tr></thead>
-      <tbody id="lec-tbody"></tbody></table>
-    </div>
-    <button class="add-row" onclick="openModal('m-lec')">+ إضافة محاضرة</button>
-  </div>
-</div>
-
-<!-- ═══ ASSIGNMENTS ═══ -->
-<div class="pane" id="pane-assignments">
-  <div class="sec-hdr">
-    <div class="sec-icon" style="background:rgba(255,124,42,.1)">📌</div>
-    <div class="sec-title">التكليفات</div>
-    <div class="sec-line"></div>
-    <button class="btn btn-primary" onclick="openModal('m-assign')">+ إضافة</button>
-  </div>
-  <div class="tcard">
-    <div class="tscroll">
-      <table><thead><tr><th class="num">#</th><th>القسم</th><th>النوع</th><th>السبب</th><th>الوقت</th><th>المسؤول</th><th>الحالة</th><th></th></tr></thead>
-      <tbody id="assign-tbody"></tbody></table>
-    </div>
-    <button class="add-row" onclick="openModal('m-assign')">+ إضافة تكليف</button>
-  </div>
-</div>
-
-<!-- ═══ POLICIES ═══ -->
-<div class="pane" id="pane-policies">
-  <div class="sec-hdr">
-    <div class="sec-icon" style="background:rgba(0,194,255,.1)">.</div>
-    <div class="sec-title">السياسات والموقعون</div>
-    <div class="sec-line"></div>
-    <button class="btn btn-primary" onclick="openModal('m-pol')">+ إضافة</button>
-  </div>
-  <div class="sig-grid" id="sig-grid"></div>
-  <div class="tcard">
-    <div class="tcard-hdr">
-      <div class="tcard-title"> السياسات <span class="badge badge-blue" id="pol-cnt">0</span></div>
-      <span class="badge badge-green" id="pol-signed-cnt">0 موقعة كاملاً</span>
-    </div>
-    <div class="tscroll">
-      <table><thead><tr><th class="num">#</th><th>اسم السياسة</th><th>القسم</th><th>جاهزية المحتوى</th><th>الموقعون المطلوبون</th><th>حالة التوقيع</th><th></th></tr></thead>
-      <tbody id="pol-tbody"></tbody></table>
-    </div>
-    <button class="add-row" onclick="openModal('m-pol')">+ إضافة سياسة</button>
-  </div>
-</div>
-
-<!-- ═══ WORKFLOW ═══ -->
-<div class="pane" id="pane-workflow">
-  
-  <!-- Header -->
-  <div style="background:linear-gradient(135deg,#7C3AED,#0080FF);border-radius:12px;padding:24px;margin-bottom:20px;color:white">
-    <h2 style="margin:0 0 8px;font-size:24px;font-weight:900"> المستندات</h2>
-    <p style="margin:0;opacity:.9;font-size:13px">إدارة روابط المستندات والملفات المهمة للمشروع</p>
-  </div>
-
-  <!-- Actions -->
-  <div style="display:flex;gap:12px;margin-bottom:20px">
-    <button class="btn btn-primary" onclick="openModal('m-add-wf')">➕ إضافة مستند</button>
-    <button class="btn btn-ghost" onclick="exportCSV('workflow','المستندات')">📥 تصدير CSV</button>
-    <div style="flex:1"></div>
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 16px;display:flex;align-items:center;gap:8px">
-      <span style="font-size:11px;color:var(--text3)">الإجمالي:</span>
-      <strong style="color:var(--accent);font-size:16px" id="wf-cnt">0</strong>
-    </div>
-  </div>
-
-  <!-- Table -->
-  <table id="wf-table" class="tbl">
-    <thead>
-      <tr>
-        <th class="num">#</th>
-        <th>المستند</th>
-        <th>التصنيف</th>
-        <th>المسؤول</th>
-        <th>إجراءات</th>
-      </tr>
-    </thead>
-    <tbody id="wf-tbody">
-      <tr><td colspan="5" style="text-align:center;color:var(--text3);padding:40px">لا توجد مستندات</td></tr>
-    </tbody>
-  </table>
-
-</div>
-
-<div class="pane" id="pane-policies2">
-  <!-- Stats row -->
-  <div class="kpi-grid" id="pol2-stats" style="grid-template-columns:repeat(6,1fr);margin-bottom:16px"></div>
-
-  <!-- Section bars -->
-  <div class="sec-hdr">
-    <div class="sec-icon" style="background:rgba(0,194,255,.1)">📊</div>
-    <div class="sec-title">التقدم حسب القسم</div>
-    <div class="sec-line"></div>
-    <button class="btn btn-ghost" onclick="fetchPolicies()">🔄 مزامنة</button>
-    <button class="btn btn-primary" onclick="syncFromTracker()" title="سحب من شيت Tracker إلى CBAHI">📥 سحب من Tracker</button>
-    <button class="btn btn-gold" onclick="exportPoliciesCSV()">📥 CSV</button>
-  </div>
-  <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:20px" id="pol2-sections"></div>
-
-  <!-- Signatories -->
-  <div class="sec-hdr">
-    <div class="sec-icon" style="background:rgba(168,85,247,.1)">✍️</div>
-    <div class="sec-title">حالة التوقيعات</div>
-    <div class="sec-line"></div>
-  </div>
-  <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:10px;margin-bottom:20px" id="pol2-sigs"></div>
-
-  <!-- Table -->
-  <div class="sec-hdr">
-    <div class="sec-icon" style="background:rgba(16,217,126,.1)">📋</div>
-    <div class="sec-title">السياسات الكاملة</div>
-    <div class="sec-line"></div>
-    <span class="badge badge-blue" id="pol2-count">0</span>
-  </div>
-
-  <!-- Filters -->
-  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:center">
-    <select id="pol2-sec-select" onchange="POL_FILTER_SEC=this.value;renderPolTable()"
-      style="padding:7px 12px;background:var(--surface);border:1px solid var(--border);border-radius:7px;color:var(--text);font-family:Tajawal,sans-serif;font-size:12px">
-      <option value="ALL">كل الأقسام</option>
-      <option value="IPC">IPC – مكافحة العدوى (28)</option>
-      <option value="PC">PC – رعاية المرضى (11)</option>
-      <option value="LD">LD – القيادة (23)</option>
-      <option value="MOI">MOI – إدارة المعلومات (9)</option>
-      <option value="FMS">FMS – السلامة (36)</option>
-    </select>
-    <select onchange="POL_FILTER_STATUS=this.value;renderPolTable()"
-      style="padding:7px 12px;background:var(--surface);border:1px solid var(--border);border-radius:7px;color:var(--text);font-family:Tajawal,sans-serif;font-size:12px">
-      <option value="ALL">كل الحالات</option>
-      <option value="مكتملة">✅ مكتملة</option>
-      <option value="قيد الإعداد">⏳ قيد الإعداد</option>
-      <option value="لم تبدأ">❌ لم تبدأ</option>
-    </select>
-    <input type="text" placeholder="🔍 بحث..." oninput="POL_SEARCH=this.value;renderPolTable()"
-      style="padding:7px 12px;background:var(--surface);border:1px solid var(--border);border-radius:7px;color:var(--text);font-family:Tajawal,sans-serif;font-size:12px;flex:1;min-width:150px">
-    <button class="btn btn-ghost" onclick="POL_FILTER_SEC='ALL';POL_FILTER_STATUS='ALL';POL_SEARCH='';renderPolTable()">مسح</button>
-  </div>
-
-  <div class="info-bar">💡 اضغط على الحالة لتغييرها · اضغط ⬜ لتسجيل التوقيع · عدّل النسبة مباشرة · كل تعديل يُحفظ في Google Sheets فوراً</div>
-
-  <div class="tcard">
-    <div class="tscroll">
-      <table>
-        <thead>
-          <tr>
-            <th class="num">#</th>
-            <th>الرمز</th>
-            <th>عنوان السياسة</th>
-            <th>القسم</th>
-            <th>✍️ حالة الكتابة</th>
-            <th>التقدم %</th>
-            <th>🖊️ حالة التوقيع</th>
-            <th style="background:rgba(13,148,136,.2);color:#0D9488;text-align:center">مدير الجودة</th>
-            <th style="background:rgba(16,185,129,.2);color:#10B981;text-align:center">مدير طبي</th>
-            <th style="background:rgba(124,58,237,.2);color:#7C3AED;text-align:center">مدير الفرع</th>
-            <th style="background:rgba(245,158,11,.2);color:#F59E0B;text-align:center">رئيسة التمريض</th>
-            <th style="background:rgba(249,115,22,.2);color:#F97316;text-align:center">مدير الموارد</th>
-            <th style="background:rgba(239,68,68,.2);color:#EF4444;text-align:center">مهندس السلامة</th>
-            <th style="background:rgba(13,31,60,.4);color:#93C5FD;text-align:center">الرئيس التنفيذي</th>
-            <th>ملاحظات</th>
-          </tr>
-        </thead>
-        <tbody id="pol2-tbody"></tbody>
-      </table>
-    </div>
-  </div>
-</div>
-
-
-
-<!-- ═══ PATIENT FILES TRACKER ═══ -->
-<div class="pane" id="pane-patient-files">
-  
-  <!-- Summary Cards -->
-  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px">
-    <div style="background:linear-gradient(135deg,#0080FF,#0D9488);border-radius:12px;padding:20px;color:white">
-      <div style="font-size:12px;opacity:.9;margin-bottom:6px">📊 إجمالي الملفات</div>
-      <div style="font-size:36px;font-weight:900;font-family:Cairo,sans-serif" id="pf-total">0</div>
-    </div>
-    <div style="background:linear-gradient(135deg,#10D97E,#0D9488);border-radius:12px;padding:20px;color:white">
-      <div style="font-size:12px;opacity:.9;margin-bottom:6px">✅ المكتملة</div>
-      <div style="font-size:36px;font-weight:900;font-family:Cairo,sans-serif" id="pf-complete">0</div>
-    </div>
-    <div style="background:linear-gradient(135deg,#F97316,#EF4444);border-radius:12px;padding:20px;color:white">
-      <div style="font-size:12px;opacity:.9;margin-bottom:6px">⚠️ الناقصة</div>
-      <div style="font-size:36px;font-weight:900;font-family:Cairo,sans-serif" id="pf-incomplete">0</div>
-    </div>
-  </div>
-
-  <!-- Period Selection + Actions -->
-  <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:20px">
-    <div style="display:grid;grid-template-columns:1fr 1fr auto auto;gap:12px;align-items:end">
-      <div class="fg" style="margin:0">
-        <label>📅 من تاريخ</label>
-        <input type="date" id="pf-from" style="width:100%">
-      </div>
-      <div class="fg" style="margin:0">
-        <label>📅 إلى تاريخ</label>
-        <input type="date" id="pf-to" style="width:100%">
-      </div>
-      <button class="btn btn-primary" onclick="updatePatientFileStats()" style="height:42px">🔄 تحديث</button>
-      <button class="btn btn-ghost" onclick="openPatientFileModal()" style="height:42px">📊 رفع تقرير</button>
-    </div>
-  </div>
-
-  <!-- Report Display Area -->
-  <div id="pf-report-area" style="background:var(--surface);border:2px dashed var(--border);border-radius:12px;padding:40px;text-align:center;color:var(--text3);margin-bottom:20px">
-    <div style="font-size:48px;margin-bottom:12px">📄</div>
-    <div style="font-size:14px;font-weight:600;margin-bottom:6px">لا يوجد تقرير محمّل</div>
-    <div style="font-size:12px">اضغط "📊 رفع تقرير" لإضافة ملف PDF</div>
-  </div>
-
-  <!-- History Table -->
-  <div class="sec-hdr">
-    <div class="sec-icon" style="background:rgba(0,128,255,.1)">📊</div>
-    <div class="sec-title">سجل التقارير</div>
-    <div class="sec-line"></div>
-  </div>
-
-  <table class="tbl">
-    <thead>
-      <tr>
-        <th class="num">#</th>
-        <th>الفترة</th>
-        <th>الإجمالي</th>
-        <th>المكتمل</th>
-        <th>الناقص</th>
-        <th>النسبة %</th>
-        <th>التقرير</th>
-        <th>إجراءات</th>
-      </tr>
-    </thead>
-    <tbody id="pf-history-tbody">
-      <tr><td colspan="8" style="text-align:center;color:var(--text3);padding:40px">لا توجد تقارير</td></tr>
-    </tbody>
-  </table>
-
-</div>
-
-<!-- ═══ TOTAL PROGRESS DASHBOARD ═══ -->
-<div class="pane" id="pane-progress">
-
-  <!-- Hero KPI: Total Progress -->
-  <div style="background:linear-gradient(135deg,#0a1628,#0d1f3c);border:1px solid var(--border);border-radius:var(--radius);padding:28px;margin-bottom:20px;text-align:center;position:relative;overflow:hidden">
-    <div style="font-size:13px;color:var(--text3);font-weight:700;letter-spacing:2px;margin-bottom:10px">نسبة الإنجاز الكلية لمشروع CBAHI</div>
-    <div id="total-progress-num" style="font-size:80px;font-weight:900;font-family:'Cairo',sans-serif;background:linear-gradient(135deg,#10d97e,#00c2ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1;margin-bottom:14px">0%</div>
-    <div style="height:14px;background:rgba(255,255,255,.06);border-radius:7px;overflow:hidden;margin:0 auto;max-width:600px">
-      <div id="total-progress-bar" style="height:100%;width:0%;background:linear-gradient(90deg,#0080ff,#10d97e,#00c2ff);border-radius:7px;transition:width 1.2s ease;box-shadow:0 0 20px rgba(16,217,126,.5)"></div>
-    </div>
-    <div style="display:flex;gap:24px;justify-content:center;margin-top:18px;flex-wrap:wrap">
-      <div><span style="color:var(--text3);font-size:11px"> الأيام المتبقية</span> <strong id="prog-days" style="color:var(--gold);font-size:18px;margin-right:8px">–</strong></div>
-      <div><span style="color:var(--text3);font-size:11px"> الوقت المتوقع لجاهزية المنشأة</span> <strong style="color:var(--accent);font-size:14px;margin-right:8px">20/08/2026</strong></div>
-      <div><span style="color:var(--text3);font-size:11px"> تاريخ البداية</span> <strong style="color:var(--text2);font-size:14px;margin-right:8px">10/02/2026</strong></div>
-    </div>
-  </div>
-
-  <!-- Weighted Pillars -->
-  <div class="sec-hdr">
-    <div class="sec-icon" style="background:rgba(0,194,255,.1)">⚖️</div>
-    <div class="sec-title">المحاور الموزونة (10 محاور = 100%)</div>
-    <div class="sec-line"></div>
-  </div>
-
-  <div id="pillars-grid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px"></div>
-
-  <!-- Action items -->
-  <div class="sec-hdr" style="margin-top:24px">
-    <div class="sec-icon" style="background:rgba(255,124,42,.1)">⚡</div>
-    <div class="sec-title">إجراءات سريعة</div>
-    <div class="sec-line"></div>
-  </div>
-
-  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px">
-    <button class="btn btn-primary" style="padding:14px;font-size:13px" onclick="switchTab('policies2')"> إدارة السياسات (106)</button>
-    <button class="btn btn-ghost" style="padding:14px;font-size:13px" onclick="switchTab('observations')"> إدارة الملاحظات</button>
-    <button class="btn btn-ghost" style="padding:14px;font-size:13px" onclick="switchTab('requirements')"> إدارة المتطلبات</button>
-    <button class="btn btn-ghost" style="padding:14px;font-size:13px" onclick="switchTab('lectures')"> المحاضرات</button>
-    <button class="btn btn-ghost" style="padding:14px;font-size:13px" onclick="openExtras()"> رخص وعقود ومستندات</button>
-    <button class="btn btn-gold" style="padding:14px;font-size:13px" onclick="syncAll()">🔄 مزامنة كل البيانات</button>
-  </div>
-</div>
-
-<!-- Extras Modal — رخص / عقود / مستندات / موظفين -->
-<div class="overlay" id="m-extras">
-  <div class="modal" style="max-width:600px">
-    <h3> الرخص والعقود والمستندات</h3>
-    <div class="info-bar">💡 سجل الإنجاز السريع لكل بند يدخل في النسبة الإجمالية</div>
-
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px">
-      <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:10px"> الرخص والعقود</div>
-      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px">
-        <div class="fg"><label>رخصة البلدية</label>
-          <select id="ex-lic-baladiya"><option value="0">❌</option><option value="1">✅</option></select></div>
-        <div class="fg"><label>رخصة الدفاع المدني</label>
-          <select id="ex-lic-defaa"><option value="0">❌</option><option value="1">✅</option></select></div>
-        <div class="fg"><label>رخصة الهلال الأحمر</label>
-          <select id="ex-lic-hilal"><option value="0">❌</option><option value="1">✅</option></select></div>
-        <div class="fg"><label>ترخيص وزارة الصحة</label>
-          <select id="ex-lic-health"><option value="0">❌</option><option value="1">✅</option></select></div>
-        <div class="fg"><label>شهادة CBAHI السابقة</label>
-          <select id="ex-lic-cbahi"><option value="0">❌</option><option value="1">✅</option></select></div>
-        <div class="fg"><label>رخص أخرى (عدد)</label>
-          <input type="number" id="ex-lic-other" min="0" max="5" placeholder="0-5"></div>
-      </div>
-    </div>
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px">
-      <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:10px"> العقود السارية</div>
-      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px">
-        <div class="fg"><label>عقد النفايات الطبية</label>
-          <select id="ex-cnt-waste"><option value="0">❌</option><option value="1">✅</option></select></div>
-        <div class="fg"><label>عقد الأشعة (إن وجد)</label>
-          <select id="ex-cnt-xray"><option value="0">❌</option><option value="1">✅</option></select></div>
-        <div class="fg"><label>عقد المختبر (إن وجد)</label>
-          <select id="ex-cnt-lab"><option value="0">❌</option><option value="1">✅</option></select></div>
-        <div class="fg"><label>عقود أخرى (عدد)</label>
-          <input type="number" id="ex-cnt-other" min="0" max="5" placeholder="0-5"></div>
-      </div>
-    </div>
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px">
-      <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:10px"> الاتفاقيات الطبية</div>
-      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px">
-        <div class="fg"><label>اتفاقية CPR (إنعاش)</label>
-          <select id="ex-agr-cpr"><option value="0">❌</option><option value="1">✅</option></select></div>
-        <div class="fg"><label>اتفاقية المختبر المرجعي</label>
-          <select id="ex-agr-lab"><option value="0">❌</option><option value="1">✅</option></select></div>
-        <div class="fg"><label>اتفاقية الإحالات (مستشفى)</label>
-          <select id="ex-agr-referral"><option value="0">❌</option><option value="1">✅</option></select></div>
-        <div class="fg"><label>اتفاقيات أخرى (عدد)</label>
-          <input type="number" id="ex-agr-other" min="0" max="2" placeholder="0-2"></div>
-      </div>
-    </div>
-    <div class="fg"><label>📄 OVR Report نسخ مطبوعة وموزعة (نعم/لا)</label>
-      <select id="ex-ovr"><option value="0">لا</option><option value="1">نعم</option></select></div>
-    <div class="fg"><label>📘 Manual مكافحة العدوى مطبوع وموزع</label>
-      <select id="ex-manual"><option value="0">لا</option><option value="1">نعم</option></select></div>
-    <div class="fg"><label>✅ Checklists معتمدة وموزعة (من 12 قائمة)</label>
-      <input type="number" id="ex-checklists" min="0" max="12" placeholder="0-12"></div>
-    <div class="fg"><label>📝 محاضرات جسر — تم الإبلاغ عنها (من المحاضرات المنجزة)</label>
-      <select id="ex-jisr"><option value="none">لم يُبلَّغ بعد</option><option value="partial">بعضها</option><option value="all">الكل</option></select></div>
-    <div class="fg"><label>👥 ملفات الموظفين المكتملة (نسبة %)</label>
-      <input type="number" id="ex-staff" min="0" max="100" placeholder="0-100"></div>
-    <div class="fg"><label>🤝 تعاون الفريق (نسبة %)</label>
-      <input type="number" id="ex-team" min="0" max="100" placeholder="0-100"></div>
-
-    <div class="modal-footer">
-      <button class="btn btn-danger" onclick="closeModal('m-extras')">إلغاء</button>
-      <button class="btn btn-primary" onclick="saveExtras()">💾 حفظ</button>
-    </div>
-  </div>
-</div>
-
-</div><!-- /main -->
-
-<!-- ═══ MODALS ═══ -->
-
-<!-- Settings -->
-<div class="overlay" id="m-settings">
-  <div class="modal">
-    <h3>⚙️ إعدادات الاتصال بـ Google Sheets</h3>
-    <div class="fg"><label>رابط Apps Script (Web App URL)</label>
-      <input type="text" id="cfg-url" placeholder="https://script.google.com/macros/s/YOUR_ID/exec"></div>
-    <div class="fg"><label>اختبار الاتصال</label>
-      <button class="btn btn-ghost" style="width:100%" onclick="testConnection()">🔌 اختبار الآن</button></div>
-    <div class="modal-footer">
-      <button class="btn btn-danger" onclick="closeModal('m-settings')">إغلاق</button>
-      <button class="btn btn-primary" onclick="saveSettings()">💾 حفظ</button>
-    </div>
-  </div>
-</div>
-
-<!-- Observation Modal -->
-<div class="overlay" id="m-obs">
-  <div class="modal">
-    <h3>🔍 <span id="m-obs-title">إضافة ملاحظة</span></h3>
-    <input type="hidden" id="obs-eid">
-    <div class="fg"><label>نص الملاحظة</label><textarea id="obs-text" rows="3" placeholder="وصف الملاحظة..."></textarea></div>
-    <div class="fg"><label>الأولوية</label><select id="obs-pri"><option>عالية</option><option>متوسطة</option><option>منخفضة</option></select></div>
-    <div class="fg"><label>المسؤول</label><input type="text" id="obs-owner" placeholder="اسم المسؤول"></div>
-    <div class="fg"><label>الموعد النهائي</label><input type="date" id="obs-due"></div>
-    <div class="fg"><label>الحالة</label><select id="obs-stat"><option>معلقة</option><option>جارية</option><option>محلولة</option></select></div>
-    <div class="modal-footer">
-      <button class="btn btn-danger" onclick="closeModal('m-obs')">إلغاء</button>
-      <button class="btn btn-primary" onclick="saveObs()">💾 حفظ</button>
-    </div>
-  </div>
-</div>
-
-<!-- Requirement Modal -->
-<div class="overlay" id="m-req">
-  <div class="modal">
-    <h3>📋 <span id="m-req-title">إضافة متطلب</span></h3>
-    <input type="hidden" id="req-eid">
-    <div class="fg"><label>المتطلب</label><textarea id="req-text" rows="2" placeholder="وصف المتطلب..."></textarea></div>
-    <div class="fg"><label>الفئة</label><select id="req-cat">
-      <option>سياسات وإجراءات</option><option>بنية تحتية</option><option>تدريب وتأهيل</option>
-      <option>أجهزة ومعدات</option><option>سجلات وملفات</option><option>سلامة بيئية</option>
-      <option>مستلزمات</option><option>أخرى</option></select></div>
-    <div class="fg"><label>الأولوية</label><select id="req-pri"><option>عالية</option><option>متوسطة</option><option>منخفضة</option></select></div>
-    <div class="fg"><label>التكلفة التقديرية (ريال)</label><input type="number" id="req-cost" placeholder="0" min="0"></div>
-    <div class="fg"><label>يحتاج دعم مالي؟</label><select id="req-fin"><option value="لا">لا</option><option value="نعم">نعم</option></select></div>
-    <div class="fg"><label>الحالة</label><select id="req-stat"><option>معلق</option><option>جارٍ</option><option>مكتمل</option></select></div>
-    <div class="fg"><label>المسؤول</label><input type="text" id="req-owner" placeholder="اسم المسؤول"></div>
-    <div class="modal-footer">
-      <button class="btn btn-danger" onclick="closeModal('m-req')">إلغاء</button>
-      <button class="btn btn-primary" onclick="saveReq()">💾 حفظ</button>
-    </div>
-  </div>
-</div>
-
-<!-- Team Modal -->
-<div class="overlay" id="m-team">
-  <div class="modal">
-    <h3> إضافة عضو</h3>
-    <input type="hidden" id="team-eid">
-    <div class="fg"><label>الاسم</label><input type="text" id="team-name" placeholder="الاسم"></div>
-    <div class="fg"><label>المسمى الوظيفي</label><input type="text" id="team-role" placeholder="المسمى"></div>
-    <div class="fg"><label>القسم</label><input type="text" id="team-dept" placeholder="القسم"></div>
-    <div class="fg"><label>دوره في CBAHI</label><input type="text" id="team-proj" placeholder="دور في المشروع"></div>
-    <div class="fg"><label>الفرع</label><select id="team-branch"><option>بريدة</option><option>عنيزة</option><option>كلا الفرعين</option></select></div>
-    <div class="modal-footer">
-      <button class="btn btn-danger" onclick="closeModal('m-team')">إلغاء</button>
-      <button class="btn btn-primary" onclick="saveTeam()">💾 حفظ</button>
-    </div>
-  </div>
-</div>
-
-<!-- Location Modal -->
-<div class="overlay" id="m-loc">
-  <div class="modal">
-    <h3>🏥 إضافة مكان (تعديل دائم)</h3>
-    <input type="hidden" id="loc-eid">
-    <div class="fg"><label>اسم المكان</label><input type="text" id="loc-name" placeholder="مثال: غرفة الانتظار"></div>
-    <div class="fg"><label>الفرع</label><select id="loc-branch"><option>بريدة</option><option>عنيزة</option><option>كلا الفرعين</option></select></div>
-    <div class="fg"><label>الوضع الحالي (قبل)</label><textarea id="loc-before" rows="2"></textarea></div>
-    <div class="fg"><label>المطلوب (بعد)</label><textarea id="loc-after" rows="2"></textarea></div>
-    <div class="fg"><label>الحالة</label><select id="loc-stat"><option>معلق</option><option>جارٍ</option><option>مكتمل</option></select></div>
-    <div class="fg"><label>المسؤول</label><input type="text" id="loc-owner" placeholder="اسم المسؤول"></div>
-    <div class="modal-footer">
-      <button class="btn btn-danger" onclick="closeModal('m-loc')">إلغاء</button>
-      <button class="btn btn-primary" onclick="saveLoc()">💾 حفظ</button>
-    </div>
-  </div>
-</div>
-
-<!-- Temp Modal -->
-<div class="overlay" id="m-tmp">
-  <div class="modal">
-    <h3>🔄 تعديل مؤقت أثناء الزيارة</h3>
-    <input type="hidden" id="tmp-eid">
-    <div class="fg"><label>العنصر</label><input type="text" id="tmp-item" placeholder="ما الشيء؟"></div>
-    <div class="fg"><label>المكان الحالي</label><input type="text" id="tmp-loc" placeholder="وين موجود؟"></div>
-    <div class="fg"><label>التعديل المؤقت</label><textarea id="tmp-change" rows="2"></textarea></div>
-    <div class="fg"><label>يُعاد لمكانه</label><input type="text" id="tmp-restore" placeholder="متى يُعاد؟"></div>
-    <div class="fg"><label>المسؤول</label><input type="text" id="tmp-owner" placeholder="اسم المسؤول"></div>
-    <div class="modal-footer">
-      <button class="btn btn-danger" onclick="closeModal('m-tmp')">إلغاء</button>
-      <button class="btn btn-primary" onclick="saveTmp()">💾 حفظ</button>
-    </div>
-  </div>
-</div>
-
-<!-- Lecture Modal -->
-<div class="overlay" id="m-lec">
-  <div class="modal">
-    <h3> إضافة محاضرة</h3>
-    <input type="hidden" id="lec-eid">
-    <div class="fg"><label>عنوان المحاضرة</label><input type="text" id="lec-title" placeholder="عنوان المحاضرة"></div>
-    <div class="fg"><label>الملقي الأساسي</label><input type="text" id="lec-speaker" placeholder="الاسم"></div>
-    <div class="fg"><label>البديل (نيابةً)</label><input type="text" id="lec-alt" placeholder="اسم البديل"></div>
-    <div class="fg"><label>التاريخ</label><input type="date" id="lec-date"></div>
-    <div class="fg"><label>الوقت</label><input type="time" id="lec-time"></div>
-    <div class="fg"><label>الجمهور المستهدف</label><select id="lec-aud">
-      <option>جميع الموظفين</option><option>الكادر التمريضي</option><option>الكادر الطبي</option>
-      <option>الإداريون</option><option>فريق الجودة</option><option>التمريض والصيدلة</option></select></div>
-    <div class="fg"><label>هل تمت؟</label><select id="lec-done"><option value="لا">لا</option><option value="نعم">نعم</option></select></div>
-    <div class="modal-footer">
-      <button class="btn btn-danger" onclick="closeModal('m-lec')">إلغاء</button>
-      <button class="btn btn-primary" onclick="saveLec()">💾 حفظ</button>
-    </div>
-  </div>
-</div>
-
-<!-- Assignment Modal -->
-<div class="overlay" id="m-assign">
-  <div class="modal">
-    <h3> إضافة تكليف</h3>
-    <input type="hidden" id="assign-eid">
-    <div class="fg"><label>القسم</label><input type="text" id="assign-dept" placeholder="القسم"></div>
-    <div class="fg"><label>نوع التكليف</label><select id="assign-type">
-      <option>تكليف رسمي موثق</option><option>تكليف كتابي</option>
-      <option>تفويض صلاحيات</option><option>مهمة ميدانية</option>
-      <option>تكليف تدريبي إلزامي</option></select></div>
-    <div class="fg"><label>السبب والهدف</label><textarea id="assign-reason" rows="2"></textarea></div>
-    <div class="fg"><label>الوقت المطلوب</label><input type="text" id="assign-time" placeholder="يومي / أسبوعي / مرة واحدة"></div>
-    <div class="fg"><label>المسؤول</label><input type="text" id="assign-owner" placeholder="اسم المسؤول"></div>
-    <div class="fg"><label>الحالة</label><select id="assign-stat"><option>معلق</option><option>جارٍ</option><option>مكتمل</option></select></div>
-    <div class="modal-footer">
-      <button class="btn btn-danger" onclick="closeModal('m-assign')">إلغاء</button>
-      <button class="btn btn-primary" onclick="saveAssign()">💾 حفظ</button>
-    </div>
-  </div>
-</div>
-
-<!-- Policy Modal -->
-<div class="overlay" id="m-pol">
-  <div class="modal">
-    <h3> إضافة سياسة</h3>
-    <input type="hidden" id="pol-eid">
-    <div class="fg"><label>اسم السياسة</label><input type="text" id="pol-name" placeholder="اسم السياسة"></div>
-    <div class="fg"><label>القسم</label><input type="text" id="pol-dept" placeholder="القسم المعني"></div>
-    <div class="fg"><label>جاهزية المحتوى</label><select id="pol-content"><option>مكتملة</option><option>قيد الإعداد</option><option>لم تبدأ</option></select></div>
-    <div class="fg"><label>الموقعون المطلوبون</label><input type="text" id="pol-sigs" placeholder="مثال: مدير الجودة، مدير طبي"></div>
-    <div class="fg"><label>حالة التوقيع</label><select id="pol-sigstat"><option>لم يوقع</option><option>موقع جزئياً</option><option>موقع كامل</option></select></div>
-    <div class="modal-footer">
-      <button class="btn btn-danger" onclick="closeModal('m-pol')">إلغاء</button>
-      <button class="btn btn-primary" onclick="savePol()">💾 حفظ</button>
-    </div>
-  </div>
-</div>
-
-<!-- Workflow Modal -->
-<div class="overlay" id="m-wf">
-  <div class="modal">
-    <h3> إضافة مستند</h3>
-    <input type="hidden" id="wf-eid">
-    <div class="fg"><label>عنوان المستند</label><input type="text" id="wf-title-in" placeholder="عنوان المستند"></div>
-    <div class="fg"><label>وصف المستند</label><textarea id="wf-desc-in" rows="3" placeholder="التفاصيل..."></textarea></div>
-    <div class="fg"><label>الوثيقة / النموذج</label><input type="text" id="wf-doc-in" placeholder="النموذج المطلوب"></div>
-    <div class="fg"><label>المسؤول</label><input type="text" id="wf-owner-in" placeholder="المسؤول عن المستند"></div>
-    <div class="modal-footer">
-      <button class="btn btn-danger" onclick="closeModal('m-wf')">إلغاء</button>
-      <button class="btn btn-primary" onclick="saveWf()">💾 حفظ</button>
-    </div>
-  </div>
-</div>
-
-<!-- TOAST CONTAINER -->
-<div class="toast-wrap" id="toasts"></div>
-
-<div class="spacer"></div>
-
 </body>
 </html>
 

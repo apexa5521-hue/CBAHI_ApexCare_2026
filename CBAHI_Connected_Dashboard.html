@@ -288,7 +288,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
     <div class="sec-icon" style="background:rgba(255,71,87,.1)">🔍</div>
     <div class="sec-title">الملاحظات المبدئية</div>
     <div class="sec-line"></div>
-    <button class="btn btn-primary" onclick="openModal('m-obs')">+ إضافة</button>
+    <button class="btn btn-primary" onclick="openObsModal()">+ إضافة</button>
   </div>
   <div class="info-bar">ℹ️ جميع التعديلات تُحفظ تلقائياً في Google Sheets وتظهر فوراً</div>
   <div class="tcard">
@@ -300,7 +300,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
       <table><thead><tr><th class="num">#</th><th>الملاحظة</th><th>الأولوية</th><th>المسؤول</th><th>الموعد</th><th>الحالة</th><th>إجراء</th></tr></thead>
       <tbody id="obs-tbody"></tbody></table>
     </div>
-    <button class="add-row" onclick="openModal('m-obs')">+ إضافة ملاحظة</button>
+    <button class="add-row" onclick="openObsModal()">+ إضافة ملاحظة</button>
   </div>
 </div>
 
@@ -310,7 +310,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
     <div class="sec-icon" style="background:rgba(168,85,247,.1)">📋</div>
     <div class="sec-title">المتطلبات الكاملة</div>
     <div class="sec-line"></div>
-    <button class="btn btn-primary" onclick="openModal('m-req')">+ إضافة</button>
+    <button class="btn btn-primary" onclick="newReq()">+ إضافة</button>
   </div>
   <div class="tcard">
     <div class="tcard-hdr">
@@ -321,7 +321,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
       <table><thead><tr><th class="num">#</th><th>المتطلب</th><th>الفئة</th><th>الأولوية</th><th>التكلفة</th><th>تمويل؟</th><th>الحالة</th><th>المسؤول</th><th></th></tr></thead>
       <tbody id="req-tbody"></tbody></table>
     </div>
-    <button class="add-row" onclick="openModal('m-req')">+ إضافة متطلب</button>
+    <button class="add-row" onclick="newReq()">+ إضافة متطلب</button>
   </div>
 </div>
 
@@ -331,10 +331,10 @@ tr:hover td{background:rgba(0,194,255,.03)}
     <div class="sec-icon" style="background:rgba(16,217,126,.1)">👥</div>
     <div class="sec-title">الفريق الداخلي</div>
     <div class="sec-line"></div>
-    <button class="btn btn-primary" onclick="openModal('m-team')">+ إضافة</button>
+    <button class="btn btn-primary" onclick="newTeam()">+ إضافة</button>
   </div>
   <div class="team-grid" id="team-grid"></div>
-  <button class="add-row" style="margin-top:10px;border-radius:8px" onclick="openModal('m-team')">+ إضافة عضو</button>
+  <button class="add-row" style="margin-top:10px;border-radius:8px" onclick="newTeam()">+ إضافة عضو</button>
 </div>
 
 <!-- ═══ LOCATIONS ═══ -->
@@ -345,7 +345,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
         <div class="sec-icon" style="background:rgba(0,194,255,.1)">🏥</div>
         <div class="sec-title">تعديلات دائمة</div>
         <div class="sec-line"></div>
-        <button class="btn btn-primary" onclick="openModal('m-loc')">+</button>
+        <button class="btn btn-primary" onclick="newLoc()">+</button>
       </div>
       <div class="loc-grid" id="loc-perm-grid"></div>
     </div>
@@ -354,14 +354,14 @@ tr:hover td{background:rgba(0,194,255,.03)}
         <div class="sec-icon" style="background:rgba(255,124,42,.1)">🔄</div>
         <div class="sec-title">تعديلات مؤقتة (أثناء الزيارة)</div>
         <div class="sec-line"></div>
-        <button class="btn btn-primary" onclick="openModal('m-tmp')">+</button>
+        <button class="btn btn-primary" onclick="newTmp()">+</button>
       </div>
       <div class="tcard">
         <div class="tscroll">
           <table><thead><tr><th>العنصر</th><th>المكان</th><th>التعديل</th><th>يُعاد</th><th></th></tr></thead>
           <tbody id="tmp-tbody"></tbody></table>
         </div>
-        <button class="add-row" onclick="openModal('m-tmp')">+ إضافة تعديل مؤقت</button>
+        <button class="add-row" onclick="newTmp()">+ إضافة تعديل مؤقت</button>
       </div>
     </div>
   </div>
@@ -373,7 +373,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
     <div class="sec-icon" style="background:rgba(240,180,41,.1)">🎓</div>
     <div class="sec-title">المحاضرات المجدولة</div>
     <div class="sec-line"></div>
-    <button class="btn btn-primary" onclick="openModal('m-lec')">+ إضافة</button>
+    <button class="btn btn-primary" onclick="newLec()">+ إضافة</button>
   </div>
   <div class="tcard">
     <div class="tcard-hdr">
@@ -384,7 +384,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
       <table><thead><tr><th class="num">#</th><th>العنوان</th><th>الملقي</th><th>البديل</th><th>التاريخ</th><th>الجمهور</th><th>تمت؟</th><th></th></tr></thead>
       <tbody id="lec-tbody"></tbody></table>
     </div>
-    <button class="add-row" onclick="openModal('m-lec')">+ إضافة محاضرة</button>
+    <button class="add-row" onclick="newLec()">+ إضافة محاضرة</button>
   </div>
 </div>
 
@@ -394,14 +394,14 @@ tr:hover td{background:rgba(0,194,255,.03)}
     <div class="sec-icon" style="background:rgba(255,124,42,.1)">📌</div>
     <div class="sec-title">التكليفات</div>
     <div class="sec-line"></div>
-    <button class="btn btn-primary" onclick="openModal('m-assign')">+ إضافة</button>
+    <button class="btn btn-primary" onclick="newAssign()">+ إضافة</button>
   </div>
   <div class="tcard">
     <div class="tscroll">
       <table><thead><tr><th class="num">#</th><th>القسم</th><th>النوع</th><th>السبب</th><th>الوقت</th><th>المسؤول</th><th>الحالة</th><th></th></tr></thead>
       <tbody id="assign-tbody"></tbody></table>
     </div>
-    <button class="add-row" onclick="openModal('m-assign')">+ إضافة تكليف</button>
+    <button class="add-row" onclick="newAssign()">+ إضافة تكليف</button>
   </div>
 </div>
 
@@ -411,7 +411,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
     <div class="sec-icon" style="background:rgba(0,194,255,.1)">📜</div>
     <div class="sec-title">السياسات والموقعون</div>
     <div class="sec-line"></div>
-    <button class="btn btn-primary" onclick="openModal('m-pol')">+ إضافة</button>
+    <button class="btn btn-primary" onclick="newPol()">+ إضافة</button>
   </div>
   <div class="sig-grid" id="sig-grid"></div>
   <div class="tcard">
@@ -423,7 +423,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
       <table><thead><tr><th class="num">#</th><th>اسم السياسة</th><th>القسم</th><th>جاهزية المحتوى</th><th>الموقعون المطلوبون</th><th>حالة التوقيع</th><th></th></tr></thead>
       <tbody id="pol-tbody"></tbody></table>
     </div>
-    <button class="add-row" onclick="openModal('m-pol')">+ إضافة سياسة</button>
+    <button class="add-row" onclick="newPol()">+ إضافة سياسة</button>
   </div>
 </div>
 
@@ -1499,6 +1499,84 @@ async function saveTmp(){ const id=document.getElementById('tmp-eid').value; con
 // ═══════════════════════════════════════════════════════════════
 // CRUD — Lectures
 // ═══════════════════════════════════════════════════════════════
+function newLec() {
+  // تنظيف النموذج بالكامل
+  document.getElementById('lec-eid').value = '';
+  document.getElementById('lec-title').value = '';
+  document.getElementById('lec-speaker').value = '';
+  document.getElementById('lec-alt').value = '';
+  document.getElementById('lec-date').value = ''; // ← فارغ، المستخدم يدخل التاريخ الفعلي
+  document.getElementById('lec-time').value = '';
+  document.getElementById('lec-aud').value = 'جميع الموظفين';
+  document.getElementById('lec-done').value = 'لا';
+  openModal('m-lec');
+}
+
+function newReq() {
+  document.getElementById('req-eid').value = '';
+  document.getElementById('m-req-title').textContent = 'إضافة متطلب';
+  document.getElementById('req-text').value = '';
+  document.getElementById('req-cat').value = 'سياسات وإجراءات';
+  document.getElementById('req-pri').value = 'عالية';
+  document.getElementById('req-cost').value = '0';
+  document.getElementById('req-fin').value = 'لا';
+  document.getElementById('req-stat').value = 'معلق';
+  document.getElementById('req-owner').value = '';
+  openModal('m-req');
+}
+
+function newTeam() {
+  document.getElementById('team-eid').value = '';
+  document.getElementById('team-name').value = '';
+  document.getElementById('team-role').value = '';
+  document.getElementById('team-dept').value = '';
+  document.getElementById('team-proj').value = '';
+  document.getElementById('team-branch').value = 'بريدة';
+  openModal('m-team');
+}
+
+function newLoc() {
+  document.getElementById('loc-eid').value = '';
+  document.getElementById('loc-name').value = '';
+  document.getElementById('loc-branch').value = 'بريدة';
+  document.getElementById('loc-before').value = '';
+  document.getElementById('loc-after').value = '';
+  document.getElementById('loc-stat').value = 'معلق';
+  document.getElementById('loc-owner').value = '';
+  openModal('m-loc');
+}
+
+function newTmp() {
+  document.getElementById('tmp-eid').value = '';
+  document.getElementById('tmp-item').value = '';
+  document.getElementById('tmp-loc').value = '';
+  document.getElementById('tmp-change').value = '';
+  document.getElementById('tmp-restore').value = '';
+  document.getElementById('tmp-owner').value = '';
+  openModal('m-tmp');
+}
+
+function newAssign() {
+  document.getElementById('assign-eid').value = '';
+  document.getElementById('assign-dept').value = '';
+  document.getElementById('assign-type').value = 'تكليف رسمي موثق';
+  document.getElementById('assign-reason').value = '';
+  document.getElementById('assign-time').value = '';
+  document.getElementById('assign-owner').value = '';
+  document.getElementById('assign-stat').value = 'معلق';
+  openModal('m-assign');
+}
+
+function newPol() {
+  document.getElementById('pol-eid').value = '';
+  document.getElementById('pol-name').value = '';
+  document.getElementById('pol-dept').value = '';
+  document.getElementById('pol-content').value = 'لم تبدأ';
+  document.getElementById('pol-sigs').value = '';
+  document.getElementById('pol-sigstat').value = 'لم يوقع';
+  openModal('m-pol');
+}
+
 function editLec(id){ const l=DB.lectures.find(x=>String(x.id)===String(id))||{}; document.getElementById('lec-eid').value=l.id||''; document.getElementById('lec-title').value=l.title||''; document.getElementById('lec-speaker').value=l.speaker||''; document.getElementById('lec-alt').value=l.alt||''; document.getElementById('lec-date').value=l.date||''; document.getElementById('lec-time').value=l.time||''; document.getElementById('lec-aud').value=l.audience||l.aud||'جميع الموظفين'; document.getElementById('lec-done').value=l.done||'لا'; openModal('m-lec'); }
 async function delLec(id){ if(!confirm('حذف؟')) return; DB.lectures=DB.lectures.filter(l=>String(l.id)!==String(id)); renderAll(); await apiCall('delete','lectures',id); setTimeout(() => syncAll(), 1000); toast('🗑️ تم الحذف','info'); }
 async function saveLec(){ 

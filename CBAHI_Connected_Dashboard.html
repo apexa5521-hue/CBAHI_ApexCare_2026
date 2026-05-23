@@ -246,7 +246,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
   <button class="tab" onclick="switchTab('locations')">🏥 الأماكن</button>
   <button class="tab" onclick="switchTab('lectures')">🎓 المحاضرات</button>
   <button class="tab" onclick="switchTab('assignments')">📌 التكليفات</button>
-  <button class="tab" onclick="switchTab('policies')">📜 السياسات</button>
+
   <button class="tab" onclick="switchTab('progress')" style="background:linear-gradient(135deg,#10d97e,#0080ff);color:#fff;font-weight:800">🎯 لوحة الإنجاز الكلي</button>
     <button class="tab" onclick="switchTab('workflow')">📁 المستندات</button>
     <button class="tab" onclick="switchTab('policies2')">📜 السياسات الكاملة (106)</button>
@@ -430,39 +430,51 @@ tr:hover td{background:rgba(0,194,255,.03)}
 
 <!-- ═══ WORKFLOW ═══ -->
 <div class="pane" id="pane-workflow">
-  
+
   <!-- Header -->
   <div style="background:linear-gradient(135deg,#7C3AED,#0080FF);border-radius:12px;padding:24px;margin-bottom:20px;color:white">
     <h2 style="margin:0 0 8px;font-size:24px;font-weight:900">📁 المستندات</h2>
-    <p style="margin:0;opacity:.9;font-size:13px">إدارة روابط المستندات والملفات المهمة للمشروع</p>
+    <p style="margin:0;opacity:.9;font-size:13px">أضف رابط مجلد المستندات للوصول السريع إليه</p>
   </div>
 
-  <!-- Actions -->
-  <div style="display:flex;gap:12px;margin-bottom:20px">
-    <button class="btn btn-primary" onclick="openModal('m-add-wf')">➕ إضافة مستند</button>
-    <button class="btn btn-ghost" onclick="exportCSV('workflow','المستندات')">📥 تصدير CSV</button>
-    <div style="flex:1"></div>
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 16px;display:flex;align-items:center;gap:8px">
-      <span style="font-size:11px;color:var(--text3)">الإجمالي:</span>
-      <strong style="color:var(--accent);font-size:16px" id="wf-cnt">0</strong>
+  <!-- Folder Link Input -->
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:20px">
+    <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:16px;display:flex;align-items:center;gap:8px">
+      🔗 رابط مجلد المستندات
+    </div>
+    <div style="display:flex;gap:10px;align-items:center">
+      <input type="url" id="wf-folder-url"
+        placeholder="https://drive.google.com/drive/folders/..."
+        style="flex:1;padding:11px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:Tajawal,sans-serif;font-size:13px;outline:none;direction:ltr">
+      <button class="btn btn-primary" onclick="saveWfFolder()" style="white-space:nowrap">💾 حفظ الرابط</button>
+      <button class="btn btn-ghost" onclick="openWfFolder()" style="white-space:nowrap">📂 فتح المجلد</button>
+    </div>
+    <div style="font-size:11px;color:var(--text3);margin-top:8px">
+      ℹ️ يُحفظ الرابط محلياً في المتصفح ويبقى متاحاً في كل مرة تفتح الداشبورد
     </div>
   </div>
 
-  <!-- Table -->
-  <table id="wf-table" class="tbl">
-    <thead>
-      <tr>
-        <th class="num">#</th>
-        <th>المستند</th>
-        <th>التصنيف</th>
-        <th>المسؤول</th>
-        <th>إجراءات</th>
-      </tr>
-    </thead>
-    <tbody id="wf-tbody">
-      <tr><td colspan="5" style="text-align:center;color:var(--text3);padding:40px">لا توجد مستندات</td></tr>
-    </tbody>
-  </table>
+  <!-- Folder Preview Card -->
+  <div id="wf-folder-card" style="display:none;background:var(--surface2);border:1px solid rgba(124,58,237,.3);border-radius:12px;padding:20px;margin-bottom:20px">
+    <div style="display:flex;align-items:center;gap:14px">
+      <div style="width:52px;height:52px;background:linear-gradient(135deg,#7C3AED,#0080FF);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">📁</div>
+      <div style="flex:1">
+        <div style="font-size:14px;font-weight:800;color:var(--text);margin-bottom:4px">مجلد مستندات المشروع</div>
+        <div id="wf-folder-url-display" style="font-size:11px;color:var(--text3);word-break:break-all;direction:ltr"></div>
+      </div>
+      <a id="wf-folder-link" href="#" target="_blank"
+        style="background:linear-gradient(135deg,#7C3AED,#0080FF);color:white;padding:10px 20px;border-radius:8px;text-decoration:none;font-size:12px;font-weight:700;white-space:nowrap">
+        📂 فتح المجلد
+      </a>
+    </div>
+  </div>
+
+  <!-- Empty state -->
+  <div id="wf-empty-state" style="background:var(--surface);border:2px dashed rgba(124,58,237,.2);border-radius:12px;padding:60px;text-align:center;color:var(--text3)">
+    <div style="font-size:52px;margin-bottom:12px">📁</div>
+    <div style="font-size:14px;font-weight:600;margin-bottom:6px;color:var(--text2)">لم يتم إضافة رابط بعد</div>
+    <div style="font-size:12px">أضف رابط مجلد Google Drive أو أي مجلد مستندات أعلاه</div>
+  </div>
 
 </div>
 
@@ -621,68 +633,61 @@ tr:hover td{background:rgba(0,194,255,.03)}
 
 </div>
 
-<!-- ═══ EMPLOYEE FILES TRACKER ═══ -->
+<!-- ═══ EMPLOYEE FILES ═══ -->
 <div class="pane" id="pane-employee-files">
 
-  <!-- Header actions -->
   <div class="sec-hdr">
     <div class="sec-icon" style="background:rgba(245,158,11,.12)">🪪</div>
     <div class="sec-title">ملفات الموظفين</div>
     <div class="sec-line"></div>
     <button class="btn btn-ghost" onclick="fetchEmployeeFiles()" id="emp-sync-btn">🔄 تحديث من Sheets</button>
-    <button class="btn btn-gold" onclick="exportEmployeeCSV()">📥 CSV</button>
+    <button class="btn btn-gold" onclick="exportEmpCSV()">📥 CSV</button>
   </div>
 
-  <div class="info-bar">
-    🔗 البيانات تُقرأ مباشرة من Google Sheets · حالة الإنجاز تؤثر على لوحة الإنجاز الكلي (وزن 15%)
-  </div>
+  <div class="info-bar">🔗 البيانات من Google Sheets مباشرةً عبر Apps Script · تؤثر على لوحة الإنجاز الكلي (وزن 15%)</div>
 
-  <!-- KPI Cards -->
   <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px">
-    <div style="background:linear-gradient(135deg,#0080FF22,#0080FF11);border:1px solid #0080FF33;border-radius:12px;padding:18px">
+    <div style="background:var(--surface);border:1px solid rgba(0,194,255,.2);border-radius:12px;padding:18px">
       <div style="font-size:11px;color:var(--text3);margin-bottom:4px">إجمالي الموظفين</div>
-      <div style="font-size:34px;font-weight:900;color:#00c2ff;font-family:Cairo,sans-serif" id="emp-total">–</div>
+      <div style="font-size:34px;font-weight:900;color:var(--accent);font-family:Cairo,sans-serif" id="emp-total">–</div>
     </div>
-    <div style="background:linear-gradient(135deg,#10D97E22,#10D97E11);border:1px solid #10D97E33;border-radius:12px;padding:18px">
-      <div style="font-size:11px;color:var(--text3);margin-bottom:4px">✅ ملفات مكتملة</div>
-      <div style="font-size:34px;font-weight:900;color:#10D97E;font-family:Cairo,sans-serif" id="emp-complete">–</div>
+    <div style="background:var(--surface);border:1px solid rgba(16,217,126,.2);border-radius:12px;padding:18px">
+      <div style="font-size:11px;color:var(--text3);margin-bottom:4px">✅ مكتملة</div>
+      <div style="font-size:34px;font-weight:900;color:var(--green);font-family:Cairo,sans-serif" id="emp-complete">–</div>
     </div>
-    <div style="background:linear-gradient(135deg,#EF444422,#EF444411);border:1px solid #EF444433;border-radius:12px;padding:18px">
-      <div style="font-size:11px;color:var(--text3);margin-bottom:4px">⚠️ ملفات ناقصة</div>
-      <div style="font-size:34px;font-weight:900;color:#EF4444;font-family:Cairo,sans-serif" id="emp-incomplete">–</div>
+    <div style="background:var(--surface);border:1px solid rgba(255,71,87,.2);border-radius:12px;padding:18px">
+      <div style="font-size:11px;color:var(--text3);margin-bottom:4px">⚠️ ناقصة</div>
+      <div style="font-size:34px;font-weight:900;color:var(--red);font-family:Cairo,sans-serif" id="emp-incomplete">–</div>
     </div>
-    <div style="background:linear-gradient(135deg,#F59E0B22,#F59E0B11);border:1px solid #F59E0B33;border-radius:12px;padding:18px">
+    <div style="background:var(--surface);border:1px solid rgba(245,158,11,.2);border-radius:12px;padding:18px">
       <div style="font-size:11px;color:var(--text3);margin-bottom:4px">📊 نسبة الإكتمال</div>
-      <div style="font-size:34px;font-weight:900;color:#F59E0B;font-family:Cairo,sans-serif" id="emp-pct">–</div>
+      <div style="font-size:34px;font-weight:900;color:var(--gold);font-family:Cairo,sans-serif" id="emp-pct">–</div>
       <div style="height:5px;background:rgba(255,255,255,.06);border-radius:3px;margin-top:8px;overflow:hidden">
-        <div id="emp-pct-bar" style="height:100%;width:0%;background:#F59E0B;border-radius:3px;transition:width .8s"></div>
+        <div id="emp-pct-bar" style="height:100%;width:0%;background:var(--gold);border-radius:3px;transition:width .8s"></div>
       </div>
     </div>
   </div>
 
-  <!-- Filters -->
   <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:center">
-    <select id="emp-filter-dept" onchange="renderEmployeeTable()"
+    <select id="emp-filter-dept" onchange="renderEmpTable()"
       style="padding:7px 12px;background:var(--surface);border:1px solid var(--border);border-radius:7px;color:var(--text);font-family:Tajawal,sans-serif;font-size:12px">
       <option value="ALL">كل الأقسام</option>
     </select>
-    <select id="emp-filter-status" onchange="renderEmployeeTable()"
+    <select id="emp-filter-status" onchange="renderEmpTable()"
       style="padding:7px 12px;background:var(--surface);border:1px solid var(--border);border-radius:7px;color:var(--text);font-family:Tajawal,sans-serif;font-size:12px">
       <option value="ALL">كل الحالات</option>
       <option value="مكتمل">✅ مكتمل</option>
-      <option value="ناقص">⚠️ ناقص</option>
-      <option value="جارٍ">⏳ جارٍ</option>
+      <option value="قيد العمل">⏳ قيد العمل</option>
+      <option value="ناقص">❌ ناقص</option>
     </select>
-    <input type="text" id="emp-search" placeholder="🔍 بحث بالاسم أو المسمى..."
-      oninput="renderEmployeeTable()"
+    <input type="text" id="emp-search" placeholder="🔍 بحث..." oninput="renderEmpTable()"
       style="padding:7px 12px;background:var(--surface);border:1px solid var(--border);border-radius:7px;color:var(--text);font-family:Tajawal,sans-serif;font-size:12px;flex:1;min-width:180px">
-    <button class="btn btn-ghost" onclick="document.getElementById('emp-filter-dept').value='ALL';document.getElementById('emp-filter-status').value='ALL';document.getElementById('emp-search').value='';renderEmployeeTable()">مسح</button>
+    <button class="btn btn-ghost" onclick="document.getElementById('emp-filter-dept').value='ALL';document.getElementById('emp-filter-status').value='ALL';document.getElementById('emp-search').value='';renderEmpTable()">مسح</button>
   </div>
 
-  <!-- Table -->
   <div class="tcard">
     <div class="tcard-hdr">
-      <div class="tcard-title">🪪 قائمة الموظفين <span class="badge badge-blue" id="emp-cnt">0</span></div>
+      <div class="tcard-title">🪪 الموظفون <span class="badge badge-blue" id="emp-cnt">0</span></div>
       <div id="emp-last-sync" style="font-size:10px;color:var(--text3)">لم يتم التحديث بعد</div>
     </div>
     <div class="tscroll">
@@ -693,13 +698,12 @@ tr:hover td{background:rgba(0,194,255,.03)}
             <th>اسم الموظف</th>
             <th>المسمى الوظيفي</th>
             <th>القسم</th>
-            <th style="text-align:center">حالة الملف</th>
+            <th style="text-align:center">نسبة الإنجاز</th>
+            <th style="text-align:center">الحالة</th>
           </tr>
         </thead>
         <tbody id="emp-tbody">
-          <tr><td colspan="5" style="text-align:center;color:var(--text3);padding:40px">
-            اضغط "تحديث من Sheets" لجلب البيانات
-          </td></tr>
+          <tr><td colspan="6" style="text-align:center;color:var(--text3);padding:40px">اضغط تحديث من Sheets لجلب البيانات</td></tr>
         </tbody>
       </table>
     </div>
@@ -746,7 +750,6 @@ tr:hover td{background:rgba(0,194,255,.03)}
     <button class="btn btn-ghost" style="padding:14px;font-size:13px" onclick="switchTab('requirements')">📋 إدارة المتطلبات</button>
     <button class="btn btn-ghost" style="padding:14px;font-size:13px" onclick="switchTab('lectures')">🎓 المحاضرات</button>
     <button class="btn btn-ghost" style="padding:14px;font-size:13px" onclick="openExtras()">📂 رخص وعقود ومستندات</button>
-    <button class="btn btn-ghost" style="padding:14px;font-size:13px" onclick="switchTab('employee-files');fetchEmployeeFiles()">🪪 ملفات الموظفين</button>
     <button class="btn btn-gold" style="padding:14px;font-size:13px" onclick="syncAll()">🔄 مزامنة كل البيانات</button>
   </div>
 </div>
@@ -2067,7 +2070,7 @@ function exportPoliciesCSV() {
 const PILLARS = [
   { key:'policy_writing',  label:'كتابة السياسات (106)',          weight:25, icon:'✍️', color:'#0080FF' },
   { key:'policy_signing',  label:'توقيع السياسات',                weight:20, icon:'🖊️', color:'#7C3AED' },
-  { key:'staff_files',     label:'ملفات الموظفين 🪪',              weight:15, icon:'👥', color:'#F59E0B' },
+  { key:'staff_files',     label:'ملفات الموظفين',                weight:15, icon:'👥', color:'#F59E0B' },
   { key:'requirements',    label:'المتطلبات',                     weight:10, icon:'📋', color:'#10D97E' },
   { key:'lectures',        label:'المحاضرات + جسر',                weight:10, icon:'🎓', color:'#0D9488' },
   { key:'documents',       label:'OVR / Manual / Checklists',     weight:8,  icon:'📂', color:'#F97316' },
@@ -2466,191 +2469,6 @@ renderAll = function() {
 };
 
 // ════════════════════════════════════════════════════════════════
-// EMPLOYEE FILES TRACKER — ملفات الموظفين
-// يقرأ من Google Sheets مباشرةً (الرابط الخاص بصفحة ملفات الموظفين)
-// الأعمدة المتوقعة: اسم الموظف | المسمى | القسم | حالة الإنجاز
-// ════════════════════════════════════════════════════════════════
-
-const EMPLOYEE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1hNVASsnHDNt-ciO4BmOSFqRRQEOL2ugU9_mhJH_7pi8/gviz/tq?tqx=out:json&gid=522830921';
-
-let EMPLOYEE_DATA = [];
-
-async function fetchEmployeeFiles() {
-  const btn = document.getElementById('emp-sync-btn');
-  if (btn) { btn.textContent = '⟳ جاري الجلب...'; btn.disabled = true; }
-  try {
-    const res = await fetch(EMPLOYEE_SHEET_URL);
-    const text = await res.text();
-    // Google Viz JSON wraps response in /*O_o*/ ... )
-    const jsonStr = text.replace(/^[^(]+\(/, '').replace(/\);?\s*$/, '');
-    const json = JSON.parse(jsonStr);
-    const rows = json.table.rows;
-    const cols = json.table.cols;
-
-    // Map column labels to indices
-    const colLabels = cols.map(c => (c.label || '').trim());
-    const nameIdx   = colLabels.findIndex(l => l.includes('اسم') || l.includes('الموظف') || l.toLowerCase().includes('name'));
-    const titleIdx  = colLabels.findIndex(l => l.includes('المسمى') || l.includes('الوظيف') || l.toLowerCase().includes('title') || l.toLowerCase().includes('role'));
-    const deptIdx   = colLabels.findIndex(l => l.includes('القسم') || l.includes('الادارة') || l.toLowerCase().includes('dept'));
-    const statusIdx = colLabels.findIndex(l => l.includes('حالة') || l.includes('الإنجاز') || l.includes('انجاز') || l.toLowerCase().includes('status'));
-
-    // Fallback to positions 0,1,2,3 if labels not found
-    const ni = nameIdx  >= 0 ? nameIdx  : 0;
-    const ti = titleIdx >= 0 ? titleIdx : 1;
-    const di = deptIdx  >= 0 ? deptIdx  : 2;
-    const si = statusIdx>= 0 ? statusIdx: 3;
-
-    EMPLOYEE_DATA = rows
-      .filter(r => r.c && r.c[ni] && r.c[ni].v)
-      .map((r, idx) => ({
-        id: idx + 1,
-        name:   String(r.c[ni]  ? (r.c[ni].v  || '') : '').trim(),
-        title:  String(r.c[ti]  ? (r.c[ti].v  || '') : '').trim(),
-        dept:   String(r.c[di]  ? (r.c[di].v  || '') : '').trim(),
-        status: String(r.c[si]  ? (r.c[si].v  || '') : '').trim(),
-      }));
-
-    // Persist locally
-    try { localStorage.setItem('cbahi_employees_v1', JSON.stringify(EMPLOYEE_DATA)); } catch(e) {}
-
-    renderEmployeeTable();
-    updateEmployeeProgressPillar();
-    toast('✅ تم جلب ' + EMPLOYEE_DATA.length + ' موظف من Sheets', 'success');
-
-    const syncEl = document.getElementById('emp-last-sync');
-    if (syncEl) syncEl.textContent = 'آخر تحديث: ' + new Date().toLocaleTimeString('ar-SA');
-
-    // Populate dept filter
-    const depts = [...new Set(EMPLOYEE_DATA.map(e => e.dept).filter(Boolean))].sort();
-    const sel = document.getElementById('emp-filter-dept');
-    if (sel) {
-      sel.innerHTML = '<option value="ALL">كل الأقسام</option>' +
-        depts.map(d => `<option value="${d}">${d}</option>`).join('');
-    }
-
-  } catch(err) {
-    // Try local cache
-    try {
-      const cached = localStorage.getItem('cbahi_employees_v1');
-      if (cached) {
-        EMPLOYEE_DATA = JSON.parse(cached);
-        renderEmployeeTable();
-        toast('⚠️ تعذّر الاتصال — يُعرض آخر نسخة محفوظة', 'info');
-      } else {
-        toast('❌ تعذّر جلب البيانات: ' + err.message, 'error');
-      }
-    } catch(e2) {
-      toast('❌ ' + err.message, 'error');
-    }
-  } finally {
-    if (btn) { btn.textContent = '🔄 تحديث من Sheets'; btn.disabled = false; }
-  }
-}
-
-// Normalize status to standard values for consistent coloring
-function normalizeEmpStatus(raw) {
-  const s = String(raw || '').trim();
-  if (!s || s === '–' || s === '') return 'ناقص';
-  const lower = s.toLowerCase();
-  if (s === 'مكتمل' || s === 'مكتملة' || s === 'مكتمل ✅' || lower.includes('complet') || lower.includes('done')) return 'مكتمل';
-  if (s === 'جارٍ' || s === 'جاري' || s === 'قيد الإعداد' || lower.includes('progress') || lower.includes('جارية')) return 'جارٍ';
-  return s; // Return as-is — could be any Arabic text
-}
-
-function empStatusPill(raw) {
-  const s = normalizeEmpStatus(raw);
-  const cls = s === 'مكتمل' ? 's-done' : s === 'جارٍ' ? 's-prog' : s === 'ناقص' ? 's-crit' : 's-pend';
-  return `<span class="pill ${cls}">${s}</span>`;
-}
-
-function renderEmployeeTable() {
-  const tbody = document.getElementById('emp-tbody');
-  if (!tbody) return;
-
-  const deptFilter   = (document.getElementById('emp-filter-dept')   || {}).value || 'ALL';
-  const statusFilter = (document.getElementById('emp-filter-status') || {}).value || 'ALL';
-  const search       = ((document.getElementById('emp-search')       || {}).value || '').toLowerCase();
-
-  let filtered = [...EMPLOYEE_DATA];
-  if (deptFilter   !== 'ALL') filtered = filtered.filter(e => e.dept === deptFilter);
-  if (statusFilter !== 'ALL') filtered = filtered.filter(e => normalizeEmpStatus(e.status) === statusFilter);
-  if (search) filtered = filtered.filter(e =>
-    e.name.toLowerCase().includes(search) ||
-    e.title.toLowerCase().includes(search) ||
-    e.dept.toLowerCase().includes(search)
-  );
-
-  const cntEl = document.getElementById('emp-cnt');
-  if (cntEl) cntEl.textContent = filtered.length;
-
-  if (filtered.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:40px">لا توجد نتائج</td></tr>';
-  } else {
-    tbody.innerHTML = filtered.map((e, i) => `
-      <tr>
-        <td class="num" style="color:var(--text3);font-size:11px">${i + 1}</td>
-        <td class="td-main">${e.name}</td>
-        <td style="color:var(--text2)">${e.title}</td>
-        <td><span style="font-size:10px;background:rgba(0,194,255,.08);color:var(--accent);padding:2px 8px;border-radius:10px;font-weight:700">${e.dept}</span></td>
-        <td style="text-align:center">${empStatusPill(e.status)}</td>
-      </tr>`).join('');
-  }
-
-  // Update KPI cards
-  const total      = EMPLOYEE_DATA.length;
-  const complete   = EMPLOYEE_DATA.filter(e => normalizeEmpStatus(e.status) === 'مكتمل').length;
-  const incomplete = total - complete;
-  const pct        = total ? Math.round(complete / total * 100) : 0;
-
-  const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
-  set('emp-total',    total);
-  set('emp-complete', complete);
-  set('emp-incomplete', incomplete);
-  set('emp-pct',      pct + '%');
-  const bar = document.getElementById('emp-pct-bar');
-  if (bar) bar.style.width = pct + '%';
-}
-
-function updateEmployeeProgressPillar() {
-  // Update the staff_files pillar in the progress dashboard based on live Sheets data
-  if (!EMPLOYEE_DATA.length) return;
-  const total    = EMPLOYEE_DATA.length;
-  const complete = EMPLOYEE_DATA.filter(e => normalizeEmpStatus(e.status) === 'مكتمل').length;
-  const pct      = Math.round(complete / total * 100);
-
-  // Override the extras-based value with real data
-  const ex = getExtras();
-  ex.staff = pct;
-  try { localStorage.setItem('cbahi_extras_v1', JSON.stringify(ex)); } catch(e) {}
-
-  renderProgressDashboard();
-}
-
-function exportEmployeeCSV() {
-  if (!EMPLOYEE_DATA.length) { toast('لا توجد بيانات للتصدير', 'info'); return; }
-  const hdrs = ['#', 'اسم الموظف', 'المسمى الوظيفي', 'القسم', 'حالة الإنجاز'];
-  const rows = EMPLOYEE_DATA.map((e, i) => [i + 1, e.name, e.title, e.dept, e.status]);
-  const csv = [hdrs, ...rows].map(r => r.map(c => `"${c || ''}"`).join(',')).join('\n');
-  const a = document.createElement('a');
-  a.href = 'data:text/csv;charset=utf-8,\uFEFF' + encodeURIComponent(csv);
-  a.download = 'Employee_Files_' + new Date().toISOString().slice(0, 10) + '.csv';
-  a.click();
-  toast('📥 تم التصدير', 'success');
-}
-
-// Load cached employee data on startup
-(function() {
-  try {
-    const cached = localStorage.getItem('cbahi_employees_v1');
-    if (cached) {
-      EMPLOYEE_DATA = JSON.parse(cached);
-      renderEmployeeTable();
-      updateEmployeeProgressPillar();
-    }
-  } catch(e) {}
-})();
-
-// ════════════════════════════════════════════════════════════════
 // AUTO-SYNC SYSTEM
 // ════════════════════════════════════════════════════════════════
 (function() {
@@ -2688,6 +2506,167 @@ function exportEmployeeCSV() {
     }
   }, 30000);
 })();
+
+
+
+// ═══════════════════════════════════════════════════════════════
+// EMPLOYEE FILES — ملفات الموظفين
+// ═══════════════════════════════════════════════════════════════
+
+let EMP_DATA = [];
+
+async function fetchEmployeeFiles() {
+  const btn = document.getElementById('emp-sync-btn');
+  if (btn) { btn.textContent = '⟳ جاري الجلب...'; btn.disabled = true; }
+  try {
+    if (!GAS_URL) { showSettings(); throw new Error('أدخل رابط Apps Script أولاً'); }
+    const result = await callGAS({ action: 'getEmployeeFiles' });
+    if (!result || result.error) throw new Error(result ? result.error : 'لا استجابة');
+    if (!result.success) throw new Error(result.error || 'فشل الجلب');
+    const raw = result.data || [];
+    EMP_DATA = raw.map(function(e, i) {
+      return {
+        id:       i + 1,
+        name:     String(e.name || '').trim(),
+        title:    String(e.jobTitle || e.title || '').trim(),
+        dept:     String(e.department || e.dept || '').trim(),
+        progress: parseFloat(e.progress) || 0,
+        status:   String(e.status || '').trim()
+      };
+    }).filter(function(e){ return e.name; });
+    try { localStorage.setItem('cbahi_emp_v1', JSON.stringify(EMP_DATA)); } catch(x) {}
+    var depts = [];
+    EMP_DATA.forEach(function(e){ if(e.dept && depts.indexOf(e.dept)===-1) depts.push(e.dept); });
+    depts.sort();
+    var sel = document.getElementById('emp-filter-dept');
+    if (sel) sel.innerHTML = '<option value="ALL">كل الأقسام</option>' +
+      depts.map(function(d){ return '<option value="'+d+'">'+d+'</option>'; }).join('');
+    renderEmpTable();
+    if (result.stats && result.stats.overallProgress !== undefined) {
+      var ex = getExtras();
+      ex.staff = result.stats.overallProgress;
+      try { localStorage.setItem('cbahi_extras_v1', JSON.stringify(ex)); } catch(x) {}
+      renderProgressDashboard();
+    }
+    var el = document.getElementById('emp-last-sync');
+    if (el) el.textContent = 'آخر تحديث: ' + new Date().toLocaleTimeString('ar-SA') + ' | ' + EMP_DATA.length + ' موظف';
+    toast('✅ تم جلب ' + EMP_DATA.length + ' موظف', 'success');
+  } catch(err) {
+    try { var c = localStorage.getItem('cbahi_emp_v1'); if(c){ EMP_DATA=JSON.parse(c); renderEmpTable(); } } catch(x){}
+    toast('❌ ' + err.message, 'error');
+  } finally {
+    if (btn) { btn.textContent = '🔄 تحديث من Sheets'; btn.disabled = false; }
+  }
+}
+
+function renderEmpTable() {
+  var tbody = document.getElementById('emp-tbody');
+  if (!tbody) return;
+  var dept   = (document.getElementById('emp-filter-dept')   || {}).value || 'ALL';
+  var status = (document.getElementById('emp-filter-status') || {}).value || 'ALL';
+  var search = ((document.getElementById('emp-search')       || {}).value || '').toLowerCase();
+  var list = EMP_DATA.slice();
+  if (dept   !== 'ALL') list = list.filter(function(e){ return e.dept === dept; });
+  if (status !== 'ALL') list = list.filter(function(e){ return e.status === status; });
+  if (search) list = list.filter(function(e){
+    return e.name.toLowerCase().indexOf(search) > -1 ||
+           e.title.toLowerCase().indexOf(search) > -1 ||
+           e.dept.toLowerCase().indexOf(search) > -1;
+  });
+  var cnt = document.getElementById('emp-cnt');
+  if (cnt) cnt.textContent = list.length;
+  if (!list.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:40px">' +
+      (EMP_DATA.length ? 'لا توجد نتائج للفلتر' : 'اضغط تحديث من Sheets لجلب البيانات') + '</td></tr>';
+  } else {
+    tbody.innerHTML = list.map(function(e, i) {
+      var pc = e.progress;
+      var pc_color = pc >= 100 ? 'var(--green)' : pc > 0 ? 'var(--gold)' : 'var(--red)';
+      var st_cls = e.status === 'مكتمل' ? 's-done' : e.status === 'قيد العمل' ? 's-prog' : 's-crit';
+      return '<tr>' +
+        '<td class="num" style="color:var(--text3);font-size:11px">' + (i+1) + '</td>' +
+        '<td class="td-main">' + e.name + '</td>' +
+        '<td style="color:var(--text2)">' + e.title + '</td>' +
+        '<td><span style="font-size:10px;background:rgba(0,194,255,.08);color:var(--accent);padding:2px 8px;border-radius:10px;font-weight:700">' + e.dept + '</span></td>' +
+        '<td style="text-align:center"><div style="display:flex;align-items:center;gap:6px;justify-content:center">' +
+        '<div style="width:60px;height:5px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden">' +
+        '<div style="height:100%;width:'+pc+'%;background:'+pc_color+';border-radius:3px"></div></div>' +
+        '<span style="font-size:11px;font-weight:700;color:'+pc_color+'">'+pc+'%</span></div></td>' +
+        '<td style="text-align:center"><span class="pill ' + st_cls + '">' + e.status + '</span></td>' +
+        '</tr>';
+    }).join('');
+  }
+  var total    = EMP_DATA.length;
+  var complete = EMP_DATA.filter(function(e){ return e.status === 'مكتمل'; }).length;
+  var incomp   = total - complete;
+  var pct      = total ? Math.round(complete / total * 100) : 0;
+  function sg(id){ return document.getElementById(id); }
+  if (sg('emp-total'))      sg('emp-total').textContent      = total;
+  if (sg('emp-complete'))   sg('emp-complete').textContent   = complete;
+  if (sg('emp-incomplete')) sg('emp-incomplete').textContent = incomp;
+  if (sg('emp-pct'))        sg('emp-pct').textContent        = pct + '%';
+  if (sg('emp-pct-bar'))    sg('emp-pct-bar').style.width    = pct + '%';
+}
+
+function exportEmpCSV() {
+  if (!EMP_DATA.length) { toast('لا توجد بيانات', 'info'); return; }
+  var h = ['#','اسم الموظف','المسمى الوظيفي','القسم','نسبة الإنجاز','الحالة'];
+  var r = EMP_DATA.map(function(e,i){ return [i+1, e.name, e.title, e.dept, e.progress+'%', e.status]; });
+  var csv = [h].concat(r).map(function(row){ return row.map(function(c){ return '"'+(c||'')+'"'; }).join(','); }).join('\n');
+  var a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,\uFEFF' + encodeURIComponent(csv);
+  a.download = 'Employee_Files_' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click();
+  toast('📥 تم التصدير', 'success');
+}
+
+(function(){
+  try { var c = localStorage.getItem('cbahi_emp_v1'); if(c){ EMP_DATA=JSON.parse(c); renderEmpTable(); } } catch(x){}
+})();
+
+
+// ═══════════════════════════════════════════════════════════════
+// WORKFLOW FOLDER LINK
+// ═══════════════════════════════════════════════════════════════
+const WF_FOLDER_KEY = 'cbahi_wf_folder';
+
+function saveWfFolder() {
+  var url = (document.getElementById('wf-folder-url').value || '').trim();
+  if (!url) { toast('⚠️ أدخل الرابط أولاً', 'error'); return; }
+  if (!url.startsWith('http')) { toast('⚠️ الرابط غير صحيح', 'error'); return; }
+  localStorage.setItem(WF_FOLDER_KEY, url);
+  renderWfFolder();
+  toast('✅ تم حفظ رابط المجلد', 'success');
+}
+
+function openWfFolder() {
+  var url = localStorage.getItem(WF_FOLDER_KEY) || (document.getElementById('wf-folder-url').value || '').trim();
+  if (!url) { toast('⚠️ أدخل الرابط أولاً', 'error'); return; }
+  window.open(url, '_blank');
+}
+
+function renderWfFolder() {
+  var url = localStorage.getItem(WF_FOLDER_KEY) || '';
+  var input = document.getElementById('wf-folder-url');
+  var card  = document.getElementById('wf-folder-card');
+  var empty = document.getElementById('wf-empty-state');
+  var disp  = document.getElementById('wf-folder-url-display');
+  var link  = document.getElementById('wf-folder-link');
+  if (input) input.value = url;
+  if (url) {
+    if (card)  card.style.display  = 'block';
+    if (empty) empty.style.display = 'none';
+    if (disp)  disp.textContent    = url;
+    if (link)  link.href           = url;
+  } else {
+    if (card)  card.style.display  = 'none';
+    if (empty) empty.style.display = 'block';
+  }
+}
+
+// تحميل الرابط عند الفتح
+document.addEventListener('DOMContentLoaded', function(){ renderWfFolder(); });
+setTimeout(renderWfFolder, 300);
 
 </script>
 </body>

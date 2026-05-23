@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CBAHI – أبكس كير | لوحة تحكم مشروع الاعتماد</title>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
 <style>
 
@@ -212,28 +213,15 @@ tr:hover td{background:rgba(0,194,255,.03)}
 </style>
 </head>
 <body>
-  <!-- Professional Header -->
-  <div style="background:linear-gradient(135deg,#0D1F3C,#1A3560);color:white;padding:24px 40px;box-shadow:0 4px 12px rgba(0,0,0,.15)">
-    <div style="max-width:1400px;margin:0 auto;display:flex;align-items:center;justify-content:space-between">
-      <div>
-        <h1 style="margin:0;font-size:28px;font-weight:900;letter-spacing:-0.5px">صفحة متابعة مشروع اعتماد CBAHI</h1>
-        <p style="margin:6px 0 0;opacity:.85;font-size:14px">APEX CARE ClinicS | بريدة </p>
-      </div>
-      <div style="text-align:left">
-        <div style="font-size:12px;opacity:.7;margin-bottom:4px">الوقت المتوقع لجاهزية المنشأة</div>
-        <div style="font-size:22px;font-weight:800;font-family:Cairo,sans-serif">20 أغسطس 2026</div>
-      </div>
-    </div>
-  </div>
-
-
 <!-- HEADER -->
 <div class="header">
   <div class="logo">
+    <div class="logo-icon">AC</div>
+    <div><div class="logo-text">APEX CARE – أبكس كير</div><div class="logo-sub">CBAHI PROJECT DASHBOARD</div></div>
   </div>
   <div class="header-actions">
     <span class="sync-badge sync-load" id="syncBadge">⟳ جاري الاتصال</span>
-    <button class="btn btn-ghost" onclick="syncAll()">🔄 مزامنة البيانات لعرضها على اللوحة</button>
+    <button class="btn btn-ghost" onclick="syncAll()">🔄 مزامنة</button>
     <button class="btn btn-gold" onclick="window.print()">🖨️</button>
   </div>
 </div>
@@ -242,7 +230,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
 <div class="status-bar">
   <div class="sb-item"><div class="sb-dot" id="apiDot" style="background:var(--gold);animation:pulse 1s infinite"></div><span id="apiStatus">جاري الاتصال بـ Google Sheets...</span></div>
   <div class="sb-item">📅 تاريخ البداية: <strong>10/02/2026</strong></div>
-  <div class="sb-item">🎯 الوقت المتوقع لجاهزية المنشأة: <strong style="color:var(--gold)">20/07/2026</strong></div>
+  <div class="sb-item">🎯 الوقت المتوقع لجاهزية المنشأة: <strong style="color:var(--gold)">20/08/2026</strong></div>
   <div class="sb-item" id="lastSyncSb">آخر مزامنة: –</div>
   <div class="sb-item" style="margin-right:auto">
     <button class="btn btn-ghost" style="padding:3px 10px;font-size:10px" onclick="showSettings()">⚙️ إعدادات الاتصال</button>
@@ -251,18 +239,18 @@ tr:hover td{background:rgba(0,194,255,.03)}
 
 <!-- TABS -->
 <div class="tabs">
-  <button class="tab active" onclick="switchTab('overview')">نظرة عامة</button>
-  <button class="tab" onclick="switchTab('observations')">الملاحظات</button>
-  <button class="tab" onclick="switchTab('requirements')">المتطلبات</button>
-  <button class="tab" onclick="switchTab('team')">الفريق</button>
-  <button class="tab" onclick="switchTab('locations')">التعديلات</button>
-  <button class="tab" onclick="switchTab('lectures')">المحاضرات</button>
-  <button class="tab" onclick="switchTab('assignments')">التكليفات</button>
-  <button class="tab" onclick="switchTab('policies')">توقيع السياسات</button>
-  <button class="tab" onclick="switchTab('progress')" style="background:linear-gradient(135deg,#10d97e,#0080ff);color:#fff;font-weight:800">لوحة الإنجاز</button>
-    <button class="tab" onclick="switchTab('workflow')">المستندات</button>
-    <button class="tab" onclick="switchTab('policies2')"> السياسات الكاملة </button>
-    <button class="tab" onclick="switchTab('patient-files')"> ملفات المرضى المكتملة</button>
+  <button class="tab active" onclick="switchTab('overview')">📊 نظرة عامة</button>
+  <button class="tab" onclick="switchTab('observations')">🔍 الملاحظات</button>
+  <button class="tab" onclick="switchTab('requirements')">📋 المتطلبات</button>
+  <button class="tab" onclick="switchTab('team')">👥 الفريق</button>
+  <button class="tab" onclick="switchTab('locations')">🏥 الأماكن</button>
+  <button class="tab" onclick="switchTab('lectures')">🎓 المحاضرات</button>
+  <button class="tab" onclick="switchTab('assignments')">📌 التكليفات</button>
+  <button class="tab" onclick="switchTab('policies')">📜 السياسات</button>
+  <button class="tab" onclick="switchTab('progress')" style="background:linear-gradient(135deg,#10d97e,#0080ff);color:#fff;font-weight:800">🎯 لوحة الإنجاز الكلي</button>
+    <button class="tab" onclick="switchTab('workflow')">📁 المستندات</button>
+    <button class="tab" onclick="switchTab('policies2')">📜 السياسات الكاملة (106)</button>
+    <button class="tab" onclick="switchTab('patient-files')">📂 ملفات المرضى</button>
 </div>
 
 <div class="main">
@@ -271,7 +259,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
 <div class="pane active" id="pane-overview">
   <div class="kpi-grid">
     <div class="kpi blue"><div class="kpi-lbl">نسبة الإنجاز الكلية</div><div class="kpi-val" id="k-overall">–</div><div class="pbar"><div class="pfill blue" id="pf-overall" style="width:0%"></div></div><div class="kpi-sub">متوسط جميع الأقسام</div></div>
-    <div class="kpi gold"><div class="kpi-lbl">الأيام المتبقية</div><div class="kpi-val" id="k-days">–</div><div class="kpi-sub">حتى 01 أغسطس 2026</div></div>
+    <div class="kpi gold"><div class="kpi-lbl">الأيام المتبقية</div><div class="kpi-val" id="k-days">–</div><div class="kpi-sub">حتى 01 يوليو 2026</div></div>
     <div class="kpi green"><div class="kpi-lbl">ملاحظات محلولة</div><div class="kpi-val" id="k-obs">–</div><div class="pbar"><div class="pfill green" id="pf-obs" style="width:0%"></div></div><div class="kpi-sub" id="k-obs-sub">من 0</div></div>
     <div class="kpi red"><div class="kpi-lbl">متطلبات تحتاج تمويل</div><div class="kpi-val" id="k-fin">–</div><div class="kpi-sub" id="k-cost">التكلفة: –</div></div>
   </div>
@@ -305,7 +293,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
   <div class="info-bar">ℹ️ جميع التعديلات تُحفظ تلقائياً في Google Sheets وتظهر فوراً</div>
   <div class="tcard">
     <div class="tcard-hdr">
-      <div class="tcard-title"> الملاحظات <span class="badge badge-blue" id="obs-cnt">0</span></div>
+      <div class="tcard-title">📋 الملاحظات <span class="badge badge-blue" id="obs-cnt">0</span></div>
       <div style="display:flex;gap:6px"><span class="badge badge-green" id="obs-solved">0 محلولة</span><span class="badge badge-red" id="obs-pend">0 معلقة</span></div>
     </div>
     <div class="tscroll">
@@ -326,7 +314,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
   </div>
   <div class="tcard">
     <div class="tcard-hdr">
-      <div class="tcard-title"> المتطلبات <span class="badge badge-blue" id="req-cnt">0</span></div>
+      <div class="tcard-title">📌 المتطلبات <span class="badge badge-blue" id="req-cnt">0</span></div>
       <span class="badge badge-gold" id="req-fin-cnt">0 تحتاج تمويل</span>
     </div>
     <div class="tscroll">
@@ -382,14 +370,14 @@ tr:hover td{background:rgba(0,194,255,.03)}
 <!-- ═══ LECTURES ═══ -->
 <div class="pane" id="pane-lectures">
   <div class="sec-hdr">
-    <div class="sec-icon" style="background:rgba(240,180,41,.1)"></div>
-    <div class="sec-title">المحاضرات التدريبية المجدولة</div>
+    <div class="sec-icon" style="background:rgba(240,180,41,.1)">🎓</div>
+    <div class="sec-title">المحاضرات المجدولة</div>
     <div class="sec-line"></div>
     <button class="btn btn-primary" onclick="openModal('m-lec')">+ إضافة</button>
   </div>
   <div class="tcard">
     <div class="tcard-hdr">
-      <div class="tcard-title"> المحاضرات <span class="badge badge-blue" id="lec-cnt">0</span></div>
+      <div class="tcard-title">🎓 المحاضرات <span class="badge badge-blue" id="lec-cnt">0</span></div>
       <span class="badge badge-green" id="lec-done-cnt">0 منجزة</span>
     </div>
     <div class="tscroll">
@@ -420,7 +408,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
 <!-- ═══ POLICIES ═══ -->
 <div class="pane" id="pane-policies">
   <div class="sec-hdr">
-    <div class="sec-icon" style="background:rgba(0,194,255,.1)">.</div>
+    <div class="sec-icon" style="background:rgba(0,194,255,.1)">📜</div>
     <div class="sec-title">السياسات والموقعون</div>
     <div class="sec-line"></div>
     <button class="btn btn-primary" onclick="openModal('m-pol')">+ إضافة</button>
@@ -428,7 +416,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
   <div class="sig-grid" id="sig-grid"></div>
   <div class="tcard">
     <div class="tcard-hdr">
-      <div class="tcard-title"> السياسات <span class="badge badge-blue" id="pol-cnt">0</span></div>
+      <div class="tcard-title">📄 السياسات <span class="badge badge-blue" id="pol-cnt">0</span></div>
       <span class="badge badge-green" id="pol-signed-cnt">0 موقعة كاملاً</span>
     </div>
     <div class="tscroll">
@@ -444,7 +432,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
   
   <!-- Header -->
   <div style="background:linear-gradient(135deg,#7C3AED,#0080FF);border-radius:12px;padding:24px;margin-bottom:20px;color:white">
-    <h2 style="margin:0 0 8px;font-size:24px;font-weight:900"> المستندات</h2>
+    <h2 style="margin:0 0 8px;font-size:24px;font-weight:900">📁 المستندات</h2>
     <p style="margin:0;opacity:.9;font-size:13px">إدارة روابط المستندات والملفات المهمة للمشروع</p>
   </div>
 
@@ -643,9 +631,9 @@ tr:hover td{background:rgba(0,194,255,.03)}
       <div id="total-progress-bar" style="height:100%;width:0%;background:linear-gradient(90deg,#0080ff,#10d97e,#00c2ff);border-radius:7px;transition:width 1.2s ease;box-shadow:0 0 20px rgba(16,217,126,.5)"></div>
     </div>
     <div style="display:flex;gap:24px;justify-content:center;margin-top:18px;flex-wrap:wrap">
-      <div><span style="color:var(--text3);font-size:11px"> الأيام المتبقية</span> <strong id="prog-days" style="color:var(--gold);font-size:18px;margin-right:8px">–</strong></div>
-      <div><span style="color:var(--text3);font-size:11px"> الوقت المتوقع لجاهزية المنشأة</span> <strong style="color:var(--accent);font-size:14px;margin-right:8px">20/08/2026</strong></div>
-      <div><span style="color:var(--text3);font-size:11px"> تاريخ البداية</span> <strong style="color:var(--text2);font-size:14px;margin-right:8px">10/02/2026</strong></div>
+      <div><span style="color:var(--text3);font-size:11px">⏰ الأيام المتبقية</span> <strong id="prog-days" style="color:var(--gold);font-size:18px;margin-right:8px">–</strong></div>
+      <div><span style="color:var(--text3);font-size:11px">📅 الوقت المتوقع لجاهزية المنشأة</span> <strong style="color:var(--accent);font-size:14px;margin-right:8px">20/08/2026</strong></div>
+      <div><span style="color:var(--text3);font-size:11px">🚀 تاريخ البداية</span> <strong style="color:var(--text2);font-size:14px;margin-right:8px">10/02/2026</strong></div>
     </div>
   </div>
 
@@ -666,11 +654,11 @@ tr:hover td{background:rgba(0,194,255,.03)}
   </div>
 
   <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px">
-    <button class="btn btn-primary" style="padding:14px;font-size:13px" onclick="switchTab('policies2')"> إدارة السياسات (106)</button>
-    <button class="btn btn-ghost" style="padding:14px;font-size:13px" onclick="switchTab('observations')"> إدارة الملاحظات</button>
-    <button class="btn btn-ghost" style="padding:14px;font-size:13px" onclick="switchTab('requirements')"> إدارة المتطلبات</button>
-    <button class="btn btn-ghost" style="padding:14px;font-size:13px" onclick="switchTab('lectures')"> المحاضرات</button>
-    <button class="btn btn-ghost" style="padding:14px;font-size:13px" onclick="openExtras()"> رخص وعقود ومستندات</button>
+    <button class="btn btn-primary" style="padding:14px;font-size:13px" onclick="switchTab('policies2')">📜 إدارة السياسات (106)</button>
+    <button class="btn btn-ghost" style="padding:14px;font-size:13px" onclick="switchTab('observations')">🔍 إدارة الملاحظات</button>
+    <button class="btn btn-ghost" style="padding:14px;font-size:13px" onclick="switchTab('requirements')">📋 إدارة المتطلبات</button>
+    <button class="btn btn-ghost" style="padding:14px;font-size:13px" onclick="switchTab('lectures')">🎓 المحاضرات</button>
+    <button class="btn btn-ghost" style="padding:14px;font-size:13px" onclick="openExtras()">📂 رخص وعقود ومستندات</button>
     <button class="btn btn-gold" style="padding:14px;font-size:13px" onclick="syncAll()">🔄 مزامنة كل البيانات</button>
   </div>
 </div>
@@ -678,11 +666,11 @@ tr:hover td{background:rgba(0,194,255,.03)}
 <!-- Extras Modal — رخص / عقود / مستندات / موظفين -->
 <div class="overlay" id="m-extras">
   <div class="modal" style="max-width:600px">
-    <h3> الرخص والعقود والمستندات</h3>
+    <h3>📂 الرخص والعقود والمستندات</h3>
     <div class="info-bar">💡 سجل الإنجاز السريع لكل بند يدخل في النسبة الإجمالية</div>
 
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px">
-      <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:10px"> الرخص والعقود</div>
+      <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:10px">📜 الرخص والعقود</div>
       <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px">
         <div class="fg"><label>رخصة البلدية</label>
           <select id="ex-lic-baladiya"><option value="0">❌</option><option value="1">✅</option></select></div>
@@ -699,7 +687,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
       </div>
     </div>
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px">
-      <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:10px"> العقود السارية</div>
+      <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:10px">📝 العقود السارية</div>
       <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px">
         <div class="fg"><label>عقد النفايات الطبية</label>
           <select id="ex-cnt-waste"><option value="0">❌</option><option value="1">✅</option></select></div>
@@ -712,7 +700,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
       </div>
     </div>
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px">
-      <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:10px"> الاتفاقيات الطبية</div>
+      <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:10px">🤝 الاتفاقيات الطبية</div>
       <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px">
         <div class="fg"><label>اتفاقية CPR (إنعاش)</label>
           <select id="ex-agr-cpr"><option value="0">❌</option><option value="1">✅</option></select></div>
@@ -805,7 +793,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
 <!-- Team Modal -->
 <div class="overlay" id="m-team">
   <div class="modal">
-    <h3> إضافة عضو</h3>
+    <h3>👥 إضافة عضو</h3>
     <input type="hidden" id="team-eid">
     <div class="fg"><label>الاسم</label><input type="text" id="team-name" placeholder="الاسم"></div>
     <div class="fg"><label>المسمى الوظيفي</label><input type="text" id="team-role" placeholder="المسمى"></div>
@@ -857,7 +845,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
 <!-- Lecture Modal -->
 <div class="overlay" id="m-lec">
   <div class="modal">
-    <h3> إضافة محاضرة</h3>
+    <h3>🎓 إضافة محاضرة</h3>
     <input type="hidden" id="lec-eid">
     <div class="fg"><label>عنوان المحاضرة</label><input type="text" id="lec-title" placeholder="عنوان المحاضرة"></div>
     <div class="fg"><label>الملقي الأساسي</label><input type="text" id="lec-speaker" placeholder="الاسم"></div>
@@ -878,7 +866,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
 <!-- Assignment Modal -->
 <div class="overlay" id="m-assign">
   <div class="modal">
-    <h3> إضافة تكليف</h3>
+    <h3>📌 إضافة تكليف</h3>
     <input type="hidden" id="assign-eid">
     <div class="fg"><label>القسم</label><input type="text" id="assign-dept" placeholder="القسم"></div>
     <div class="fg"><label>نوع التكليف</label><select id="assign-type">
@@ -899,7 +887,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
 <!-- Policy Modal -->
 <div class="overlay" id="m-pol">
   <div class="modal">
-    <h3> إضافة سياسة</h3>
+    <h3>📜 إضافة سياسة</h3>
     <input type="hidden" id="pol-eid">
     <div class="fg"><label>اسم السياسة</label><input type="text" id="pol-name" placeholder="اسم السياسة"></div>
     <div class="fg"><label>القسم</label><input type="text" id="pol-dept" placeholder="القسم المعني"></div>
@@ -916,7 +904,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
 <!-- Workflow Modal -->
 <div class="overlay" id="m-wf">
   <div class="modal">
-    <h3> إضافة مستند</h3>
+    <h3>🔄 إضافة خطوة</h3>
     <input type="hidden" id="wf-eid">
     <div class="fg"><label>عنوان المستند</label><input type="text" id="wf-title-in" placeholder="عنوان المستند"></div>
     <div class="fg"><label>وصف المستند</label><textarea id="wf-desc-in" rows="3" placeholder="التفاصيل..."></textarea></div>
@@ -1026,90 +1014,6 @@ const SIG_FIELDS = [
   { key:'sig_safety',  label:'مهندس السلامة',     color:'#EF4444' },
   { key:'sig_ceo',     label:'الرئيس التنفيذي',   color:'#0D1F3C' },
 ];
-
-
-
-// ════════════════════════════════════════════════════════════════
-// DOCUMENTS UPLOAD SUPPORT
-// ════════════════════════════════════════════════════════════════
-let selectedFile = null;
-
-function switchUploadMethod(method) {
-  // Update buttons
-  document.querySelectorAll('.upload-method-btn').forEach(btn => {
-    if (btn.dataset.method === method) {
-      btn.style.borderColor = 'var(--accent)';
-      btn.style.background = 'rgba(0,128,255,.1)';
-      btn.style.color = 'var(--accent)';
-    } else {
-      btn.style.borderColor = 'var(--border)';
-      btn.style.background = 'transparent';
-      btn.style.color = 'var(--text2)';
-    }
-  });
-  
-  // Show/hide fields
-  if (method === 'link') {
-    document.getElementById('link-method-fields').style.display = 'block';
-    document.getElementById('upload-method-fields').style.display = 'none';
-    document.getElementById('wf-doc-in').required = true;
-    selectedFile = null;
-  } else {
-    document.getElementById('link-method-fields').style.display = 'none';
-    document.getElementById('upload-method-fields').style.display = 'block';
-    document.getElementById('wf-doc-in').required = false;
-  }
-}
-
-function handleFileSelected(input) {
-  if (input.files && input.files[0]) {
-    selectedFile = input.files[0];
-    const nameSpan = document.getElementById('file-selected-name');
-    nameSpan.textContent = selectedFile.name;
-    nameSpan.style.color = 'var(--accent)';
-    nameSpan.style.fontWeight = '600';
-  }
-}
-
-async function uploadToGoogleDrive(file, category) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    
-    reader.onload = async function(e) {
-      const base64Data = e.target.result.split(',')[1];
-      
-      try {
-        const result = await callGAS({
-          action: 'uploadFile',
-          fileData: JSON.stringify({
-            fileName: file.name,
-            fileData: base64Data,
-            mimeType: file.type,
-            category: category
-          })
-        });
-        
-        if (result.success) {
-          resolve(result);
-        } else {
-          reject(new Error(result.error || 'Upload failed'));
-        }
-      } catch(err) {
-        reject(err);
-      }
-    };
-    
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}  
-  // Placeholder - في الواقع يجب استخدام Google Drive API
-  return {
-    success: false,
-    url: null,
-    message: 'Google Drive API غير مُفعّل'
-  };
-}
 
 
 // ════════════════════════════════════════════════════════════════
@@ -1328,8 +1232,15 @@ const signatories = [
 // RENDER FUNCTIONS
 // ═══════════════════════════════════════════════════════════════
 function renderAll() {
-  renderOverview(); renderObs(); renderReq(); renderTeam();
-  renderLoc(); renderLec(); renderAssign(); renderPol(); renderWf();
+  try { renderOverview(); } catch(e) { console.warn('renderOverview error:', e); }
+  try { renderObs(); } catch(e) { console.warn('renderObs error:', e); }
+  try { renderReq(); } catch(e) { console.warn('renderReq error:', e); }
+  try { renderTeam(); } catch(e) { console.warn('renderTeam error:', e); }
+  try { renderLoc(); } catch(e) { console.warn('renderLoc error:', e); }
+  try { renderLec(); } catch(e) { console.warn('renderLec error:', e); }
+  try { renderAssign(); } catch(e) { console.warn('renderAssign error:', e); }
+  try { renderPol(); } catch(e) { console.warn('renderPol error:', e); }
+  try { renderWf(); } catch(e) { console.warn('renderWf error:', e); }
   saveLocal();
 }
 
@@ -1457,52 +1368,21 @@ function renderLoc() {
 
 // ─── Lectures ─────────────────────────────────────────────────
 function renderLec() {
-  const el = document.getElementById('lec-tbody');
-  if (!el) return;
-  
+  const done = DB.lectures.filter(l=>l.done==='نعم').length;
   document.getElementById('lec-cnt').textContent = DB.lectures.length;
-  
-  if (!DB.lectures || DB.lectures.length === 0) {
-    el.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text3);padding:40px">لا توجد محاضرات</td></tr>';
-    return;
-  }
-  
-  // ترتيب حسب تاريخ المحاضرة (date) من الأقدم للأحدث
-  const sorted = [...DB.lectures].sort((a, b) => {
-    const dateA = a.date || '9999-12-31';
-    const dateB = b.date || '9999-12-31';
-    return dateA.localeCompare(dateB);
-  });
-  
-  el.innerHTML = sorted.map((lec, i) => {
-    const status = lec.done ? 'مكتملة' : 'قادمة';
-    const statusColor = lec.done ? '#10D97E' : '#F97316';
-    const dateStr = lec.date || '—';
-    
-    return `<tr>
-      <td class="num">${i+1}</td>
-      <td class="td-main">
-        <strong>${lec.title || 'محاضرة'}</strong>
-        ${lec.speaker ? '<div style="font-size:11px;color:var(--text3);margin-top:4px">المحاضر: ' + lec.speaker + '</div>' : ''}
-      </td>
-      <td style="font-size:12px;color:var(--text2)">${dateStr}</td>
-      <td style="font-size:12px;color:var(--text2)">${lec.time || '—'}</td>
-      <td style="font-size:11px;color:var(--text3)">${lec.audience || '—'}</td>
-      <td style="text-align:center">
-        <span class="status-badge" style="background:${statusColor}22;color:${statusColor}">${status}</span>
-      </td>
-      <td>
-        <input type="checkbox" ${lec.done ? 'checked' : ''} 
-               onchange="toggleLecDone('${lec.id}')" 
-               style="cursor:pointer;width:18px;height:18px">
-      </td>
-      <td>
-        <button class="btn-icon" onclick="editLec('${lec.id}')" title="تعديل">✏️</button>
-        <button class="btn-icon" onclick="delLec('${lec.id}')" title="حذف">🗑️</button>
-      </td>
-    </tr>`;
-  }).join('');
+  document.getElementById('lec-done-cnt').textContent = done + ' منجزة';
+  document.getElementById('lec-tbody').innerHTML = DB.lectures.map((l,i)=>`
+    <tr><td class="num">${i+1}</td>
+    <td class="td-main">${l.title||''}</td>
+    <td style="font-size:11px;color:var(--accent)">${l.speaker||''}</td>
+    <td style="font-size:11px;color:var(--text3)">${l.alt||'–'}</td>
+    <td style="font-size:11px">${l.date||'–'}</td>
+    <td><span class="badge badge-purple" style="font-size:9px">${l.audience||l.aud||''}</span></td>
+    <td>${l.done==='نعم'?pill('✅ تمت'):pill('⏳ لم تتم')}</td>
+    <td>${actionBtns('editLec','delLec',l.id)}</td></tr>`).join('');
 }
+
+// ─── Assignments ──────────────────────────────────────────────
 function renderAssign() {
   document.getElementById('assign-tbody').innerHTML = DB.assignments.map((a,i)=>`
     <tr><td class="num">${i+1}</td>
@@ -1543,7 +1423,9 @@ function renderPol() {
 
 // ─── Workflow ─────────────────────────────────────────────────
 function renderWf() {
-  document.getElementById('wf-list').innerHTML = DB.workflow.map((w,i)=>`
+  const el = document.getElementById('wf-list');
+  if (!el) return; // Skip if element doesn't exist
+  el.innerHTML = DB.workflow.map((w,i)=>`
     <div class="wf-step">
       <div class="wf-num">${i+1}</div>
       <div style="flex:1">
@@ -1585,6 +1467,7 @@ async function saveObs() {
   else DB.observations.push(obj);
   renderAll(); closeModal('m-obs');
   await apiCall(id?'update':'add','observations',obj.id,obj);
+  setTimeout(() => syncAll(), 1000);
   toast('✅ تم الحفظ في Google Sheets', 'success');
 }
 
@@ -1592,47 +1475,81 @@ async function saveObs() {
 // CRUD — Requirements
 // ═══════════════════════════════════════════════════════════════
 function editReq(id){ const r=DB.requirements.find(x=>String(x.id)===String(id))||{}; document.getElementById('req-eid').value=r.id||''; document.getElementById('m-req-title').textContent='تعديل متطلب'; document.getElementById('req-text').value=r.text||''; document.getElementById('req-cat').value=r.cat||'سياسات وإجراءات'; document.getElementById('req-pri').value=r.priority||r.pri||'عالية'; document.getElementById('req-cost').value=r.cost||0; document.getElementById('req-fin').value=r.financial||'لا'; document.getElementById('req-stat').value=r.status||'معلق'; document.getElementById('req-owner').value=r.owner||''; openModal('m-req'); }
-async function delReq(id){ if(!confirm('حذف؟')) return; DB.requirements=DB.requirements.filter(r=>String(r.id)!==String(id)); renderAll(); await apiCall('delete','requirements',id); toast('🗑️ تم الحذف','info'); }
-async function saveReq(){ const id=document.getElementById('req-eid').value; const obj={id:id||String(Date.now()),text:document.getElementById('req-text').value,cat:document.getElementById('req-cat').value,priority:document.getElementById('req-pri').value,cost:document.getElementById('req-cost').value,financial:document.getElementById('req-fin').value,status:document.getElementById('req-stat').value,owner:document.getElementById('req-owner').value}; if(id){const idx=DB.requirements.findIndex(r=>String(r.id)===id);DB.requirements[idx]={...DB.requirements[idx],...obj};}else DB.requirements.push(obj); renderAll();closeModal('m-req'); await apiCall(id?'update':'add','requirements',obj.id,obj); toast('✅ تم الحفظ','success'); }
+async function delReq(id){ if(!confirm('حذف؟')) return; DB.requirements=DB.requirements.filter(r=>String(r.id)!==String(id)); renderAll(); await apiCall('delete','requirements',id); setTimeout(() => syncAll(), 1000); toast('🗑️ تم الحذف','info'); }
+async function saveReq(){ const id=document.getElementById('req-eid').value; const obj={id:id||String(Date.now()),text:document.getElementById('req-text').value,cat:document.getElementById('req-cat').value,priority:document.getElementById('req-pri').value,cost:document.getElementById('req-cost').value,financial:document.getElementById('req-fin').value,status:document.getElementById('req-stat').value,owner:document.getElementById('req-owner').value}; if(id){const idx=DB.requirements.findIndex(r=>String(r.id)===id);DB.requirements[idx]={...DB.requirements[idx],...obj};}else DB.requirements.push(obj); renderAll();closeModal('m-req'); await apiCall(id?'update':'add','requirements',obj.id,obj); setTimeout(() => syncAll(), 1000); toast('✅ تم الحفظ','success'); }
 
 // ═══════════════════════════════════════════════════════════════
 // CRUD — Team
 // ═══════════════════════════════════════════════════════════════
 function editTeam(id){ const t=DB.team.find(x=>String(x.id)===String(id))||{}; document.getElementById('team-eid').value=t.id||''; document.getElementById('team-name').value=t.name||''; document.getElementById('team-role').value=t.role||''; document.getElementById('team-dept').value=t.dept||''; document.getElementById('team-proj').value=t.proj||''; document.getElementById('team-branch').value=t.branch||'بريدة'; openModal('m-team'); }
-async function delTeam(id){ if(!confirm('حذف؟')) return; DB.team=DB.team.filter(t=>String(t.id)!==String(id)); renderAll(); await apiCall('delete','team',id); toast('🗑️ تم الحذف','info'); }
-async function saveTeam(){ const id=document.getElementById('team-eid').value; const obj={id:id||String(Date.now()),name:document.getElementById('team-name').value,role:document.getElementById('team-role').value,dept:document.getElementById('team-dept').value,proj:document.getElementById('team-proj').value,branch:document.getElementById('team-branch').value,participation:'جيدة'}; if(id){const idx=DB.team.findIndex(t=>String(t.id)===id);DB.team[idx]={...DB.team[idx],...obj};}else DB.team.push(obj); renderAll();closeModal('m-team'); await apiCall(id?'update':'add','team',obj.id,obj); toast('✅ تم الحفظ','success'); }
+async function delTeam(id){ if(!confirm('حذف؟')) return; DB.team=DB.team.filter(t=>String(t.id)!==String(id)); renderAll(); await apiCall('delete','team',id); setTimeout(() => syncAll(), 1000); toast('🗑️ تم الحذف','info'); }
+async function saveTeam(){ const id=document.getElementById('team-eid').value; const obj={id:id||String(Date.now()),name:document.getElementById('team-name').value,role:document.getElementById('team-role').value,dept:document.getElementById('team-dept').value,proj:document.getElementById('team-proj').value,branch:document.getElementById('team-branch').value,participation:'جيدة'}; if(id){const idx=DB.team.findIndex(t=>String(t.id)===id);DB.team[idx]={...DB.team[idx],...obj};}else DB.team.push(obj); renderAll();closeModal('m-team'); await apiCall(id?'update':'add','team',obj.id,obj); setTimeout(() => syncAll(), 1000); toast('✅ تم الحفظ','success'); }
 
 // ═══════════════════════════════════════════════════════════════
 // CRUD — Locations & Temp
 // ═══════════════════════════════════════════════════════════════
 function editLoc(id){ const l=DB.locations.find(x=>String(x.id)===String(id))||{}; document.getElementById('loc-eid').value=l.id||''; document.getElementById('loc-name').value=l.name||''; document.getElementById('loc-branch').value=l.branch||'بريدة'; document.getElementById('loc-before').value=l.before||''; document.getElementById('loc-after').value=l.after||''; document.getElementById('loc-stat').value=l.status||'معلق'; document.getElementById('loc-owner').value=l.owner||''; openModal('m-loc'); }
-async function delLoc(id){ if(!confirm('حذف؟')) return; DB.locations=DB.locations.filter(l=>String(l.id)!==String(id)); renderAll(); await apiCall('delete','locations',id); toast('🗑️ تم الحذف','info'); }
-async function saveLoc(){ const id=document.getElementById('loc-eid').value; const obj={id:id||String(Date.now()),name:document.getElementById('loc-name').value,branch:document.getElementById('loc-branch').value,before:document.getElementById('loc-before').value,after:document.getElementById('loc-after').value,status:document.getElementById('loc-stat').value,owner:document.getElementById('loc-owner').value}; if(id){const idx=DB.locations.findIndex(l=>String(l.id)===id);DB.locations[idx]={...DB.locations[idx],...obj};}else DB.locations.push(obj); renderAll();closeModal('m-loc'); await apiCall(id?'update':'add','locations',obj.id,obj); toast('✅ تم الحفظ','success'); }
+async function delLoc(id){ if(!confirm('حذف؟')) return; DB.locations=DB.locations.filter(l=>String(l.id)!==String(id)); renderAll(); await apiCall('delete','locations',id); setTimeout(() => syncAll(), 1000); toast('🗑️ تم الحذف','info'); }
+async function saveLoc(){ const id=document.getElementById('loc-eid').value; const obj={id:id||String(Date.now()),name:document.getElementById('loc-name').value,branch:document.getElementById('loc-branch').value,before:document.getElementById('loc-before').value,after:document.getElementById('loc-after').value,status:document.getElementById('loc-stat').value,owner:document.getElementById('loc-owner').value}; if(id){const idx=DB.locations.findIndex(l=>String(l.id)===id);DB.locations[idx]={...DB.locations[idx],...obj};}else DB.locations.push(obj); renderAll();closeModal('m-loc'); await apiCall(id?'update':'add','locations',obj.id,obj); setTimeout(() => syncAll(), 1000); toast('✅ تم الحفظ','success'); }
 
 function editTmp(id){ const t=DB.tmpChanges.find(x=>String(x.id)===String(id))||{}; document.getElementById('tmp-eid').value=t.id||''; document.getElementById('tmp-item').value=t.item||''; document.getElementById('tmp-loc').value=t.loc||''; document.getElementById('tmp-change').value=t.change||''; document.getElementById('tmp-restore').value=t.restore||''; document.getElementById('tmp-owner').value=t.owner||''; openModal('m-tmp'); }
-async function delTmp(id){ if(!confirm('حذف؟')) return; DB.tmpChanges=DB.tmpChanges.filter(t=>String(t.id)!==String(id)); renderAll(); await apiCall('delete','tmpChanges',id); toast('🗑️ تم الحذف','info'); }
-async function saveTmp(){ const id=document.getElementById('tmp-eid').value; const obj={id:id||String(Date.now()),item:document.getElementById('tmp-item').value,loc:document.getElementById('tmp-loc').value,change:document.getElementById('tmp-change').value,restore:document.getElementById('tmp-restore').value,owner:document.getElementById('tmp-owner').value}; if(id){const idx=DB.tmpChanges.findIndex(t=>String(t.id)===id);DB.tmpChanges[idx]={...DB.tmpChanges[idx],...obj};}else DB.tmpChanges.push(obj); renderAll();closeModal('m-tmp'); await apiCall(id?'update':'add','tmpChanges',obj.id,obj); toast('✅ تم الحفظ','success'); }
+async function delTmp(id){ if(!confirm('حذف؟')) return; DB.tmpChanges=DB.tmpChanges.filter(t=>String(t.id)!==String(id)); renderAll(); await apiCall('delete','tmpChanges',id); setTimeout(() => syncAll(), 1000); toast('🗑️ تم الحذف','info'); }
+async function saveTmp(){ const id=document.getElementById('tmp-eid').value; const obj={id:id||String(Date.now()),item:document.getElementById('tmp-item').value,loc:document.getElementById('tmp-loc').value,change:document.getElementById('tmp-change').value,restore:document.getElementById('tmp-restore').value,owner:document.getElementById('tmp-owner').value}; if(id){const idx=DB.tmpChanges.findIndex(t=>String(t.id)===id);DB.tmpChanges[idx]={...DB.tmpChanges[idx],...obj};}else DB.tmpChanges.push(obj); renderAll();closeModal('m-tmp'); await apiCall(id?'update':'add','tmpChanges',obj.id,obj); setTimeout(() => syncAll(), 1000); toast('✅ تم الحفظ','success'); }
 
 // ═══════════════════════════════════════════════════════════════
 // CRUD — Lectures
 // ═══════════════════════════════════════════════════════════════
 function editLec(id){ const l=DB.lectures.find(x=>String(x.id)===String(id))||{}; document.getElementById('lec-eid').value=l.id||''; document.getElementById('lec-title').value=l.title||''; document.getElementById('lec-speaker').value=l.speaker||''; document.getElementById('lec-alt').value=l.alt||''; document.getElementById('lec-date').value=l.date||''; document.getElementById('lec-time').value=l.time||''; document.getElementById('lec-aud').value=l.audience||l.aud||'جميع الموظفين'; document.getElementById('lec-done').value=l.done||'لا'; openModal('m-lec'); }
-async function delLec(id){ if(!confirm('حذف؟')) return; DB.lectures=DB.lectures.filter(l=>String(l.id)!==String(id)); renderAll(); await apiCall('delete','lectures',id); toast('🗑️ تم الحذف','info'); }
-async function saveLec(){ const id=document.getElementById('lec-eid').value; const obj={id:id||String(Date.now()),title:document.getElementById('lec-title').value,speaker:document.getElementById('lec-speaker').value,alt:document.getElementById('lec-alt').value,date:document.getElementById('lec-date').value,time:document.getElementById('lec-time').value,audience:document.getElementById('lec-aud').value,done:document.getElementById('lec-done').value}; if(id){const idx=DB.lectures.findIndex(l=>String(l.id)===id);DB.lectures[idx]={...DB.lectures[idx],...obj};}else DB.lectures.push(obj); renderAll();closeModal('m-lec'); await apiCall(id?'update':'add','lectures',obj.id,obj); toast('✅ تم الحفظ','success'); }
+async function delLec(id){ if(!confirm('حذف؟')) return; DB.lectures=DB.lectures.filter(l=>String(l.id)!==String(id)); renderAll(); await apiCall('delete','lectures',id); setTimeout(() => syncAll(), 1000); toast('🗑️ تم الحذف','info'); }
+async function saveLec(){ 
+  const id=document.getElementById('lec-eid').value; 
+  const obj={
+    id:id||String(Date.now()),
+    title:document.getElementById('lec-title').value,
+    speaker:document.getElementById('lec-speaker').value,
+    alt:document.getElementById('lec-alt').value,
+    date:document.getElementById('lec-date').value,
+    time:document.getElementById('lec-time').value,
+    audience:document.getElementById('lec-aud').value,
+    done:document.getElementById('lec-done').value
+  }; 
+  
+  console.log('💾 حفظ محاضرة:', obj);
+  
+  if(id){
+    const idx=DB.lectures.findIndex(l=>String(l.id)===id);
+    DB.lectures[idx]={...DB.lectures[idx],...obj};
+  } else {
+    DB.lectures.push(obj);
+  }
+  
+  renderAll();
+  closeModal('m-lec'); 
+  
+  // Save to Google Sheets
+  const result = await apiCall(id?'update':'add','lectures',obj.id,obj); 
+  
+  // Re-sync immediately to get fresh data from Sheets
+  setTimeout(() => {
+    syncAll();
+  }, 1000);
+  
+  toast('✅ تم الحفظ','success'); 
+}
 
 // ═══════════════════════════════════════════════════════════════
 // CRUD — Assignments
 // ═══════════════════════════════════════════════════════════════
 function editAssign(id){ const a=DB.assignments.find(x=>String(x.id)===String(id))||{}; document.getElementById('assign-eid').value=a.id||''; document.getElementById('assign-dept').value=a.dept||''; document.getElementById('assign-type').value=a.type||'تكليف رسمي موثق'; document.getElementById('assign-reason').value=a.reason||''; document.getElementById('assign-time').value=a.time||''; document.getElementById('assign-owner').value=a.owner||''; document.getElementById('assign-stat').value=a.status||'معلق'; openModal('m-assign'); }
-async function delAssign(id){ if(!confirm('حذف؟')) return; DB.assignments=DB.assignments.filter(a=>String(a.id)!==String(id)); renderAll(); await apiCall('delete','assignments',id); toast('🗑️ تم الحذف','info'); }
-async function saveAssign(){ const id=document.getElementById('assign-eid').value; const obj={id:id||String(Date.now()),dept:document.getElementById('assign-dept').value,type:document.getElementById('assign-type').value,reason:document.getElementById('assign-reason').value,time:document.getElementById('assign-time').value,owner:document.getElementById('assign-owner').value,status:document.getElementById('assign-stat').value}; if(id){const idx=DB.assignments.findIndex(a=>String(a.id)===id);DB.assignments[idx]={...DB.assignments[idx],...obj};}else DB.assignments.push(obj); renderAll();closeModal('m-assign'); await apiCall(id?'update':'add','assignments',obj.id,obj); toast('✅ تم الحفظ','success'); }
+async function delAssign(id){ if(!confirm('حذف؟')) return; DB.assignments=DB.assignments.filter(a=>String(a.id)!==String(id)); renderAll(); await apiCall('delete','assignments',id); setTimeout(() => syncAll(), 1000); toast('🗑️ تم الحذف','info'); }
+async function saveAssign(){ const id=document.getElementById('assign-eid').value; const obj={id:id||String(Date.now()),dept:document.getElementById('assign-dept').value,type:document.getElementById('assign-type').value,reason:document.getElementById('assign-reason').value,time:document.getElementById('assign-time').value,owner:document.getElementById('assign-owner').value,status:document.getElementById('assign-stat').value}; if(id){const idx=DB.assignments.findIndex(a=>String(a.id)===id);DB.assignments[idx]={...DB.assignments[idx],...obj};}else DB.assignments.push(obj); renderAll();closeModal('m-assign'); await apiCall(id?'update':'add','assignments',obj.id,obj); setTimeout(() => syncAll(), 1000); toast('✅ تم الحفظ','success'); }
 
 // ═══════════════════════════════════════════════════════════════
 // CRUD — Policies
 // ═══════════════════════════════════════════════════════════════
 function editPol(id){ const p=DB.policies.find(x=>String(x.id)===String(id))||{}; document.getElementById('pol-eid').value=p.id||''; document.getElementById('pol-name').value=p.name||''; document.getElementById('pol-dept').value=p.dept||''; document.getElementById('pol-content').value=p.content||'لم تبدأ'; document.getElementById('pol-sigs').value=p.sigs||''; document.getElementById('pol-sigstat').value=p.sigStatus||'لم يوقع'; openModal('m-pol'); }
-async function delPol(id){ if(!confirm('حذف؟')) return; DB.policies=DB.policies.filter(p=>String(p.id)!==String(id)); renderAll(); await apiCall('delete','policies',id); toast('🗑️ تم الحذف','info'); }
-async function savePol(){ const id=document.getElementById('pol-eid').value; const obj={id:id||String(Date.now()),name:document.getElementById('pol-name').value,dept:document.getElementById('pol-dept').value,content:document.getElementById('pol-content').value,sigs:document.getElementById('pol-sigs').value,sigStatus:document.getElementById('pol-sigstat').value}; if(id){const idx=DB.policies.findIndex(p=>String(p.id)===id);DB.policies[idx]={...DB.policies[idx],...obj};}else DB.policies.push(obj); renderAll();closeModal('m-pol'); await apiCall(id?'update':'add','policies',obj.id,obj); toast('✅ تم الحفظ','success'); }
+async function delPol(id){ if(!confirm('حذف؟')) return; DB.policies=DB.policies.filter(p=>String(p.id)!==String(id)); renderAll(); await apiCall('delete','policies',id); setTimeout(() => syncAll(), 1000); toast('🗑️ تم الحذف','info'); }
+async function savePol(){ const id=document.getElementById('pol-eid').value; const obj={id:id||String(Date.now()),name:document.getElementById('pol-name').value,dept:document.getElementById('pol-dept').value,content:document.getElementById('pol-content').value,sigs:document.getElementById('pol-sigs').value,sigStatus:document.getElementById('pol-sigstat').value}; if(id){const idx=DB.policies.findIndex(p=>String(p.id)===id);DB.policies[idx]={...DB.policies[idx],...obj};}else DB.policies.push(obj); renderAll();closeModal('m-pol'); await apiCall(id?'update':'add','policies',obj.id,obj); setTimeout(() => syncAll(), 1000); toast('✅ تم الحفظ','success'); }
 
 // ═══════════════════════════════════════════════════════════════
 // CRUD — Workflow
@@ -1669,37 +1586,13 @@ async function delWf(id){
 async function saveWf(){
   const id = document.getElementById('wf-eid').value;
   const title = document.getElementById('wf-title-in').value;
-  let doc = document.getElementById('wf-doc-in').value;
+  const doc = document.getElementById('wf-doc-in').value;
   const category = document.getElementById('wf-cat-in').value;
   const desc = document.getElementById('wf-desc-in').value;
   const owner = document.getElementById('wf-owner-in').value;
   
-  if (!title) {
-    toast('⚠️ أدخل اسم المستند', 'error');
-    return;
-  }
-  
-  // Handle file upload
-  if (selectedFile) {
-    toast('📤 جاري رفع الملف...', 'info', 2000);
-    
-    // In production, this would upload to Google Drive
-    // For now, we'll store file info locally
-    const fileInfo = {
-      name: selectedFile.name,
-      size: selectedFile.size,
-      type: selectedFile.type,
-      uploadDate: new Date().toISOString()
-    };
-    
-    // Placeholder URL - في الواقع سيكون رابط Google Drive
-    doc = `local://files/${selectedFile.name}`;
-    
-    toast('⚠️ ملاحظة: الرفع لـ Google Drive يتطلب إعداد API', 'info', 3000);
-  }
-  
-  if (!doc && !selectedFile) {
-    toast('⚠️ أدخل رابط المستند أو اختر ملف', 'error');
+  if (!title || !doc) {
+    toast('⚠️ املأ الحقول المطلوبة', 'error');
     return;
   }
   
@@ -1722,19 +1615,13 @@ async function saveWf(){
   renderAll();
   closeModal('m-add-wf');
   
-  // Reset file selection
-  selectedFile = null;
-  if (document.getElementById('file-selected-name')) {
-    document.getElementById('file-selected-name').textContent = 'اضغط لاختيار ملف...';
-  }
-  
   // Sync to backend
   if (GAS_URL) {
     try {
       setSyncStatus('load');
       await callGAS({action: id ? 'update' : 'add', sheet: 'workflow', id: obj.id, data: obj});
       setSyncStatus('ok');
-      toast('✅ تم الحفظ بنجاح', 'success');
+      toast('✅ حُفظ في Google Sheets', 'success');
     } catch(e) {
       setSyncStatus('err');
       toast('✅ حُفظ محلياً فقط', 'info');
@@ -2410,7 +2297,46 @@ const _origRenderAll2 = renderAll;
 renderAll = function() {
   _origRenderAll2();
   renderPatientFiles();
-;
+};
+
+// ════════════════════════════════════════════════════════════════
+// AUTO-SYNC SYSTEM
+// ════════════════════════════════════════════════════════════════
+(function() {
+  // Load local data first
+  loadLocalFallback();
+  renderAll();
+  
+  // Initial sync after 1.5 seconds
+  setTimeout(async () => {
+    if (GAS_URL) {
+      console.log('🔄 Initial sync...');
+      try {
+        await syncAll();
+      } catch(e) {
+        console.warn('Sync error:', e);
+      }
+    } else {
+      setSyncStatus('err');
+    }
+  }, 1500);
+  
+  // Auto-sync every 30 seconds (silent)
+  setInterval(async () => {
+    if (GAS_URL && !isSyncing) {
+      console.log('🔄 Auto-sync...');
+      const origToast = window.toast;
+      window.toast = () => {}; // Disable toast temporarily
+      try {
+        await syncAll();
+      } catch(e) {
+        console.warn('Auto-sync error:', e);
+      } finally {
+        window.toast = origToast; // Restore toast
+      }
+    }
+  }, 30000);
+})();
 
 </script>
 </body>

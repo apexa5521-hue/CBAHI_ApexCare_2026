@@ -3,6 +3,34 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CBAHI Project Dashboard | لوحة مشروع CBAHI</title>
+<!--
+════════════════════════════════════════════════════════════════
+  CBAHI PROJECT MANAGEMENT DASHBOARD
+  نظام إدارة مشروع اعتماد CBAHI
+  
+  📌 ملاحظات مهمة:
+  ────────────────────────────────────────────────────────────
+  1️⃣ هذا الملف يعمل على localStorage فقط حالياً
+  2️⃣ المحاضرات تُحفظ في متصفحك ولا تختفي
+  3️⃣ لتفعيل المزامنة مع Google Sheets:
+     • ابحث عن: const GAS_URL = null;
+     • غيّره إلى: const GAS_URL = 'رابطك هنا';
+     • الرابط من: Google Apps Script > Deploy > Web App URL
+  
+  ✅ الميزات الجديدة:
+  ────────────────────────────────────────────────────────────
+  • حفظ تلقائي في localStorage
+  • تحميل تلقائي عند فتح الصفحة
+  • عدد غير محدود من المحاضرات
+  • لا تختفي المحاضرات أبداً
+  • مزامنة اختيارية مع Google Sheets
+  
+  🔧 للتحقق من عمل النظام:
+  ────────────────────────────────────────────────────────────
+  افتح Console (F12) وشوف الرسائل الخضراء ✅
+════════════════════════════════════════════════════════════════
+-->
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
 <style>
 
@@ -2456,7 +2484,10 @@ renderAll = function() {
 // ════════════════════════════════════════════════════════════════
 // CONFIG & GLOBAL STATE
 // ════════════════════════════════════════════════════════════════
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbwVt8vJxoIm-YOUR-DEPLOYMENT-ID/exec';
+// 🔧 ضع رابط Google Apps Script هنا:
+// مثال: 'https://script.google.com/macros/s/AKfycby.../exec'
+// أو اتركه null للعمل على localStorage فقط (بدون مزامنة)
+const GAS_URL = null;
 
 let DB = {
   observations:[], requirements:[], team:[],
@@ -2506,6 +2537,12 @@ function loadLecturesFromLocal() {
 // API CALLS
 // ════════════════════════════════════════════════════════════════
 async function apiCall(action, sheet, id, data) {
+  // إذا ما في رابط Apps Script، نشتغل على localStorage فقط
+  if (!GAS_URL) {
+    console.log('⚠️ لا يوجد رابط GAS_URL - العمل على localStorage فقط');
+    return { success: true, message: 'localStorage only mode' };
+  }
+  
   const params = new URLSearchParams({
     action: action,
     sheet: sheet || '',
@@ -2513,29 +2550,47 @@ async function apiCall(action, sheet, id, data) {
     data: data ? JSON.stringify(data) : ''
   });
   
-  const response = await fetch(GAS_URL + '?' + params.toString());
-  return await response.json();
+  try {
+    const response = await fetch(GAS_URL + '?' + params.toString());
+    return await response.json();
+  } catch(e) {
+    console.warn('⚠️ فشل الاتصال بالسيرفر:', e.message);
+    return { success: false, error: e.message };
+  }
 }
 
 async function loadData() {
-  const result = await apiCall('getData');
-  if (result) {
-    DB.observations = result.observations || [];
-    DB.requirements = result.requirements || [];
-    DB.team = result.team || [];
-    DB.locations = result.locations || [];
-    DB.tmpChanges = result.tmpChanges || [];
-    DB.lectures = result.lectures || [];
-    DB.assignments = result.assignments || [];
-    DB.policies = result.policies || [];
-    DB.workflow = result.workflow || [];
-    DB.patientFiles = result.patientFiles || [];
-    DB.dashboard = result.dashboard || null;
-    
-    // حفظ المحاضرات في localStorage بعد التحميل من السيرفر
-    saveLecturesToLocal();
-    
-    renderAll();
+  // إذا ما في رابط، نعتمد على localStorage فقط
+  if (!GAS_URL) {
+    console.log('💾 العمل على localStorage فقط (لا توجد مزامنة مع السيرفر)');
+    return;
+  }
+  
+  try {
+    const result = await apiCall('getData');
+    if (result && !result.error) {
+      DB.observations = result.observations || [];
+      DB.requirements = result.requirements || [];
+      DB.team = result.team || [];
+      DB.locations = result.locations || [];
+      DB.tmpChanges = result.tmpChanges || [];
+      DB.lectures = result.lectures || [];
+      DB.assignments = result.assignments || [];
+      DB.policies = result.policies || [];
+      DB.workflow = result.workflow || [];
+      DB.patientFiles = result.patientFiles || [];
+      DB.dashboard = result.dashboard || null;
+      
+      // حفظ المحاضرات في localStorage بعد التحميل من السيرفر
+      saveLecturesToLocal();
+      
+      renderAll();
+      console.log('✅ تم تحميل البيانات من السيرفر');
+    } else {
+      console.warn('⚠️ فشل تحميل البيانات من السيرفر');
+    }
+  } catch(e) {
+    console.error('❌ خطأ في loadData:', e.message);
   }
 }
 
@@ -2750,19 +2805,27 @@ window.addEventListener('DOMContentLoaded', async function() {
   console.log('🚀 تهيئة نظام CBAHI...');
   
   // تحميل المحاضرات من localStorage أولاً (تحميل فوري)
-  loadLecturesFromLocal();
+  const hasLocal = loadLecturesFromLocal();
+  if (hasLocal) {
+    console.log('📦 تم تحميل المحاضرات من الذاكرة المحلية');
+  }
   
   // عرض البيانات المحلية فوراً
   renderAll();
   
-  // المزامنة مع السيرفر في الخلفية
-  try {
-    console.log('🔄 جاري المزامنة مع السيرفر...');
-    await loadData();
-    console.log('✅ تمت المزامنة بنجاح');
-  } catch(e) {
-    console.error('❌ فشلت المزامنة مع السيرفر:', e);
-    console.log('💾 سيتم العمل على البيانات المحلية');
+  // المزامنة مع السيرفر في الخلفية (إذا كان الرابط موجود)
+  if (GAS_URL) {
+    try {
+      console.log('🔄 جاري المزامنة مع السيرفر...');
+      await loadData();
+      console.log('✅ تمت المزامنة بنجاح');
+    } catch(e) {
+      console.error('❌ فشلت المزامنة مع السيرفر:', e);
+      console.log('💾 سيتم العمل على البيانات المحلية');
+    }
+  } else {
+    console.log('💡 الوضع: localStorage فقط (لا توجد مزامنة مع السيرفر)');
+    console.log('📝 لتفعيل المزامنة: ضع رابط Google Apps Script في المتغير GAS_URL');
   }
   
   // إغلاق المودال عند النقر على الخلفية

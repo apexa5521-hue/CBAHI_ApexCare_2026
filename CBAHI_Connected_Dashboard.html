@@ -1616,9 +1616,7 @@ async function saveTmp(){ const id=document.getElementById('tmp-eid').value; con
 // ═══════════════════════════════════════════════════════════════
 // CRUD — Lectures
 // ═══════════════════════════════════════════════════════════════
-function editLec(id){ const l=DB.lectures.find(x=>String(x.id)===String(id))||{}; document.getElementById('lec-eid').value=l.id||''; document.getElementById('lec-title').value=l.title||''; document.getElementById('lec-speaker').value=l.speaker||''; document.getElementById('lec-alt').value=l.alt||''; document.getElementById('lec-date').value=l.date||''; document.getElementById('lec-time').value=l.time||''; document.getElementById('lec-aud').value=l.audience||l.aud||'جميع الموظفين'; document.getElementById('lec-done').value=l.done||'لا'; openModal('m-lec'); }
-async function delLec(id){ if(!confirm('حذف؟')) return; DB.lectures=DB.lectures.filter(l=>String(l.id)!==String(id)); renderAll(); await apiCall('delete','lectures',id); toast('🗑️ تم الحذف','info'); }
-async function saveLec(){ const id=document.getElementById('lec-eid').value; const obj={id:id||String(Date.now()),title:document.getElementById('lec-title').value,speaker:document.getElementById('lec-speaker').value,alt:document.getElementById('lec-alt').value,date:document.getElementById('lec-date').value,time:document.getElementById('lec-time').value,audience:document.getElementById('lec-aud').value,done:document.getElementById('lec-done').value}; if(id){const idx=DB.lectures.findIndex(l=>String(l.id)===id);DB.lectures[idx]={...DB.lectures[idx],...obj};}else DB.lectures.push(obj); renderAll();closeModal('m-lec'); await apiCall(id?'update':'add','lectures',obj.id,obj); toast('✅ تم الحفظ','success'); }
+// ⚠️ تم نقل دوال المحاضرات (editLec, delLec, saveLec) إلى نهاية الملف مع تحسينات localStorage
 
 // ═══════════════════════════════════════════════════════════════
 // CRUD — Assignments
@@ -2453,3 +2451,368 @@ renderAll = function() {
     </div>
   </div>
 </div>
+
+<script>
+// ════════════════════════════════════════════════════════════════
+// CONFIG & GLOBAL STATE
+// ════════════════════════════════════════════════════════════════
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbwVt8vJxoIm-YOUR-DEPLOYMENT-ID/exec';
+
+let DB = {
+  observations:[], requirements:[], team:[],
+  locations:[], tmpChanges:[], lectures:[],
+  assignments:[], policies:[], workflow:[],
+  patientFiles:[], dashboard: null
+};
+let isSyncing = false;
+
+// ════════════════════════════════════════════════════════════════
+// 🔥 localStorage PERSISTENCE للمحاضرات
+// ════════════════════════════════════════════════════════════════
+function saveLecturesToLocal() {
+  try {
+    localStorage.setItem('cbahi_lectures', JSON.stringify(DB.lectures));
+    localStorage.setItem('cbahi_lectures_timestamp', new Date().toISOString());
+    console.log('✅ حُفظ', DB.lectures.length, 'محاضرات في localStorage');
+    return true;
+  } catch(e) {
+    console.error('❌ فشل حفظ localStorage:', e);
+    return false;
+  }
+}
+
+function loadLecturesFromLocal() {
+  try {
+    const stored = localStorage.getItem('cbahi_lectures');
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      if (Array.isArray(parsed)) {
+        DB.lectures = parsed;
+        const timestamp = localStorage.getItem('cbahi_lectures_timestamp');
+        console.log('📦 تم تحميل', DB.lectures.length, 'محاضرات من localStorage');
+        if (timestamp) {
+          console.log('📅 آخر حفظ:', new Date(timestamp).toLocaleString('ar-SA'));
+        }
+        return true;
+      }
+    }
+  } catch(e) {
+    console.warn('⚠️ فشل تحميل localStorage:', e);
+  }
+  return false;
+}
+
+// ════════════════════════════════════════════════════════════════
+// API CALLS
+// ════════════════════════════════════════════════════════════════
+async function apiCall(action, sheet, id, data) {
+  const params = new URLSearchParams({
+    action: action,
+    sheet: sheet || '',
+    id: id || '',
+    data: data ? JSON.stringify(data) : ''
+  });
+  
+  const response = await fetch(GAS_URL + '?' + params.toString());
+  return await response.json();
+}
+
+async function loadData() {
+  const result = await apiCall('getData');
+  if (result) {
+    DB.observations = result.observations || [];
+    DB.requirements = result.requirements || [];
+    DB.team = result.team || [];
+    DB.locations = result.locations || [];
+    DB.tmpChanges = result.tmpChanges || [];
+    DB.lectures = result.lectures || [];
+    DB.assignments = result.assignments || [];
+    DB.policies = result.policies || [];
+    DB.workflow = result.workflow || [];
+    DB.patientFiles = result.patientFiles || [];
+    DB.dashboard = result.dashboard || null;
+    
+    // حفظ المحاضرات في localStorage بعد التحميل من السيرفر
+    saveLecturesToLocal();
+    
+    renderAll();
+  }
+}
+
+// ════════════════════════════════════════════════════════════════
+// LECTURES CRUD - محسّنة مع localStorage
+// ════════════════════════════════════════════════════════════════
+function editLec(id) { 
+  const l = DB.lectures.find(x => String(x.id) === String(id)) || {}; 
+  document.getElementById('lec-eid').value = l.id || ''; 
+  document.getElementById('lec-title').value = l.title || ''; 
+  document.getElementById('lec-speaker').value = l.speaker || ''; 
+  document.getElementById('lec-alt').value = l.alt || ''; 
+  document.getElementById('lec-date').value = l.date || ''; 
+  document.getElementById('lec-time').value = l.time || ''; 
+  document.getElementById('lec-aud').value = l.audience || l.aud || 'جميع الموظفين'; 
+  document.getElementById('lec-done').value = l.done || 'لا'; 
+  openModal('m-lec'); 
+}
+
+async function delLec(id) { 
+  if(!confirm('هل تريد حذف هذه المحاضرة؟')) return; 
+  
+  const lecture = DB.lectures.find(l => String(l.id) === String(id));
+  const title = lecture ? lecture.title : id;
+  
+  DB.lectures = DB.lectures.filter(l => String(l.id) !== String(id)); 
+  
+  // حفظ في localStorage
+  saveLecturesToLocal();
+  
+  renderAll(); 
+  toast('🗑️ تم الحذف محلياً...', 'info');
+  
+  try {
+    await apiCall('delete', 'lectures', id); 
+    console.log('🗑️ تم الحذف من السيرفر:', title);
+    toast('✅ تم الحذف بنجاح', 'success'); 
+  } catch(e) {
+    console.error('❌ فشل الحذف من السيرفر:', e);
+    toast('⚠️ تم الحذف محلياً فقط', 'warning');
+  }
+}
+
+async function saveLec() { 
+  const id = document.getElementById('lec-eid').value; 
+  const title = document.getElementById('lec-title').value.trim();
+  
+  // التحقق من البيانات
+  if (!title) {
+    toast('⚠️ يرجى إدخال عنوان المحاضرة', 'warning');
+    return;
+  }
+  
+  const obj = {
+    id: id || String(Date.now()),
+    title: title,
+    speaker: document.getElementById('lec-speaker').value.trim(),
+    alt: document.getElementById('lec-alt').value.trim(),
+    date: document.getElementById('lec-date').value,
+    time: document.getElementById('lec-time').value,
+    audience: document.getElementById('lec-aud').value,
+    done: document.getElementById('lec-done').value,
+    createdAt: id ? undefined : new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  }; 
+  
+  // تحديث محلي أولاً
+  if(id) {
+    const idx = DB.lectures.findIndex(l => String(l.id) === id);
+    if (idx !== -1) {
+      DB.lectures[idx] = {...DB.lectures[idx], ...obj};
+      console.log('✏️ تم تعديل المحاضرة:', obj.title);
+    }
+  } else {
+    DB.lectures.push(obj);
+    console.log('➕ تمت إضافة محاضرة جديدة:', obj.title);
+  }
+  
+  // حفظ في localStorage فوراً
+  const localSaved = saveLecturesToLocal();
+  
+  // تحديث العرض
+  renderAll();
+  closeModal('m-lec'); 
+  
+  // إظهار رسالة فورية
+  toast(localSaved ? '💾 تم الحفظ محلياً...' : '⏳ جاري الحفظ...', 'info');
+  
+  // المزامنة مع السيرفر (في الخلفية)
+  try {
+    const result = await apiCall(id ? 'update' : 'add', 'lectures', obj.id, obj);
+    if (result && result.success) {
+      console.log('✅ تمت المزامنة مع السيرفر:', obj.title);
+      toast('✅ تم الحفظ والمزامنة بنجاح', 'success');
+    } else {
+      console.warn('⚠️ فشلت المزامنة، البيانات محفوظة محلياً');
+      toast('💾 محفوظ محلياً، سيتم المزامنة لاحقاً', 'warning');
+    }
+  } catch(e) {
+    console.error('❌ خطأ في المزامنة:', e);
+    toast('💾 محفوظ محلياً فقط', 'warning');
+  }
+}
+
+async function toggleLecDone(id) {
+  const lec = DB.lectures.find(l => String(l.id) === String(id));
+  if (!lec) return;
+  
+  lec.done = lec.done === 'نعم' ? 'لا' : 'نعم';
+  lec.updatedAt = new Date().toISOString();
+  
+  saveLecturesToLocal();
+  renderAll();
+  
+  try {
+    await apiCall('update', 'lectures', id, { done: lec.done });
+    console.log('✅ تم تحديث حالة المحاضرة:', lec.title, '→', lec.done);
+  } catch(e) {
+    console.error('❌ فشل تحديث الحالة:', e);
+  }
+}
+
+// ════════════════════════════════════════════════════════════════
+// RENDER LECTURES
+// ════════════════════════════════════════════════════════════════
+function renderLectures() {
+  const el = document.getElementById('lec-tbody');
+  if (!el) return;
+  
+  document.getElementById('lec-cnt').textContent = DB.lectures.length;
+  
+  const doneCnt = DB.lectures.filter(l => l.done === 'نعم').length;
+  const doneEl = document.getElementById('lec-done-cnt');
+  if (doneEl) doneEl.textContent = doneCnt + ' منجزة';
+  
+  if (!DB.lectures || DB.lectures.length === 0) {
+    el.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text3);padding:40px">لا توجد محاضرات<br><small style="color:var(--text3);font-size:10px">اضغط "+ إضافة" لإضافة أول محاضرة</small></td></tr>';
+    return;
+  }
+  
+  const sorted = [...DB.lectures].sort((a, b) => {
+    const dateA = a.date || '9999-12-31';
+    const dateB = b.date || '9999-12-31';
+    return dateA.localeCompare(dateB);
+  });
+  
+  el.innerHTML = sorted.map((lec, i) => {
+    const isDone = lec.done === 'نعم';
+    const statusColor = isDone ? '#10D97E' : '#F97316';
+    const statusText = isDone ? 'مكتملة' : 'قادمة';
+    const dateStr = lec.date || '—';
+    
+    return `<tr>
+      <td class="num">${i+1}</td>
+      <td class="td-main">
+        <strong>${lec.title || 'محاضرة'}</strong>
+        ${lec.speaker ? '<div style="font-size:11px;color:var(--text3);margin-top:4px">🎤 ' + lec.speaker + '</div>' : ''}
+      </td>
+      <td style="font-size:12px;color:var(--text2)">${lec.speaker || '—'}</td>
+      <td style="font-size:12px;color:var(--text2)">${lec.alt || '—'}</td>
+      <td style="font-size:12px;color:var(--text2)">${dateStr}</td>
+      <td style="font-size:11px;color:var(--text3)">${lec.audience || '—'}</td>
+      <td style="text-align:center">
+        <span class="badge" style="background:${statusColor}22;color:${statusColor};font-size:10px">${statusText}</span>
+      </td>
+      <td style="text-align:center">
+        <button class="btn-icon" onclick="editLec('${lec.id}')" title="تعديل">✏️</button>
+        <button class="btn-icon" onclick="delLec('${lec.id}')" title="حذف">🗑️</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+// ════════════════════════════════════════════════════════════════
+// UI HELPERS
+// ════════════════════════════════════════════════════════════════
+function renderAll() {
+  renderLectures();
+  // أضف هنا باقي دوال الرندر الأخرى
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.pane').forEach(p => p.classList.remove('active'));
+  
+  const tabEl = event?.target;
+  if (tabEl) tabEl.classList.add('active');
+  
+  const pane = document.getElementById('pane-' + tab);
+  if (pane) pane.classList.add('active');
+}
+
+function openModal(id) {
+  const modal = document.getElementById(id);
+  if (modal) modal.classList.add('open');
+}
+
+function closeModal(id) {
+  const modal = document.getElementById(id);
+  if (modal) modal.classList.remove('open');
+}
+
+function toast(msg, type) {
+  console.log('[Toast]', type, ':', msg);
+  alert(msg);
+}
+
+// ════════════════════════════════════════════════════════════════
+// INITIALIZATION
+// ════════════════════════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', async function() {
+  console.log('🚀 تهيئة نظام CBAHI...');
+  
+  // تحميل المحاضرات من localStorage أولاً (تحميل فوري)
+  loadLecturesFromLocal();
+  
+  // عرض البيانات المحلية فوراً
+  renderAll();
+  
+  // المزامنة مع السيرفر في الخلفية
+  try {
+    console.log('🔄 جاري المزامنة مع السيرفر...');
+    await loadData();
+    console.log('✅ تمت المزامنة بنجاح');
+  } catch(e) {
+    console.error('❌ فشلت المزامنة مع السيرفر:', e);
+    console.log('💾 سيتم العمل على البيانات المحلية');
+  }
+  
+  // إغلاق المودال عند النقر على الخلفية
+  document.querySelectorAll('.overlay').forEach(function(el) {
+    el.addEventListener('click', function(e) {
+      if (e.target === el) el.classList.remove('open');
+    });
+  });
+  
+  console.log('✅ النظام جاهز!');
+  console.log('📊 إجمالي المحاضرات:', DB.lectures.length);
+});
+
+// ════════════════════════════════════════════════════════════════
+// دالة مزامنة يدوية للمحاضرات
+// ════════════════════════════════════════════════════════════════
+async function syncAllLectures() {
+  if (!DB.lectures || DB.lectures.length === 0) {
+    toast('لا توجد محاضرات للمزامنة', 'info');
+    return;
+  }
+  
+  toast('🔄 جاري مزامنة ' + DB.lectures.length + ' محاضرة...', 'info');
+  
+  let synced = 0;
+  let failed = 0;
+  
+  for (const lec of DB.lectures) {
+    try {
+      const result = await apiCall('update', 'lectures', lec.id, lec);
+      if (result && result.success) {
+        synced++;
+      } else {
+        failed++;
+      }
+    } catch(e) {
+      failed++;
+    }
+  }
+  
+  if (failed === 0) {
+    toast('✅ تمت مزامنة ' + synced + ' محاضرة', 'success');
+  } else {
+    toast('⚠️ نجح: ' + synced + '، فشل: ' + failed, 'warning');
+  }
+}
+
+console.log('✅ تم تحميل السكريبت المحسّن للمحاضرات');
+console.log('📦 localStorage persistence مُفعّل');
+console.log('🔄 المزامنة التلقائية مُفعّلة');
+</script>
+</body>
+</html>

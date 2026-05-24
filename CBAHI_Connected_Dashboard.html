@@ -251,6 +251,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
     <button class="tab" onclick="switchTab('workflow')">📁 المستندات</button>
     <button class="tab" onclick="switchTab('policies2')">📜 السياسات الكاملة (106)</button>
     <button class="tab" onclick="switchTab('patient-files')">📂 ملفات المرضى</button>
+    <button class="tab" onclick="switchTab('licenses')">📜 الرخص والعقود</button>
     <button class="tab" onclick="switchTab('employee-files')">🪪 ملفات الموظفين</button>
 </div>
 
@@ -749,7 +750,6 @@ tr:hover td{background:rgba(0,194,255,.03)}
     <button class="btn btn-ghost" style="padding:14px;font-size:13px" onclick="switchTab('observations')">🔍 إدارة الملاحظات</button>
     <button class="btn btn-ghost" style="padding:14px;font-size:13px" onclick="switchTab('requirements')">📋 إدارة المتطلبات</button>
     <button class="btn btn-ghost" style="padding:14px;font-size:13px" onclick="switchTab('lectures')">🎓 المحاضرات</button>
-    <button class="btn btn-ghost" style="padding:14px;font-size:13px" onclick="openExtras()">📂 رخص وعقود ومستندات</button>
     <button class="btn btn-gold" style="padding:14px;font-size:13px" onclick="syncAll()">🔄 مزامنة كل البيانات</button>
   </div>
 </div>
@@ -804,23 +804,98 @@ tr:hover td{background:rgba(0,194,255,.03)}
       </div>
     </div>
     <div class="fg"><label>📄 OVR Report نسخ مطبوعة وموزعة (نعم/لا)</label>
-      <select id="ex-ovr"><option value="0">لا</option><option value="1">نعم</option></select></div>
     <div class="fg"><label>📘 Manual مكافحة العدوى مطبوع وموزع</label>
-      <select id="ex-manual"><option value="0">لا</option><option value="1">نعم</option></select></div>
     <div class="fg"><label>✅ Checklists معتمدة وموزعة (من 12 قائمة)</label>
-      <input type="number" id="ex-checklists" min="0" max="12" placeholder="0-12"></div>
     <div class="fg"><label>📝 محاضرات جسر — تم الإبلاغ عنها (من المحاضرات المنجزة)</label>
       <select id="ex-jisr"><option value="none">لم يُبلَّغ بعد</option><option value="partial">بعضها</option><option value="all">الكل</option></select></div>
     <div class="fg"><label>👥 ملفات الموظفين المكتملة (نسبة %)</label>
       <input type="number" id="ex-staff" min="0" max="100" placeholder="0-100"></div>
     <div class="fg"><label>🤝 تعاون الفريق (نسبة %)</label>
-      <input type="number" id="ex-team" min="0" max="100" placeholder="0-100"></div>
 
     <div class="modal-footer">
       <button class="btn btn-danger" onclick="closeModal('m-extras')">إلغاء</button>
       <button class="btn btn-primary" onclick="saveExtras()">💾 حفظ</button>
     </div>
   </div>
+</div>
+
+
+<!-- ═══ LICENSES & CONTRACTS ═══ -->
+<div class="pane" id="pane-licenses">
+
+  <div style="background:linear-gradient(135deg,#EF4444,#F97316);border-radius:12px;padding:24px;margin-bottom:20px;color:white">
+    <h2 style="margin:0 0 8px;font-size:24px;font-weight:900">📜 الرخص والعقود والاتفاقيات</h2>
+    <p style="margin:0;opacity:.9;font-size:13px">سجّل إنجاز كل بند — تؤثر مباشرة على لوحة الإنجاز الكلي (وزن 5%)</p>
+  </div>
+
+  <!-- KPI -->
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px">
+    <div style="background:var(--surface);border:1px solid rgba(239,68,68,.2);border-radius:12px;padding:18px;text-align:center">
+      <div style="font-size:11px;color:var(--text3);margin-bottom:4px">📜 الرخص</div>
+      <div style="font-size:28px;font-weight:900;color:#EF4444;font-family:Cairo,sans-serif" id="lic-kpi-lic">–</div>
+    </div>
+    <div style="background:var(--surface);border:1px solid rgba(249,115,22,.2);border-radius:12px;padding:18px;text-align:center">
+      <div style="font-size:11px;color:var(--text3);margin-bottom:4px">📝 العقود</div>
+      <div style="font-size:28px;font-weight:900;color:#F97316;font-family:Cairo,sans-serif" id="lic-kpi-cnt">–</div>
+    </div>
+    <div style="background:var(--surface);border:1px solid rgba(16,217,126,.2);border-radius:12px;padding:18px;text-align:center">
+      <div style="font-size:11px;color:var(--text3);margin-bottom:4px">📊 نسبة الإنجاز</div>
+      <div style="font-size:28px;font-weight:900;color:var(--green);font-family:Cairo,sans-serif" id="lic-kpi-pct">–</div>
+      <div style="height:5px;background:rgba(255,255,255,.06);border-radius:3px;margin-top:8px;overflow:hidden">
+        <div id="lic-kpi-bar" style="height:100%;width:0%;background:var(--green);border-radius:3px;transition:width .8s"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- الرخص -->
+  <div class="tcard" style="margin-bottom:16px">
+    <div class="tcard-hdr"><div class="tcard-title">📜 الرخص</div></div>
+    <div style="padding:16px;display:grid;grid-template-columns:repeat(2,1fr);gap:10px">
+      <div class="fg"><label>رخصة البلدية</label>
+        <select id="ex-lic-baladiya" onchange="saveLicenses()"><option value="0">❌ غير منجز</option><option value="1">✅ منجز</option></select></div>
+      <div class="fg"><label>رخصة الدفاع المدني</label>
+        <select id="ex-lic-defaa" onchange="saveLicenses()"><option value="0">❌ غير منجز</option><option value="1">✅ منجز</option></select></div>
+      <div class="fg"><label>رخصة الهلال الأحمر</label>
+        <select id="ex-lic-hilal" onchange="saveLicenses()"><option value="0">❌ غير منجز</option><option value="1">✅ منجز</option></select></div>
+      <div class="fg"><label>ترخيص وزارة الصحة</label>
+        <select id="ex-lic-health" onchange="saveLicenses()"><option value="0">❌ غير منجز</option><option value="1">✅ منجز</option></select></div>
+      <div class="fg"><label>شهادة CBAHI السابقة</label>
+        <select id="ex-lic-cbahi" onchange="saveLicenses()"><option value="0">❌ غير منجز</option><option value="1">✅ منجز</option></select></div>
+      <div class="fg"><label>رخص أخرى (عدد من 5)</label>
+        <input type="number" id="ex-lic-other" min="0" max="5" placeholder="0-5" oninput="saveLicenses()"></div>
+    </div>
+  </div>
+
+  <!-- العقود -->
+  <div class="tcard" style="margin-bottom:16px">
+    <div class="tcard-hdr"><div class="tcard-title">📝 العقود السارية</div></div>
+    <div style="padding:16px;display:grid;grid-template-columns:repeat(2,1fr);gap:10px">
+      <div class="fg"><label>عقد النفايات الطبية</label>
+        <select id="ex-cnt-waste" onchange="saveLicenses()"><option value="0">❌ غير منجز</option><option value="1">✅ منجز</option></select></div>
+      <div class="fg"><label>عقد الأشعة (إن وجد)</label>
+        <select id="ex-cnt-xray" onchange="saveLicenses()"><option value="0">❌ غير منجز</option><option value="1">✅ منجز</option></select></div>
+      <div class="fg"><label>عقد المختبر (إن وجد)</label>
+        <select id="ex-cnt-lab" onchange="saveLicenses()"><option value="0">❌ غير منجز</option><option value="1">✅ منجز</option></select></div>
+      <div class="fg"><label>عقود أخرى (عدد من 5)</label>
+        <input type="number" id="ex-cnt-other" min="0" max="5" placeholder="0-5" oninput="saveLicenses()"></div>
+    </div>
+  </div>
+
+  <!-- الاتفاقيات -->
+  <div class="tcard">
+    <div class="tcard-hdr"><div class="tcard-title">🤝 الاتفاقيات الطبية</div></div>
+    <div style="padding:16px;display:grid;grid-template-columns:repeat(2,1fr);gap:10px">
+      <div class="fg"><label>اتفاقية CPR (إنعاش)</label>
+        <select id="ex-agr-cpr" onchange="saveLicenses()"><option value="0">❌ غير منجز</option><option value="1">✅ منجز</option></select></div>
+      <div class="fg"><label>اتفاقية المختبر المرجعي</label>
+        <select id="ex-agr-lab" onchange="saveLicenses()"><option value="0">❌ غير منجز</option><option value="1">✅ منجز</option></select></div>
+      <div class="fg"><label>اتفاقية الإحالات (مستشفى)</label>
+        <select id="ex-agr-referral" onchange="saveLicenses()"><option value="0">❌ غير منجز</option><option value="1">✅ منجز</option></select></div>
+      <div class="fg"><label>اتفاقيات أخرى (عدد من 2)</label>
+        <input type="number" id="ex-agr-other" min="0" max="2" placeholder="0-2" oninput="saveLicenses()"></div>
+    </div>
+  </div>
+
 </div>
 
 </div><!-- /main -->
@@ -2068,15 +2143,13 @@ function exportPoliciesCSV() {
 // WEIGHTED PROGRESS DASHBOARD
 // ════════════════════════════════════════════════════════════════
 const PILLARS = [
-  { key:'policy_writing',  label:'كتابة السياسات (106)',          weight:25, icon:'✍️', color:'#0080FF' },
-  { key:'policy_signing',  label:'توقيع السياسات',                weight:20, icon:'🖊️', color:'#7C3AED' },
-  { key:'staff_files',     label:'ملفات الموظفين',                weight:15, icon:'👥', color:'#F59E0B' },
-  { key:'requirements',    label:'المتطلبات',                     weight:10, icon:'📋', color:'#10D97E' },
-  { key:'lectures',        label:'المحاضرات + جسر',                weight:10, icon:'🎓', color:'#0D9488' },
-  { key:'documents',       label:'OVR / Manual / Checklists',     weight:8,  icon:'📂', color:'#F97316' },
+  { key:'policy_writing',  label:'كتابة السياسات (106)',          weight:28, icon:'✍️', color:'#0080FF' },
+  { key:'policy_signing',  label:'توقيع السياسات',                weight:22, icon:'🖊️', color:'#7C3AED' },
+  { key:'staff_files',     label:'ملفات الموظفين',                weight:18, icon:'👥', color:'#F59E0B' },
+  { key:'requirements',    label:'المتطلبات',                     weight:12, icon:'📋', color:'#10D97E' },
+  { key:'lectures',        label:'المحاضرات + جسر',               weight:10, icon:'🎓', color:'#0D9488' },
   { key:'licenses',        label:'الرخص والعقود والاتفاقيات',     weight:5,  icon:'📜', color:'#EF4444' },
   { key:'assignments',     label:'التكليفات',                     weight:3,  icon:'📌', color:'#8B5CF6' },
-  { key:'team',            label:'تعاون الفريق',                  weight:2,  icon:'🤝', color:'#06B6D4' },
   { key:'observations',    label:'الملاحظات',                     weight:2,  icon:'🔍', color:'#FF7C2A' },
 ];
 
@@ -2104,12 +2177,8 @@ async function saveExtras() {
     agr_lab:      Number(document.getElementById('ex-agr-lab').value)      || 0,
     agr_referral: Number(document.getElementById('ex-agr-referral').value) || 0,
     agr_other:    Number(document.getElementById('ex-agr-other').value)    || 0,
-    ovr:         Number(document.getElementById('ex-ovr').value)         || 0,
-    manual:      Number(document.getElementById('ex-manual').value)      || 0,
-    checklists:  Number(document.getElementById('ex-checklists').value)  || 0,
     jisr:        document.getElementById('ex-jisr').value,
     staff:       Number(document.getElementById('ex-staff').value)       || 0,
-    team:        Number(document.getElementById('ex-team').value)        || 0,
   };
   localStorage.setItem('cbahi_extras_v1', JSON.stringify(ex));
   closeModal('m-extras');
@@ -2150,12 +2219,8 @@ function openExtras() {
   document.getElementById('ex-agr-lab').value      = ex.agr_lab      || 0;
   document.getElementById('ex-agr-referral').value = ex.agr_referral || 0;
   document.getElementById('ex-agr-other').value    = ex.agr_other    || '';
-  document.getElementById('ex-ovr').value        = ex.ovr        || 0;
-  document.getElementById('ex-manual').value     = ex.manual     || 0;
-  document.getElementById('ex-checklists').value = ex.checklists || '';
   document.getElementById('ex-jisr').value       = ex.jisr       || 'none';
   document.getElementById('ex-staff').value      = ex.staff      || '';
-  document.getElementById('ex-team').value       = ex.team       || '';
   openModal('m-extras');
 }
 
@@ -2669,6 +2734,71 @@ function renderWfFolder() {
 // تحميل الرابط عند الفتح
 document.addEventListener('DOMContentLoaded', function(){ renderWfFolder(); });
 setTimeout(renderWfFolder, 300);
+
+
+// ═══════════════════════════════════════════════════════════════
+// LICENSES & CONTRACTS — رخص وعقود واتفاقيات
+// ═══════════════════════════════════════════════════════════════
+function saveLicenses() {
+  var ex = getExtras();
+  var g = function(id){ var el=document.getElementById(id); return el ? (Number(el.value)||0) : 0; };
+  ex.lic_baladiya  = g('ex-lic-baladiya');
+  ex.lic_defaa     = g('ex-lic-defaa');
+  ex.lic_hilal     = g('ex-lic-hilal');
+  ex.lic_health    = g('ex-lic-health');
+  ex.lic_cbahi     = g('ex-lic-cbahi');
+  ex.lic_other     = g('ex-lic-other');
+  ex.cnt_waste     = g('ex-cnt-waste');
+  ex.cnt_xray      = g('ex-cnt-xray');
+  ex.cnt_lab       = g('ex-cnt-lab');
+  ex.cnt_other     = g('ex-cnt-other');
+  ex.agr_cpr       = g('ex-agr-cpr');
+  ex.agr_lab       = g('ex-agr-lab');
+  ex.agr_referral  = g('ex-agr-referral');
+  ex.agr_other     = g('ex-agr-other');
+  try { localStorage.setItem('cbahi_extras_v1', JSON.stringify(ex)); } catch(_) {}
+  renderLicenses();
+  renderProgressDashboard();
+}
+
+function renderLicenses() {
+  var ex = getExtras();
+  var s = function(id, val) { var el=document.getElementById(id); if(el) el.value = val||0; };
+  s('ex-lic-baladiya', ex.lic_baladiya);
+  s('ex-lic-defaa',    ex.lic_defaa);
+  s('ex-lic-hilal',    ex.lic_hilal);
+  s('ex-lic-health',   ex.lic_health);
+  s('ex-lic-cbahi',    ex.lic_cbahi);
+  s('ex-lic-other',    ex.lic_other);
+  s('ex-cnt-waste',    ex.cnt_waste);
+  s('ex-cnt-xray',     ex.cnt_xray);
+  s('ex-cnt-lab',      ex.cnt_lab);
+  s('ex-cnt-other',    ex.cnt_other);
+  s('ex-agr-cpr',      ex.agr_cpr);
+  s('ex-agr-lab',      ex.agr_lab);
+  s('ex-agr-referral', ex.agr_referral);
+  s('ex-agr-other',    ex.agr_other);
+
+  // حساب KPI
+  var licDone = (ex.lic_baladiya||0)+(ex.lic_defaa||0)+(ex.lic_hilal||0)+(ex.lic_health||0)+(ex.lic_cbahi||0)+(Math.min(ex.lic_other||0,5));
+  var licTotal = 10;
+  var cntDone  = (ex.cnt_waste||0)+(ex.cnt_xray||0)+(ex.cnt_lab||0)+(Math.min(ex.cnt_other||0,5));
+  var cntTotal = 8;
+  var agrDone  = (ex.agr_cpr||0)+(ex.agr_lab||0)+(ex.agr_referral||0)+(Math.min(ex.agr_other||0,2));
+  var agrTotal = 5;
+  var totalDone = licDone + cntDone + agrDone;
+  var totalAll  = licTotal + cntTotal + agrTotal;
+  var pct = totalAll ? Math.round(totalDone/totalAll*100) : 0;
+
+  var el = function(id){ return document.getElementById(id); };
+  if(el('lic-kpi-lic')) el('lic-kpi-lic').textContent = licDone + ' / ' + licTotal;
+  if(el('lic-kpi-cnt')) el('lic-kpi-cnt').textContent = cntDone + ' / ' + cntTotal;
+  if(el('lic-kpi-pct')) el('lic-kpi-pct').textContent = pct + '%';
+  if(el('lic-kpi-bar')) el('lic-kpi-bar').style.width  = pct + '%';
+}
+
+// تحميل عند البداية
+(function(){ setTimeout(renderLicenses, 400); })();
 
 </script>
 </body>

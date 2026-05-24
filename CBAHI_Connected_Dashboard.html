@@ -732,7 +732,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
   <!-- Weighted Pillars -->
   <div class="sec-hdr">
     <div class="sec-icon" style="background:rgba(0,194,255,.1)">⚖️</div>
-    <div class="sec-title">المحاور الموزونة (10 محاور = 100%)</div>
+    <div class="sec-title">المحاور الموزونة (8 محاور = 100%)</div>
     <div class="sec-line"></div>
   </div>
 
@@ -2191,8 +2191,8 @@ function exportPoliciesCSV() {
 // WEIGHTED PROGRESS DASHBOARD
 // ════════════════════════════════════════════════════════════════
 const PILLARS = [
-  { key:'policy_writing',  label:'كتابة السياسات (106)',          weight:28, icon:'✍️', color:'#0080FF' },
-  { key:'policy_signing',  label:'توقيع السياسات',                weight:22, icon:'🖊️', color:'#7C3AED' },
+  { key:'policy_writing',  label:'كتابة السياسات (106)',          weight:30, icon:'✍️', color:'#0080FF' },
+  { key:'policy_signing',  label:'توقيع السياسات',                weight:20, icon:'🖊️', color:'#7C3AED' },
   { key:'staff_files',     label:'ملفات الموظفين',                weight:18, icon:'👥', color:'#F59E0B' },
   { key:'requirements',    label:'المتطلبات',                     weight:12, icon:'📋', color:'#10D97E' },
   { key:'lectures',        label:'المحاضرات + جسر',               weight:10, icon:'🎓', color:'#0D9488' },
@@ -2472,57 +2472,78 @@ async function savePatientFileReport() {
 function renderPatientFiles() {
   const tbody = document.getElementById('pf-history-tbody');
   if (!tbody) return;
-  
+
   if (!DB.patientFiles || DB.patientFiles.length === 0) {
     tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text3);padding:40px">لا توجد تقارير</td></tr>';
+    // Reset summary
+    ['pf-total','pf-complete','pf-incomplete'].forEach(function(id){
+      var el = document.getElementById(id); if(el) el.textContent = '0';
+    });
+    var ra = document.getElementById('pf-report-area');
+    if (ra) ra.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text3)"><div style="font-size:48px;margin-bottom:12px">📄</div><div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:6px">لا يوجد تقرير محلق</div><div style="font-size:11px">اضغط 📊 رفع تقرير لإضافة ملف PDF</div></div>';
     return;
   }
-  
-  tbody.innerHTML = DB.patientFiles.map((p, i) => {
-    const pct = p.pct || 0;
-    const pctColor = pct >= 90 ? '#10D97E' : pct >= 70 ? '#F97316' : '#EF4444';
-    
-    return `<tr>
-      <td class="num">${i+1}</td>
-      <td style="font-size:12px;white-space:nowrap">${p.from} → ${p.to}</td>
-      <td style="text-align:center;font-weight:700">${p.total}</td>
-      <td style="text-align:center;color:#10D97E;font-weight:700">${p.complete}</td>
-      <td style="text-align:center;color:#EF4444;font-weight:700">${p.incomplete}</td>
-      <td style="text-align:center">
-        <span style="font-weight:700;color:${pctColor}">${pct}%</span>
-      </td>
-      <td style="text-align:center">
-        ${p.report 
-          ? `<a href="${p.report}" target="_blank" style="color:var(--accent);text-decoration:none;font-weight:600">📄 عرض</a>`
-          : '<span style="color:var(--text3);font-size:11px">–</span>'
-        }
-      </td>
-      <td>
-        <button class="btn-icon" onclick="editPatientFile('${p.id}')" title="تعديل">✏️</button>
-        <button class="btn-icon" onclick="deletePatientFile('${p.id}')" title="حذف">🗑️</button>
-      </td>
-    </tr>`;
-  }).join('');
-  
-  // Update summary if latest report exists
-  if (DB.patientFiles.length > 0) {
-    const latest = DB.patientFiles[DB.patientFiles.length - 1];
-    document.getElementById('pf-total').textContent = latest.total;
-    document.getElementById('pf-complete').textContent = latest.complete;
-    document.getElementById('pf-incomplete').textContent = latest.incomplete;
-    
-    // Update report area
-    const reportArea = document.getElementById('pf-report-area');
-    if (latest.report) {
-      reportArea.innerHTML = `
-        <div style="font-size:48px;margin-bottom:12px">✅</div>
-        <div style="font-size:14px;font-weight:600;margin-bottom:12px;color:var(--text)">تقرير الفترة: ${latest.from} → ${latest.to}</div>
-        <a href="${latest.report}" target="_blank" class="btn btn-primary" style="display:inline-flex;align-items:center;gap:8px;text-decoration:none">
-          📄 عرض التقرير المفصل
-        </a>
-        <div style="margin-top:12px;font-size:12px;color:var(--text3)">نسبة الإكتمال: ${latest.pct}%</div>
-      `;
+
+  tbody.innerHTML = DB.patientFiles.map(function(p, i) {
+    var pct = p.pct || 0;
+    var pctColor = pct >= 90 ? '#10D97E' : pct >= 70 ? '#F97316' : '#EF4444';
+    // Determine report link: prefer URL, fall back to base64 PDF
+    var reportBtn = '–';
+    if (p.report && p.report.startsWith('http')) {
+      reportBtn = '<a href="'+p.report+'" target="_blank" style="color:var(--accent);text-decoration:none;font-weight:600">🔗 رابط</a>';
+    } else if (p.pdfData) {
+      reportBtn = '<a href="'+p.pdfData+'" download="'+(p.pdfName||'report.pdf')+'" style="color:#10D97E;text-decoration:none;font-weight:600">📥 تحميل</a>';
+    } else if (p.report) {
+      reportBtn = '<span style="color:var(--text3);font-size:10px">'+p.report+'</span>';
     }
+    return '<tr>'+
+      '<td class="num">'+(i+1)+'</td>'+
+      '<td style="font-size:12px;white-space:nowrap">'+p.from+' → '+p.to+'</td>'+
+      '<td style="text-align:center;font-weight:700">'+p.total+'</td>'+
+      '<td style="text-align:center;color:#10D97E;font-weight:700">'+p.complete+'</td>'+
+      '<td style="text-align:center;color:#EF4444;font-weight:700">'+p.incomplete+'</td>'+
+      '<td style="text-align:center"><span style="font-weight:700;color:'+pctColor+'">'+pct+'%</span></td>'+
+      '<td style="text-align:center">'+reportBtn+'</td>'+
+      '<td>'+
+        '<button class="btn-icon" onclick="editPatientFile(\''+p.id+'\')" title="تعديل">✏️</button>'+
+        '<button class="btn-icon" onclick="deletePatientFile(\''+p.id+'\')" title="حذف">🗑️</button>'+
+      '</td>'+
+    '</tr>';
+  }).join('');
+
+  // Update summary cards with latest report
+  var latest = DB.patientFiles[DB.patientFiles.length - 1];
+  var pfTotal = document.getElementById('pf-total');
+  var pfComp  = document.getElementById('pf-complete');
+  var pfInc   = document.getElementById('pf-incomplete');
+  if (pfTotal) pfTotal.textContent = latest.total;
+  if (pfComp)  pfComp.textContent  = latest.complete;
+  if (pfInc)   pfInc.textContent   = latest.incomplete;
+
+  // Update report preview area
+  var reportArea = document.getElementById('pf-report-area');
+  if (!reportArea) return;
+
+  if (latest.pdfData) {
+    // Embed PDF inline using <iframe> for viewing
+    reportArea.innerHTML =
+      '<div style="margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">'+
+        '<div style="font-size:13px;font-weight:700;color:var(--text)">📄 '+( latest.pdfName||'التقرير المرفق')+' <span style="font-size:11px;color:var(--text3)">'+latest.from+' → '+latest.to+'</span></div>'+
+        '<div style="display:flex;gap:8px">'+
+          '<a href="'+latest.pdfData+'" download="'+(latest.pdfName||'report.pdf')+'" class="btn btn-ghost" style="font-size:12px;text-decoration:none">📥 تحميل</a>'+
+          '<a href="'+latest.pdfData+'" target="_blank" class="btn btn-primary" style="font-size:12px;text-decoration:none">👁️ فتح</a>'+
+        '</div>'+
+      '</div>'+
+      '<iframe src="'+latest.pdfData+'" style="width:100%;height:500px;border:1px solid var(--border);border-radius:8px;background:#fff"></iframe>';
+  } else if (latest.report && latest.report.startsWith('http')) {
+    reportArea.innerHTML =
+      '<div style="text-align:center;padding:30px">'+
+        '<div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px">تقرير الفترة: '+latest.from+' → '+latest.to+'</div>'+
+        '<a href="'+latest.report+'" target="_blank" class="btn btn-primary" style="display:inline-flex;align-items:center;gap:8px;text-decoration:none">📄 عرض التقرير</a>'+
+        '<div style="margin-top:10px;font-size:12px;color:var(--text3)">نسبة الإكتمال: '+latest.pct+'%</div>'+
+      '</div>';
+  } else {
+    reportArea.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text3)"><div style="font-size:48px;margin-bottom:12px">📄</div><div style="font-size:12px">لا يوجد تقرير مرفق</div></div>';
   }
 }
 

@@ -776,7 +776,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
       <button class="btn btn-primary" onclick="saveExtras()">💾 حفظ</button>
     </div>
   </div>
-</div>
+</div></div>
 
 
 
@@ -946,7 +946,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
       <button class="btn btn-primary" onclick="licSave()">💾 حفظ</button>
     </div>
   </div>
-</div>
+
 
 <!-- ═══ MODALS ═══ -->
 
@@ -2797,19 +2797,22 @@ function licExpiry(dateStr) {
 
 // ── Modal ─────────────────────────────────────────────
 function licOpenModal(id) {
-  var items = licGet();
-  var it = id ? items.find(function(x){ return x.id===id; }) : null;
-  document.getElementById('lic2-edit-id').value    = id||'';
-  document.getElementById('lic2-modal-ttl').textContent = id ? '✏️ تعديل البند' : '📋 إضافة بند جديد';
-  document.getElementById('lic2-m-type').value    = it ? it.type    : 'رخصة';
-  document.getElementById('lic2-m-status').value  = it ? it.status  : 'لم يتم';
-  document.getElementById('lic2-m-name').value    = it ? it.name    : '';
-  document.getElementById('lic2-m-purpose').value = it ? it.purpose : '';
-  document.getElementById('lic2-m-start').value   = it ? it.start   : '';
-  document.getElementById('lic2-m-expiry').value  = it ? it.expiry  : '';
-  document.getElementById('lic2-m-link').value    = it ? it.link    : '';
-  document.getElementById('lic2-m-notes').value   = it ? it.notes   : '';
-  openModal('m-lic2');
+  try {
+    var items = licGet();
+    var it = id ? items.find(function(x){ return x.id===id; }) : null;
+    var g = function(elId){ return document.getElementById(elId); };
+    if(g('lic2-edit-id'))    g('lic2-edit-id').value           = id||'';
+    if(g('lic2-modal-ttl'))  g('lic2-modal-ttl').textContent   = id ? '✏️ تعديل البند' : '📋 إضافة بند جديد';
+    if(g('lic2-m-type'))     g('lic2-m-type').value            = (it&&it.type)    || 'رخصة';
+    if(g('lic2-m-status'))   g('lic2-m-status').value          = (it&&it.status)  || 'لم يتم';
+    if(g('lic2-m-name'))     g('lic2-m-name').value            = (it&&it.name)    || '';
+    if(g('lic2-m-purpose'))  g('lic2-m-purpose').value         = (it&&it.purpose) || '';
+    if(g('lic2-m-start'))    g('lic2-m-start').value           = (it&&it.start)   || '';
+    if(g('lic2-m-expiry'))   g('lic2-m-expiry').value          = (it&&it.expiry)  || '';
+    if(g('lic2-m-link'))     g('lic2-m-link').value            = (it&&it.link)    || '';
+    if(g('lic2-m-notes'))    g('lic2-m-notes').value           = (it&&it.notes)   || '';
+    openModal('m-lic2');
+  } catch(e) { console.error('licOpenModal error:', e); toast('⚠️ خطأ في فتح النموذج','error'); }
 }
 
 function licSave() {

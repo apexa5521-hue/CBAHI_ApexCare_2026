@@ -2374,54 +2374,98 @@ function openPatientFileModal() {
   document.getElementById('pf-modal-incomplete').value = '';
   document.getElementById('pf-modal-report').value = '';
   document.getElementById('pf-modal-notes').value = '';
+  var pdfInput = document.getElementById('pf-modal-pdf');
+  if (pdfInput) pdfInput.value = '';
+  var pdfPreview = document.getElementById('pf-pdf-preview');
+  if (pdfPreview) { pdfPreview.style.display = 'none'; pdfPreview.textContent = ''; }
   openModal('m-patient-file');
 }
 
+// PDF preview on file select
+document.addEventListener('DOMContentLoaded', function() {
+  var pdfInput = document.getElementById('pf-modal-pdf');
+  if (pdfInput) {
+    pdfInput.addEventListener('change', function() {
+      var preview = document.getElementById('pf-pdf-preview');
+      if (this.files && this.files[0]) {
+        var f = this.files[0];
+        var sizeMB = (f.size / 1048576).toFixed(2);
+        preview.style.display = 'flex';
+        preview.innerHTML = '📄 ' + f.name + ' <span style="color:var(--text3);margin-right:6px">(' + sizeMB + ' MB)</span>';
+      } else {
+        preview.style.display = 'none';
+      }
+    });
+  }
+});
+
 async function savePatientFileReport() {
-  const id = document.getElementById('pf-edit-id').value;
-  const from = document.getElementById('pf-modal-from').value;
-  const to = document.getElementById('pf-modal-to').value;
-  const total = Number(document.getElementById('pf-modal-total').value) || 0;
+  const id       = document.getElementById('pf-edit-id').value;
+  const from     = document.getElementById('pf-modal-from').value;
+  const to       = document.getElementById('pf-modal-to').value;
+  const total    = Number(document.getElementById('pf-modal-total').value) || 0;
   const complete = Number(document.getElementById('pf-modal-complete').value) || 0;
   const incomplete = Number(document.getElementById('pf-modal-incomplete').value) || 0;
-  const report = document.getElementById('pf-modal-report').value;
-  const notes = document.getElementById('pf-modal-notes').value;
-  
-  if (!from || !to || total === 0) {
-    toast('⚠️ املأ الحقول المطلوبة', 'error');
-    return;
+  const notes    = document.getElementById('pf-modal-notes').value;
+
+  // PDF file or URL
+  var pdfInput  = document.getElementById('pf-modal-pdf');
+  var pdfFile   = pdfInput && pdfInput.files && pdfInput.files[0] ? pdfInput.files[0] : null;
+  var reportUrl = document.getElementById('pf-modal-report').value.trim();
+
+  // Read PDF as base64 if provided
+  var pdfData = null;
+  var pdfName = '';
+  if (pdfFile) {
+    try {
+      pdfData = await new Promise(function(resolve, reject) {
+        var reader = new FileReader();
+        reader.onload  = function(e) { resolve(e.target.result); };
+        reader.onerror = reject;
+        reader.readAsDataURL(pdfFile);
+      });
+      pdfName = pdfFile.name;
+    } catch(e) {
+      toast('⚠️ فشل قراءة الملف', 'error'); return;
+    }
   }
-  
+
+  if (!from || !to || total === 0) {
+    toast('⚠️ املأ الحقول المطلوبة', 'error'); return;
+  }
+
   const pct = Math.round(complete / total * 100);
-  
   const obj = {
     id: id || String(Date.now()),
-    from, to, total, complete, incomplete, pct, report, notes,
-    createdAt: id ? undefined : new Date().toISOString(),
+    from, to, total, complete, incomplete, pct,
+    report:  reportUrl || (pdfName ? '[PDF: ' + pdfName + ']' : ''),
+    pdfName: pdfName,
+    pdfData: pdfData,   // base64 — stored locally
+    notes,
     updatedAt: new Date().toISOString()
   };
-  
+  if (!id) obj.createdAt = obj.updatedAt;
+
   if (id) {
     const idx = DB.patientFiles.findIndex(p => String(p.id) === id);
     if (idx > -1) DB.patientFiles[idx] = {...DB.patientFiles[idx], ...obj};
   } else {
     DB.patientFiles.push(obj);
   }
-  
+
   saveLocal('data', DB);
   renderPatientFiles();
   closeModal('m-patient-file');
-  
-  // Sync to backend
+
   if (GAS_URL) {
     try {
-      await callGAS({action: id ? 'update' : 'add', sheet: 'patientFiles', id: obj.id, data: obj});
+      // Don't send large pdfData to GAS — send URL/name only
+      var gasObj = Object.assign({}, obj); delete gasObj.pdfData;
+      await callGAS({action: id ? 'update' : 'add', sheet: 'patientFiles', id: obj.id, data: gasObj});
       toast('✅ حُفظ في Google Sheets', 'success');
-    } catch(e) {
-      toast('✅ حُفظ محلياً', 'info');
-    }
+    } catch(e) { toast('✅ حُفظ محلياً', 'info'); }
   } else {
-    toast('✅ تم الحفظ', 'success');
+    toast('✅ تم الحفظ' + (pdfName ? ' — ' + pdfName : ''), 'success');
   }
 }
 
@@ -2985,8 +3029,14 @@ function renderLicenses(){ licRender(); licKPIs(); }
         <input type="number" id="pf-modal-incomplete" min="0" required></div>
     </div>
 
-    <div class="fg"><label>📄 رابط التقرير (PDF أو Google Drive)</label>
-      <input type="url" id="pf-modal-report" placeholder="https://drive.google.com/file/d/... أو رابط آخر"></div>
+    <div class="fg"><label>📎 رفع ملف PDF</label>
+      <input type="file" id="pf-modal-pdf" accept=".pdf,application/pdf"
+        style="padding:8px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);width:100%;font-family:Tajawal,sans-serif;font-size:12px;cursor:pointer">
+      <div id="pf-pdf-preview" style="display:none;margin-top:6px;padding:8px 12px;background:rgba(16,217,126,.08);border:1px solid rgba(16,217,126,.2);border-radius:7px;font-size:11px;color:var(--green);display:flex;align-items:center;gap:6px"></div>
+    </div>
+
+    <div class="fg"><label>🔗 أو أدخل رابط Drive / PDF</label>
+      <input type="url" id="pf-modal-report" placeholder="https://drive.google.com/file/d/..."></div>
     
     <div class="fg"><label>💬 ملاحظات</label>
       <textarea id="pf-modal-notes" rows="2" placeholder="أي ملاحظات إضافية"></textarea></div>

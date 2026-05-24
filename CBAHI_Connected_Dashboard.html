@@ -243,7 +243,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
   <button class="tab" onclick="switchTab('observations')">🔍 الملاحظات</button>
   <button class="tab" onclick="switchTab('requirements')">📋 المتطلبات</button>
   <button class="tab" onclick="switchTab('team')">👥 الفريق</button>
-  <button class="tab" onclick="switchTab('locations')"> التعديلات</button>
+  <button class="tab" onclick="switchTab('locations')">🏥 الأماكن</button>
   <button class="tab" onclick="switchTab('lectures')">🎓 المحاضرات</button>
   <button class="tab" onclick="switchTab('assignments')">📌 التكليفات</button>
 
@@ -652,15 +652,15 @@ tr:hover td{background:rgba(0,194,255,.03)}
       <div style="font-size:34px;font-weight:900;color:var(--accent);font-family:Cairo,sans-serif" id="emp-total">–</div>
     </div>
     <div style="background:var(--surface);border:1px solid rgba(16,217,126,.2);border-radius:12px;padding:18px">
-      <div style="font-size:11px;color:var(--text3);margin-bottom:4px">✅ مكتملة</div>
+      <div style="font-size:11px;color:var(--text3);margin-bottom:4px">⏳ قيد العمل</div>
       <div style="font-size:34px;font-weight:900;color:var(--green);font-family:Cairo,sans-serif" id="emp-complete">–</div>
     </div>
     <div style="background:var(--surface);border:1px solid rgba(255,71,87,.2);border-radius:12px;padding:18px">
-      <div style="font-size:11px;color:var(--text3);margin-bottom:4px">⚠️ ناقصة</div>
+      <div style="font-size:11px;color:var(--text3);margin-bottom:4px">❌ لم يبدأ</div>
       <div style="font-size:34px;font-weight:900;color:var(--red);font-family:Cairo,sans-serif" id="emp-incomplete">–</div>
     </div>
     <div style="background:var(--surface);border:1px solid rgba(245,158,11,.2);border-radius:12px;padding:18px">
-      <div style="font-size:11px;color:var(--text3);margin-bottom:4px">📊 نسبة الإكتمال</div>
+      <div style="font-size:11px;color:var(--text3);margin-bottom:4px">📊 متوسط الإنجاز الكلي</div>
       <div style="font-size:34px;font-weight:900;color:var(--gold);font-family:Cairo,sans-serif" id="emp-pct">–</div>
       <div style="height:5px;background:rgba(255,255,255,.06);border-radius:3px;margin-top:8px;overflow:hidden">
         <div id="emp-pct-bar" style="height:100%;width:0%;background:var(--gold);border-radius:3px;transition:width .8s"></div>
@@ -2597,15 +2597,17 @@ function renderEmpTable() {
     }).join('');
   }
   var total    = EMP_DATA.length;
-  var complete = EMP_DATA.filter(function(e){ return e.status === 'مكتمل'; }).length;
-  var incomp   = total - complete;
-  var pct      = total ? Math.round(complete / total * 100) : 0;
+  var complete = EMP_DATA.filter(function(e){ return e.progress >= 100; }).length;
+  var inprog   = EMP_DATA.filter(function(e){ return e.progress > 0 && e.progress < 100; }).length;
+  var incomp   = EMP_DATA.filter(function(e){ return e.progress === 0; }).length;
+  // متوسط نسب الإنجاز الكلي
+  var avgProg  = total ? Math.round(EMP_DATA.reduce(function(s,e){ return s + e.progress; }, 0) / total * 10) / 10 : 0;
   function sg(id){ return document.getElementById(id); }
   if (sg('emp-total'))      sg('emp-total').textContent      = total;
-  if (sg('emp-complete'))   sg('emp-complete').textContent   = complete;
-  if (sg('emp-incomplete')) sg('emp-incomplete').textContent = incomp;
-  if (sg('emp-pct'))        sg('emp-pct').textContent        = pct + '%';
-  if (sg('emp-pct-bar'))    sg('emp-pct-bar').style.width    = pct + '%';
+  if (sg('emp-complete'))   sg('emp-complete').textContent   = inprog;   // قيد العمل
+  if (sg('emp-incomplete')) sg('emp-incomplete').textContent = incomp;   // لم يبدأ
+  if (sg('emp-pct'))        sg('emp-pct').textContent        = avgProg + '%';
+  if (sg('emp-pct-bar'))    sg('emp-pct-bar').style.width    = avgProg + '%';
 }
 
 function exportEmpCSV() {

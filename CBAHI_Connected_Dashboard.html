@@ -251,7 +251,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
     <button class="tab" onclick="switchTab('workflow')">📁 المستندات</button>
     <button class="tab" onclick="switchTab('policies2')">📜 السياسات الكاملة (106)</button>
     <button class="tab" onclick="switchTab('patient-files')">📂 ملفات المرضى</button>
-    <button class="tab" onclick="switchTab('licenses')">📜 الرخص والعقود</button>
+    <button class="tab" onclick="switchTab('licenses')">📋 الرخص والعقود</button>
     <button class="tab" onclick="switchTab('employee-files')">🪪 ملفات الموظفين</button>
 </div>
 
@@ -760,52 +760,11 @@ tr:hover td{background:rgba(0,194,255,.03)}
     <h3>📂 الرخص والعقود والمستندات</h3>
     <div class="info-bar">💡 سجل الإنجاز السريع لكل بند يدخل في النسبة الإجمالية</div>
 
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px">
-      <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:10px">📜 الرخص والعقود</div>
-      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px">
-        <div class="fg"><label>رخصة البلدية</label>
-          <select id="ex-lic-baladiya"><option value="0">❌</option><option value="1">✅</option></select></div>
-        <div class="fg"><label>رخصة الدفاع المدني</label>
-          <select id="ex-lic-defaa"><option value="0">❌</option><option value="1">✅</option></select></div>
-        <div class="fg"><label>رخصة الهلال الأحمر</label>
-          <select id="ex-lic-hilal"><option value="0">❌</option><option value="1">✅</option></select></div>
-        <div class="fg"><label>ترخيص وزارة الصحة</label>
-          <select id="ex-lic-health"><option value="0">❌</option><option value="1">✅</option></select></div>
-        <div class="fg"><label>شهادة CBAHI السابقة</label>
-          <select id="ex-lic-cbahi"><option value="0">❌</option><option value="1">✅</option></select></div>
-        <div class="fg"><label>رخص أخرى (عدد)</label>
-          <input type="number" id="ex-lic-other" min="0" max="5" placeholder="0-5"></div>
+    <div style="background:rgba(0,194,255,.06);border:1px solid rgba(0,194,255,.15);border-radius:8px;padding:12px;margin-bottom:12px">
+      <div style="font-size:12px;color:var(--text3);display:flex;align-items:center;gap:8px">
+        <span>📜</span> الرخص والعقود تُدار الآن من تبويب <strong style="color:var(--accent)">الرخص والعقود</strong> مباشرةً
       </div>
     </div>
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px">
-      <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:10px">📝 العقود السارية</div>
-      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px">
-        <div class="fg"><label>عقد النفايات الطبية</label>
-          <select id="ex-cnt-waste"><option value="0">❌</option><option value="1">✅</option></select></div>
-        <div class="fg"><label>عقد الأشعة (إن وجد)</label>
-          <select id="ex-cnt-xray"><option value="0">❌</option><option value="1">✅</option></select></div>
-        <div class="fg"><label>عقد المختبر (إن وجد)</label>
-          <select id="ex-cnt-lab"><option value="0">❌</option><option value="1">✅</option></select></div>
-        <div class="fg"><label>عقود أخرى (عدد)</label>
-          <input type="number" id="ex-cnt-other" min="0" max="5" placeholder="0-5"></div>
-      </div>
-    </div>
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px">
-      <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:10px">🤝 الاتفاقيات الطبية</div>
-      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px">
-        <div class="fg"><label>اتفاقية CPR (إنعاش)</label>
-          <select id="ex-agr-cpr"><option value="0">❌</option><option value="1">✅</option></select></div>
-        <div class="fg"><label>اتفاقية المختبر المرجعي</label>
-          <select id="ex-agr-lab"><option value="0">❌</option><option value="1">✅</option></select></div>
-        <div class="fg"><label>اتفاقية الإحالات (مستشفى)</label>
-          <select id="ex-agr-referral"><option value="0">❌</option><option value="1">✅</option></select></div>
-        <div class="fg"><label>اتفاقيات أخرى (عدد)</label>
-          <input type="number" id="ex-agr-other" min="0" max="2" placeholder="0-2"></div>
-      </div>
-    </div>
-    <div class="fg"><label>📄 OVR Report نسخ مطبوعة وموزعة (نعم/لا)</label>
-    <div class="fg"><label>📘 Manual مكافحة العدوى مطبوع وموزع</label>
-    <div class="fg"><label>✅ Checklists معتمدة وموزعة (من 12 قائمة)</label>
     <div class="fg"><label>📝 محاضرات جسر — تم الإبلاغ عنها (من المحاضرات المنجزة)</label>
       <select id="ex-jisr"><option value="none">لم يُبلَّغ بعد</option><option value="partial">بعضها</option><option value="all">الكل</option></select></div>
     <div class="fg"><label>👥 ملفات الموظفين المكتملة (نسبة %)</label>
@@ -821,109 +780,104 @@ tr:hover td{background:rgba(0,194,255,.03)}
 
 
 
+
 <!-- ═══ LICENSES & CONTRACTS ═══ -->
 <div class="pane" id="pane-licenses">
 
-  <!-- Header banner -->
-  <div style="background:linear-gradient(135deg,#991B1B,#EF4444,#F97316);border-radius:14px;padding:24px 28px;margin-bottom:20px;color:white;position:relative;overflow:hidden">
-    <div style="position:absolute;left:-20px;top:-20px;width:120px;height:120px;background:rgba(255,255,255,.06);border-radius:50%"></div>
-    <div style="position:absolute;left:60px;bottom:-30px;width:80px;height:80px;background:rgba(255,255,255,.04);border-radius:50%"></div>
+  <!-- Header -->
+  <div style="background:linear-gradient(135deg,#7C2D12,#DC2626,#EA580C);border-radius:14px;padding:22px 28px;margin-bottom:18px;color:white;position:relative;overflow:hidden">
+    <div style="position:absolute;right:-30px;top:-30px;width:130px;height:130px;background:rgba(255,255,255,.05);border-radius:50%"></div>
     <div style="position:relative;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
       <div>
-        <h2 style="margin:0 0 6px;font-size:22px;font-weight:900">📜 الرخص والعقود والاتفاقيات</h2>
-        <p style="margin:0;opacity:.85;font-size:12px">تُدار كل بنود الترخيص والتعاقد هنا — تؤثر مباشرةً على لوحة الإنجاز (وزن 5%)</p>
+        <h2 style="margin:0 0 5px;font-size:20px;font-weight:900">📋 الرخص والعقود والاتفاقيات</h2>
+        <p style="margin:0;opacity:.85;font-size:12px">سجّل كل بند مع تاريخ سريانه — تؤثر على لوحة الإنجاز الكلي (وزن 5%)</p>
       </div>
-      <button class="btn" onclick="openLicModal()" style="background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.35);color:#fff;font-size:13px;padding:10px 22px;border-radius:9px;font-weight:800">
-        ＋ إضافة بند جديد
+      <button onclick="licOpenModal()" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:#fff;padding:10px 22px;border-radius:9px;font-family:Tajawal,sans-serif;font-size:13px;font-weight:800;cursor:pointer">
+        ＋ إضافة بند
       </button>
     </div>
   </div>
 
-  <!-- Drive folder link bar -->
-  <div id="lic-drive-card" style="background:var(--surface2);border:1px solid rgba(239,68,68,.25);border-radius:12px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
-    <div style="font-size:22px">📁</div>
-    <div style="flex:1;min-width:200px">
-      <div style="font-size:12px;font-weight:800;color:var(--text);margin-bottom:5px">رابط مجلد الرخص والعقود في Google Drive</div>
-      <input type="url" id="lic-drive-url" placeholder="https://drive.google.com/drive/folders/..."
-        style="width:100%;padding:8px 11px;background:var(--surface);border:1px solid var(--border);border-radius:7px;color:var(--text);font-family:Tajawal,sans-serif;font-size:12px;outline:none;direction:ltr">
+  <!-- Drive link -->
+  <div style="background:var(--surface2);border:1px solid rgba(220,38,38,.2);border-radius:11px;padding:13px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+    <span style="font-size:20px">📁</span>
+    <div style="flex:1;min-width:180px">
+      <div style="font-size:11px;font-weight:800;color:var(--text);margin-bottom:4px">مجلد Google Drive — الرخص والعقود</div>
+      <input type="url" id="lic-drive-input" placeholder="https://drive.google.com/drive/folders/..."
+        style="width:100%;padding:7px 10px;background:var(--surface);border:1px solid var(--border);border-radius:7px;color:var(--text);font-family:Tajawal,sans-serif;font-size:11px;outline:none;direction:ltr">
     </div>
-    <div style="display:flex;gap:8px;flex-shrink:0">
-      <button class="btn btn-ghost" onclick="saveLicDriveUrl()">💾 حفظ</button>
-      <a id="lic-drive-link" href="#" target="_blank" onclick="return checkLicDrive(this)"
-        style="display:inline-flex;align-items:center;gap:6px;padding:7px 16px;background:linear-gradient(135deg,#EF4444,#F97316);color:#fff;border-radius:7px;font-size:12px;font-weight:700;text-decoration:none">
-        📂 فتح المجلد
-      </a>
+    <div style="display:flex;gap:7px;flex-shrink:0">
+      <button onclick="licSaveDrive()" style="padding:7px 14px;background:rgba(0,194,255,.1);border:1px solid rgba(0,194,255,.25);color:var(--accent);border-radius:7px;font-family:Tajawal,sans-serif;font-size:11px;font-weight:700;cursor:pointer">💾 حفظ</button>
+      <a id="lic-drive-btn" href="#" target="_blank" onclick="return licOpenDrive(this)"
+        style="display:inline-flex;align-items:center;gap:5px;padding:7px 14px;background:linear-gradient(135deg,#DC2626,#EA580C);color:#fff;border-radius:7px;font-size:11px;font-weight:700;text-decoration:none">📂 فتح</a>
     </div>
   </div>
 
-  <!-- KPI Cards -->
-  <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:20px" id="lic-kpi-grid">
-    <div style="background:var(--surface);border:1px solid rgba(239,68,68,.2);border-radius:12px;padding:14px;text-align:center">
+  <!-- KPI row -->
+  <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:18px">
+    <div style="background:var(--surface);border:1px solid rgba(220,38,38,.2);border-radius:11px;padding:14px;text-align:center">
       <div style="font-size:10px;color:var(--text3);margin-bottom:3px">📜 رخص</div>
-      <div style="font-size:26px;font-weight:900;color:#EF4444;font-family:Cairo,sans-serif" id="lic-kpi-lic">–</div>
-      <div style="font-size:10px;color:var(--text3)" id="lic-kpi-lic-sub">مُضاف</div>
+      <div style="font-size:28px;font-weight:900;color:#EF4444;font-family:Cairo,sans-serif" id="lic2-n-lic">0</div>
     </div>
-    <div style="background:var(--surface);border:1px solid rgba(249,115,22,.2);border-radius:12px;padding:14px;text-align:center">
+    <div style="background:var(--surface);border:1px solid rgba(234,88,12,.2);border-radius:11px;padding:14px;text-align:center">
       <div style="font-size:10px;color:var(--text3);margin-bottom:3px">📝 عقود</div>
-      <div style="font-size:26px;font-weight:900;color:#F97316;font-family:Cairo,sans-serif" id="lic-kpi-cnt">–</div>
-      <div style="font-size:10px;color:var(--text3)" id="lic-kpi-cnt-sub">مُضاف</div>
+      <div style="font-size:28px;font-weight:900;color:#EA580C;font-family:Cairo,sans-serif" id="lic2-n-cnt">0</div>
     </div>
-    <div style="background:var(--surface);border:1px solid rgba(168,85,247,.2);border-radius:12px;padding:14px;text-align:center">
+    <div style="background:var(--surface);border:1px solid rgba(168,85,247,.2);border-radius:11px;padding:14px;text-align:center">
       <div style="font-size:10px;color:var(--text3);margin-bottom:3px">🤝 اتفاقيات</div>
-      <div style="font-size:26px;font-weight:900;color:#a855f7;font-family:Cairo,sans-serif" id="lic-kpi-agr">–</div>
-      <div style="font-size:10px;color:var(--text3)" id="lic-kpi-agr-sub">مُضاف</div>
+      <div style="font-size:28px;font-weight:900;color:#a855f7;font-family:Cairo,sans-serif" id="lic2-n-agr">0</div>
     </div>
-    <div style="background:var(--surface);border:1px solid rgba(16,217,126,.2);border-radius:12px;padding:14px;text-align:center">
-      <div style="font-size:10px;color:var(--text3);margin-bottom:3px">✅ مُنجز</div>
-      <div style="font-size:26px;font-weight:900;color:var(--green);font-family:Cairo,sans-serif" id="lic-kpi-done">–</div>
-      <div style="font-size:10px;color:var(--text3)">من الكل</div>
+    <div style="background:var(--surface);border:1px solid rgba(16,217,126,.2);border-radius:11px;padding:14px;text-align:center">
+      <div style="font-size:10px;color:var(--text3);margin-bottom:3px">✅ مُنجز / الكل</div>
+      <div style="font-size:24px;font-weight:900;color:var(--green);font-family:Cairo,sans-serif" id="lic2-done-ratio">0/0</div>
     </div>
-    <div style="background:var(--surface);border:1px solid rgba(255,71,87,.2);border-radius:12px;padding:14px;text-align:center">
-      <div style="font-size:10px;color:var(--text3);margin-bottom:3px">⚠️ شارف على الانتهاء</div>
-      <div style="font-size:26px;font-weight:900;color:var(--orange);font-family:Cairo,sans-serif" id="lic-kpi-expiring">–</div>
-      <div style="font-size:10px;color:var(--text3)">خلال 3 أشهر</div>
+    <div style="background:var(--surface);border:1px solid rgba(255,124,42,.2);border-radius:11px;padding:14px;text-align:center">
+      <div style="font-size:10px;color:var(--text3);margin-bottom:3px">⚠️ ينتهي قريباً</div>
+      <div style="font-size:28px;font-weight:900;color:var(--orange);font-family:Cairo,sans-serif" id="lic2-expiring">0</div>
+      <div style="font-size:9px;color:var(--text3)">خلال 3 أشهر</div>
     </div>
-    <div style="background:var(--surface);border:1px solid rgba(16,217,126,.2);border-radius:12px;padding:14px;text-align:center">
-      <div style="font-size:10px;color:var(--text3);margin-bottom:3px">📊 نسبة الإنجاز</div>
-      <div style="font-size:26px;font-weight:900;color:var(--green);font-family:Cairo,sans-serif" id="lic-kpi-pct">–</div>
-      <div style="height:5px;background:rgba(255,255,255,.06);border-radius:3px;margin-top:6px;overflow:hidden">
-        <div id="lic-kpi-bar" style="height:100%;width:0%;background:var(--green);border-radius:3px;transition:width .8s"></div>
-      </div>
+  </div>
+  <!-- progress bar -->
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:14px;margin-bottom:18px;display:flex;align-items:center;gap:14px">
+    <div style="font-size:11px;color:var(--text3);white-space:nowrap">نسبة الإنجاز</div>
+    <div style="flex:1;height:10px;background:rgba(255,255,255,.06);border-radius:5px;overflow:hidden">
+      <div id="lic2-pct-bar" style="height:100%;width:0%;background:linear-gradient(90deg,#DC2626,#EA580C);border-radius:5px;transition:width .8s"></div>
     </div>
+    <div style="font-size:18px;font-weight:900;color:#EA580C;font-family:Cairo,sans-serif;min-width:44px;text-align:left" id="lic2-pct-num">0%</div>
   </div>
 
   <!-- Filter bar -->
   <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:center">
-    <select id="lic-filter-type" onchange="renderLicTable()"
+    <select id="lic2-f-type" onchange="licRender()"
       style="padding:7px 12px;background:var(--surface);border:1px solid var(--border);border-radius:7px;color:var(--text);font-family:Tajawal,sans-serif;font-size:12px">
-      <option value="ALL">كل الأنواع</option>
+      <option value="">كل الأنواع</option>
       <option value="رخصة">📜 رخص</option>
       <option value="عقد">📝 عقود</option>
       <option value="اتفاقية">🤝 اتفاقيات</option>
     </select>
-    <select id="lic-filter-status" onchange="renderLicTable()"
+    <select id="lic2-f-status" onchange="licRender()"
       style="padding:7px 12px;background:var(--surface);border:1px solid var(--border);border-radius:7px;color:var(--text);font-family:Tajawal,sans-serif;font-size:12px">
-      <option value="ALL">كل الحالات</option>
+      <option value="">كل الحالات</option>
       <option value="تم">✅ تم</option>
       <option value="لم يتم">❌ لم يتم</option>
-      <option value="قيد الإنجاز">⏳ قيد الإنجاز</option>
+      <option value="جارٍ">⏳ جارٍ</option>
     </select>
-    <select id="lic-filter-expiry" onchange="renderLicTable()"
+    <select id="lic2-f-exp" onchange="licRender()"
       style="padding:7px 12px;background:var(--surface);border:1px solid var(--border);border-radius:7px;color:var(--text);font-family:Tajawal,sans-serif;font-size:12px">
-      <option value="ALL">كل الصلاحيات</option>
-      <option value="سارٍ">✅ ساري</option>
-      <option value="قارب على الانتهاء">⚠️ يقارب الانتهاء (3 أشهر)</option>
-      <option value="منتهي">🔴 منتهي</option>
+      <option value="">كل الصلاحيات</option>
+      <option value="active">✅ سارٍ</option>
+      <option value="expiring">⚠️ ينتهي قريباً</option>
+      <option value="expired">🔴 منتهٍ</option>
     </select>
-    <input type="text" id="lic-search" placeholder="🔍 بحث..." oninput="renderLicTable()"
-      style="padding:7px 12px;background:var(--surface);border:1px solid var(--border);border-radius:7px;color:var(--text);font-family:Tajawal,sans-serif;font-size:12px;flex:1;min-width:160px">
-    <button class="btn btn-ghost" onclick="document.getElementById('lic-filter-type').value='ALL';document.getElementById('lic-filter-status').value='ALL';document.getElementById('lic-filter-expiry').value='ALL';document.getElementById('lic-search').value='';renderLicTable()">مسح</button>
+    <input id="lic2-search" type="text" placeholder="🔍 بحث..." oninput="licRender()"
+      style="padding:7px 12px;background:var(--surface);border:1px solid var(--border);border-radius:7px;color:var(--text);font-family:Tajawal,sans-serif;font-size:12px;flex:1;min-width:150px">
+    <button onclick="licResetFilters()" style="padding:7px 14px;background:rgba(0,194,255,.08);border:1px solid rgba(0,194,255,.2);color:var(--accent);border-radius:7px;font-family:Tajawal,sans-serif;font-size:12px;cursor:pointer">مسح</button>
   </div>
 
-  <!-- Main table -->
+  <!-- Table -->
   <div class="tcard">
     <div class="tcard-hdr">
-      <div class="tcard-title">📋 قائمة الرخص والعقود والاتفاقيات <span class="badge badge-blue" id="lic-cnt">0</span></div>
+      <div class="tcard-title">📋 القائمة <span class="badge badge-blue" id="lic2-count">0</span></div>
     </div>
     <div class="tscroll">
       <table>
@@ -936,77 +890,63 @@ tr:hover td{background:rgba(0,194,255,.03)}
             <th style="text-align:center">تاريخ البداية</th>
             <th style="text-align:center">تاريخ الانتهاء</th>
             <th style="text-align:center">المتبقي</th>
-            <th style="text-align:center">حالة الصلاحية</th>
-            <th style="text-align:center">حالة الإنجاز</th>
+            <th style="text-align:center">الإنجاز</th>
             <th style="text-align:center">إجراءات</th>
           </tr>
         </thead>
-        <tbody id="lic-tbody">
-          <tr><td colspan="10" style="text-align:center;color:var(--text3);padding:50px">
-            <div style="font-size:36px;margin-bottom:10px">📜</div>
-            <div style="font-weight:700;color:var(--text2);margin-bottom:6px">لا توجد بنود مُضافة بعد</div>
-            <div style="font-size:11px">اضغط "＋ إضافة بند جديد" أعلاه للبدء</div>
+        <tbody id="lic2-tbody">
+          <tr><td colspan="9" style="text-align:center;color:var(--text3);padding:50px 20px">
+            <div style="font-size:40px;margin-bottom:10px">📋</div>
+            <div style="font-size:13px;font-weight:700;color:var(--text2);margin-bottom:6px">لا توجد بنود بعد</div>
+            <div style="font-size:11px">اضغط "＋ إضافة بند" لإضافة أول رخصة أو عقد أو اتفاقية</div>
           </td></tr>
         </tbody>
       </table>
     </div>
   </div>
-
 </div>
 
-<!-- ═══ LICENSE MODAL ═══ -->
-<div class="overlay" id="m-lic">
-  <div class="modal" style="max-width:540px">
-    <div style="background:linear-gradient(135deg,#991B1B,#EF4444,#F97316);padding:20px;margin:-26px -26px 20px;border-radius:14px 14px 0 0">
-      <h3 style="margin:0;color:white;font-size:16px" id="lic-modal-title">📜 إضافة بند جديد</h3>
-      <p style="margin:5px 0 0;color:rgba(255,255,255,.8);font-size:11px">رخصة / عقد / اتفاقية</p>
+<!-- ── LICENSE MODAL ── -->
+<div class="overlay" id="m-lic2">
+  <div class="modal" style="max-width:520px">
+    <div style="background:linear-gradient(135deg,#7C2D12,#DC2626,#EA580C);padding:18px 22px;margin:-26px -26px 18px;border-radius:14px 14px 0 0">
+      <h3 style="margin:0;color:#fff;font-size:15px" id="lic2-modal-ttl">📋 إضافة بند جديد</h3>
     </div>
-    <input type="hidden" id="lic-edit-id">
-
+    <input type="hidden" id="lic2-edit-id">
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <div class="fg"><label>نوع البند *</label>
-        <select id="lic-modal-type">
+      <div class="fg"><label>النوع *</label>
+        <select id="lic2-m-type">
           <option value="رخصة">📜 رخصة</option>
           <option value="عقد">📝 عقد</option>
           <option value="اتفاقية">🤝 اتفاقية</option>
-        </select>
-      </div>
+        </select></div>
       <div class="fg"><label>حالة الإنجاز *</label>
-        <select id="lic-modal-status">
+        <select id="lic2-m-status">
           <option value="لم يتم">❌ لم يتم</option>
-          <option value="قيد الإنجاز">⏳ قيد الإنجاز</option>
+          <option value="جارٍ">⏳ جارٍ</option>
           <option value="تم">✅ تم</option>
-        </select>
-      </div>
+        </select></div>
     </div>
-
-    <div class="fg"><label>اسم الرخصة / العقد / الاتفاقية *</label>
-      <input type="text" id="lic-modal-name" placeholder="مثال: رخصة البلدية — فرع بريدة"></div>
-
-    <div class="fg"><label>الغرض منها</label>
-      <textarea id="lic-modal-purpose" rows="2" placeholder="مثال: تصريح تشغيل المنشأة الصحية من أمانة منطقة القصيم"></textarea></div>
-
+    <div class="fg"><label>الاسم *</label>
+      <input type="text" id="lic2-m-name" placeholder="مثال: رخصة البلدية – فرع بريدة"></div>
+    <div class="fg"><label>الغرض</label>
+      <textarea id="lic2-m-purpose" rows="2" placeholder="مثال: تصريح تشغيل المنشأة الصحية"></textarea></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <div class="fg"><label>📅 تاريخ البداية / الإصدار</label>
-        <input type="date" id="lic-modal-start"></div>
-      <div class="fg"><label>📅 تاريخ انتهاء الصلاحية</label>
-        <input type="date" id="lic-modal-expiry"></div>
+      <div class="fg"><label>📅 تاريخ البداية</label>
+        <input type="date" id="lic2-m-start"></div>
+      <div class="fg"><label>📅 تاريخ الانتهاء</label>
+        <input type="date" id="lic2-m-expiry"></div>
     </div>
-
     <div class="fg"><label>🔗 رابط المستند (Drive)</label>
-      <input type="url" id="lic-modal-link" placeholder="https://drive.google.com/file/d/..." style="direction:ltr"></div>
-
-    <div class="fg"><label>📝 ملاحظات</label>
-      <textarea id="lic-modal-notes" rows="2" placeholder="أي ملاحظات إضافية..."></textarea></div>
-
+      <input type="url" id="lic2-m-link" placeholder="https://drive.google.com/..." style="direction:ltr"></div>
+    <div class="fg"><label>ملاحظات</label>
+      <textarea id="lic2-m-notes" rows="2" placeholder="أي ملاحظات..."></textarea></div>
     <div class="modal-footer">
-      <button class="btn btn-danger" onclick="closeModal('m-lic')">إلغاء</button>
-      <button class="btn btn-primary" onclick="saveLicItem()">💾 حفظ</button>
+      <button class="btn btn-danger" onclick="closeModal('m-lic2')">إلغاء</button>
+      <button class="btn btn-primary" onclick="licSave()">💾 حفظ</button>
     </div>
   </div>
 </div>
-
-</div><!-- /main -->
 
 <!-- ═══ MODALS ═══ -->
 
@@ -2267,26 +2207,11 @@ function getExtras() {
 }
 
 async function saveExtras() {
+  var _g = function(id){ var el=document.getElementById(id); return el ? (Number(el.value)||0) : 0; };
+  var _s = function(id){ var el=document.getElementById(id); return el ? el.value : ''; };
   const ex = {
-    // Licenses (10 total)
-    lic_baladiya: Number(document.getElementById('ex-lic-baladiya').value) || 0,
-    lic_defaa:    Number(document.getElementById('ex-lic-defaa').value)    || 0,
-    lic_hilal:    Number(document.getElementById('ex-lic-hilal').value)    || 0,
-    lic_health:   Number(document.getElementById('ex-lic-health').value)   || 0,
-    lic_cbahi:    Number(document.getElementById('ex-lic-cbahi').value)    || 0,
-    lic_other:    Number(document.getElementById('ex-lic-other').value)    || 0,
-    // Contracts (8 total)
-    cnt_waste:    Number(document.getElementById('ex-cnt-waste').value)    || 0,
-    cnt_xray:     Number(document.getElementById('ex-cnt-xray').value)     || 0,
-    cnt_lab:      Number(document.getElementById('ex-cnt-lab').value)      || 0,
-    cnt_other:    Number(document.getElementById('ex-cnt-other').value)    || 0,
-    // Agreements (5 total)
-    agr_cpr:      Number(document.getElementById('ex-agr-cpr').value)      || 0,
-    agr_lab:      Number(document.getElementById('ex-agr-lab').value)      || 0,
-    agr_referral: Number(document.getElementById('ex-agr-referral').value) || 0,
-    agr_other:    Number(document.getElementById('ex-agr-other').value)    || 0,
-    jisr:        document.getElementById('ex-jisr').value,
-    staff:       Number(document.getElementById('ex-staff').value)       || 0,
+    jisr:  _s('ex-jisr'),
+    staff: _g('ex-staff'),
   };
   localStorage.setItem('cbahi_extras_v1', JSON.stringify(ex));
   closeModal('m-extras');
@@ -2310,25 +2235,9 @@ async function saveExtras() {
 
 function openExtras() {
   const ex = getExtras();
-  // Licenses
-  document.getElementById('ex-lic-baladiya').value = ex.lic_baladiya || 0;
-  document.getElementById('ex-lic-defaa').value    = ex.lic_defaa    || 0;
-  document.getElementById('ex-lic-hilal').value    = ex.lic_hilal    || 0;
-  document.getElementById('ex-lic-health').value   = ex.lic_health   || 0;
-  document.getElementById('ex-lic-cbahi').value    = ex.lic_cbahi    || 0;
-  document.getElementById('ex-lic-other').value    = ex.lic_other    || '';
-  // Contracts
-  document.getElementById('ex-cnt-waste').value = ex.cnt_waste || 0;
-  document.getElementById('ex-cnt-xray').value  = ex.cnt_xray  || 0;
-  document.getElementById('ex-cnt-lab').value   = ex.cnt_lab   || 0;
-  document.getElementById('ex-cnt-other').value = ex.cnt_other || '';
-  // Agreements
-  document.getElementById('ex-agr-cpr').value      = ex.agr_cpr      || 0;
-  document.getElementById('ex-agr-lab').value      = ex.agr_lab      || 0;
-  document.getElementById('ex-agr-referral').value = ex.agr_referral || 0;
-  document.getElementById('ex-agr-other').value    = ex.agr_other    || '';
-  document.getElementById('ex-jisr').value       = ex.jisr       || 'none';
-  document.getElementById('ex-staff').value      = ex.staff      || '';
+  var _s = function(id,val){ var el=document.getElementById(id); if(el) el.value=val||''; };
+  _s('ex-jisr',  ex.jisr  || 'none');
+  _s('ex-staff', ex.staff || '');
   openModal('m-extras');
 }
 
@@ -2844,235 +2753,209 @@ document.addEventListener('DOMContentLoaded', function(){ renderWfFolder(); });
 setTimeout(renderWfFolder, 300);
 
 
-// ═══════════════════════════════════════════════════════════════
-// LICENSES & CONTRACTS v2 — قائمة تفصيلية مع تواريخ الانتهاء
-// ═══════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════
+// LICENSES v3 — رخص وعقود واتفاقيات
+// ════════════════════════════════════════════════════════
+var LIC_KEY   = 'cbahi_lic_v3';
+var LIC_DRIVE = 'cbahi_lic_drive_v3';
 
-var LIC_ITEMS_KEY = 'cbahi_lic_items_v1';
-var LIC_DRIVE_KEY = 'cbahi_lic_drive_v1';
+function licGet()       { try { return JSON.parse(localStorage.getItem(LIC_KEY)||'[]'); } catch(e){ return []; } }
+function licSet(arr)    { try { localStorage.setItem(LIC_KEY, JSON.stringify(arr)); } catch(e){} }
 
-function getLicItems() {
-  try { return JSON.parse(localStorage.getItem(LIC_ITEMS_KEY) || '[]'); }
-  catch(e) { return []; }
+// ── Drive helpers ─────────────────────────────────────
+function licSaveDrive() {
+  var v = (document.getElementById('lic-drive-input').value||'').trim();
+  if (!v || !v.startsWith('http')) { toast('⚠️ أدخل رابطاً صحيحاً','error'); return; }
+  localStorage.setItem(LIC_DRIVE, v);
+  document.getElementById('lic-drive-btn').href = v;
+  toast('✅ تم حفظ الرابط','success');
 }
-function saveLicItems(arr) {
-  try { localStorage.setItem(LIC_ITEMS_KEY, JSON.stringify(arr)); } catch(_) {}
+function licOpenDrive(a) {
+  var v = localStorage.getItem(LIC_DRIVE)||'';
+  if (!v) { toast('⚠️ أدخل الرابط أولاً','error'); return false; }
+  a.href = v; return true;
 }
-
-// ─── Drive link ───────────────────────────────────────────────
-function saveLicDriveUrl() {
-  var url = (document.getElementById('lic-drive-url').value || '').trim();
-  if (!url) { toast('⚠️ أدخل الرابط أولاً', 'error'); return; }
-  if (!url.startsWith('http')) { toast('⚠️ الرابط غير صحيح', 'error'); return; }
-  localStorage.setItem(LIC_DRIVE_KEY, url);
-  renderLicDriveUrl();
-  toast('✅ تم حفظ رابط المجلد', 'success');
-}
-function checkLicDrive(a) {
-  var url = localStorage.getItem(LIC_DRIVE_KEY) || '';
-  if (!url) { toast('⚠️ أدخل الرابط أولاً', 'error'); return false; }
-  a.href = url;
-  return true;
-}
-function renderLicDriveUrl() {
-  var url = localStorage.getItem(LIC_DRIVE_KEY) || '';
-  var inp = document.getElementById('lic-drive-url');
-  var lnk = document.getElementById('lic-drive-link');
-  if (inp) inp.value = url;
-  if (lnk) lnk.href = url || '#';
+function licInitDrive() {
+  var v = localStorage.getItem(LIC_DRIVE)||'';
+  var inp = document.getElementById('lic-drive-input');
+  var btn = document.getElementById('lic-drive-btn');
+  if (inp) inp.value = v;
+  if (btn) btn.href  = v||'#';
 }
 
-// ─── Modal helpers ────────────────────────────────────────────
-function openLicModal(id) {
-  var items = getLicItems();
-  var item = id ? items.find(function(x){ return x.id===id; }) : null;
-  document.getElementById('lic-edit-id').value = id || '';
-  document.getElementById('lic-modal-title').textContent = id ? '✏️ تعديل البند' : '📜 إضافة بند جديد';
-  document.getElementById('lic-modal-type').value    = item ? item.type    : 'رخصة';
-  document.getElementById('lic-modal-name').value    = item ? item.name    : '';
-  document.getElementById('lic-modal-purpose').value = item ? item.purpose : '';
-  document.getElementById('lic-modal-start').value   = item ? item.start   : '';
-  document.getElementById('lic-modal-expiry').value  = item ? item.expiry  : '';
-  document.getElementById('lic-modal-status').value  = item ? item.status  : 'لم يتم';
-  document.getElementById('lic-modal-link').value    = item ? item.link    : '';
-  document.getElementById('lic-modal-notes').value   = item ? item.notes   : '';
-  openModal('m-lic');
+// ── Expiry calc ───────────────────────────────────────
+function licExpiry(dateStr) {
+  if (!dateStr) return { label:'—', cls:'s-pend', tag:'none', months:null };
+  var now = new Date(); now.setHours(0,0,0,0);
+  var exp = new Date(dateStr);
+  var days = Math.round((exp - now) / 86400000);
+  var months = Math.floor(days / 30);
+  if (days < 0)   return { label:'منتهٍ منذ ' + Math.abs(months) + ' شهر',  cls:'s-crit', tag:'expired',  months };
+  if (days <= 90) return { label:'ينتهي خلال ' + months + ' شهر' + (months<=1?'':''), cls:'s-warn', tag:'expiring', months };
+  return             { label:'ساري — ' + months + ' شهر', cls:'s-done', tag:'active',   months };
 }
 
-function saveLicItem() {
-  var name = (document.getElementById('lic-modal-name').value || '').trim();
-  if (!name) { toast('⚠️ اسم البند مطلوب', 'error'); return; }
-  var id = document.getElementById('lic-edit-id').value;
-  var items = getLicItems();
+// ── Modal ─────────────────────────────────────────────
+function licOpenModal(id) {
+  var items = licGet();
+  var it = id ? items.find(function(x){ return x.id===id; }) : null;
+  document.getElementById('lic2-edit-id').value    = id||'';
+  document.getElementById('lic2-modal-ttl').textContent = id ? '✏️ تعديل البند' : '📋 إضافة بند جديد';
+  document.getElementById('lic2-m-type').value    = it ? it.type    : 'رخصة';
+  document.getElementById('lic2-m-status').value  = it ? it.status  : 'لم يتم';
+  document.getElementById('lic2-m-name').value    = it ? it.name    : '';
+  document.getElementById('lic2-m-purpose').value = it ? it.purpose : '';
+  document.getElementById('lic2-m-start').value   = it ? it.start   : '';
+  document.getElementById('lic2-m-expiry').value  = it ? it.expiry  : '';
+  document.getElementById('lic2-m-link').value    = it ? it.link    : '';
+  document.getElementById('lic2-m-notes').value   = it ? it.notes   : '';
+  openModal('m-lic2');
+}
+
+function licSave() {
+  var name = (document.getElementById('lic2-m-name').value||'').trim();
+  if (!name) { toast('⚠️ الاسم مطلوب','error'); return; }
+  var id = document.getElementById('lic2-edit-id').value;
+  var items = licGet();
   var obj = {
     id:      id || String(Date.now()),
-    type:    document.getElementById('lic-modal-type').value,
+    type:    document.getElementById('lic2-m-type').value,
+    status:  document.getElementById('lic2-m-status').value,
     name:    name,
-    purpose: document.getElementById('lic-modal-purpose').value,
-    start:   document.getElementById('lic-modal-start').value,
-    expiry:  document.getElementById('lic-modal-expiry').value,
-    status:  document.getElementById('lic-modal-status').value,
-    link:    document.getElementById('lic-modal-link').value,
-    notes:   document.getElementById('lic-modal-notes').value,
-    updatedAt: new Date().toISOString()
+    purpose: document.getElementById('lic2-m-purpose').value,
+    start:   document.getElementById('lic2-m-start').value,
+    expiry:  document.getElementById('lic2-m-expiry').value,
+    link:    document.getElementById('lic2-m-link').value,
+    notes:   document.getElementById('lic2-m-notes').value
   };
   if (id) {
     var idx = items.findIndex(function(x){ return x.id===id; });
     if (idx > -1) items[idx] = obj; else items.push(obj);
-  } else {
-    items.push(obj);
-  }
-  saveLicItems(items);
-  closeModal('m-lic');
-  renderLicTable();
-  renderLicKPIs();
-  renderProgressDashboard();
-  toast('✅ تم الحفظ', 'success');
+  } else { items.push(obj); }
+  licSet(items);
+  closeModal('m-lic2');
+  licRender(); licKPIs(); renderProgressDashboard();
+  toast('✅ تم الحفظ','success');
 }
 
-function deleteLicItem(id) {
-  if (!confirm('هل تريد حذف هذا البند؟')) return;
-  var items = getLicItems().filter(function(x){ return x.id !== id; });
-  saveLicItems(items);
-  renderLicTable();
-  renderLicKPIs();
-  renderProgressDashboard();
-  toast('🗑️ تم الحذف', 'info');
+function licDelete(id) {
+  if (!confirm('حذف هذا البند؟')) return;
+  licSet(licGet().filter(function(x){ return x.id!==id; }));
+  licRender(); licKPIs(); renderProgressDashboard();
+  toast('🗑️ تم الحذف','info');
 }
 
-// ─── Expiry helpers ───────────────────────────────────────────
-function licExpiryStatus(dateStr) {
-  if (!dateStr) return { label:'—', cls:'s-pend', months: null };
-  var exp = new Date(dateStr);
-  var now = new Date();
-  var diffMs = exp - now;
-  var diffDays = Math.floor(diffMs / 86400000);
-  var diffMonths = Math.floor(diffDays / 30);
-  if (diffDays < 0) return { label:'منتهي', cls:'s-crit', months: diffMonths };
-  if (diffDays <= 90) return { label:'يقارب الانتهاء (' + diffMonths + ' شهر)', cls:'s-warn', months: diffMonths };
-  return { label:'ساري (' + diffMonths + ' شهر)', cls:'s-done', months: diffMonths };
+// ── KPIs ──────────────────────────────────────────────
+function licKPIs() {
+  var items = licGet();
+  var nLic  = items.filter(function(x){ return x.type==='رخصة'; }).length;
+  var nCnt  = items.filter(function(x){ return x.type==='عقد'; }).length;
+  var nAgr  = items.filter(function(x){ return x.type==='اتفاقية'; }).length;
+  var done  = items.filter(function(x){ return x.status==='تم'; }).length;
+  var total = items.length;
+  var pct   = total ? Math.round(done/total*100) : 0;
+  var expiring = items.filter(function(x){ return licExpiry(x.expiry).tag==='expiring'; }).length;
+
+  var el = function(id,v){ var e=document.getElementById(id); if(e) e.textContent=v; };
+  el('lic2-n-lic',      nLic);
+  el('lic2-n-cnt',      nCnt);
+  el('lic2-n-agr',      nAgr);
+  el('lic2-done-ratio', done+'/'+total);
+  el('lic2-expiring',   expiring);
+  el('lic2-pct-num',    pct+'%');
+  var bar = document.getElementById('lic2-pct-bar');
+  if (bar) bar.style.width = pct+'%';
 }
 
-// ─── Render table ─────────────────────────────────────────────
-function renderLicTable() {
-  var items = getLicItems();
-  var filterType   = (document.getElementById('lic-filter-type')   || {}).value || 'ALL';
-  var filterStatus = (document.getElementById('lic-filter-status') || {}).value || 'ALL';
-  var filterExpiry = (document.getElementById('lic-filter-expiry') || {}).value || 'ALL';
-  var search       = ((document.getElementById('lic-search')       || {}).value || '').toLowerCase();
+// ── Table ─────────────────────────────────────────────
+function licResetFilters() {
+  ['lic2-f-type','lic2-f-status','lic2-f-exp'].forEach(function(id){
+    var el=document.getElementById(id); if(el) el.value='';
+  });
+  var s=document.getElementById('lic2-search'); if(s) s.value='';
+  licRender();
+}
 
-  var filtered = items.filter(function(it) {
-    if (filterType !== 'ALL' && it.type !== filterType) return false;
-    if (filterStatus !== 'ALL' && it.status !== filterStatus) return false;
-    if (filterExpiry !== 'ALL') {
-      var es = licExpiryStatus(it.expiry);
-      var label = it.expiry
-        ? (es.months < 0 ? 'منتهي' : es.months <= 3 ? 'قارب على الانتهاء' : 'سارٍ')
-        : '';
-      if (label !== filterExpiry) return false;
-    }
-    if (search && !it.name.toLowerCase().includes(search) && !it.purpose.toLowerCase().includes(search)) return false;
+function licRender() {
+  var items = licGet();
+  var fType   = (document.getElementById('lic2-f-type')||{}).value||'';
+  var fStatus = (document.getElementById('lic2-f-status')||{}).value||'';
+  var fExp    = (document.getElementById('lic2-f-exp')||{}).value||'';
+  var fSearch = ((document.getElementById('lic2-search')||{}).value||'').toLowerCase();
+
+  var list = items.filter(function(it) {
+    if (fType   && it.type   !== fType)   return false;
+    if (fStatus && it.status !== fStatus) return false;
+    if (fExp    && licExpiry(it.expiry).tag !== fExp) return false;
+    if (fSearch && !(it.name+it.purpose).toLowerCase().includes(fSearch)) return false;
     return true;
   });
 
-  var cntEl = document.getElementById('lic-cnt');
-  if (cntEl) cntEl.textContent = filtered.length;
+  var cntEl = document.getElementById('lic2-count');
+  if (cntEl) cntEl.textContent = list.length;
 
-  var typeIcon  = { 'رخصة':'📜', 'عقد':'📝', 'اتفاقية':'🤝' };
-  var typeColor = { 'رخصة':'#EF4444', 'عقد':'#F97316', 'اتفاقية':'#a855f7' };
-  var statusCls = { 'تم':'s-done', 'قيد الإنجاز':'s-warn', 'لم يتم':'s-crit' };
-
-  var tbody = document.getElementById('lic-tbody');
+  var tbody = document.getElementById('lic2-tbody');
   if (!tbody) return;
 
-  if (!filtered.length) {
-    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:var(--text3);padding:50px"><div style="font-size:36px;margin-bottom:10px">📜</div><div style="font-weight:700;color:var(--text2)">لا توجد نتائج</div></td></tr>';
+  if (!list.length) {
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--text3);padding:50px 20px"><div style="font-size:38px;margin-bottom:10px">📋</div><div style="font-size:13px;font-weight:700;color:var(--text2);margin-bottom:5px">لا توجد نتائج</div></td></tr>';
     return;
   }
 
-  tbody.innerHTML = filtered.map(function(it, i) {
-    var es = licExpiryStatus(it.expiry);
-    var icon = typeIcon[it.type] || '📄';
-    var color = typeColor[it.type] || '#6B7280';
-    var sCls = statusCls[it.status] || 's-pend';
-    var linkBtn = it.link ? '<a href="' + it.link + '" target="_blank" style="display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:5px;background:rgba(0,194,255,.1);border:1px solid rgba(0,194,255,.2);color:var(--accent);font-size:10px;text-decoration:none;font-weight:700">🔗 فتح</a>' : '—';
-    return '<tr>' +
-      '<td class="num" style="color:var(--text3);font-size:10px">' + (i+1) + '</td>' +
-      '<td><span style="font-size:11px;font-weight:800;color:' + color + ';background:' + color + '18;padding:2px 8px;border-radius:8px">' + icon + ' ' + it.type + '</span></td>' +
-      '<td class="td-main" style="max-width:180px;font-size:12px">' + it.name + (it.notes ? '<div style="font-size:10px;color:var(--text3);margin-top:2px">' + it.notes + '</div>' : '') + '</td>' +
-      '<td style="font-size:11px;color:var(--text2);max-width:160px">' + (it.purpose || '—') + '</td>' +
-      '<td style="text-align:center;font-size:11px;color:var(--text3)">' + (it.start || '—') + '</td>' +
-      '<td style="text-align:center;font-size:11px;color:var(--text2)">' + (it.expiry || '—') + '</td>' +
-      '<td style="text-align:center">' + (it.expiry ? '<span class="pill ' + es.cls + '" style="font-size:10px">' + es.label + '</span>' : '<span style="color:var(--text3);font-size:10px">—</span>') + '</td>' +
-      '<td style="text-align:center">' + (it.expiry ? '<span class="pill ' + (es.months !== null && es.months < 0 ? 's-crit' : es.months !== null && es.months <= 3 ? 's-warn' : 's-done') + '" style="font-size:10px">' + (es.months !== null && es.months < 0 ? '🔴 منتهي' : es.months !== null && es.months <= 3 ? '⚠️ قارب الانتهاء' : '✅ ساري') + '</span>' : '<span style="color:var(--text3);font-size:10px">—</span>') + '</td>' +
-      '<td style="text-align:center"><span class="pill ' + sCls + '" style="font-size:10px">' + it.status + '</span></td>' +
-      '<td style="text-align:center"><div style="display:flex;gap:4px;justify-content:center">' +
-        '<button class="btn btn-ghost" onclick="openLicModal(\'' + it.id + '\')" style="padding:4px 9px;font-size:10px">✏️</button>' +
-        linkBtn +
-        '<button class="btn btn-danger" onclick="deleteLicItem(\'' + it.id + '\')" style="padding:4px 9px;font-size:10px">🗑️</button>' +
-      '</div></td>' +
+  var typeColor = { 'رخصة':'#EF4444','عقد':'#EA580C','اتفاقية':'#a855f7' };
+  var typeIcon  = { 'رخصة':'📜','عقد':'📝','اتفاقية':'🤝' };
+  var sCls      = { 'تم':'s-done','جارٍ':'s-warn','لم يتم':'s-crit' };
+
+  tbody.innerHTML = list.map(function(it, i) {
+    var color = typeColor[it.type]||'#6B7280';
+    var icon  = typeIcon[it.type]||'📄';
+    var sc    = sCls[it.status]||'s-pend';
+    var exp   = licExpiry(it.expiry);
+    var linkBtn = it.link
+      ? '<a href="'+it.link+'" target="_blank" style="display:inline-flex;align-items:center;gap:3px;padding:3px 8px;border-radius:5px;background:rgba(0,194,255,.1);border:1px solid rgba(0,194,255,.2);color:var(--accent);font-size:10px;text-decoration:none;font-weight:700">🔗</a>'
+      : '';
+    return '<tr>'+
+      '<td class="num" style="font-size:10px;color:var(--text3)">'+(i+1)+'</td>'+
+      '<td><span style="font-size:11px;font-weight:800;color:'+color+';background:'+color+'1a;padding:2px 9px;border-radius:8px">'+icon+' '+it.type+'</span></td>'+
+      '<td style="min-width:140px"><div style="font-size:12px;font-weight:700;color:var(--text)">'+it.name+'</div>'+(it.notes?'<div style="font-size:10px;color:var(--text3);margin-top:1px">'+it.notes+'</div>':'')+'</td>'+
+      '<td style="font-size:11px;color:var(--text2);max-width:150px">'+(it.purpose||'—')+'</td>'+
+      '<td style="text-align:center;font-size:11px;color:var(--text3)">'+(it.start||'—')+'</td>'+
+      '<td style="text-align:center;font-size:11px;color:var(--text2);font-weight:700">'+(it.expiry||'—')+'</td>'+
+      '<td style="text-align:center">'+(it.expiry?'<span class="pill '+exp.cls+'" style="font-size:10px">'+exp.label+'</span>':'<span style="color:var(--text3);font-size:10px">—</span>')+'</td>'+
+      '<td style="text-align:center"><span class="pill '+sc+'" style="font-size:10px">'+it.status+'</span></td>'+
+      '<td style="text-align:center"><div style="display:flex;gap:4px;justify-content:center;align-items:center">'+
+        linkBtn+
+        '<button onclick="licOpenModal(\''+it.id+'\')" style="padding:3px 8px;background:rgba(0,194,255,.08);border:1px solid rgba(0,194,255,.2);color:var(--accent);border-radius:5px;font-size:10px;cursor:pointer">✏️</button>'+
+        '<button onclick="licDelete(\''+it.id+'\')" style="padding:3px 8px;background:rgba(255,71,87,.08);border:1px solid rgba(255,71,87,.2);color:var(--red);border-radius:5px;font-size:10px;cursor:pointer">🗑️</button>'+
+      '</div></td>'+
     '</tr>';
   }).join('');
 }
 
-// ─── KPIs ─────────────────────────────────────────────────────
-function renderLicKPIs() {
-  var items = getLicItems();
-  var licItems = items.filter(function(x){ return x.type==='رخصة'; });
-  var cntItems = items.filter(function(x){ return x.type==='عقد'; });
-  var agrItems = items.filter(function(x){ return x.type==='اتفاقية'; });
-  var doneItems = items.filter(function(x){ return x.status==='تم'; });
-  var now = new Date();
-  var expiringItems = items.filter(function(x){
-    if (!x.expiry) return false;
-    var d = new Date(x.expiry);
-    var ms = d - now;
-    return ms >= 0 && ms <= 90 * 86400000;
-  });
-  var total = items.length;
-  var done  = doneItems.length;
-  var pct   = total ? Math.round(done / total * 100) : 0;
-
-  var el = function(id){ return document.getElementById(id); };
-  if(el('lic-kpi-lic'))         el('lic-kpi-lic').textContent         = licItems.length;
-  if(el('lic-kpi-lic-sub'))     el('lic-kpi-lic-sub').textContent     = 'من إجمالي ' + total;
-  if(el('lic-kpi-cnt'))         el('lic-kpi-cnt').textContent         = cntItems.length;
-  if(el('lic-kpi-cnt-sub'))     el('lic-kpi-cnt-sub').textContent     = 'مُضاف';
-  if(el('lic-kpi-agr'))         el('lic-kpi-agr').textContent         = agrItems.length;
-  if(el('lic-kpi-agr-sub'))     el('lic-kpi-agr-sub').textContent     = 'مُضاف';
-  if(el('lic-kpi-done'))        el('lic-kpi-done').textContent        = done + ' / ' + total;
-  if(el('lic-kpi-expiring'))    el('lic-kpi-expiring').textContent    = expiringItems.length;
-  if(el('lic-kpi-pct'))         el('lic-kpi-pct').textContent         = pct + '%';
-  if(el('lic-kpi-bar'))         el('lic-kpi-bar').style.width         = pct + '%';
-}
-
-// ─── Override calcPillarPct for licenses ─────────────────────
-// يستخدم الآن عدد البنود المُضافة والمُنجزة بدلاً من الـ toggles
-var _origCalcPillarPct = calcPillarPct;
-calcPillarPct = function(key) {
-  if (key !== 'licenses') return _origCalcPillarPct(key);
-  var items = getLicItems();
-  if (!items.length) return 0;
-  var done = items.filter(function(x){ return x.status === 'تم'; }).length;
-  return Math.round(done / items.length * 100);
-};
-
-// ─── Init ─────────────────────────────────────────────────────
+// ── Override calcPillarPct for 'licenses' ─────────────
 (function(){
-  setTimeout(function(){
-    renderLicDriveUrl();
-    renderLicTable();
-    renderLicKPIs();
-  }, 450);
+  var _orig = calcPillarPct;
+  calcPillarPct = function(key) {
+    if (key !== 'licenses') return _orig(key);
+    var items = licGet();
+    if (!items.length) return 0;
+    return Math.round(items.filter(function(x){ return x.status==='تم'; }).length / items.length * 100);
+  };
 })();
 
-// backward-compat stub (لا تزيل، قد يُستدعى من saveExtras)
-function saveLicenses() { renderLicKPIs(); renderProgressDashboard(); }
-function renderLicenses() { renderLicKPIs(); }
+// ── Init ──────────────────────────────────────────────
+function licInit() { licInitDrive(); licRender(); licKPIs(); }
+setTimeout(licInit, 500);
+
+// stubs for any legacy calls
+function saveLicenses()  { licKPIs(); renderProgressDashboard(); }
+function renderLicenses(){ licRender(); licKPIs(); }
+
+
+
+
 
 </script>
-</body>
-</html>
 
 <!-- Patient File Report Modal -->
 <div class="overlay" id="m-patient-file">
@@ -3111,3 +2994,6 @@ function renderLicenses() { renderLicKPIs(); }
     </div>
   </div>
 </div>
+</body>
+
+</html>

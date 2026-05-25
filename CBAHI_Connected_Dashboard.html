@@ -433,9 +433,12 @@ tr:hover td{background:rgba(0,194,255,.03)}
 <div class="pane" id="pane-workflow">
 
   <!-- Header -->
-  <div style="background:linear-gradient(135deg,#7C3AED,#0080FF);border-radius:12px;padding:24px;margin-bottom:20px;color:white">
-    <h2 style="margin:0 0 8px;font-size:24px;font-weight:900">📁 المستندات</h2>
-    <p style="margin:0;opacity:.9;font-size:13px">أضف رابط مجلد المستندات للوصول السريع إليه</p>
+  <div style="background:linear-gradient(135deg,#7C3AED,#0080FF);border-radius:12px;padding:24px;margin-bottom:20px;color:white;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+    <div>
+      <h2 style="margin:0 0 8px;font-size:24px;font-weight:900">📁 المستندات</h2>
+      <p style="margin:0;opacity:.9;font-size:13px">أضف رابط مجلد المستندات أو سجّل مستنداتك يدوياً</p>
+    </div>
+    <button onclick="newWf()" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:#fff;padding:10px 22px;border-radius:9px;font-family:Tajawal,sans-serif;font-size:13px;font-weight:800;cursor:pointer">＋ إضافة مستند</button>
   </div>
 
   <!-- Folder Link Input -->
@@ -571,9 +574,12 @@ tr:hover td{background:rgba(0,194,255,.03)}
   <!-- Header -->
   <div style="background:linear-gradient(135deg,#0047AB,#0080FF,#10D97E);border-radius:14px;padding:22px 28px;margin-bottom:20px;color:white;position:relative;overflow:hidden">
     <div style="position:absolute;left:-20px;top:-20px;width:120px;height:120px;background:rgba(255,255,255,.05);border-radius:50%"></div>
-    <div style="position:relative">
-      <h2 style="margin:0 0 4px;font-size:20px;font-weight:900">📂 ملفات المرضى</h2>
-      <p style="margin:0;opacity:.85;font-size:12px">ارفع تقرير التحليل اليومي وتتبّع نسبة اكتمال الملفات</p>
+    <div style="position:relative;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+      <div>
+        <h2 style="margin:0 0 4px;font-size:20px;font-weight:900">📂 ملفات المرضى</h2>
+        <p style="margin:0;opacity:.85;font-size:12px">ارفع تقرير التحليل اليومي وتتبّع نسبة اكتمال الملفات</p>
+      </div>
+      <button onclick="openModal('m-patient-file')" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:#fff;padding:10px 22px;border-radius:9px;font-family:Tajawal,sans-serif;font-size:13px;font-weight:800;cursor:pointer">＋ إضافة تقرير</button>
     </div>
   </div>
 
@@ -1162,16 +1168,25 @@ tr:hover td{background:rgba(0,194,255,.03)}
 </div>
 
 <!-- Workflow Modal -->
-<div class="overlay" id="m-wf">
+<div class="overlay" id="m-add-wf">
   <div class="modal">
-    <h3>🔄 إضافة خطوة</h3>
+    <h3 id="wf-modal-ttl">📁 إضافة مستند</h3>
     <input type="hidden" id="wf-eid">
-    <div class="fg"><label>عنوان المستند</label><input type="text" id="wf-title-in" placeholder="عنوان المستند"></div>
+    <div class="fg"><label>عنوان المستند *</label><input type="text" id="wf-title-in" placeholder="عنوان المستند"></div>
+    <div class="fg"><label>التصنيف</label>
+      <select id="wf-cat-in">
+        <option value="سياسة">📜 سياسة</option>
+        <option value="إجراء">📋 إجراء</option>
+        <option value="نموذج">📄 نموذج</option>
+        <option value="دليل">📗 دليل</option>
+        <option value="أخرى" selected>📂 أخرى</option>
+      </select>
+    </div>
     <div class="fg"><label>وصف المستند</label><textarea id="wf-desc-in" rows="3" placeholder="التفاصيل..."></textarea></div>
-    <div class="fg"><label>الوثيقة / النموذج</label><input type="text" id="wf-doc-in" placeholder="النموذج المطلوب"></div>
+    <div class="fg"><label>الوثيقة / النموذج *</label><input type="text" id="wf-doc-in" placeholder="رقم أو اسم النموذج المطلوب"></div>
     <div class="fg"><label>المسؤول</label><input type="text" id="wf-owner-in" placeholder="المسؤول عن المستند"></div>
     <div class="modal-footer">
-      <button class="btn btn-danger" onclick="closeModal('m-wf')">إلغاء</button>
+      <button class="btn btn-danger" onclick="closeModal('m-add-wf')">إلغاء</button>
       <button class="btn btn-primary" onclick="saveWf()">💾 حفظ</button>
     </div>
   </div>
@@ -1892,6 +1907,16 @@ async function savePol(){ const id=document.getElementById('pol-eid').value; con
 // ═══════════════════════════════════════════════════════════════
 // CRUD — Workflow
 // ═══════════════════════════════════════════════════════════════
+function newWf(){
+  document.getElementById('wf-eid').value='';
+  document.getElementById('wf-title-in').value='';
+  document.getElementById('wf-doc-in').value='';
+  document.getElementById('wf-cat-in').value='أخرى';
+  document.getElementById('wf-desc-in').value='';
+  document.getElementById('wf-owner-in').value='';
+  document.getElementById('wf-modal-ttl').textContent='📁 إضافة مستند';
+  openModal('m-add-wf');
+}
 function editWf(id){
   const w=DB.workflow.find(x=>String(x.id)===id);
   if(!w) return;
@@ -1901,6 +1926,7 @@ function editWf(id){
   document.getElementById('wf-cat-in').value=w.category||'أخرى';
   document.getElementById('wf-desc-in').value=w.desc||'';
   document.getElementById('wf-owner-in').value=w.owner||'';
+  document.getElementById('wf-modal-ttl').textContent='✏️ تعديل مستند';
   openModal('m-add-wf');
 }
 async function delWf(id){
@@ -2538,6 +2564,39 @@ function pfDelete(id) {
   pfSet(pfGet().filter(function(x){ return x.id !== id; }));
   pfRender();
   toast('🗑️ تم الحذف','info');
+}
+
+// حفظ من Modal
+function savePatientFileReport() {
+  var date       = document.getElementById('pf-modal-from').value || document.getElementById('pf-modal-to').value;
+  var total      = parseInt(document.getElementById('pf-modal-total').value)      || 0;
+  var complete   = parseInt(document.getElementById('pf-modal-complete').value)   || 0;
+  var incomplete = parseInt(document.getElementById('pf-modal-incomplete').value) || 0;
+  var notes      = document.getElementById('pf-modal-notes').value;
+  var reportUrl  = document.getElementById('pf-modal-report').value;
+
+  if (!date)  { toast('⚠️ حدد التاريخ','error'); return; }
+  if (!total) { toast('⚠️ أدخل إجمالي الملفات','error'); return; }
+
+  var pct = Math.round(complete / total * 100);
+  var id  = String(Date.now());
+
+  var records = pfGet();
+  records.unshift({
+    id: id, date: date, total: total, complete: complete,
+    incomplete: incomplete, pct: pct, notes: notes,
+    pdfData: null, pdfName: reportUrl || '',
+    savedAt: new Date().toISOString()
+  });
+  try { pfSet(records); } catch(e) { toast('⚠️ مساحة التخزين ممتلئة','error'); return; }
+
+  // إعادة تعيين حقول Modal
+  ['pf-modal-from','pf-modal-to','pf-modal-total','pf-modal-complete','pf-modal-incomplete','pf-modal-notes','pf-modal-report'].forEach(function(id){
+    var el = document.getElementById(id); if(el) el.value = '';
+  });
+  closeModal('m-patient-file');
+  pfRender();
+  toast('✅ تم حفظ التقرير','success');
 }
 
 // مسح الكل

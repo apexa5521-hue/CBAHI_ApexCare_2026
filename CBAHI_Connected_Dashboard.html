@@ -1643,19 +1643,52 @@ function renderLoc() {
 }
 
 // ─── Lectures ─────────────────────────────────────────────────
+// ─── تنسيق التاريخ — يحول ISO أو أي صيغة إلى YYYY-MM-DD + HH:MM ───
+function parseLecDate(raw) {
+  if (!raw) return { date: '', time: '', display: '–' };
+  var s = String(raw).trim();
+  // ISO كامل مثل 2026-02-16T21:00:00.000Z
+  if (s.includes('T')) {
+    var dt = new Date(s);
+    if (!isNaN(dt)) {
+      var yyyy = dt.getFullYear();
+      var mm   = String(dt.getMonth()+1).padStart(2,'0');
+      var dd   = String(dt.getDate()).padStart(2,'0');
+      var hh   = String(dt.getHours()).padStart(2,'0');
+      var mi   = String(dt.getMinutes()).padStart(2,'0');
+      var dateStr = yyyy+'-'+mm+'-'+dd;
+      var timeStr = hh+':'+mi;
+      var display = dd+'/'+mm+'/'+yyyy + (timeStr!=='00:00' ? ' — '+timeStr : '');
+      return { date: dateStr, time: (timeStr!=='00:00'?timeStr:''), display: display };
+    }
+  }
+  // تاريخ نظيف YYYY-MM-DD
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+    var p = s.split('-');
+    return { date: s, time: '', display: p[2]+'/'+p[1]+'/'+p[0] };
+  }
+  return { date: s, time: '', display: s };
+}
+
 function renderLec() {
   const done = DB.lectures.filter(l=>l.done==='نعم').length;
   document.getElementById('lec-cnt').textContent = DB.lectures.length;
   document.getElementById('lec-done-cnt').textContent = done + ' منجزة';
-  document.getElementById('lec-tbody').innerHTML = DB.lectures.map((l,i)=>`
-    <tr><td class="num">${i+1}</td>
+  document.getElementById('lec-tbody').innerHTML = DB.lectures.map((l,i)=>{
+    var pd = parseLecDate(l.date);
+    var timeDisplay = l.time || pd.time;
+    return `<tr><td class="num">${i+1}</td>
     <td class="td-main">${l.title||''}</td>
     <td style="font-size:11px;color:var(--accent)">${l.speaker||''}</td>
     <td style="font-size:11px;color:var(--text3)">${l.alt||'–'}</td>
-    <td style="font-size:11px">${l.date||'–'}</td>
+    <td style="font-size:11px;white-space:nowrap">
+      <div style="font-weight:700;color:var(--text)">${pd.display}</div>
+      ${timeDisplay ? `<div style="font-size:10px;color:var(--text3);margin-top:2px">🕐 ${timeDisplay}</div>` : ''}
+    </td>
     <td><span class="badge badge-purple" style="font-size:9px">${l.audience||l.aud||''}</span></td>
     <td>${l.done==='نعم'?pill('✅ تمت'):pill('⏳ لم تتم')}</td>
-    <td>${actionBtns('editLec','delLec',l.id)}</td></tr>`).join('');
+    <td>${actionBtns('editLec','delLec',l.id)}</td></tr>`;
+  }).join('');
 }
 
 // ─── Assignments ──────────────────────────────────────────────
@@ -1853,16 +1886,29 @@ function newPol() {
   openModal('m-pol');
 }
 
-function editLec(id){ const l=DB.lectures.find(x=>String(x.id)===String(id))||{}; document.getElementById('lec-eid').value=l.id||''; document.getElementById('lec-title').value=l.title||''; document.getElementById('lec-speaker').value=l.speaker||''; document.getElementById('lec-alt').value=l.alt||''; document.getElementById('lec-date').value=l.date||''; document.getElementById('lec-time').value=l.time||''; document.getElementById('lec-aud').value=l.audience||l.aud||'جميع الموظفين'; document.getElementById('lec-done').value=l.done||'لا'; openModal('m-lec'); }
+function editLec(id){ 
+  const l=DB.lectures.find(x=>String(x.id)===String(id))||{}; 
+  var pd = parseLecDate(l.date);
+  document.getElementById('lec-eid').value=l.id||''; 
+  document.getElementById('lec-title').value=l.title||''; 
+  document.getElementById('lec-speaker').value=l.speaker||''; 
+  document.getElementById('lec-alt').value=l.alt||''; 
+  document.getElementById('lec-date').value=pd.date||''; 
+  document.getElementById('lec-time').value=l.time||pd.time||''; 
+  document.getElementById('lec-aud').value=l.audience||l.aud||'جميع الموظفين'; 
+  document.getElementById('lec-done').value=l.done||'لا'; 
+  openModal('m-lec'); 
+}
 async function delLec(id){ if(!confirm('حذف؟')) return; DB.lectures=DB.lectures.filter(l=>String(l.id)!==String(id)); renderAll(); await apiCall('delete','lectures',id); setTimeout(() => syncAll(), 1000); toast('🗑️ تم الحذف','info'); }
 async function saveLec(){ 
   const id=document.getElementById('lec-eid').value; 
+  const rawDate = document.getElementById('lec-date').value;
   const obj={
     id:id||String(Date.now()),
     title:document.getElementById('lec-title').value,
     speaker:document.getElementById('lec-speaker').value,
     alt:document.getElementById('lec-alt').value,
-    date:document.getElementById('lec-date').value,
+    date: rawDate,   // يُخزَّن كـ YYYY-MM-DD نظيف
     time:document.getElementById('lec-time').value,
     audience:document.getElementById('lec-aud').value,
     done:document.getElementById('lec-done').value

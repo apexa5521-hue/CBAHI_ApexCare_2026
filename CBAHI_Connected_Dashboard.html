@@ -2445,47 +2445,75 @@ function pfPreviewFile(inp) {
 
 // حفظ التقرير
 function pfSaveReport() {
-  var date     = document.getElementById('pf-new-date').value;
-  var total    = parseInt(document.getElementById('pf-new-total').value)      || 0;
-  var complete = parseInt(document.getElementById('pf-new-complete').value)   || 0;
-  var incomplete = parseInt(document.getElementById('pf-new-incomplete').value) || 0;
-  var notes    = document.getElementById('pf-new-notes').value;
-  var pdfInput = document.getElementById('pf-new-pdf');
-  var pdfFile  = pdfInput && pdfInput.files && pdfInput.files[0] ? pdfInput.files[0] : null;
+  var date       = document.getElementById('pf-new-date').value;
+  var total      = parseInt(document.getElementById('pf-new-total').value)       || 0;
+  var complete   = parseInt(document.getElementById('pf-new-complete').value)    || 0;
+  var incomplete = parseInt(document.getElementById('pf-new-incomplete').value)  || 0;
+  var notes      = document.getElementById('pf-new-notes').value;
+  var pdfInput   = document.getElementById('pf-new-pdf');
+  var pdfFile    = pdfInput && pdfInput.files && pdfInput.files[0] ? pdfInput.files[0] : null;
 
   if (!date)  { toast('⚠️ حدد تاريخ التحليل','error'); return; }
   if (!total) { toast('⚠️ أدخل إجمالي الملفات','error'); return; }
 
   var pct = Math.round(complete / total * 100);
 
+  // حفظ بدون PDF أولاً
+  var id = String(Date.now());
+
   if (pdfFile) {
+    // تحقق من الحجم — إذا أكبر من 4MB نحفظ فقط اسم الملف
+    if (pdfFile.size > 4 * 1024 * 1024) {
+      // الملف كبير — نحفظ البيانات فقط ونُعلم المستخدم
+      pfDoSave(id, date, total, complete, incomplete, pct, notes, null, pdfFile.name + ' (كبير جداً للتخزين)');
+      toast('✅ حُفظت البيانات — الملف كبير جداً ('+( pdfFile.size/1048576).toFixed(1)+'MB) لا يمكن تخزينه محلياً', 'info');
+      return;
+    }
     var reader = new FileReader();
     reader.onload = function(e) {
-      pfDoSave(date, total, complete, incomplete, pct, notes, e.target.result, pdfFile.name);
+      try {
+        pfDoSave(id, date, total, complete, incomplete, pct, notes, e.target.result, pdfFile.name);
+      } catch(err) {
+        // localStorage فاض — نحفظ بدون PDF
+        pfDoSave(id, date, total, complete, incomplete, pct, notes, null, pdfFile.name + ' (لم يُخزَّن)');
+        toast('✅ حُفظت البيانات — مساحة التخزين غير كافية للملف', 'info');
+      }
     };
-    reader.onerror = function() { toast('⚠️ فشل قراءة الملف','error'); };
+    reader.onerror = function() {
+      pfDoSave(id, date, total, complete, incomplete, pct, notes, null, '');
+      toast('⚠️ فشلت قراءة الملف — حُفظت البيانات بدونه', 'info');
+    };
     reader.readAsDataURL(pdfFile);
   } else {
-    pfDoSave(date, total, complete, incomplete, pct, notes, null, '');
+    pfDoSave(id, date, total, complete, incomplete, pct, notes, null, '');
   }
 }
 
-function pfDoSave(date, total, complete, incomplete, pct, notes, pdfData, pdfName) {
+function pfDoSave(id, date, total, complete, incomplete, pct, notes, pdfData, pdfName) {
   var records = pfGet();
   var obj = {
-    id:        String(Date.now()),
-    date:      date,
-    total:     total,
-    complete:  complete,
+    id:         id || String(Date.now()),
+    date:       date,
+    total:      total,
+    complete:   complete,
     incomplete: incomplete,
-    pct:       pct,
-    notes:     notes,
-    pdfData:   pdfData,
-    pdfName:   pdfName,
-    savedAt:   new Date().toISOString()
+    pct:        pct,
+    notes:      notes,
+    pdfData:    pdfData,
+    pdfName:    pdfName,
+    savedAt:    new Date().toISOString()
   };
-  records.unshift(obj);   // أحدث في الأعلى
-  pfSet(records);
+  records.unshift(obj);
+  try {
+    pfSet(records);
+  } catch(e) {
+    // localStorage امتلأ — نحفظ بدون pdfData
+    obj.pdfData = null;
+    obj.pdfName = (pdfName||'') + ' (لم يُخزَّن)';
+    records[0] = obj;
+    pfSet(records);
+    toast('✅ حُفظت البيانات — لم يتم تخزين PDF بسبب امتلاء المساحة', 'info');
+  }
   pfReset();
   pfRender();
   toast('✅ تم حفظ التقرير' + (pdfName ? ' — ' + pdfName : ''), 'success');

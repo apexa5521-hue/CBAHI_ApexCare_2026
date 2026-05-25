@@ -2417,8 +2417,29 @@ if (!DB.patientFiles) DB.patientFiles = [];
 // ════════════════════════════════════════════════════════
 var PF_KEY = 'cbahi_pf_v2';
 
-function pfGet() { try { return JSON.parse(localStorage.getItem(PF_KEY)||'[]'); } catch(e){ return []; } }
-function pfSet(a) { try { localStorage.setItem(PF_KEY, JSON.stringify(a)); } catch(e){} }
+function pfGet() {
+  try { return JSON.parse(localStorage.getItem(PF_KEY)||'[]'); }
+  catch(e) { return []; }
+}
+function pfSet(a) {
+  // حذف pdfData من السجلات القديمة لتوفير مساحة إذا لزم
+  var str = JSON.stringify(a);
+  try {
+    localStorage.setItem(PF_KEY, str);
+    return true;
+  } catch(e) {
+    // امتلأ localStorage — احذف pdfData من كل السجلات وحاول مرة ثانية
+    var slim = a.map(function(r) {
+      return Object.assign({}, r, { pdfData: null });
+    });
+    try {
+      localStorage.setItem(PF_KEY, JSON.stringify(slim));
+      return false; // نجح لكن بدون PDF
+    } catch(e2) {
+      return false;
+    }
+  }
+}
 
 // حساب الناقص تلقائياً
 function pfCalcIncomplete() {
@@ -2445,43 +2466,27 @@ function pfPreviewFile(inp) {
 
 // حفظ التقرير
 function pfSaveReport() {
-  var date       = document.getElementById('pf-new-date').value;
-  var total      = parseInt(document.getElementById('pf-new-total').value)       || 0;
-  var complete   = parseInt(document.getElementById('pf-new-complete').value)    || 0;
-  var incomplete = parseInt(document.getElementById('pf-new-incomplete').value)  || 0;
-  var notes      = document.getElementById('pf-new-notes').value;
+  var date       = (document.getElementById('pf-new-date')       || {}).value || '';
+  var total      = parseInt((document.getElementById('pf-new-total')      || {}).value) || 0;
+  var complete   = parseInt((document.getElementById('pf-new-complete')   || {}).value) || 0;
+  var incomplete = parseInt((document.getElementById('pf-new-incomplete') || {}).value) || 0;
+  var notes      = (document.getElementById('pf-new-notes') || {}).value || '';
   var pdfInput   = document.getElementById('pf-new-pdf');
   var pdfFile    = pdfInput && pdfInput.files && pdfInput.files[0] ? pdfInput.files[0] : null;
 
-  if (!date)  { toast('⚠️ حدد تاريخ التحليل','error'); return; }
-  if (!total) { toast('⚠️ أدخل إجمالي الملفات','error'); return; }
+  if (!date)  { toast('⚠️ حدد تاريخ التحليل', 'error'); return; }
+  if (!total) { toast('⚠️ أدخل إجمالي الملفات', 'error'); return; }
 
+  var id  = String(Date.now());
   var pct = Math.round(complete / total * 100);
 
-  // حفظ بدون PDF أولاً
-  var id = String(Date.now());
-
   if (pdfFile) {
-    // تحقق من الحجم — إذا أكبر من 4MB نحفظ فقط اسم الملف
-    if (pdfFile.size > 4 * 1024 * 1024) {
-      // الملف كبير — نحفظ البيانات فقط ونُعلم المستخدم
-      pfDoSave(id, date, total, complete, incomplete, pct, notes, null, pdfFile.name + ' (كبير جداً للتخزين)');
-      toast('✅ حُفظت البيانات — الملف كبير جداً ('+( pdfFile.size/1048576).toFixed(1)+'MB) لا يمكن تخزينه محلياً', 'info');
-      return;
-    }
     var reader = new FileReader();
     reader.onload = function(e) {
-      try {
-        pfDoSave(id, date, total, complete, incomplete, pct, notes, e.target.result, pdfFile.name);
-      } catch(err) {
-        // localStorage فاض — نحفظ بدون PDF
-        pfDoSave(id, date, total, complete, incomplete, pct, notes, null, pdfFile.name + ' (لم يُخزَّن)');
-        toast('✅ حُفظت البيانات — مساحة التخزين غير كافية للملف', 'info');
-      }
+      pfDoSave(id, date, total, complete, incomplete, pct, notes, e.target.result, pdfFile.name);
     };
     reader.onerror = function() {
-      pfDoSave(id, date, total, complete, incomplete, pct, notes, null, '');
-      toast('⚠️ فشلت قراءة الملف — حُفظت البيانات بدونه', 'info');
+      pfDoSave(id, date, total, complete, incomplete, pct, notes, null, pdfFile.name);
     };
     reader.readAsDataURL(pdfFile);
   } else {
@@ -2500,23 +2505,19 @@ function pfDoSave(id, date, total, complete, incomplete, pct, notes, pdfData, pd
     pct:        pct,
     notes:      notes,
     pdfData:    pdfData,
-    pdfName:    pdfName,
+    pdfName:    pdfName || '',
     savedAt:    new Date().toISOString()
   };
   records.unshift(obj);
-  try {
-    pfSet(records);
-  } catch(e) {
-    // localStorage امتلأ — نحفظ بدون pdfData
-    obj.pdfData = null;
-    obj.pdfName = (pdfName||'') + ' (لم يُخزَّن)';
-    records[0] = obj;
-    pfSet(records);
-    toast('✅ حُفظت البيانات — لم يتم تخزين PDF بسبب امتلاء المساحة', 'info');
+  var saved = pfSet(records);
+  if (saved === false && pdfData) {
+    // لم يُحفظ الـ PDF — لكن البيانات حُفظت
+    toast('✅ حُفظت البيانات — الملف كبير جداً لم يُخزَّن محلياً', 'info');
+  } else {
+    toast('✅ تم حفظ التقرير' + (pdfName ? ' — ' + pdfName : ''), 'success');
   }
   pfReset();
   pfRender();
-  toast('✅ تم حفظ التقرير' + (pdfName ? ' — ' + pdfName : ''), 'success');
 }
 
 // إعادة تعيين حقول الإدخال

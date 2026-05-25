@@ -492,7 +492,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
     <div class="sec-title">التقدم حسب القسم</div>
     <div class="sec-line"></div>
     <button class="btn btn-ghost" onclick="fetchPolicies()">🔄 مزامنة</button>
-    <button class="btn btn-primary" onclick="syncFromTracker()" title="سحب من شيت Tracker إلى CBAHI">📥 سحب من Tracker</button>
+    <button class="btn btn-primary" onclick="promptSyncFromSheet()" title="سحب من شيت السياسات">📥 سحب من الشيت</button>
     <button class="btn btn-gold" onclick="exportPoliciesCSV()">📥 CSV</button>
   </div>
   <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:20px" id="pol2-sections"></div>
@@ -1193,6 +1193,30 @@ tr:hover td{background:rgba(0,194,255,.03)}
   </div>
 </div>
 
+<!-- Sheet Picker Modal -->
+<div class="overlay" id="m-sheet-picker">
+  <div class="modal" style="max-width:460px">
+    <h3>📥 سحب السياسات من Google Sheets</h3>
+    <div class="info-bar" style="margin-bottom:14px">
+      💡 أدخل الاسم <strong>الدقيق</strong> للشيت كما يظهر في جوجل شيتس (مثال: <strong>سياسات</strong>)
+    </div>
+    <div class="fg">
+      <label>اسم الشيت في Google Sheets</label>
+      <input type="text" id="sheet-picker-name" placeholder="سياسات"
+        style="font-size:14px;font-weight:700"
+        onkeydown="if(event.key==='Enter') confirmSyncFromSheet()">
+    </div>
+    <div style="font-size:11px;color:var(--text3);margin-bottom:14px;line-height:1.7">
+      الأعمدة المتوقعة في الشيت:<br>
+      <code style="color:var(--accent);font-size:10px">id · title · section · contentReady · pct · sig_quality · sig_medical · sig_branch · sig_nursing · sig_hr · sig_safety · sig_ceo · notes</code>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-danger" onclick="closeModal('m-sheet-picker')">إلغاء</button>
+      <button class="btn btn-primary" onclick="confirmSyncFromSheet()">📥 سحب الآن</button>
+    </div>
+  </div>
+</div>
+
 <!-- TOAST CONTAINER -->
 <div class="toast-wrap" id="toasts"></div>
 
@@ -1421,13 +1445,55 @@ async function fetchPolicies() {
   }
 }
 
-async function syncFromTracker() {
-  toast('⏳ مزامنة...', 'info', 3000); setSyncStatus('load');
+// ── اسم الشيت المحفوظ (آخر استخدام) ────────────────────────────
+const POL_SHEET_KEY = 'cbahi_pol_sheet';
+
+function promptSyncFromSheet() {
+  const saved = localStorage.getItem(POL_SHEET_KEY) || 'سياسات';
+  const inp = document.getElementById('sheet-picker-name');
+  if (inp) inp.value = saved;
+  openModal('m-sheet-picker');
+}
+
+async function confirmSyncFromSheet() {
+  const inp = document.getElementById('sheet-picker-name');
+  const sheetName = (inp ? inp.value : '').trim() || 'سياسات';
+  localStorage.setItem(POL_SHEET_KEY, sheetName);
+  closeModal('m-sheet-picker');
+  await syncFromTracker(sheetName);
+}
+
+async function syncFromTracker(sheetName) {
+  sheetName = sheetName || localStorage.getItem(POL_SHEET_KEY) || 'سياسات';
+  toast('⏳ جاري السحب من شيت "' + sheetName + '"...', 'info', 4000);
+  setSyncStatus('load');
   try {
-    const res = await gasGet('syncFromTracker');
-    if (res && res.success) { toast('✅ ' + res.count + ' سياسة', 'success'); await syncAll(); }
-    else { toast('❌ ' + ((res&&res.error)||'فشل'), 'error'); setSyncStatus('err'); }
-  } catch(e) { toast('❌ ' + e.message, 'error'); setSyncStatus('err'); }
+    const res = await gasGet('syncFromSheet', { sheetName: sheetName });
+    if (res && res.success) {
+      if (Array.isArray(res.data) && res.data.length) {
+        POLICIES = res.data;
+        localStorage.setItem('cbahi_policies_v1', JSON.stringify(POLICIES));
+        renderPoliciesTab();
+        toast('✅ تم سحب ' + res.data.length + ' سياسة من "' + sheetName + '"', 'success');
+      } else {
+        toast('⚠️ الشيت موجود لكن لا توجد بيانات', 'info');
+      }
+      setSyncStatus('ok');
+    } else {
+      const errMsg = (res && res.error) || 'فشل السحب';
+      // رسالة واضحة إذا كان الشيت غير موجود
+      if (errMsg.includes('غير موجود') || errMsg.includes('not found')) {
+        toast('❌ شيت "' + sheetName + '" غير موجود — تأكد من الاسم', 'error');
+        setTimeout(() => openModal('m-sheet-picker'), 2000);
+      } else {
+        toast('❌ ' + errMsg, 'error');
+      }
+      setSyncStatus('err');
+    }
+  } catch(e) {
+    toast('❌ ' + e.message, 'error');
+    setSyncStatus('err');
+  }
 }
 
 async function syncToTracker() {

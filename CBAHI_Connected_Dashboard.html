@@ -567,70 +567,116 @@ tr:hover td{background:rgba(0,194,255,.03)}
 
 <!-- ═══ PATIENT FILES TRACKER ═══ -->
 <div class="pane" id="pane-patient-files">
-  
+
+  <!-- Header -->
+  <div style="background:linear-gradient(135deg,#0047AB,#0080FF,#10D97E);border-radius:14px;padding:22px 28px;margin-bottom:20px;color:white;position:relative;overflow:hidden">
+    <div style="position:absolute;left:-20px;top:-20px;width:120px;height:120px;background:rgba(255,255,255,.05);border-radius:50%"></div>
+    <div style="position:relative">
+      <h2 style="margin:0 0 4px;font-size:20px;font-weight:900">📂 ملفات المرضى</h2>
+      <p style="margin:0;opacity:.85;font-size:12px">ارفع تقرير التحليل اليومي وتتبّع نسبة اكتمال الملفات</p>
+    </div>
+  </div>
+
   <!-- Summary Cards -->
-  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px">
-    <div style="background:linear-gradient(135deg,#0080FF,#0D9488);border-radius:12px;padding:20px;color:white">
-      <div style="font-size:12px;opacity:.9;margin-bottom:6px">📊 إجمالي الملفات</div>
-      <div style="font-size:36px;font-weight:900;font-family:Cairo,sans-serif" id="pf-total">0</div>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px">
+    <div style="background:linear-gradient(135deg,#0047AB,#0080FF);border-radius:12px;padding:18px;color:white;text-align:center">
+      <div style="font-size:11px;opacity:.9;margin-bottom:4px">📊 إجمالي الملفات</div>
+      <div style="font-size:34px;font-weight:900;font-family:Cairo,sans-serif" id="pf-total">0</div>
     </div>
-    <div style="background:linear-gradient(135deg,#10D97E,#0D9488);border-radius:12px;padding:20px;color:white">
-      <div style="font-size:12px;opacity:.9;margin-bottom:6px">✅ المكتملة</div>
-      <div style="font-size:36px;font-weight:900;font-family:Cairo,sans-serif" id="pf-complete">0</div>
+    <div style="background:linear-gradient(135deg,#10D97E,#0D9488);border-radius:12px;padding:18px;color:white;text-align:center">
+      <div style="font-size:11px;opacity:.9;margin-bottom:4px">✅ المكتملة</div>
+      <div style="font-size:34px;font-weight:900;font-family:Cairo,sans-serif" id="pf-complete">0</div>
     </div>
-    <div style="background:linear-gradient(135deg,#F97316,#EF4444);border-radius:12px;padding:20px;color:white">
-      <div style="font-size:12px;opacity:.9;margin-bottom:6px">⚠️ الناقصة</div>
-      <div style="font-size:36px;font-weight:900;font-family:Cairo,sans-serif" id="pf-incomplete">0</div>
+    <div style="background:linear-gradient(135deg,#F97316,#EF4444);border-radius:12px;padding:18px;color:white;text-align:center">
+      <div style="font-size:11px;opacity:.9;margin-bottom:4px">⚠️ الناقصة</div>
+      <div style="font-size:34px;font-weight:900;font-family:Cairo,sans-serif" id="pf-incomplete">0</div>
     </div>
-  </div>
-
-  <!-- Period Selection + Actions -->
-  <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:20px">
-    <div style="display:grid;grid-template-columns:1fr 1fr auto auto;gap:12px;align-items:end">
-      <div class="fg" style="margin:0">
-        <label>📅 من تاريخ</label>
-        <input type="date" id="pf-from" style="width:100%">
-      </div>
-      <div class="fg" style="margin:0">
-        <label>📅 إلى تاريخ</label>
-        <input type="date" id="pf-to" style="width:100%">
-      </div>
-      <button class="btn btn-primary" onclick="updatePatientFileStats()" style="height:42px">🔄 تحديث</button>
-      <button class="btn btn-ghost" onclick="openPatientFileModal()" style="height:42px">📊 رفع تقرير</button>
+    <div style="background:var(--surface);border:1px solid rgba(0,194,255,.2);border-radius:12px;padding:18px;text-align:center">
+      <div style="font-size:11px;color:var(--text3);margin-bottom:4px">📈 نسبة الاكتمال</div>
+      <div style="font-size:34px;font-weight:900;font-family:Cairo,sans-serif;color:var(--accent)" id="pf-pct">0%</div>
     </div>
   </div>
 
-  <!-- Report Display Area -->
-  <div id="pf-report-area" style="background:var(--surface);border:2px dashed var(--border);border-radius:12px;padding:40px;text-align:center;color:var(--text3);margin-bottom:20px">
-    <div style="font-size:48px;margin-bottom:12px">📄</div>
-    <div style="font-size:14px;font-weight:600;margin-bottom:6px">لا يوجد تقرير محمّل</div>
-    <div style="font-size:12px">اضغط "📊 رفع تقرير" لإضافة ملف PDF</div>
+  <!-- Upload Box -->
+  <div style="background:var(--surface);border:2px dashed rgba(0,194,255,.3);border-radius:14px;padding:24px;margin-bottom:20px">
+    <div style="font-size:13px;font-weight:800;color:var(--text);margin-bottom:16px">📤 رفع تقرير تحليل جديد</div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-bottom:16px;align-items:end">
+      <div class="fg" style="margin:0">
+        <label>📅 تاريخ آخر تحليل *</label>
+        <input type="date" id="pf-new-date">
+      </div>
+      <div class="fg" style="margin:0">
+        <label>📊 إجمالي الملفات *</label>
+        <input type="number" id="pf-new-total" min="0" placeholder="0">
+      </div>
+      <div class="fg" style="margin:0">
+        <label>✅ المكتملة *</label>
+        <input type="number" id="pf-new-complete" min="0" placeholder="0" oninput="pfCalcIncomplete()">
+      </div>
+      <div class="fg" style="margin:0">
+        <label>⚠️ الناقصة</label>
+        <input type="number" id="pf-new-incomplete" min="0" placeholder="تحسب تلقائياً" style="background:rgba(255,255,255,.03)">
+      </div>
+    </div>
+
+    <!-- PDF Upload -->
+    <div style="margin-bottom:16px">
+      <label style="display:block;font-size:11px;font-weight:700;color:var(--text2);margin-bottom:6px">📎 ملف PDF التقرير (اختياري)</label>
+      <div style="position:relative;border:1px solid var(--border);border-radius:9px;overflow:hidden;height:44px">
+        <input type="file" id="pf-new-pdf" accept=".pdf,application/pdf" onchange="pfPreviewFile(this)"
+          style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;z-index:2">
+        <div id="pf-pdf-label" style="position:absolute;inset:0;padding:11px 14px;font-size:12px;color:var(--text3);display:flex;align-items:center;gap:8px;pointer-events:none;z-index:1">
+          <span style="font-size:18px">📄</span>
+          <span>اضغط لاختيار ملف PDF...</span>
+        </div>
+      </div>
+      <div id="pf-pdf-info" style="display:none;margin-top:6px;padding:8px 12px;background:rgba(16,217,126,.08);border:1px solid rgba(16,217,126,.2);border-radius:7px;font-size:11px;color:var(--green);align-items:center;gap:8px"></div>
+    </div>
+
+    <div class="fg" style="margin:0 0 16px">
+      <label>💬 ملاحظات</label>
+      <textarea id="pf-new-notes" rows="2" placeholder="أي ملاحظات على التقرير..."></textarea>
+    </div>
+
+    <button onclick="pfSaveReport()" style="width:100%;padding:12px;background:linear-gradient(135deg,#0080FF,#10D97E);border:none;border-radius:9px;color:white;font-family:Tajawal,sans-serif;font-size:14px;font-weight:800;cursor:pointer">
+      💾 حفظ التقرير
+    </button>
+  </div>
+
+  <!-- Latest Report Preview -->
+  <div id="pf-report-area" style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:20px;text-align:center;color:var(--text3)">
+    <div style="font-size:40px;margin-bottom:10px">📄</div>
+    <div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:5px">لا يوجد تقرير محلّق</div>
+    <div style="font-size:11px">ارفع تقريرك أعلاه لعرضه هنا</div>
   </div>
 
   <!-- History Table -->
-  <div class="sec-hdr">
-    <div class="sec-icon" style="background:rgba(0,128,255,.1)">📊</div>
-    <div class="sec-title">سجل التقارير</div>
-    <div class="sec-line"></div>
+  <div class="tcard">
+    <div class="tcard-hdr">
+      <div class="tcard-title">📋 سجل التقارير <span class="badge badge-blue" id="pf-count">0</span></div>
+      <button onclick="pfClearAll()" style="padding:5px 12px;background:rgba(255,71,87,.08);border:1px solid rgba(255,71,87,.2);color:var(--red);border-radius:6px;font-family:Tajawal,sans-serif;font-size:11px;cursor:pointer">🗑️ مسح الكل</button>
+    </div>
+    <div class="tscroll">
+      <table>
+        <thead>
+          <tr>
+            <th class="num">#</th>
+            <th>تاريخ التحليل</th>
+            <th style="text-align:center">الإجمالي</th>
+            <th style="text-align:center">المكتمل</th>
+            <th style="text-align:center">الناقص</th>
+            <th style="text-align:center">النسبة %</th>
+            <th style="text-align:center">الملف</th>
+            <th style="text-align:center">إجراءات</th>
+          </tr>
+        </thead>
+        <tbody id="pf-history-tbody">
+          <tr><td colspan="8" style="text-align:center;color:var(--text3);padding:40px">لا توجد تقارير بعد</td></tr>
+        </tbody>
+      </table>
+    </div>
   </div>
-
-  <table class="tbl">
-    <thead>
-      <tr>
-        <th class="num">#</th>
-        <th>الفترة</th>
-        <th>الإجمالي</th>
-        <th>المكتمل</th>
-        <th>الناقص</th>
-        <th>النسبة %</th>
-        <th>التقرير</th>
-        <th>إجراءات</th>
-      </tr>
-    </thead>
-    <tbody id="pf-history-tbody">
-      <tr><td colspan="8" style="text-align:center;color:var(--text3);padding:40px">لا توجد تقارير</td></tr>
-    </tbody>
-  </table>
 
 </div>
 
@@ -732,7 +778,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
   <!-- Weighted Pillars -->
   <div class="sec-hdr">
     <div class="sec-icon" style="background:rgba(0,194,255,.1)">⚖️</div>
-    <div class="sec-title">المحاور الموزونة (10 محاور = 100%)</div>
+    <div class="sec-title">المحاور الموزونة (8 محاور = 100%)</div>
     <div class="sec-line"></div>
   </div>
 
@@ -776,7 +822,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
       <button class="btn btn-primary" onclick="saveExtras()">💾 حفظ</button>
     </div>
   </div>
-</div>
+</div></div>
 
 
 
@@ -946,7 +992,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
       <button class="btn btn-primary" onclick="licSave()">💾 حفظ</button>
     </div>
   </div>
-</div>
+
 
 <!-- ═══ MODALS ═══ -->
 
@@ -2191,8 +2237,8 @@ function exportPoliciesCSV() {
 // WEIGHTED PROGRESS DASHBOARD
 // ════════════════════════════════════════════════════════════════
 const PILLARS = [
-  { key:'policy_writing',  label:'كتابة السياسات (106)',          weight:28, icon:'✍️', color:'#0080FF' },
-  { key:'policy_signing',  label:'توقيع السياسات',                weight:22, icon:'🖊️', color:'#7C3AED' },
+  { key:'policy_writing',  label:'كتابة السياسات (106)',          weight:30, icon:'✍️', color:'#0080FF' },
+  { key:'policy_signing',  label:'توقيع السياسات',                weight:20, icon:'🖊️', color:'#7C3AED' },
   { key:'staff_files',     label:'ملفات الموظفين',                weight:18, icon:'👥', color:'#F59E0B' },
   { key:'requirements',    label:'المتطلبات',                     weight:12, icon:'📋', color:'#10D97E' },
   { key:'lectures',        label:'المحاضرات + جسر',               weight:10, icon:'🎓', color:'#0D9488' },
@@ -2365,183 +2411,226 @@ setTimeout(renderProgressDashboard, 500);
 // ════════════════════════════════════════════════════════════════
 if (!DB.patientFiles) DB.patientFiles = [];
 
-function openPatientFileModal() {
-  document.getElementById('pf-edit-id').value = '';
-  document.getElementById('pf-modal-from').value = '';
-  document.getElementById('pf-modal-to').value = '';
-  document.getElementById('pf-modal-total').value = '';
-  document.getElementById('pf-modal-complete').value = '';
-  document.getElementById('pf-modal-incomplete').value = '';
-  document.getElementById('pf-modal-report').value = '';
-  document.getElementById('pf-modal-notes').value = '';
-  openModal('m-patient-file');
+
+// ════════════════════════════════════════════════════════
+// PATIENT FILES v2 — ملفات المرضى
+// ════════════════════════════════════════════════════════
+var PF_KEY = 'cbahi_pf_v2';
+
+function pfGet() { try { return JSON.parse(localStorage.getItem(PF_KEY)||'[]'); } catch(e){ return []; } }
+function pfSet(a) { try { localStorage.setItem(PF_KEY, JSON.stringify(a)); } catch(e){} }
+
+// حساب الناقص تلقائياً
+function pfCalcIncomplete() {
+  var total    = parseInt(document.getElementById('pf-new-total').value)    || 0;
+  var complete = parseInt(document.getElementById('pf-new-complete').value) || 0;
+  var inc = total - complete;
+  document.getElementById('pf-new-incomplete').value = inc >= 0 ? inc : 0;
 }
 
-async function savePatientFileReport() {
-  const id = document.getElementById('pf-edit-id').value;
-  const from = document.getElementById('pf-modal-from').value;
-  const to = document.getElementById('pf-modal-to').value;
-  const total = Number(document.getElementById('pf-modal-total').value) || 0;
-  const complete = Number(document.getElementById('pf-modal-complete').value) || 0;
-  const incomplete = Number(document.getElementById('pf-modal-incomplete').value) || 0;
-  const report = document.getElementById('pf-modal-report').value;
-  const notes = document.getElementById('pf-modal-notes').value;
-  
-  if (!from || !to || total === 0) {
-    toast('⚠️ املأ الحقول المطلوبة', 'error');
-    return;
+// معاينة اسم الملف
+function pfPreviewFile(inp) {
+  var label = document.getElementById('pf-pdf-label');
+  var info  = document.getElementById('pf-pdf-info');
+  if (inp.files && inp.files[0]) {
+    var f = inp.files[0];
+    var mb = (f.size/1048576).toFixed(2);
+    if (label) label.innerHTML = '<span style="font-size:18px">📄</span><span style="color:var(--green);font-weight:700">'+f.name+'</span>';
+    if (info)  { info.style.display='flex'; info.innerHTML='✅ '+f.name+' <span style="color:var(--text3);margin-right:8px">('+mb+' MB)</span>'; }
+  } else {
+    if (label) label.innerHTML = '<span style="font-size:18px">📄</span><span>اضغط لاختيار ملف PDF...</span>';
+    if (info)  info.style.display='none';
   }
-  
-  const pct = Math.round(complete / total * 100);
-  
-  const obj = {
-    id: id || String(Date.now()),
-    from, to, total, complete, incomplete, pct, report, notes,
-    createdAt: id ? undefined : new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+}
+
+// حفظ التقرير
+function pfSaveReport() {
+  var date       = document.getElementById('pf-new-date').value;
+  var total      = parseInt(document.getElementById('pf-new-total').value)       || 0;
+  var complete   = parseInt(document.getElementById('pf-new-complete').value)    || 0;
+  var incomplete = parseInt(document.getElementById('pf-new-incomplete').value)  || 0;
+  var notes      = document.getElementById('pf-new-notes').value;
+  var pdfInput   = document.getElementById('pf-new-pdf');
+  var pdfFile    = pdfInput && pdfInput.files && pdfInput.files[0] ? pdfInput.files[0] : null;
+
+  if (!date)  { toast('⚠️ حدد تاريخ التحليل','error'); return; }
+  if (!total) { toast('⚠️ أدخل إجمالي الملفات','error'); return; }
+
+  var pct = Math.round(complete / total * 100);
+
+  // حفظ بدون PDF أولاً
+  var id = String(Date.now());
+
+  if (pdfFile) {
+    // تحقق من الحجم — إذا أكبر من 4MB نحفظ فقط اسم الملف
+    if (pdfFile.size > 4 * 1024 * 1024) {
+      // الملف كبير — نحفظ البيانات فقط ونُعلم المستخدم
+      pfDoSave(id, date, total, complete, incomplete, pct, notes, null, pdfFile.name + ' (كبير جداً للتخزين)');
+      toast('✅ حُفظت البيانات — الملف كبير جداً ('+( pdfFile.size/1048576).toFixed(1)+'MB) لا يمكن تخزينه محلياً', 'info');
+      return;
+    }
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        pfDoSave(id, date, total, complete, incomplete, pct, notes, e.target.result, pdfFile.name);
+      } catch(err) {
+        // localStorage فاض — نحفظ بدون PDF
+        pfDoSave(id, date, total, complete, incomplete, pct, notes, null, pdfFile.name + ' (لم يُخزَّن)');
+        toast('✅ حُفظت البيانات — مساحة التخزين غير كافية للملف', 'info');
+      }
+    };
+    reader.onerror = function() {
+      pfDoSave(id, date, total, complete, incomplete, pct, notes, null, '');
+      toast('⚠️ فشلت قراءة الملف — حُفظت البيانات بدونه', 'info');
+    };
+    reader.readAsDataURL(pdfFile);
+  } else {
+    pfDoSave(id, date, total, complete, incomplete, pct, notes, null, '');
+  }
+}
+
+function pfDoSave(id, date, total, complete, incomplete, pct, notes, pdfData, pdfName) {
+  var records = pfGet();
+  var obj = {
+    id:         id || String(Date.now()),
+    date:       date,
+    total:      total,
+    complete:   complete,
+    incomplete: incomplete,
+    pct:        pct,
+    notes:      notes,
+    pdfData:    pdfData,
+    pdfName:    pdfName,
+    savedAt:    new Date().toISOString()
   };
-  
-  if (id) {
-    const idx = DB.patientFiles.findIndex(p => String(p.id) === id);
-    if (idx > -1) DB.patientFiles[idx] = {...DB.patientFiles[idx], ...obj};
-  } else {
-    DB.patientFiles.push(obj);
+  records.unshift(obj);
+  try {
+    pfSet(records);
+  } catch(e) {
+    // localStorage امتلأ — نحفظ بدون pdfData
+    obj.pdfData = null;
+    obj.pdfName = (pdfName||'') + ' (لم يُخزَّن)';
+    records[0] = obj;
+    pfSet(records);
+    toast('✅ حُفظت البيانات — لم يتم تخزين PDF بسبب امتلاء المساحة', 'info');
   }
-  
-  saveLocal('data', DB);
-  renderPatientFiles();
-  closeModal('m-patient-file');
-  
-  // Sync to backend
-  if (GAS_URL) {
-    try {
-      await callGAS({action: id ? 'update' : 'add', sheet: 'patientFiles', id: obj.id, data: obj});
-      toast('✅ حُفظ في Google Sheets', 'success');
-    } catch(e) {
-      toast('✅ حُفظ محلياً', 'info');
-    }
-  } else {
-    toast('✅ تم الحفظ', 'success');
-  }
+  pfReset();
+  pfRender();
+  toast('✅ تم حفظ التقرير' + (pdfName ? ' — ' + pdfName : ''), 'success');
 }
 
-function renderPatientFiles() {
-  const tbody = document.getElementById('pf-history-tbody');
-  if (!tbody) return;
-  
-  if (!DB.patientFiles || DB.patientFiles.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text3);padding:40px">لا توجد تقارير</td></tr>';
-    return;
-  }
-  
-  tbody.innerHTML = DB.patientFiles.map((p, i) => {
-    const pct = p.pct || 0;
-    const pctColor = pct >= 90 ? '#10D97E' : pct >= 70 ? '#F97316' : '#EF4444';
-    
-    return `<tr>
-      <td class="num">${i+1}</td>
-      <td style="font-size:12px;white-space:nowrap">${p.from} → ${p.to}</td>
-      <td style="text-align:center;font-weight:700">${p.total}</td>
-      <td style="text-align:center;color:#10D97E;font-weight:700">${p.complete}</td>
-      <td style="text-align:center;color:#EF4444;font-weight:700">${p.incomplete}</td>
-      <td style="text-align:center">
-        <span style="font-weight:700;color:${pctColor}">${pct}%</span>
-      </td>
-      <td style="text-align:center">
-        ${p.report 
-          ? `<a href="${p.report}" target="_blank" style="color:var(--accent);text-decoration:none;font-weight:600">📄 عرض</a>`
-          : '<span style="color:var(--text3);font-size:11px">–</span>'
-        }
-      </td>
-      <td>
-        <button class="btn-icon" onclick="editPatientFile('${p.id}')" title="تعديل">✏️</button>
-        <button class="btn-icon" onclick="deletePatientFile('${p.id}')" title="حذف">🗑️</button>
-      </td>
-    </tr>`;
-  }).join('');
-  
-  // Update summary if latest report exists
-  if (DB.patientFiles.length > 0) {
-    const latest = DB.patientFiles[DB.patientFiles.length - 1];
-    document.getElementById('pf-total').textContent = latest.total;
-    document.getElementById('pf-complete').textContent = latest.complete;
-    document.getElementById('pf-incomplete').textContent = latest.incomplete;
-    
-    // Update report area
-    const reportArea = document.getElementById('pf-report-area');
-    if (latest.report) {
-      reportArea.innerHTML = `
-        <div style="font-size:48px;margin-bottom:12px">✅</div>
-        <div style="font-size:14px;font-weight:600;margin-bottom:12px;color:var(--text)">تقرير الفترة: ${latest.from} → ${latest.to}</div>
-        <a href="${latest.report}" target="_blank" class="btn btn-primary" style="display:inline-flex;align-items:center;gap:8px;text-decoration:none">
-          📄 عرض التقرير المفصل
-        </a>
-        <div style="margin-top:12px;font-size:12px;color:var(--text3)">نسبة الإكتمال: ${latest.pct}%</div>
-      `;
-    }
-  }
-}
-
-function editPatientFile(id) {
-  const p = DB.patientFiles.find(x => String(x.id) === id);
-  if (!p) return;
-  
-  document.getElementById('pf-edit-id').value = p.id;
-  document.getElementById('pf-modal-from').value = p.from;
-  document.getElementById('pf-modal-to').value = p.to;
-  document.getElementById('pf-modal-total').value = p.total;
-  document.getElementById('pf-modal-complete').value = p.complete;
-  document.getElementById('pf-modal-incomplete').value = p.incomplete;
-  document.getElementById('pf-modal-report').value = p.report || '';
-  document.getElementById('pf-modal-notes').value = p.notes || '';
-  openModal('m-patient-file');
-}
-
-async function deletePatientFile(id) {
-  if (!confirm('هل تريد حذف هذا التقرير؟')) return;
-  DB.patientFiles = DB.patientFiles.filter(p => String(p.id) !== id);
-  saveLocal('data', DB);
-  renderPatientFiles();
-  
-  if (GAS_URL) {
-    try {
-      await callGAS({action: 'delete', sheet: 'patientFiles', id});
-    } catch(e) {}
-  }
-  toast('✅ تم الحذف', 'success');
-}
-
-function updatePatientFileStats() {
-  const from = document.getElementById('pf-from').value;
-  const to = document.getElementById('pf-to').value;
-  
-  if (!from || !to) {
-    toast('⚠️ اختر الفترة أولاً', 'info');
-    return;
-  }
-  
-  // Filter reports by date range
-  const filtered = DB.patientFiles.filter(p => {
-    return p.from >= from && p.to <= to;
+// إعادة تعيين حقول الإدخال
+function pfReset() {
+  ['pf-new-date','pf-new-total','pf-new-complete','pf-new-incomplete','pf-new-notes'].forEach(function(id){
+    var el = document.getElementById(id); if(el) el.value = '';
   });
-  
-  if (filtered.length === 0) {
-    toast('لا توجد تقارير في هذه الفترة', 'info');
+  var pdfInput = document.getElementById('pf-new-pdf');
+  if (pdfInput) pdfInput.value = '';
+  var label = document.getElementById('pf-pdf-label');
+  if (label) label.innerHTML = '<span style="font-size:18px">📄</span><span>اضغط لاختيار ملف PDF...</span>';
+  var info = document.getElementById('pf-pdf-info');
+  if (info) info.style.display = 'none';
+}
+
+// حذف سجل
+function pfDelete(id) {
+  if (!confirm('حذف هذا التقرير؟')) return;
+  pfSet(pfGet().filter(function(x){ return x.id !== id; }));
+  pfRender();
+  toast('🗑️ تم الحذف','info');
+}
+
+// مسح الكل
+function pfClearAll() {
+  if (!confirm('حذف جميع التقارير؟ لا يمكن التراجع.')) return;
+  pfSet([]);
+  pfRender();
+  toast('🗑️ تم مسح السجل','info');
+}
+
+// عرض الجدول والكروت
+function pfRender() {
+  var records = pfGet();
+  var tbody   = document.getElementById('pf-history-tbody');
+  var cntEl   = document.getElementById('pf-count');
+  if (cntEl) cntEl.textContent = records.length;
+
+  // كروت الملخص — آخر تقرير
+  if (records.length > 0) {
+    var latest = records[0];
+    var el = function(id,v){ var e=document.getElementById(id); if(e) e.textContent=v; };
+    el('pf-total',      latest.total);
+    el('pf-complete',   latest.complete);
+    el('pf-incomplete', latest.incomplete);
+    el('pf-pct',        latest.pct + '%');
+
+    // منطقة عرض آخر PDF
+    var ra = document.getElementById('pf-report-area');
+    if (ra) {
+      if (latest.pdfData) {
+        ra.innerHTML =
+          '<div style="margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">' +
+            '<div>' +
+              '<div style="font-size:13px;font-weight:800;color:var(--text)">📄 ' + (latest.pdfName||'التقرير') + '</div>' +
+              '<div style="font-size:11px;color:var(--text3);margin-top:2px">تاريخ التحليل: ' + latest.date + ' — اكتمال ' + latest.pct + '%</div>' +
+            '</div>' +
+            '<div style="display:flex;gap:8px">' +
+              '<a href="' + latest.pdfData + '" download="' + (latest.pdfName||'report.pdf') + '" class="btn btn-ghost" style="font-size:12px;text-decoration:none">📥 تحميل</a>' +
+              '<a href="' + latest.pdfData + '" target="_blank" class="btn btn-primary" style="font-size:12px;text-decoration:none">👁️ فتح</a>' +
+            '</div>' +
+          '</div>' +
+          '<iframe src="' + latest.pdfData + '" style="width:100%;height:520px;border:1px solid var(--border);border-radius:8px;background:#fff"></iframe>';
+      } else {
+        ra.innerHTML =
+          '<div style="text-align:center;padding:30px;color:var(--text3)">' +
+            '<div style="font-size:36px;margin-bottom:8px">📊</div>' +
+            '<div style="font-size:13px;font-weight:700;color:var(--text2);margin-bottom:4px">تاريخ التحليل: ' + latest.date + '</div>' +
+            '<div style="font-size:11px">لم يُرفق ملف PDF مع هذا التقرير</div>' +
+          '</div>';
+      }
+    }
+  } else {
+    var el2 = function(id,v){ var e=document.getElementById(id); if(e) e.textContent=v; };
+    el2('pf-total','0'); el2('pf-complete','0'); el2('pf-incomplete','0'); el2('pf-pct','0%');
+    var ra2 = document.getElementById('pf-report-area');
+    if (ra2) ra2.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text3)"><div style="font-size:40px;margin-bottom:10px">📄</div><div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:5px">لا يوجد تقرير محلّق</div><div style="font-size:11px">ارفع تقريرك أعلاه لعرضه هنا</div></div>';
+  }
+
+  if (!tbody) return;
+  if (!records.length) {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text3);padding:40px">لا توجد تقارير بعد</td></tr>';
     return;
   }
-  
-  const totals = filtered.reduce((acc, p) => ({
-    total: acc.total + p.total,
-    complete: acc.complete + p.complete,
-    incomplete: acc.incomplete + p.incomplete
-  }), {total: 0, complete: 0, incomplete: 0});
-  
-  document.getElementById('pf-total').textContent = totals.total;
-  document.getElementById('pf-complete').textContent = totals.complete;
-  document.getElementById('pf-incomplete').textContent = totals.incomplete;
-  
-  toast('✅ تم التحديث', 'success');
+
+  tbody.innerHTML = records.map(function(p, i) {
+    var pct = p.pct || 0;
+    var pctColor = pct >= 90 ? '#10D97E' : pct >= 70 ? '#F97316' : '#EF4444';
+    var fileBtn = p.pdfData
+      ? '<a href="'+p.pdfData+'" target="_blank" style="color:var(--accent);text-decoration:none;font-weight:700;font-size:11px">👁️ عرض</a>'
+        + ' <a href="'+p.pdfData+'" download="'+(p.pdfName||'report.pdf')+'" style="color:var(--green);text-decoration:none;font-weight:700;font-size:11px;margin-right:6px">📥</a>'
+      : '<span style="color:var(--text3);font-size:10px">—</span>';
+    return '<tr>'+
+      '<td class="num" style="font-size:10px;color:var(--text3)">'+(i+1)+'</td>'+
+      '<td style="font-size:12px;font-weight:700">'+p.date+'</td>'+
+      '<td style="text-align:center;font-weight:700">'+p.total+'</td>'+
+      '<td style="text-align:center;color:#10D97E;font-weight:700">'+p.complete+'</td>'+
+      '<td style="text-align:center;color:#EF4444;font-weight:700">'+p.incomplete+'</td>'+
+      '<td style="text-align:center"><span style="font-weight:700;color:'+pctColor+'">'+pct+'%</span></td>'+
+      '<td style="text-align:center">'+fileBtn+'</td>'+
+      '<td style="text-align:center">'+
+        '<button onclick="pfDelete(\''+p.id+'\')" style="padding:3px 8px;background:rgba(255,71,87,.08);border:1px solid rgba(255,71,87,.2);color:var(--red);border-radius:5px;font-size:10px;cursor:pointer">🗑️</button>'+
+      '</td>'+
+    '</tr>';
+  }).join('');
 }
+
+// stub للتوافق مع الكود القديم
+function openPatientFileModal()     { toast('استخدم نموذج الرفع أعلاه مباشرة','info'); }
+function updatePatientFileStats()   { pfRender(); }
+function renderPatientFiles()       { pfRender(); }
+
+setTimeout(pfRender, 500);
+
 
 // Update renderAll to include patient files
 const _origRenderAll2 = renderAll;
@@ -2797,19 +2886,22 @@ function licExpiry(dateStr) {
 
 // ── Modal ─────────────────────────────────────────────
 function licOpenModal(id) {
-  var items = licGet();
-  var it = id ? items.find(function(x){ return x.id===id; }) : null;
-  document.getElementById('lic2-edit-id').value    = id||'';
-  document.getElementById('lic2-modal-ttl').textContent = id ? '✏️ تعديل البند' : '📋 إضافة بند جديد';
-  document.getElementById('lic2-m-type').value    = it ? it.type    : 'رخصة';
-  document.getElementById('lic2-m-status').value  = it ? it.status  : 'لم يتم';
-  document.getElementById('lic2-m-name').value    = it ? it.name    : '';
-  document.getElementById('lic2-m-purpose').value = it ? it.purpose : '';
-  document.getElementById('lic2-m-start').value   = it ? it.start   : '';
-  document.getElementById('lic2-m-expiry').value  = it ? it.expiry  : '';
-  document.getElementById('lic2-m-link').value    = it ? it.link    : '';
-  document.getElementById('lic2-m-notes').value   = it ? it.notes   : '';
-  openModal('m-lic2');
+  try {
+    var items = licGet();
+    var it = id ? items.find(function(x){ return x.id===id; }) : null;
+    var g = function(elId){ return document.getElementById(elId); };
+    if(g('lic2-edit-id'))    g('lic2-edit-id').value           = id||'';
+    if(g('lic2-modal-ttl'))  g('lic2-modal-ttl').textContent   = id ? '✏️ تعديل البند' : '📋 إضافة بند جديد';
+    if(g('lic2-m-type'))     g('lic2-m-type').value            = (it&&it.type)    || 'رخصة';
+    if(g('lic2-m-status'))   g('lic2-m-status').value          = (it&&it.status)  || 'لم يتم';
+    if(g('lic2-m-name'))     g('lic2-m-name').value            = (it&&it.name)    || '';
+    if(g('lic2-m-purpose'))  g('lic2-m-purpose').value         = (it&&it.purpose) || '';
+    if(g('lic2-m-start'))    g('lic2-m-start').value           = (it&&it.start)   || '';
+    if(g('lic2-m-expiry'))   g('lic2-m-expiry').value          = (it&&it.expiry)  || '';
+    if(g('lic2-m-link'))     g('lic2-m-link').value            = (it&&it.link)    || '';
+    if(g('lic2-m-notes'))    g('lic2-m-notes').value           = (it&&it.notes)   || '';
+    openModal('m-lic2');
+  } catch(e) { console.error('licOpenModal error:', e); toast('⚠️ خطأ في فتح النموذج','error'); }
 }
 
 function licSave() {
@@ -2982,8 +3074,14 @@ function renderLicenses(){ licRender(); licKPIs(); }
         <input type="number" id="pf-modal-incomplete" min="0" required></div>
     </div>
 
-    <div class="fg"><label>📄 رابط التقرير (PDF أو Google Drive)</label>
-      <input type="url" id="pf-modal-report" placeholder="https://drive.google.com/file/d/... أو رابط آخر"></div>
+    <div class="fg"><label>📎 رفع ملف PDF</label>
+      <input type="file" id="pf-modal-pdf" accept=".pdf,application/pdf"
+        style="padding:8px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);width:100%;font-family:Tajawal,sans-serif;font-size:12px;cursor:pointer">
+      <div id="pf-pdf-preview" style="display:none;margin-top:6px;padding:8px 12px;background:rgba(16,217,126,.08);border:1px solid rgba(16,217,126,.2);border-radius:7px;font-size:11px;color:var(--green);display:flex;align-items:center;gap:6px"></div>
+    </div>
+
+    <div class="fg"><label>🔗 أو أدخل رابط Drive / PDF</label>
+      <input type="url" id="pf-modal-report" placeholder="https://drive.google.com/file/d/..."></div>
     
     <div class="fg"><label>💬 ملاحظات</label>
       <textarea id="pf-modal-notes" rows="2" placeholder="أي ملاحظات إضافية"></textarea></div>

@@ -1000,7 +1000,6 @@ tr:hover td{background:rgba(0,194,255,.03)}
   </div>
 </div><!-- /overlay#m-lic2 -->
 
-
 <!-- ═══ MODALS ═══ -->
 
 <!-- Settings -->
@@ -1198,17 +1197,13 @@ tr:hover td{background:rgba(0,194,255,.03)}
   <div class="modal" style="max-width:460px">
     <h3>📥 سحب السياسات من Google Sheets</h3>
     <div class="info-bar" style="margin-bottom:14px">
-      💡 أدخل الاسم <strong>الدقيق</strong> للشيت كما يظهر في جوجل شيتس (مثال: <strong>سياسات</strong>)
+      💡 أدخل الاسم <strong>الدقيق</strong> للشيت كما يظهر في جوجل شيتس
     </div>
     <div class="fg">
       <label>اسم الشيت في Google Sheets</label>
-      <input type="text" id="sheet-picker-name" placeholder="سياسات"
+      <input type="text" id="sheet-picker-name" placeholder="السياسات"
         style="font-size:14px;font-weight:700"
         onkeydown="if(event.key==='Enter') confirmSyncFromSheet()">
-    </div>
-    <div style="font-size:11px;color:var(--text3);margin-bottom:14px;line-height:1.7">
-      الأعمدة المتوقعة في الشيت:<br>
-      <code style="color:var(--accent);font-size:10px">id · title · section · contentReady · pct · sig_quality · sig_medical · sig_branch · sig_nursing · sig_hr · sig_safety · sig_ceo · notes</code>
     </div>
     <div class="modal-footer">
       <button class="btn btn-danger" onclick="closeModal('m-sheet-picker')">إلغاء</button>
@@ -1445,30 +1440,29 @@ async function fetchPolicies() {
   }
 }
 
-// ── اسم الشيت المحفوظ (آخر استخدام) ────────────────────────────
 const POL_SHEET_KEY = 'cbahi_pol_sheet';
 
 function promptSyncFromSheet() {
-  const saved = localStorage.getItem(POL_SHEET_KEY) || 'سياسات';
-  const inp = document.getElementById('sheet-picker-name');
+  var saved = localStorage.getItem(POL_SHEET_KEY) || 'السياسات';
+  var inp = document.getElementById('sheet-picker-name');
   if (inp) inp.value = saved;
   openModal('m-sheet-picker');
 }
 
 async function confirmSyncFromSheet() {
-  const inp = document.getElementById('sheet-picker-name');
-  const sheetName = (inp ? inp.value : '').trim() || 'سياسات';
+  var inp = document.getElementById('sheet-picker-name');
+  var sheetName = (inp ? inp.value : '').trim() || 'السياسات';
   localStorage.setItem(POL_SHEET_KEY, sheetName);
   closeModal('m-sheet-picker');
   await syncFromTracker(sheetName);
 }
 
 async function syncFromTracker(sheetName) {
-  sheetName = sheetName || localStorage.getItem(POL_SHEET_KEY) || 'سياسات';
-  toast('⏳ جاري السحب من شيت "' + sheetName + '"...', 'info', 4000);
+  sheetName = sheetName || localStorage.getItem(POL_SHEET_KEY) || 'السياسات';
+  toast('⏳ جاري السحب من "' + sheetName + '"...', 'info', 4000);
   setSyncStatus('load');
   try {
-    const res = await gasGet('syncFromSheet', { sheetName: sheetName });
+    var res = await gasGet('syncFromSheet', { sheetName: sheetName });
     if (res && res.success) {
       if (Array.isArray(res.data) && res.data.length) {
         POLICIES = res.data;
@@ -1480,11 +1474,10 @@ async function syncFromTracker(sheetName) {
       }
       setSyncStatus('ok');
     } else {
-      const errMsg = (res && res.error) || 'فشل السحب';
-      // رسالة واضحة إذا كان الشيت غير موجود
+      var errMsg = (res && res.error) || 'فشل السحب';
       if (errMsg.includes('غير موجود') || errMsg.includes('not found')) {
         toast('❌ شيت "' + sheetName + '" غير موجود — تأكد من الاسم', 'error');
-        setTimeout(() => openModal('m-sheet-picker'), 2000);
+        setTimeout(function(){ openModal('m-sheet-picker'); }, 2000);
       } else {
         toast('❌ ' + errMsg, 'error');
       }
@@ -1709,11 +1702,10 @@ function renderLoc() {
 }
 
 // ─── Lectures ─────────────────────────────────────────────────
-// ─── تنسيق التاريخ — يحول ISO أو أي صيغة إلى YYYY-MM-DD + HH:MM ───
+// ─── تنسيق التاريخ من ISO إلى DD/MM/YYYY ────────────────────────
 function parseLecDate(raw) {
   if (!raw) return { date: '', time: '', display: '–' };
   var s = String(raw).trim();
-  // ISO كامل مثل 2026-02-16T21:00:00.000Z
   if (s.includes('T')) {
     var dt = new Date(s);
     if (!isNaN(dt)) {
@@ -1728,7 +1720,6 @@ function parseLecDate(raw) {
       return { date: dateStr, time: (timeStr!=='00:00'?timeStr:''), display: display };
     }
   }
-  // تاريخ نظيف YYYY-MM-DD
   if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
     var p = s.split('-');
     return { date: s, time: '', display: p[2]+'/'+p[1]+'/'+p[0] };
@@ -1740,21 +1731,15 @@ function renderLec() {
   const done = DB.lectures.filter(l=>l.done==='نعم').length;
   document.getElementById('lec-cnt').textContent = DB.lectures.length;
   document.getElementById('lec-done-cnt').textContent = done + ' منجزة';
-  document.getElementById('lec-tbody').innerHTML = DB.lectures.map((l,i)=>{
-    var pd = parseLecDate(l.date);
-    var timeDisplay = l.time || pd.time;
-    return `<tr><td class="num">${i+1}</td>
+  document.getElementById('lec-tbody').innerHTML = DB.lectures.map((l,i)=>`
+    <tr><td class="num">${i+1}</td>
     <td class="td-main">${l.title||''}</td>
     <td style="font-size:11px;color:var(--accent)">${l.speaker||''}</td>
     <td style="font-size:11px;color:var(--text3)">${l.alt||'–'}</td>
-    <td style="font-size:11px;white-space:nowrap">
-      <div style="font-weight:700;color:var(--text)">${pd.display}</div>
-      ${timeDisplay ? `<div style="font-size:10px;color:var(--text3);margin-top:2px">🕐 ${timeDisplay}</div>` : ''}
-    </td>
+    <td style="font-size:11px;white-space:nowrap">${(function(){var pd=parseLecDate(l.date);var t=l.time||pd.time;return '<div style=\"font-weight:700;color:var(--text)\">'+pd.display+'</div>'+(t?'<div style=\"font-size:10px;color:var(--text3)\">🕐 '+t+'</div>':'');})()}</td>
     <td><span class="badge badge-purple" style="font-size:9px">${l.audience||l.aud||''}</span></td>
     <td>${l.done==='نعم'?pill('✅ تمت'):pill('⏳ لم تتم')}</td>
-    <td>${actionBtns('editLec','delLec',l.id)}</td></tr>`;
-  }).join('');
+    <td>${actionBtns('editLec','delLec',l.id)}</td></tr>`).join('');
 }
 
 // ─── Assignments ──────────────────────────────────────────────
@@ -1952,29 +1937,16 @@ function newPol() {
   openModal('m-pol');
 }
 
-function editLec(id){ 
-  const l=DB.lectures.find(x=>String(x.id)===String(id))||{}; 
-  var pd = parseLecDate(l.date);
-  document.getElementById('lec-eid').value=l.id||''; 
-  document.getElementById('lec-title').value=l.title||''; 
-  document.getElementById('lec-speaker').value=l.speaker||''; 
-  document.getElementById('lec-alt').value=l.alt||''; 
-  document.getElementById('lec-date').value=pd.date||''; 
-  document.getElementById('lec-time').value=l.time||pd.time||''; 
-  document.getElementById('lec-aud').value=l.audience||l.aud||'جميع الموظفين'; 
-  document.getElementById('lec-done').value=l.done||'لا'; 
-  openModal('m-lec'); 
-}
+function editLec(id){ const l=DB.lectures.find(x=>String(x.id)===String(id))||{}; document.getElementById('lec-eid').value=l.id||''; document.getElementById('lec-title').value=l.title||''; document.getElementById('lec-speaker').value=l.speaker||''; document.getElementById('lec-alt').value=l.alt||''; document.getElementById('lec-date').value=parseLecDate(l.date).date||''; document.getElementById('lec-time').value=l.time||''; document.getElementById('lec-aud').value=l.audience||l.aud||'جميع الموظفين'; document.getElementById('lec-done').value=l.done||'لا'; openModal('m-lec'); }
 async function delLec(id){ if(!confirm('حذف؟')) return; DB.lectures=DB.lectures.filter(l=>String(l.id)!==String(id)); renderAll(); await apiCall('delete','lectures',id); setTimeout(() => syncAll(), 1000); toast('🗑️ تم الحذف','info'); }
 async function saveLec(){ 
   const id=document.getElementById('lec-eid').value; 
-  const rawDate = document.getElementById('lec-date').value;
   const obj={
     id:id||String(Date.now()),
     title:document.getElementById('lec-title').value,
     speaker:document.getElementById('lec-speaker').value,
     alt:document.getElementById('lec-alt').value,
-    date: rawDate,   // يُخزَّن كـ YYYY-MM-DD نظيف
+    date:document.getElementById('lec-date').value,
     time:document.getElementById('lec-time').value,
     audience:document.getElementById('lec-aud').value,
     done:document.getElementById('lec-done').value

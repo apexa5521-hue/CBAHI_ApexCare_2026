@@ -557,6 +557,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
             <th style="background:rgba(249,115,22,.2);color:#F97316;text-align:center">مدير الموارد</th>
             <th style="background:rgba(239,68,68,.2);color:#EF4444;text-align:center">مهندس السلامة</th>
             <th style="background:rgba(13,31,60,.4);color:#93C5FD;text-align:center">الرئيس التنفيذي</th>
+            <th style="background:rgba(6,182,212,.15);color:#06B6D4;text-align:center">م. مكافحة العدوى</th>
             <th>ملاحظات</th>
           </tr>
         </thead>
@@ -1301,13 +1302,14 @@ const SECTIONS_META = {
   FMS:  { label:'FMS – السلامة والمنشآت',  color:'#EF4444', light:'#FEE2E2', count:36 },
 };
 const SIG_FIELDS = [
-  { key:'sig_quality', label:'مدير الجودة',      color:'#0D9488' },
-  { key:'sig_medical', label:'مدير طبي',          color:'#10B981' },
-  { key:'sig_branch',  label:'مدير الفرع',        color:'#7C3AED' },
-  { key:'sig_nursing', label:'رئيسة التمريض',     color:'#F59E0B' },
-  { key:'sig_hr',      label:'مدير الموارد',      color:'#F97316' },
-  { key:'sig_safety',  label:'مهندس السلامة',     color:'#EF4444' },
-  { key:'sig_ceo',     label:'الرئيس التنفيذي',   color:'#0D1F3C' },
+  { key:'sig_quality', label:'مدير الجودة',          color:'#0D9488' },
+  { key:'sig_medical', label:'مدير طبي',              color:'#10B981' },
+  { key:'sig_branch',  label:'مدير الفرع',            color:'#7C3AED' },
+  { key:'sig_nursing', label:'رئيسة التمريض',         color:'#F59E0B' },
+  { key:'sig_hr',      label:'مدير الموارد',          color:'#F97316' },
+  { key:'sig_safety',  label:'مهندس السلامة',         color:'#EF4444' },
+  { key:'sig_ceo',     label:'الرئيس التنفيذي',       color:'#93C5FD' },
+  { key:'sig_ipc',     label:'مسؤول مكافحة العدوى',  color:'#06B6D4' },
 ];
 
 
@@ -1560,7 +1562,7 @@ const signatories = [
   {title:'مدير الجودة',emoji:'🏆'},{title:'مدير طبي',emoji:'⚕️'},
   {title:'مدير الفرع',emoji:'🏢'},{title:'رئيسة التمريض',emoji:'💊'},
   {title:'مدير الموارد البشرية',emoji:'👥'},{title:'مهندس السلامة',emoji:'⚙️'},
-  {title:'الرئيس التنفيذي',emoji:'👔'}
+  {title:'الرئيس التنفيذي',emoji:'👔'},{title:'مسؤول مكافحة العدوى',emoji:'🦠'}
 ];
 
 // ═══════════════════════════════════════════════════════════════
@@ -2327,11 +2329,11 @@ function filterBySection(code) {
 function exportPoliciesCSV() {
   const hdrs = ['Index','Title','Section','Content','%',
     'مدير الجودة','مدير طبي','مدير الفرع','رئيسة التمريض',
-    'مدير الموارد','مهندس السلامة','الرئيس التنفيذي','Notes'];
+    'مدير الموارد','مهندس السلامة','الرئيس التنفيذي','م.مكافحة العدوى','Notes'];
   const rows = POLICIES.map(p => [
     p.indexNo,p.title,p.section,p.contentReady,p.pct,
     p.sig_quality,p.sig_medical,p.sig_branch,p.sig_nursing,
-    p.sig_hr,p.sig_safety,p.sig_ceo,p.notes||''
+    p.sig_hr,p.sig_safety,p.sig_ceo,p.sig_ipc||'⬜',p.notes||''
   ]);
   const csv = [hdrs,...rows].map(r=>r.map(c=>`"${c||''}"`).join(',')).join('\n');
   const a = document.createElement('a');

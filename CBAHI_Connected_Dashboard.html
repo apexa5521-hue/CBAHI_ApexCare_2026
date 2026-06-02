@@ -2296,7 +2296,7 @@ async function cycleStatus(id, el) {
   el.textContent = next;
   renderPolStats();
   localStorage.setItem('cbahi_policies_v1', JSON.stringify(POLICIES));
-  await apiCall('updatePolicy','السياسات',id,{ contentReady:next, pct:p.pct });
+  await apiCall('updatePolicy','السياسات',id,{ id:id, contentReady:next, pct:p.pct });
 }
 
 async function toggleSig(id, field, el) {
@@ -2304,8 +2304,11 @@ async function toggleSig(id, field, el) {
   if (!p) return;
   p[field] = p[field]==='✅' ? '⬜' : '✅';
   el.textContent = p[field];
+  renderPolSignatories();
+  renderProgressDashboard();
   localStorage.setItem('cbahi_policies_v1', JSON.stringify(POLICIES));
-  await apiCall('updatePolicy','السياسات',id,{ [field]: p[field] });
+  // أرسل id داخل data حتى يجده upsertRow
+  await apiCall('updatePolicy','السياسات', id, { id: id, [field]: p[field] });
   toast(p[field]==='✅'?'✅ تم التوقيع':'⬜ تم الإلغاء', p[field]==='✅'?'success':'info', 2000);
 }
 
@@ -2316,7 +2319,7 @@ async function updatePct(id, val) {
   p.contentReady = p.pct>=100?'مكتملة':p.pct>0?'قيد الإعداد':'لم تبدأ';
   renderPoliciesTab();
   localStorage.setItem('cbahi_policies_v1', JSON.stringify(POLICIES));
-  await apiCall('updatePolicy','السياسات',id,{ pct:p.pct, contentReady:p.contentReady });
+  await apiCall('updatePolicy','السياسات',id,{ id:id, pct:p.pct, contentReady:p.contentReady });
 }
 
 function filterBySection(code) {

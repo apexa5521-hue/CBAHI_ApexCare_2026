@@ -558,6 +558,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
             <th style="background:rgba(239,68,68,.2);color:#EF4444;text-align:center">مهندس السلامة</th>
             <th style="background:rgba(13,31,60,.4);color:#93C5FD;text-align:center">الرئيس التنفيذي</th>
             <th style="background:rgba(6,182,212,.15);color:#06B6D4;text-align:center">م. مكافحة العدوى</th>
+            <th style="background:rgba(168,85,247,.15);color:#A855F7;text-align:center">مهندس طبي حيوي</th>
             <th>ملاحظات</th>
           </tr>
         </thead>
@@ -1310,6 +1311,7 @@ const SIG_FIELDS = [
   { key:'sig_safety',  label:'مهندس السلامة',         color:'#EF4444' },
   { key:'sig_ceo',     label:'الرئيس التنفيذي',       color:'#93C5FD' },
   { key:'sig_ipc',     label:'مسؤول مكافحة العدوى',  color:'#06B6D4' },
+  { key:'sig_biomed',  label:'مهندس طبي حيوي',         color:'#A855F7' },
 ];
 
 
@@ -2332,11 +2334,11 @@ function filterBySection(code) {
 function exportPoliciesCSV() {
   const hdrs = ['Index','Title','Section','Content','%',
     'مدير الجودة','مدير طبي','مدير الفرع','رئيسة التمريض',
-    'مدير الموارد','مهندس السلامة','الرئيس التنفيذي','م.مكافحة العدوى','Notes'];
+    'مدير الموارد','مهندس السلامة','الرئيس التنفيذي','م.مكافحة العدوى','مهندس طبي حيوي','Notes'];
   const rows = POLICIES.map(p => [
     p.indexNo,p.title,p.section,p.contentReady,p.pct,
     p.sig_quality,p.sig_medical,p.sig_branch,p.sig_nursing,
-    p.sig_hr,p.sig_safety,p.sig_ceo,p.sig_ipc||'⬜',p.notes||''
+    p.sig_hr,p.sig_safety,p.sig_ceo,p.sig_ipc||'⬜',p.sig_biomed||'⬜',p.notes||''
   ]);
   const csv = [hdrs,...rows].map(r=>r.map(c=>`"${c||''}"`).join(',')).join('\n');
   const a = document.createElement('a');

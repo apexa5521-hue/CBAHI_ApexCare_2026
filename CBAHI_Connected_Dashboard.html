@@ -1010,6 +1010,8 @@ tr:hover td{background:rgba(0,194,255,.03)}
     <h3>⚙️ إعدادات الاتصال بـ Google Sheets</h3>
     <div class="fg"><label>رابط Apps Script (Web App URL)</label>
       <input type="text" id="cfg-url" placeholder="https://script.google.com/macros/s/YOUR_ID/exec"></div>
+    <div class="fg"><label>رابط Apps Script — ملفات الموظفين (HR)</label>
+      <input type="text" id="cfg-emp-url" placeholder="https://script.google.com/macros/s/HR_SCRIPT_ID/exec"></div>
     <div class="fg"><label>اختبار الاتصال</label>
       <button class="btn btn-ghost" style="width:100%" onclick="testConnection()">🔌 اختبار الآن</button></div>
     <div class="modal-footer">
@@ -1321,6 +1323,7 @@ const SIG_FIELDS = [
 // ════════════════════════════════════════════════════════════════
 const CFG_KEY = 'cbahi_gas_url';
 let GAS_URL = localStorage.getItem(CFG_KEY) || '';
+var EMP_GAS_URL = localStorage.getItem('cbahi_emp_gas_url') || '';
 
 async function callGAS(params) {
   if (!GAS_URL) {
@@ -1505,11 +1508,18 @@ function showSettings() {
   openModal('m-settings');
   const el = document.getElementById('cfg-url');
   if (el) el.value = GAS_URL;
+  const el2 = document.getElementById('cfg-emp-url');
+  if (el2) el2.value = EMP_GAS_URL;
 }
 
 async function saveSettings() {
   GAS_URL = (document.getElementById('cfg-url').value || '').trim();
   localStorage.setItem(CFG_KEY, GAS_URL);
+  var empEl = document.getElementById('cfg-emp-url');
+  if (empEl && empEl.value.trim()) {
+    EMP_GAS_URL = empEl.value.trim();
+    localStorage.setItem('cbahi_emp_gas_url', EMP_GAS_URL);
+  }
   closeModal('m-settings');
   toast('✅ تم حفظ الرابط', 'success');
   if (GAS_URL) await syncAll();
@@ -2841,19 +2851,26 @@ async function fetchEmployeeFiles() {
   const btn = document.getElementById('emp-sync-btn');
   if (btn) { btn.textContent = '⟳ جاري الجلب...'; btn.disabled = true; }
   try {
-    if (!GAS_URL) { showSettings(); throw new Error('أدخل رابط Apps Script أولاً'); }
-    const result = await callGAS({ action: 'getEmployeeFiles' });
+    var empUrl = EMP_GAS_URL || GAS_URL;
+    if (!empUrl) { showSettings(); throw new Error('أدخل رابط Apps Script للموظفين أولاً'); }
+    // استدعاء GAS الخاص بالموظفين
+    const result = await (async function() {
+      var url = empUrl + '?action=getStaffFiles&t=' + Date.now();
+      var res = await fetch(url);
+      return await res.json();
+    })();
     if (!result || result.error) throw new Error(result ? result.error : 'لا استجابة');
     if (!result.success) throw new Error(result.error || 'فشل الجلب');
     const raw = result.data || [];
     EMP_DATA = raw.map(function(e, i) {
       return {
-        id:       i + 1,
+        id:       e.id || i + 1,
         name:     String(e.name || '').trim(),
         title:    String(e.jobTitle || e.title || '').trim(),
         dept:     String(e.department || e.dept || '').trim(),
         progress: parseFloat(e.progress) || 0,
-        status:   String(e.status || '').trim()
+        status:   String(e.status || '').trim(),
+        link:     String(e.lastUpdate || e.link || '').trim()
       };
     }).filter(function(e){ return e.name; });
     try { localStorage.setItem('cbahi_emp_v1', JSON.stringify(EMP_DATA)); } catch(x) {}

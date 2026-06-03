@@ -2683,6 +2683,77 @@ function pfReset() {
 }
 
 // حذف سجل
+function pfEdit(id) {
+  var r = pfGet().find(function(x){ return x.id === id; });
+  if (!r) return;
+  // عبّأ الحقول بالبيانات الموجودة
+  var _v = function(elId, val){ var el=document.getElementById(elId); if(el) el.value=val||''; };
+  _v('pf-new-from',     r.dateFrom || '');
+  _v('pf-new-to',       r.dateTo   || '');
+  _v('pf-new-date',     r.date     || '');
+  _v('pf-new-total',    r.total    || '');
+  _v('pf-new-complete', r.complete || '');
+  _v('pf-new-incomplete', r.incomplete || '');
+  _v('pf-new-notes',    r.notes    || '');
+  // احفظ الـ id للتعديل
+  window._pfEditId = id;
+  // غيّر زر الحفظ
+  var btn = document.querySelector('[onclick="pfSaveReport()"]');
+  if (btn) {
+    btn.textContent = '💾 تحديث التقرير';
+    btn.style.background = 'linear-gradient(135deg,#7C3AED,#0080FF)';
+    btn.onclick = function(){ pfUpdateReport(); };
+  }
+  // اسكرول للأعلى
+  var uploadBox = document.querySelector('#pane-patient-files .tcard');
+  var form = document.querySelector('#pane-patient-files [style*="dashed"]');
+  if (form) form.scrollIntoView({ behavior: 'smooth' });
+  toast('✏️ جاري التعديل — عدّل البيانات واضغط تحديث', 'info', 4000);
+}
+
+function pfUpdateReport() {
+  var id = window._pfEditId;
+  if (!id) { pfSaveReport(); return; }
+
+  var dateFrom   = document.getElementById('pf-new-from').value;
+  var dateTo     = document.getElementById('pf-new-to').value;
+  var date       = document.getElementById('pf-new-date').value;
+  var total      = parseInt(document.getElementById('pf-new-total').value) || 0;
+  var complete   = parseInt(document.getElementById('pf-new-complete').value) || 0;
+  var incomplete = parseInt(document.getElementById('pf-new-incomplete').value) || 0;
+  var notes      = document.getElementById('pf-new-notes').value;
+
+  if (!date)  { toast('⚠️ حدد تاريخ التحليل','error'); return; }
+  if (!total) { toast('⚠️ أدخل إجمالي الملفات','error'); return; }
+
+  var pct = Math.round(complete / total * 100);
+  var records = pfGet();
+  var idx = records.findIndex(function(x){ return x.id === id; });
+  if (idx === -1) { toast('⚠️ التقرير غير موجود','error'); return; }
+
+  // حدّث البيانات مع الاحتفاظ بالـ PDF القديم
+  records[idx] = Object.assign(records[idx], {
+    dateFrom: dateFrom, dateTo: dateTo, date: date,
+    total: total, complete: complete, incomplete: incomplete,
+    pct: pct, notes: notes,
+    updatedAt: new Date().toISOString()
+  });
+
+  pfSet(records);
+  pfReset();
+  // أعد زر الحفظ لحالته الأصلية
+  window._pfEditId = null;
+  var btn = document.querySelector('[onclick]');
+  var saveBtn = document.querySelector('#pane-patient-files button[style*="gradient"]');
+  if (saveBtn) {
+    saveBtn.textContent = '💾 حفظ التقرير';
+    saveBtn.style.background = 'linear-gradient(135deg,#0080FF,#10D97E)';
+    saveBtn.onclick = function(){ pfSaveReport(); };
+  }
+  pfRender();
+  toast('✅ تم تحديث التقرير', 'success');
+}
+
 function pfDelete(id) {
   if (!confirm('حذف هذا التقرير؟')) return;
   pfSet(pfGet().filter(function(x){ return x.id !== id; }));
@@ -2802,7 +2873,8 @@ function pfRender() {
       '<td style="text-align:center;color:#EF4444;font-weight:700">'+p.incomplete+'</td>'+
       '<td style="text-align:center"><span style="font-weight:700;color:'+pctColor+'">'+pct+'%</span></td>'+
       '<td style="text-align:center">'+fileBtn+'</td>'+
-      '<td style="text-align:center">'+
+      '<td style="text-align:center;display:flex;gap:4px;justify-content:center">'+
+        '<button onclick="pfEdit(\''+p.id+'\')" style="padding:3px 8px;background:rgba(0,194,255,.08);border:1px solid rgba(0,194,255,.2);color:var(--accent);border-radius:5px;font-size:10px;cursor:pointer">✏️</button>'+
         '<button onclick="pfDelete(\''+p.id+'\')" style="padding:3px 8px;background:rgba(255,71,87,.08);border:1px solid rgba(255,71,87,.2);color:var(--red);border-radius:5px;font-size:10px;cursor:pointer">🗑️</button>'+
       '</td>'+
     '</tr>';

@@ -1344,12 +1344,15 @@ async function callGAS(params) {
   }
   return new Promise(function(resolve, reject) {
     const cb  = 'GAS_' + Date.now() + '_' + (Math.random()*1e9|0);
+    // iOS أبطأ — 25 ثانية
+    const isMobile = /iPhone|iPad|Android/i.test(navigator.userAgent);
+    const timeoutMs = isMobile ? 25000 : 15000;
     const tid = setTimeout(function() {
       delete window[cb];
       const el = document.getElementById(cb);
       if (el) el.remove();
-      reject(new Error('انتهت مهلة الاتصال — تأكد: Who has access = Anyone'));
-    }, 15000);
+      reject(new Error('انتهت مهلة الاتصال — تأكد: Who has access = Anyone\nتلميح: على الجوال تأكد من الاتصال بالإنترنت وأن الرابط صحيح'));
+    }, timeoutMs);
     window[cb] = function(data) {
       clearTimeout(tid);
       delete window[cb];
@@ -1366,11 +1369,11 @@ async function callGAS(params) {
     const s = document.createElement('script');
     s.id = cb;
     s.src = GAS_URL + '?' + qs;
+    // iOS Safari يطلق onerror حتى مع redirect ناجح — نتجاهله ونعتمد على الـ timeout
     s.onerror = function() {
-      clearTimeout(tid);
-      delete window[cb];
-      s.remove();
-      reject(new Error('فشل تحميل الاستجابة — تحقق من رابط Apps Script'));
+      // لا نرفض فوراً — قد يكون redirect طبيعي في iOS
+      // الـ timeout سيتكفل بالرفض إن لم يصل callback
+      console.warn('script onerror (قد يكون redirect طبيعي على iOS)');
     };
     document.head.appendChild(s);
   });

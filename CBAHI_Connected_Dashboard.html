@@ -1609,10 +1609,21 @@ function renderOverview() {
   const finReqs = cnt(reqs,'financial','نعم');
   const totalCost = reqs.reduce((s,r)=>s+(Number(r.cost)||0),0);
 
-  const overall = st?.overallProgress ??
-    Math.round([ pct(obsDone,obs.length||1), pct(reqDone,reqs.length||1),
-                 pct(lecDone,lecs.length||1), pct(polSigned,pols.length||1) ]
-               .reduce((a,b)=>a+b,0)/4);
+  // نفس حساب لوحة الإنجاز بالأوزان
+  const overall = (function() {
+    try {
+      var total = 0;
+      PILLARS.forEach(function(p) {
+        total += calcPillarPct(p.key) * p.weight / 100;
+      });
+      return Math.round(total);
+    } catch(e) {
+      return st?.overallProgress ??
+        Math.round([ pct(obsDone,obs.length||1), pct(reqDone,reqs.length||1),
+                     pct(lecDone,lecs.length||1), pct(polSigned,pols.length||1) ]
+                   .reduce((a,b)=>a+b,0)/4);
+    }
+  })();
 
   document.getElementById('k-overall').textContent = overall + '%';
   document.getElementById('pf-overall').style.width = overall + '%';

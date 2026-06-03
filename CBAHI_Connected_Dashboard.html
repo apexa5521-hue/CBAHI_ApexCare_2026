@@ -1342,6 +1342,9 @@ async function callGAS(params) {
     showSettings();
     throw new Error('أدخل رابط Apps Script');
   }
+  // iOS: تأكد من تحميل الرابط من localStorage في كل مرة
+  var currentUrl = localStorage.getItem('cbahi_gas_url') || GAS_URL;
+  if (currentUrl !== GAS_URL) { GAS_URL = currentUrl; }
   return new Promise(function(resolve, reject) {
     const cb  = 'GAS_' + Date.now() + '_' + (Math.random()*1e9|0);
     // iOS أبطأ — 25 ثانية
@@ -1351,7 +1354,12 @@ async function callGAS(params) {
       delete window[cb];
       const el = document.getElementById(cb);
       if (el) el.remove();
-      reject(new Error('انتهت مهلة الاتصال — تأكد: Who has access = Anyone\nتلميح: على الجوال تأكد من الاتصال بالإنترنت وأن الرابط صحيح'));
+      // fallback: جرب fetch مباشر (للأجهزة التي تدعمه)
+      var fbUrl = (localStorage.getItem('cbahi_gas_url')||GAS_URL) + '?' + qs.replace('callback='+cb,'callback=');
+      fetch(fbUrl.replace(/callback=[^&]*/,''), { redirect: 'follow' })
+        .then(function(r){ return r.json(); })
+        .then(function(d){ if(d && !d.error) resolve(d); else reject(new Error('انتهت مهلة الاتصال')); })
+        .catch(function(){ reject(new Error('انتهت مهلة الاتصال — تأكد: Who has access = Anyone')); });
     }, timeoutMs);
     window[cb] = function(data) {
       clearTimeout(tid);
@@ -1368,7 +1376,7 @@ async function callGAS(params) {
     }).join('&');
     const s = document.createElement('script');
     s.id = cb;
-    s.src = GAS_URL + '?' + qs;
+    s.src = currentUrl + '?' + qs;
     // iOS Safari يطلق onerror حتى مع redirect ناجح — نتجاهله ونعتمد على الـ timeout
     s.onerror = function() {
       // لا نرفض فوراً — قد يكون redirect طبيعي في iOS

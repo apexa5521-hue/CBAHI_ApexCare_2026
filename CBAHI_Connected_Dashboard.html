@@ -609,9 +609,19 @@ tr:hover td{background:rgba(0,194,255,.03)}
   <div style="background:var(--surface);border:2px dashed rgba(0,194,255,.3);border-radius:14px;padding:24px;margin-bottom:20px">
     <div style="font-size:13px;font-weight:800;color:var(--text);margin-bottom:16px">📤 رفع تقرير تحليل جديد</div>
 
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;align-items:end">
+      <div class="fg" style="margin:0">
+        <label>📅 الفترة من *</label>
+        <input type="date" id="pf-new-from">
+      </div>
+      <div class="fg" style="margin:0">
+        <label>📅 الفترة إلى *</label>
+        <input type="date" id="pf-new-to">
+      </div>
+    </div>
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-bottom:16px;align-items:end">
       <div class="fg" style="margin:0">
-        <label>📅 تاريخ آخر تحليل *</label>
+        <label>📅 تاريخ التحليل *</label>
         <input type="date" id="pf-new-date">
       </div>
       <div class="fg" style="margin:0">
@@ -671,6 +681,8 @@ tr:hover td{background:rgba(0,194,255,.03)}
           <tr>
             <th class="num">#</th>
             <th>تاريخ التحليل</th>
+            <th style="text-align:center">الفترة من</th>
+            <th style="text-align:center">الفترة إلى</th>
             <th style="text-align:center">الإجمالي</th>
             <th style="text-align:center">المكتمل</th>
             <th style="text-align:center">الناقص</th>
@@ -680,7 +692,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
           </tr>
         </thead>
         <tbody id="pf-history-tbody">
-          <tr><td colspan="8" style="text-align:center;color:var(--text3);padding:40px">لا توجد تقارير بعد</td></tr>
+          <tr><td colspan="10" style="text-align:center;color:var(--text3);padding:40px">لا توجد تقارير بعد</td></tr>
         </tbody>
       </table>
     </div>
@@ -2584,6 +2596,8 @@ function pfPreviewFile(inp) {
 
 // حفظ التقرير
 function pfSaveReport() {
+  var dateFrom   = document.getElementById('pf-new-from').value;
+  var dateTo     = document.getElementById('pf-new-to').value;
   var date       = document.getElementById('pf-new-date').value;
   var total      = parseInt(document.getElementById('pf-new-total').value)       || 0;
   var complete   = parseInt(document.getElementById('pf-new-complete').value)    || 0;
@@ -2596,43 +2610,40 @@ function pfSaveReport() {
   if (!total) { toast('⚠️ أدخل إجمالي الملفات','error'); return; }
 
   var pct = Math.round(complete / total * 100);
-
-  // حفظ بدون PDF أولاً
   var id = String(Date.now());
 
   if (pdfFile) {
-    // تحقق من الحجم — إذا أكبر من 4MB نحفظ فقط اسم الملف
     if (pdfFile.size > 4 * 1024 * 1024) {
-      // الملف كبير — نحفظ البيانات فقط ونُعلم المستخدم
-      pfDoSave(id, date, total, complete, incomplete, pct, notes, null, pdfFile.name + ' (كبير جداً للتخزين)');
+      pfDoSave(id, date, dateFrom, dateTo, total, complete, incomplete, pct, notes, null, pdfFile.name + ' (كبير جداً للتخزين)');
       toast('✅ حُفظت البيانات — الملف كبير جداً ('+( pdfFile.size/1048576).toFixed(1)+'MB) لا يمكن تخزينه محلياً', 'info');
       return;
     }
     var reader = new FileReader();
     reader.onload = function(e) {
       try {
-        pfDoSave(id, date, total, complete, incomplete, pct, notes, e.target.result, pdfFile.name);
+        pfDoSave(id, date, dateFrom, dateTo, total, complete, incomplete, pct, notes, e.target.result, pdfFile.name);
       } catch(err) {
-        // localStorage فاض — نحفظ بدون PDF
-        pfDoSave(id, date, total, complete, incomplete, pct, notes, null, pdfFile.name + ' (لم يُخزَّن)');
+        pfDoSave(id, date, dateFrom, dateTo, total, complete, incomplete, pct, notes, null, pdfFile.name + ' (لم يُخزَّن)');
         toast('✅ حُفظت البيانات — مساحة التخزين غير كافية للملف', 'info');
       }
     };
     reader.onerror = function() {
-      pfDoSave(id, date, total, complete, incomplete, pct, notes, null, '');
+      pfDoSave(id, date, dateFrom, dateTo, total, complete, incomplete, pct, notes, null, '');
       toast('⚠️ فشلت قراءة الملف — حُفظت البيانات بدونه', 'info');
     };
     reader.readAsDataURL(pdfFile);
   } else {
-    pfDoSave(id, date, total, complete, incomplete, pct, notes, null, '');
+    pfDoSave(id, date, dateFrom, dateTo, total, complete, incomplete, pct, notes, null, '');
   }
 }
 
-function pfDoSave(id, date, total, complete, incomplete, pct, notes, pdfData, pdfName) {
+function pfDoSave(id, date, dateFrom, dateTo, total, complete, incomplete, pct, notes, pdfData, pdfName) {
   var records = pfGet();
   var obj = {
     id:         id || String(Date.now()),
     date:       date,
+    dateFrom:   dateFrom || '',
+    dateTo:     dateTo   || '',
     total:      total,
     complete:   complete,
     incomplete: incomplete,
@@ -2660,7 +2671,7 @@ function pfDoSave(id, date, total, complete, incomplete, pct, notes, pdfData, pd
 
 // إعادة تعيين حقول الإدخال
 function pfReset() {
-  ['pf-new-date','pf-new-total','pf-new-complete','pf-new-incomplete','pf-new-notes'].forEach(function(id){
+  ['pf-new-from','pf-new-to','pf-new-date','pf-new-total','pf-new-complete','pf-new-incomplete','pf-new-notes'].forEach(function(id){
     var el = document.getElementById(id); if(el) el.value = '';
   });
   var pdfInput = document.getElementById('pf-new-pdf');
@@ -2770,7 +2781,7 @@ function pfRender() {
 
   if (!tbody) return;
   if (!records.length) {
-    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text3);padding:40px">لا توجد تقارير بعد</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:var(--text3);padding:40px">لا توجد تقارير بعد</td></tr>';
     return;
   }
 
@@ -2784,6 +2795,8 @@ function pfRender() {
     return '<tr>'+
       '<td class="num" style="font-size:10px;color:var(--text3)">'+(i+1)+'</td>'+
       '<td style="font-size:12px;font-weight:700">'+p.date+'</td>'+
+      '<td style="text-align:center;font-size:11px;color:var(--text2)">'+(p.dateFrom||'—')+'</td>'+
+      '<td style="text-align:center;font-size:11px;color:var(--text2)">'+(p.dateTo||'—')+'</td>'+
       '<td style="text-align:center;font-weight:700">'+p.total+'</td>'+
       '<td style="text-align:center;color:#10D97E;font-weight:700">'+p.complete+'</td>'+
       '<td style="text-align:center;color:#EF4444;font-weight:700">'+p.incomplete+'</td>'+

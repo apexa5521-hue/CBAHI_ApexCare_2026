@@ -581,7 +581,10 @@ tr:hover td{background:rgba(0,194,255,.03)}
         <h2 style="margin:0 0 4px;font-size:20px;font-weight:900">📂 ملفات المرضى</h2>
         <p style="margin:0;opacity:.85;font-size:12px">ارفع تقرير التحليل اليومي وتتبّع نسبة اكتمال الملفات</p>
       </div>
-      <button onclick="openModal('m-patient-file')" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:#fff;padding:10px 22px;border-radius:9px;font-family:Tajawal,sans-serif;font-size:13px;font-weight:800;cursor:pointer">＋ إضافة تقرير</button>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button onclick="openModal('m-patient-file')" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:#fff;padding:10px 22px;border-radius:9px;font-family:Tajawal,sans-serif;font-size:13px;font-weight:800;cursor:pointer">＋ إضافة تقرير</button>
+        <button onclick="pfFetchFromSheets()" style="background:rgba(16,217,126,.2);border:1px solid rgba(16,217,126,.4);color:#10D97E;padding:10px 18px;border-radius:9px;font-family:Tajawal,sans-serif;font-size:13px;font-weight:800;cursor:pointer">🔄 مزامنة</button>
+      </div>
     </div>
   </div>
 
@@ -1285,6 +1288,10 @@ function switchTab(id) {
   if (btn) btn.classList.add('active');
   const pane = document.getElementById('pane-'+id);
   if (pane) pane.classList.add('active');
+  // جلب تلقائي عند فتح ملفات المرضى
+  if (id === 'patient-files' && GAS_URL) {
+    setTimeout(function(){ pfFetchFromSheets(); }, 500);
+  }
 }
 
 // Close modals on overlay click
@@ -2678,6 +2685,20 @@ function pfDoSave(id, date, dateFrom, dateTo, total, complete, incomplete, pct, 
   pfReset();
   pfRender();
   toast('✅ تم حفظ التقرير' + (pdfName ? ' — ' + pdfName : ''), 'success');
+  // مزامنة مع Sheets (بدون انتظار)
+  if (GAS_URL) {
+    var syncObj = {
+      id: obj.id, date: obj.date,
+      dateFrom: obj.dateFrom||'', dateTo: obj.dateTo||'',
+      total: obj.total, complete: obj.complete,
+      incomplete: obj.incomplete, pct: obj.pct,
+      notes: obj.notes||'', pdfName: obj.pdfName||'',
+      savedAt: obj.savedAt
+    };
+    gasMutate('upsert','patientFiles', obj.id, syncObj)
+      .then(function(){ toast('☁️ تم الحفظ في Sheets','success',2000); })
+      .catch(function(e){ console.warn('Sheets sync failed:', e); });
+  }
 }
 
 // إعادة تعيين حقول الإدخال
@@ -2751,6 +2772,20 @@ function pfUpdateReport() {
   });
 
   pfSet(records);
+  // مزامنة مع Sheets
+  if (GAS_URL) {
+    var r = records[idx];
+    var syncObj = {
+      id: r.id, date: r.date,
+      dateFrom: r.dateFrom||'', dateTo: r.dateTo||'',
+      total: r.total, complete: r.complete,
+      incomplete: r.incomplete, pct: r.pct,
+      notes: r.notes||'', pdfName: r.pdfName||'',
+      savedAt: r.savedAt, updatedAt: r.updatedAt||''
+    };
+    gasMutate('upsert','patientFiles', r.id, syncObj)
+      .catch(function(e){ console.warn('Sheets sync failed:', e); });
+  }
   pfReset();
   // أعد زر الحفظ لحالته الأصلية
   window._pfEditId = null;
@@ -2770,6 +2805,10 @@ function pfDelete(id) {
   pfSet(pfGet().filter(function(x){ return x.id !== id; }));
   pfRender();
   toast('🗑️ تم الحذف','info');
+  if (GAS_URL) {
+    gasMutate('delete','patientFiles', id, {})
+      .catch(function(e){ console.warn('Sheets delete failed:', e); });
+  }
 }
 
 // حفظ من Modal
@@ -2814,6 +2853,33 @@ function pfClearAll() {
 }
 
 // عرض الجدول والكروت
+async function pfFetchFromSheets() {
+  if (!GAS_URL) { toast('⚙️ أدخل رابط Apps Script أولاً','info'); showSettings(); return; }
+  toast('⏳ جاري المزامنة...','info',3000);
+  try {
+    var res = await gasGet('getPatientFiles');
+    if (res && res.success && Array.isArray(res.data) && res.data.length) {
+      // دمج: الـ Sheets هي المصدر الرئيسي، احتفظ بالـ pdfData المحلي
+      var local = pfGet();
+      var merged = res.data.map(function(r) {
+        var localRec = local.find(function(l){ return l.id === r.id; });
+        return Object.assign({ pdfData: null, pdfName: '' }, r, {
+          pdfData: localRec ? localRec.pdfData : null
+        });
+      });
+      // رتّب من الأحدث للأقدم
+      merged.sort(function(a,b){ return (b.savedAt||'').localeCompare(a.savedAt||''); });
+      pfSet(merged);
+      pfRender();
+      toast('✅ تم جلب ' + merged.length + ' تقرير من Sheets','success');
+    } else {
+      toast('لا توجد تقارير في Sheets بعد','info');
+    }
+  } catch(e) {
+    toast('❌ فشلت المزامنة: ' + e.message,'error');
+  }
+}
+
 function pfRender() {
   var records = pfGet();
   var tbody   = document.getElementById('pf-history-tbody');

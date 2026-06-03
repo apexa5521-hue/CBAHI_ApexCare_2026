@@ -2613,7 +2613,7 @@ function pfPreviewFile(inp) {
 }
 
 // حفظ التقرير
-function pfSaveReport() {
+async function pfSaveReport() {
   var dateFrom   = document.getElementById('pf-new-from').value;
   var dateTo     = document.getElementById('pf-new-to').value;
   var date       = document.getElementById('pf-new-date').value;
@@ -2628,34 +2628,50 @@ function pfSaveReport() {
   if (!total) { toast('⚠️ أدخل إجمالي الملفات','error'); return; }
 
   var pct = Math.round(complete / total * 100);
-  var id = String(Date.now());
+  var id  = String(Date.now());
 
-  if (pdfFile) {
-    if (pdfFile.size > 4 * 1024 * 1024) {
-      pfDoSave(id, date, dateFrom, dateTo, total, complete, incomplete, pct, notes, null, pdfFile.name + ' (كبير جداً للتخزين)');
-      toast('✅ حُفظت البيانات — الملف كبير جداً ('+( pdfFile.size/1048576).toFixed(1)+'MB) لا يمكن تخزينه محلياً', 'info');
-      return;
-    }
-    var reader = new FileReader();
-    reader.onload = function(e) {
-      try {
-        pfDoSave(id, date, dateFrom, dateTo, total, complete, incomplete, pct, notes, e.target.result, pdfFile.name);
-      } catch(err) {
-        pfDoSave(id, date, dateFrom, dateTo, total, complete, incomplete, pct, notes, null, pdfFile.name + ' (لم يُخزَّن)');
-        toast('✅ حُفظت البيانات — مساحة التخزين غير كافية للملف', 'info');
+  // ── إذا في PDF حاول رفعه لـ Drive ──────────────────────────
+  if (pdfFile && GAS_URL) {
+    toast('⏳ جاري رفع الملف لـ Drive...','info', 30000);
+    var saveBtn = document.querySelector('[onclick="pfSaveReport()"]');
+    if (saveBtn) saveBtn.disabled = true;
+
+    try {
+      var base64 = await new Promise(function(res, rej) {
+        var reader = new FileReader();
+        reader.onload  = function(e) { res(e.target.result.split(',')[1]); };
+        reader.onerror = function()  { rej(new Error('فشل قراءة الملف')); };
+        reader.readAsDataURL(pdfFile);
+      });
+
+      var uploadRes = await gasMutate('uploadPDF', '', id, {
+        fileName:  pdfFile.name,
+        base64Data: base64,
+        mimeType:  pdfFile.type || 'application/pdf'
+      });
+
+      if (saveBtn) saveBtn.disabled = false;
+
+      if (uploadRes && uploadRes.success) {
+        toast('✅ تم رفع الملف لـ Drive','success', 3000);
+        pfDoSave(id, date, dateFrom, dateTo, total, complete, incomplete, pct, notes,
+          uploadRes.viewUrl, pdfFile.name, uploadRes.fileId);
+      } else {
+        toast('⚠️ فشل رفع الملف — حُفظت البيانات بدونه','info');
+        pfDoSave(id, date, dateFrom, dateTo, total, complete, incomplete, pct, notes, null, pdfFile.name, '');
       }
-    };
-    reader.onerror = function() {
-      pfDoSave(id, date, dateFrom, dateTo, total, complete, incomplete, pct, notes, null, '');
-      toast('⚠️ فشلت قراءة الملف — حُفظت البيانات بدونه', 'info');
-    };
-    reader.readAsDataURL(pdfFile);
+    } catch(err) {
+      if (saveBtn) saveBtn.disabled = false;
+      toast('⚠️ ' + err.message + ' — حُفظت البيانات بدون الملف','info');
+      pfDoSave(id, date, dateFrom, dateTo, total, complete, incomplete, pct, notes, null, pdfFile.name || '', '');
+    }
   } else {
-    pfDoSave(id, date, dateFrom, dateTo, total, complete, incomplete, pct, notes, null, '');
+    // بدون PDF أو بدون اتصال
+    pfDoSave(id, date, dateFrom, dateTo, total, complete, incomplete, pct, notes, null, '', '');
   }
 }
 
-function pfDoSave(id, date, dateFrom, dateTo, total, complete, incomplete, pct, notes, pdfData, pdfName) {
+function pfDoSave(id, date, dateFrom, dateTo, total, complete, incomplete, pct, notes, driveUrl, pdfName, driveId) {
   var records = pfGet();
   var obj = {
     id:         id || String(Date.now()),
@@ -2667,8 +2683,9 @@ function pfDoSave(id, date, dateFrom, dateTo, total, complete, incomplete, pct, 
     incomplete: incomplete,
     pct:        pct,
     notes:      notes,
-    pdfData:    pdfData,
-    pdfName:    pdfName,
+    driveUrl:   driveUrl  || '',   // رابط Drive للعرض
+    driveId:    driveId   || '',   // ID الملف في Drive
+    pdfName:    pdfName   || '',
     savedAt:    new Date().toISOString()
   };
   records.unshift(obj);
@@ -2693,6 +2710,7 @@ function pfDoSave(id, date, dateFrom, dateTo, total, complete, incomplete, pct, 
       total: obj.total, complete: obj.complete,
       incomplete: obj.incomplete, pct: obj.pct,
       notes: obj.notes||'', pdfName: obj.pdfName||'',
+      driveUrl: obj.driveUrl||'', driveId: obj.driveId||'',
       savedAt: obj.savedAt
     };
     gasMutate('upsert','patientFiles', obj.id, syncObj)
@@ -2898,19 +2916,20 @@ function pfRender() {
     // منطقة عرض آخر PDF
     var ra = document.getElementById('pf-report-area');
     if (ra) {
-      if (latest.pdfData) {
+      var previewLink = latest.driveUrl || latest.pdfData || '';
+      if (previewLink) {
+        var embedSrc = latest.driveId
+          ? 'https://drive.google.com/file/d/' + latest.driveId + '/preview'
+          : previewLink;
         ra.innerHTML =
           '<div style="margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">' +
             '<div>' +
               '<div style="font-size:13px;font-weight:800;color:var(--text)">📄 ' + (latest.pdfName||'التقرير') + '</div>' +
               '<div style="font-size:11px;color:var(--text3);margin-top:2px">تاريخ التحليل: ' + latest.date + ' — اكتمال ' + latest.pct + '%</div>' +
             '</div>' +
-            '<div style="display:flex;gap:8px">' +
-              '<a href="' + latest.pdfData + '" download="' + (latest.pdfName||'report.pdf') + '" class="btn btn-ghost" style="font-size:12px;text-decoration:none">📥 تحميل</a>' +
-              '<a href="' + latest.pdfData + '" target="_blank" class="btn btn-primary" style="font-size:12px;text-decoration:none">👁️ فتح</a>' +
-            '</div>' +
+            '<a href="' + previewLink + '" target="_blank" class="btn btn-primary" style="font-size:12px;text-decoration:none">👁️ فتح في Drive</a>' +
           '</div>' +
-          '<iframe src="' + latest.pdfData + '" style="width:100%;height:520px;border:1px solid var(--border);border-radius:8px;background:#fff"></iframe>';
+          '<iframe src="' + embedSrc + '" style="width:100%;height:520px;border:1px solid var(--border);border-radius:8px;background:#fff"></iframe>';
       } else {
         ra.innerHTML =
           '<div style="text-align:center;padding:30px;color:var(--text3)">' +
@@ -2936,9 +2955,9 @@ function pfRender() {
   tbody.innerHTML = records.map(function(p, i) {
     var pct = p.pct || 0;
     var pctColor = pct >= 90 ? '#10D97E' : pct >= 70 ? '#F97316' : '#EF4444';
-    var fileBtn = p.pdfData
-      ? '<a href="'+p.pdfData+'" target="_blank" style="color:var(--accent);text-decoration:none;font-weight:700;font-size:11px">👁️ عرض</a>'
-        + ' <a href="'+p.pdfData+'" download="'+(p.pdfName||'report.pdf')+'" style="color:var(--green);text-decoration:none;font-weight:700;font-size:11px;margin-right:6px">📥</a>'
+    var driveLink = p.driveUrl || p.pdfData || '';
+    var fileBtn = driveLink
+      ? '<a href="'+driveLink+'" target="_blank" style="color:var(--accent);text-decoration:none;font-weight:700;font-size:11px">👁️ عرض</a>'
       : '<span style="color:var(--text3);font-size:10px">—</span>';
     return '<tr>'+
       '<td class="num" style="font-size:10px;color:var(--text3)">'+(i+1)+'</td>'+

@@ -2853,12 +2853,29 @@ async function fetchEmployeeFiles() {
   try {
     var empUrl = EMP_GAS_URL || GAS_URL;
     if (!empUrl) { showSettings(); throw new Error('أدخل رابط Apps Script للموظفين أولاً'); }
-    // استدعاء GAS الخاص بالموظفين
-    const result = await (async function() {
-      var url = empUrl + '?action=getStaffFiles&t=' + Date.now();
-      var res = await fetch(url);
-      return await res.json();
-    })();
+    // استدعاء بـ JSONP لتجنب CORS
+    const result = await new Promise(function(resolve, reject) {
+      var cbName = 'empCB_' + Date.now();
+      var script = document.createElement('script');
+      var timer = setTimeout(function() {
+        delete window[cbName];
+        document.body.removeChild(script);
+        reject(new Error('timeout'));
+      }, 15000);
+      window[cbName] = function(data) {
+        clearTimeout(timer);
+        delete window[cbName];
+        document.body.removeChild(script);
+        resolve(data);
+      };
+      script.src = empUrl + '?action=getStaffFiles&callback=' + cbName + '&t=' + Date.now();
+      script.onerror = function() {
+        clearTimeout(timer);
+        delete window[cbName];
+        reject(new Error('فشل تحميل السكريبت'));
+      };
+      document.body.appendChild(script);
+    });
     if (!result || result.error) throw new Error(result ? result.error : 'لا استجابة');
     if (!result.success) throw new Error(result.error || 'فشل الجلب');
     const raw = result.data || [];

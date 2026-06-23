@@ -2290,25 +2290,27 @@ function renderPolSignatories() {
   const el = document.getElementById('pol2-sigs');
   if (!el) return;
   el.innerHTML = SIG_FIELDS.map(s => {
-    // السياسات المطلوب منه التوقيع عليها فقط
+    // السياسات المطلوب منه التوقيع عليها
     const required = POLICIES.filter(p => {
       const reqRaw = (p.required_sigs || '').trim();
-      if (!reqRaw) return true; // فارغ = مطلوب للكل
+      if (!reqRaw) return true;
       return reqRaw.split(',').map(x => x.trim()).includes(s.key);
     });
-    const reqCount = required.length;
-    const signed   = required.filter(p => p[s.key] === '\u2705' || p[s.key] === true).length;
-    const pct      = reqCount ? Math.round(signed / reqCount * 100) : 0;
-    const isDone   = reqCount > 0 && signed === reqCount;
+    const reqCount   = required.length;
+    const totalCount = POLICIES.length; // الإجمالي الكلي دائماً
+    const signed     = required.filter(p => p[s.key] === '\u2705' || p[s.key] === true).length;
+    const pct        = reqCount ? Math.round(signed / reqCount * 100) : 0;
+    const isDone     = reqCount > 0 && signed === reqCount;
     const borderColor = isDone ? s.color + '44' : 'var(--border)';
-    const subLine = reqCount < POLICIES.length && reqCount > 0
-      ? '<div style="font-size:9px;color:var(--accent);margin-bottom:4px">(' + reqCount + ' من ' + POLICIES.length + ' سياسة)</div>'
+    // إذا مطلوب على جزء فقط — اعرض من كم
+    const subLine = reqCount < totalCount && reqCount > 0
+      ? '<div style="font-size:9px;color:var(--accent);margin-bottom:4px">مطلوب على ' + reqCount + ' من ' + totalCount + '</div>'
       : '';
     return '<div style="background:var(--surface2);border:1px solid ' + borderColor + ';border-radius:10px;padding:14px;text-align:center;transition:.2s">'
       + '<div style="font-size:18px;margin-bottom:5px">' + (isDone ? '\u2705' : '\u270d\ufe0f') + '</div>'
       + '<div style="font-size:11px;font-weight:700;color:var(--text);margin-bottom:4px">' + s.label + '</div>'
       + '<div style="font-size:22px;font-weight:900;color:' + s.color + ';font-family:Cairo,sans-serif">' + signed + '</div>'
-      + '<div style="font-size:10px;color:var(--text3);margin-bottom:2px">من ' + reqCount + ' مطلوب</div>'
+      + '<div style="font-size:10px;color:var(--text3);margin-bottom:2px">من ' + totalCount + ' سياسة</div>'
       + subLine
       + '<div style="height:4px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden;margin-bottom:4px">'
       + '<div style="height:100%;width:' + pct + '%;background:' + s.color + ';border-radius:2px;transition:width .6s"></div></div>'

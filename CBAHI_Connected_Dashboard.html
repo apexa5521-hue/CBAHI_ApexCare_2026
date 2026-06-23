@@ -207,7 +207,14 @@ tr:hover td{background:rgba(0,194,255,.03)}
 .sync-err{background:rgba(255,71,87,.1);color:var(--red);border-color:rgba(255,71,87,.25)}
 .sync-load{background:rgba(240,180,41,.1);color:var(--gold);border-color:rgba(240,180,41,.25)}
 
-@media print{.header{position:static}.pane{display:block!important}.tabs,.header-actions{display:none}.overlay{display:none!important}}
+@media print{
+  *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+  body{background:#fff!important;color:#000!important}
+  .header,.tabs,.header-actions,.overlay,.toast-wrap,.spacer{display:none!important}
+  .pane{display:none!important}
+  #report-print-area{display:block!important}
+}
+#report-print-area{display:none}
 
 
 </style>
@@ -222,7 +229,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
   <div class="header-actions">
     <span class="sync-badge sync-load" id="syncBadge">⟳ جاري الاتصال</span>
     <button class="btn btn-ghost" onclick="syncAll()">🔄 مزامنة</button>
-    <button class="btn btn-gold" onclick="window.print()">🖨️</button>
+    <button class="btn btn-gold" onclick="generateReport()" title="تصدير تقرير شامل">🖨️ تقرير</button>
   </div>
 </div>
 
@@ -1230,6 +1237,9 @@ tr:hover td{background:rgba(0,194,255,.03)}
     </div>
   </div>
 </div>
+
+<!-- REPORT PRINT AREA -->
+<div id="report-print-area"></div>
 
 <!-- TOAST CONTAINER -->
 <div class="toast-wrap" id="toasts"></div>
@@ -3049,22 +3059,22 @@ async function fetchEmployeeFiles() {
     const result = await new Promise(function(resolve, reject) {
       var cbName = 'empCB_' + Date.now();
       var script = document.createElement('script');
+      var isMob = /iPhone|iPad|Android/i.test(navigator.userAgent);
       var timer = setTimeout(function() {
         delete window[cbName];
-        document.body.removeChild(script);
-        reject(new Error('timeout'));
-      }, 15000);
+        if (script.parentNode) script.parentNode.removeChild(script);
+        reject(new Error('timeout — تأكد من رابط GAS الموظفين'));
+      }, isMob ? 25000 : 15000);
       window[cbName] = function(data) {
         clearTimeout(timer);
         delete window[cbName];
-        document.body.removeChild(script);
+        if (script.parentNode) script.parentNode.removeChild(script);
         resolve(data);
       };
       script.src = empUrl + '?action=getStaffFiles&callback=' + cbName + '&t=' + Date.now();
+      // iOS: تجاهل onerror — الـ timeout يتكفل بالرفض
       script.onerror = function() {
-        clearTimeout(timer);
-        delete window[cbName];
-        reject(new Error('فشل تحميل السكريبت'));
+        console.warn('emp script onerror (ربما redirect طبيعي)');
       };
       document.body.appendChild(script);
     });
@@ -3423,6 +3433,274 @@ function renderLicenses(){ licRender(); licKPIs(); }
 
 
 
+
+
+// ════════════════════════════════════════════════════════════════
+// generateReport — تقرير شامل قابل للطباعة والمشاركة
+// ════════════════════════════════════════════════════════════════
+function generateReport() {
+  var now     = new Date();
+  var dateStr = now.toLocaleDateString('ar-SA', { year:'numeric', month:'long', day:'numeric' });
+
+  // ── بيانات السياسات ─────────────────────────────────────────
+  var polTotal    = POLICIES.length || 107;
+  var polDone     = POLICIES.filter(function(p){ return p.contentReady === 'مكتملة'; }).length;
+  var polWritePct = polTotal ? Math.round(polDone / polTotal * 100) : 0;
+
+  var SIG_KEYS = ['sig_quality','sig_medical','sig_branch','sig_nursing','sig_hr','sig_safety','sig_ceo','sig_ipc','sig_biomed'];
+  var sigTotal = 0, sigDone = 0;
+  POLICIES.forEach(function(p) {
+    var req = (p.required_sigs||'').trim();
+    var list = req ? req.split(',').map(function(x){return x.trim();}) : SIG_KEYS;
+    list.forEach(function(k){ sigTotal++; if(p[k]==='✅'||p[k]===true) sigDone++; });
+  });
+  var polSignPct = sigTotal ? Math.round(sigDone / sigTotal * 100) : 0;
+
+  // ── بيانات المحاور ───────────────────────────────────────────
+  var pillarsHTML = '';
+  if (typeof PILLARS !== 'undefined' && typeof calcPillarPct === 'function') {
+    pillarsHTML = PILLARS.map(function(p) {
+      var pct = calcPillarPct(p.key);
+      var color = pct >= 80 ? '#16a34a' : pct >= 50 ? '#d97706' : '#dc2626';
+      return '<tr style="border-bottom:1px solid #e5e7eb">' +
+        '<td style="padding:8px 12px;font-weight:600">' + p.label + '</td>' +
+        '<td style="padding:8px 12px;text-align:center;color:' + color + ';font-weight:700">' + pct + '%</td>' +
+        '<td style="padding:8px 12px;text-align:center;color:#6b7280">' + p.weight + '%</td>' +
+        '<td style="padding:8px 12px">' +
+          '<div style="background:#e5e7eb;border-radius:4px;height:8px;overflow:hidden">' +
+            '<div style="background:' + color + ';height:100%;width:' + pct + '%"></div>' +
+          '</div>' +
+        '</td>' +
+      '</tr>';
+    }).join('');
+  }
+
+  // ── الملاحظات المعلقة ────────────────────────────────────────
+  var pendingObs = (DB.observations || []).filter(function(o){ return o.status !== 'مغلقة' && o.status !== 'مكتملة'; });
+  var obsHTML = pendingObs.length ? pendingObs.map(function(o, i) {
+    var pri = o.priority === 'عالية' ? '🔴' : o.priority === 'متوسطة' ? '🟡' : '🟢';
+    return '<tr style="border-bottom:1px solid #e5e7eb">' +
+      '<td style="padding:6px 10px;color:#6b7280;font-size:12px">' + (i+1) + '</td>' +
+      '<td style="padding:6px 10px;font-size:13px">' + (o.text||o.obs||'') + '</td>' +
+      '<td style="padding:6px 10px;text-align:center">' + pri + ' ' + (o.priority||'') + '</td>' +
+      '<td style="padding:6px 10px;color:#6b7280;font-size:12px">' + (o.owner||'—') + '</td>' +
+      '<td style="padding:6px 10px;color:#6b7280;font-size:12px">' + (o.due||'—') + '</td>' +
+    '</tr>';
+  }).join('') : '<tr><td colspan="5" style="text-align:center;padding:16px;color:#6b7280">لا توجد ملاحظات معلقة</td></tr>';
+
+  // ── المتطلبات المعلقة ────────────────────────────────────────
+  var pendingReq = (DB.requirements || []).filter(function(r){ return r.status !== 'مكتمل'; });
+  var reqHTML = pendingReq.length ? pendingReq.map(function(r, i) {
+    return '<tr style="border-bottom:1px solid #e5e7eb">' +
+      '<td style="padding:6px 10px;color:#6b7280;font-size:12px">' + (i+1) + '</td>' +
+      '<td style="padding:6px 10px;font-size:13px">' + (r.text||'') + '</td>' +
+      '<td style="padding:6px 10px;text-align:center;font-size:12px">' + (r.cat||'') + '</td>' +
+      '<td style="padding:6px 10px;color:#6b7280;font-size:12px">' + (r.owner||'—') + '</td>' +
+    '</tr>';
+  }).join('') : '<tr><td colspan="4" style="text-align:center;padding:16px;color:#6b7280">لا توجد متطلبات معلقة</td></tr>';
+
+  // ── المحاضرات ────────────────────────────────────────────────
+  var lecDone    = (DB.lectures||[]).filter(function(l){ return l.done==='نعم'; }).length;
+  var lecTotal   = (DB.lectures||[]).length;
+  var lecPending = (DB.lectures||[]).filter(function(l){ return l.done!=='نعم'; });
+  var lecHTML = lecPending.length ? lecPending.map(function(l, i) {
+    var pd = typeof parseLecDate === 'function' ? parseLecDate(l.date) : { display: l.date||'—' };
+    return '<tr style="border-bottom:1px solid #e5e7eb">' +
+      '<td style="padding:6px 10px;color:#6b7280;font-size:12px">' + (i+1) + '</td>' +
+      '<td style="padding:6px 10px;font-size:13px;font-weight:600">' + (l.title||'') + '</td>' +
+      '<td style="padding:6px 10px;font-size:12px">' + (l.speaker||'—') + '</td>' +
+      '<td style="padding:6px 10px;font-size:12px;color:#6b7280">' + pd.display + '</td>' +
+      '<td style="padding:6px 10px;font-size:12px">' + (l.audience||l.aud||'') + '</td>' +
+    '</tr>';
+  }).join('') : '<tr><td colspan="5" style="text-align:center;padding:16px;color:#6b7280">كل المحاضرات منجزة ✅</td></tr>';
+
+  // ── ملفات الموظفين ───────────────────────────────────────────
+  var empTotal    = EMP_DATA.length;
+  var empComplete = EMP_DATA.filter(function(e){ return e.progress >= 100; }).length;
+  var empAvg      = empTotal ? Math.round(EMP_DATA.reduce(function(s,e){ return s+e.progress; },0)/empTotal) : 0;
+  var empPending  = EMP_DATA.filter(function(e){ return e.progress < 100; })
+    .sort(function(a,b){ return a.progress - b.progress; }).slice(0, 20);
+  var empHTML = empPending.length ? empPending.map(function(e, i) {
+    var color = e.progress >= 70 ? '#d97706' : '#dc2626';
+    return '<tr style="border-bottom:1px solid #e5e7eb">' +
+      '<td style="padding:6px 10px;color:#6b7280;font-size:12px">' + (i+1) + '</td>' +
+      '<td style="padding:6px 10px;font-size:13px;font-weight:600">' + (e.name||'') + '</td>' +
+      '<td style="padding:6px 10px;font-size:12px">' + (e.title||'') + '</td>' +
+      '<td style="padding:6px 10px;font-size:12px">' + (e.dept||'') + '</td>' +
+      '<td style="padding:6px 10px;font-weight:700;color:' + color + '">' + e.progress + '%</td>' +
+    '</tr>';
+  }).join('') : '<tr><td colspan="5" style="text-align:center;padding:16px;color:#6b7280">كل الملفات مكتملة ✅</td></tr>';
+
+  // ── الرخص المنتهية / القريبة ─────────────────────────────────
+  var today   = new Date();
+  var soon    = new Date(); soon.setDate(soon.getDate() + 90);
+  var licAlert = (DB.licenses||[]).filter(function(l){
+    if (!l.expiry) return false;
+    var exp = new Date(l.expiry);
+    return !isNaN(exp) && exp <= soon;
+  }).sort(function(a,b){ return new Date(a.expiry)-new Date(b.expiry); });
+  var licHTML = licAlert.length ? licAlert.map(function(l, i) {
+    var exp  = new Date(l.expiry);
+    var diff = Math.ceil((exp - today) / 86400000);
+    var color = diff < 0 ? '#dc2626' : diff < 30 ? '#dc2626' : '#d97706';
+    var label = diff < 0 ? '❌ منتهية' : diff < 30 ? '🔴 ' + diff + ' يوم' : '🟡 ' + diff + ' يوم';
+    return '<tr style="border-bottom:1px solid #e5e7eb">' +
+      '<td style="padding:6px 10px;font-size:13px;font-weight:600">' + (l.name||'') + '</td>' +
+      '<td style="padding:6px 10px;font-size:12px">' + (l.type||'') + '</td>' +
+      '<td style="padding:6px 10px;font-size:12px">' + (l.expiry||'') + '</td>' +
+      '<td style="padding:6px 10px;font-weight:700;color:' + color + '">' + label + '</td>' +
+    '</tr>';
+  }).join('') : '<tr><td colspan="4" style="text-align:center;padding:16px;color:#6b7280">لا توجد رخص منتهية أو قريبة الانتهاء</td></tr>';
+
+  // ── الإنجاز الكلي ────────────────────────────────────────────
+  var overallPct = 0;
+  if (typeof PILLARS !== 'undefined' && typeof calcPillarPct === 'function') {
+    PILLARS.forEach(function(p){ overallPct += calcPillarPct(p.key) * p.weight / 100; });
+    overallPct = Math.round(overallPct);
+  }
+  var overallColor = overallPct >= 80 ? '#16a34a' : overallPct >= 50 ? '#d97706' : '#dc2626';
+
+  // ── بناء HTML التقرير ────────────────────────────────────────
+  var html = '<div dir="rtl" style="font-family:Tajawal,Arial,sans-serif;color:#111;padding:32px;max-width:900px;margin:0 auto">' +
+
+    // ─ Header
+    '<div style="text-align:center;border-bottom:3px solid #0a1628;padding-bottom:20px;margin-bottom:28px">' +
+      '<div style="font-size:28px;font-weight:900;color:#0a1628">تقرير متابعة مشروع اعتماد CBAHI</div>' +
+      '<div style="font-size:16px;color:#374151;margin-top:6px">عيادات أبكس كير — بريدة وعنيزة</div>' +
+      '<div style="font-size:13px;color:#6b7280;margin-top:4px">تاريخ التقرير: ' + dateStr + '</div>' +
+    '</div>' +
+
+    // ─ نسبة الإنجاز الكلية
+    '<div style="background:#f0f9ff;border:2px solid #0a1628;border-radius:12px;padding:20px;margin-bottom:24px;text-align:center">' +
+      '<div style="font-size:14px;color:#374151;font-weight:700;margin-bottom:8px">نسبة الإنجاز الكلية لمشروع CBAHI</div>' +
+      '<div style="font-size:56px;font-weight:900;color:' + overallColor + '">' + overallPct + '%</div>' +
+      '<div style="background:#e5e7eb;border-radius:8px;height:12px;margin:12px auto;max-width:400px;overflow:hidden">' +
+        '<div style="background:' + overallColor + ';height:100%;width:' + overallPct + '%"></div>' +
+      '</div>' +
+    '</div>' +
+
+    // ─ ملخص سريع
+    '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px">' +
+      _card('السياسات المكتوبة', polDone + '/' + polTotal, polWritePct + '%', '#0a1628') +
+      _card('نسبة التوقيعات', sigDone + '/' + sigTotal, polSignPct + '%', '#7c3aed') +
+      _card('ملفات الموظفين', empComplete + '/' + empTotal, empAvg + '%', '#0369a1') +
+      _card('المحاضرات المنجزة', lecDone + '/' + lecTotal, lecTotal ? Math.round(lecDone/lecTotal*100) + '%' : '0%', '#059669') +
+    '</div>' +
+
+    // ─ محاور الإنجاز
+    _section('📊 محاور الإنجاز بالأوزان') +
+    '<table style="width:100%;border-collapse:collapse;margin-bottom:24px;font-size:13px">' +
+      '<thead><tr style="background:#0a1628;color:#fff">' +
+        '<th style="padding:10px 12px;text-align:right">المحور</th>' +
+        '<th style="padding:10px 12px;text-align:center">النسبة</th>' +
+        '<th style="padding:10px 12px;text-align:center">الوزن</th>' +
+        '<th style="padding:10px 12px;text-align:right">التقدم</th>' +
+      '</tr></thead>' +
+      '<tbody>' + pillarsHTML + '</tbody>' +
+    '</table>' +
+
+    // ─ السياسات
+    _section('📋 حالة السياسات') +
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px">' +
+      '<div style="border:1px solid #e5e7eb;border-radius:8px;padding:16px;text-align:center">' +
+        '<div style="font-size:12px;color:#6b7280;margin-bottom:4px">الكتابة</div>' +
+        '<div style="font-size:28px;font-weight:900;color:#0a1628">' + polWritePct + '%</div>' +
+        '<div style="font-size:12px;color:#6b7280">' + polDone + ' من ' + polTotal + ' سياسة مكتملة</div>' +
+      '</div>' +
+      '<div style="border:1px solid #e5e7eb;border-radius:8px;padding:16px;text-align:center">' +
+        '<div style="font-size:12px;color:#6b7280;margin-bottom:4px">التوقيعات</div>' +
+        '<div style="font-size:28px;font-weight:900;color:#7c3aed">' + polSignPct + '%</div>' +
+        '<div style="font-size:12px;color:#6b7280">' + sigDone + ' من ' + sigTotal + ' توقيع مطلوب</div>' +
+      '</div>' +
+    '</div>' +
+
+    // ─ الملاحظات المعلقة
+    _section('🔴 الملاحظات المعلقة (' + pendingObs.length + ')') +
+    '<table style="width:100%;border-collapse:collapse;margin-bottom:24px;font-size:13px">' +
+      '<thead><tr style="background:#f3f4f6">' +
+        '<th style="padding:8px 10px;text-align:center;width:40px">#</th>' +
+        '<th style="padding:8px 10px;text-align:right">الملاحظة</th>' +
+        '<th style="padding:8px 10px;text-align:center">الأولوية</th>' +
+        '<th style="padding:8px 10px;text-align:right">المسؤول</th>' +
+        '<th style="padding:8px 10px;text-align:right">الموعد</th>' +
+      '</tr></thead>' +
+      '<tbody>' + obsHTML + '</tbody>' +
+    '</table>' +
+
+    // ─ المتطلبات المعلقة
+    _section('📌 المتطلبات غير المكتملة (' + pendingReq.length + ')') +
+    '<table style="width:100%;border-collapse:collapse;margin-bottom:24px;font-size:13px">' +
+      '<thead><tr style="background:#f3f4f6">' +
+        '<th style="padding:8px 10px;text-align:center;width:40px">#</th>' +
+        '<th style="padding:8px 10px;text-align:right">المتطلب</th>' +
+        '<th style="padding:8px 10px;text-align:center">الفئة</th>' +
+        '<th style="padding:8px 10px;text-align:right">المسؤول</th>' +
+      '</tr></thead>' +
+      '<tbody>' + reqHTML + '</tbody>' +
+    '</table>' +
+
+    // ─ المحاضرات المعلقة
+    _section('🎓 المحاضرات غير المنجزة (' + lecPending.length + ')') +
+    '<table style="width:100%;border-collapse:collapse;margin-bottom:24px;font-size:13px">' +
+      '<thead><tr style="background:#f3f4f6">' +
+        '<th style="padding:8px 10px;text-align:center;width:40px">#</th>' +
+        '<th style="padding:8px 10px;text-align:right">عنوان المحاضرة</th>' +
+        '<th style="padding:8px 10px;text-align:right">الملقي</th>' +
+        '<th style="padding:8px 10px;text-align:center">التاريخ</th>' +
+        '<th style="padding:8px 10px;text-align:right">الجمهور</th>' +
+      '</tr></thead>' +
+      '<tbody>' + lecHTML + '</tbody>' +
+    '</table>' +
+
+    // ─ ملفات الموظفين الناقصة (أول 20)
+    _section('👤 ملفات الموظفين الأقل اكتمالاً (أول 20)') +
+    '<table style="width:100%;border-collapse:collapse;margin-bottom:24px;font-size:13px">' +
+      '<thead><tr style="background:#f3f4f6">' +
+        '<th style="padding:8px 10px;text-align:center;width:40px">#</th>' +
+        '<th style="padding:8px 10px;text-align:right">اسم الموظف</th>' +
+        '<th style="padding:8px 10px;text-align:right">المسمى</th>' +
+        '<th style="padding:8px 10px;text-align:right">القسم</th>' +
+        '<th style="padding:8px 10px;text-align:center">النسبة</th>' +
+      '</tr></thead>' +
+      '<tbody>' + empHTML + '</tbody>' +
+    '</table>' +
+
+    // ─ الرخص المنتهية / القريبة
+    _section('📄 الرخص والعقود المنتهية أو القريبة من الانتهاء') +
+    '<table style="width:100%;border-collapse:collapse;margin-bottom:24px;font-size:13px">' +
+      '<thead><tr style="background:#f3f4f6">' +
+        '<th style="padding:8px 10px;text-align:right">الاسم</th>' +
+        '<th style="padding:8px 10px;text-align:center">النوع</th>' +
+        '<th style="padding:8px 10px;text-align:center">تاريخ الانتهاء</th>' +
+        '<th style="padding:8px 10px;text-align:center">الحالة</th>' +
+      '</tr></thead>' +
+      '<tbody>' + licHTML + '</tbody>' +
+    '</table>' +
+
+    // ─ Footer
+    '<div style="text-align:center;border-top:2px solid #e5e7eb;padding-top:16px;margin-top:24px;color:#6b7280;font-size:12px">' +
+      'تم إنشاء هذا التقرير تلقائياً من لوحة تحكم CBAHI — أبكس كير · ' + dateStr +
+    '</div>' +
+
+  '</div>';
+
+  // ── عرض وطباعة ──────────────────────────────────────────────
+  var area = document.getElementById('report-print-area');
+  if (area) area.innerHTML = html;
+  window.print();
+}
+
+function _card(label, value, pct, color) {
+  return '<div style="border:1px solid #e5e7eb;border-radius:8px;padding:14px;text-align:center">' +
+    '<div style="font-size:11px;color:#6b7280;margin-bottom:4px">' + label + '</div>' +
+    '<div style="font-size:22px;font-weight:900;color:' + color + '">' + value + '</div>' +
+    '<div style="font-size:12px;color:' + color + ';font-weight:700">' + pct + '</div>' +
+  '</div>';
+}
+
+function _section(title) {
+  return '<div style="font-size:15px;font-weight:800;color:#0a1628;border-right:4px solid #0a1628;padding-right:10px;margin:20px 0 12px">' + title + '</div>';
+}
 
 </script>
 

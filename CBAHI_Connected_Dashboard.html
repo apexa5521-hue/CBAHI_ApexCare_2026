@@ -1673,28 +1673,45 @@ function renderOverview() {
   document.getElementById('k-fin').textContent = finReqs;
   document.getElementById('k-cost').textContent = `التكلفة: ${totalCost.toLocaleString()} ريال`;
 
-  // Summary table
-  const sections = [
-    {label:'الملاحظات', total:obs.length, done:obsDone, pend:cnt(obs,'status','معلقة')},
-    {label:'المتطلبات', total:reqs.length, done:reqDone, pend:cnt(reqs,'status','معلق')},
-    {label:'المحاضرات', total:lecs.length, done:lecDone, pend:lecs.length-lecDone},
-    {label:'السياسات', total:pols.length, done:polSigned, pend:cnt(pols,'sigStatus','لم يوقع')},
-    {label:'الفريق', total:DB.team.length, done:DB.team.length, pend:0},
-    {label:'التكليفات', total:DB.assignments.length, done:cnt(DB.assignments,'status','مكتمل'), pend:cnt(DB.assignments,'status','معلق')},
-  ];
-  const pBar = (v,t) => {
-    const p = t ? Math.round(v/t*100) : 0;
+  // Summary table — مطابق للمحاور في لوحة الإنجاز
+  const pBar2 = (p) => {
     const c = p>=80?'var(--green)':p>=40?'var(--gold)':'var(--red)';
     return `<div style="display:flex;align-items:center;gap:6px"><div style="flex:1;height:5px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden"><div style="height:100%;width:${p}%;background:${c};border-radius:3px"></div></div><span style="font-size:10px;color:var(--text3);min-width:28px">${p}%</span></div>`;
   };
-  document.getElementById('summary-tbody').innerHTML = sections.map(s=>`
-    <tr><td class="td-main">${s.label}</td>
-    <td class="num">${s.total}</td>
-    <td class="num" style="color:var(--green);font-weight:700">${s.done}</td>
-    <td class="num" style="color:var(--red)">${s.pend}</td>
-    <td style="min-width:100px">${pBar(s.done,s.total)}</td>
-    <td>${s.done===s.total&&s.total>0?pill('مكتمل'):s.done>0?pill('جارٍ'):pill('معلق')}</td>
-    </tr>`).join('');
+
+  // استخدم نفس PILLARS من لوحة الإنجاز
+  var summaryRows = '';
+  if (typeof PILLARS !== 'undefined' && typeof calcPillarPct === 'function') {
+    summaryRows = PILLARS.map(function(p) {
+      var pct2 = calcPillarPct(p.key);
+      var statusTxt = pct2 >= 100 ? 'مكتمل' : pct2 > 0 ? 'جارٍ' : 'معلق';
+      return '<tr>' +
+        '<td class="td-main">' + p.label + '</td>' +
+        '<td class="num" style="color:var(--text3)">' + p.weight + '%</td>' +
+        '<td class="num" style="color:var(--green);font-weight:700">—</td>' +
+        '<td class="num" style="color:var(--red)">—</td>' +
+        '<td style="min-width:100px">' + pBar2(pct2) + '</td>' +
+        '<td>' + pill(statusTxt) + '</td>' +
+        '</tr>';
+    }).join('');
+  } else {
+    // fallback
+    var sections2 = [
+      {label:'الملاحظات', done:obsDone, total:obs.length, pend:cnt(obs,'status','معلقة')},
+      {label:'المتطلبات', done:reqDone, total:reqs.length, pend:cnt(reqs,'status','معلق')},
+      {label:'المحاضرات', done:lecDone, total:lecs.length, pend:lecs.length-lecDone},
+      {label:'السياسات', done:polSigned, total:pols.length, pend:cnt(pols,'sigStatus','لم يوقع')},
+      {label:'الفريق', done:DB.team.length, total:DB.team.length, pend:0},
+      {label:'التكليفات', done:cnt(DB.assignments,'status','مكتمل'), total:DB.assignments.length, pend:cnt(DB.assignments,'status','معلق')},
+    ];
+    summaryRows = sections2.map(function(s) {
+      var p2 = s.total ? Math.round(s.done/s.total*100) : 0;
+      var st = s.done===s.total&&s.total>0?'مكتمل':s.done>0?'جارٍ':'معلق';
+      return '<tr><td class="td-main">'+s.label+'</td><td class="num" style="color:var(--text3)">—</td><td class="num" style="color:var(--green);font-weight:700">'+s.done+'</td><td class="num" style="color:var(--red)">'+s.pend+'</td><td style="min-width:100px">'+pBar2(p2)+'</td><td>'+pill(st)+'</td></tr>';
+    }).join('');
+  }
+
+  document.getElementById('summary-tbody').innerHTML = summaryRows;
 }
 
 // ─── Observations ────────────────────────────────────────────

@@ -2,6 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
+<link rel="icon" href="data:,">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CBAHI – أبكس كير | لوحة تحكم مشروع الاعتماد</title>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
@@ -1634,6 +1635,17 @@ function renderAll() {
 }
 
 // ─── Overview ────────────────────────────────────────────────
+var PILLARS = [
+  { key:'policy_writing',  label:'كتابة السياسات (106)',          weight:30, icon:'✍️', color:'#0080FF' },
+  { key:'policy_signing',  label:'توقيع السياسات',                weight:20, icon:'🖊️', color:'#7C3AED' },
+  { key:'staff_files',     label:'ملفات الموظفين',                weight:18, icon:'👥', color:'#F59E0B' },
+  { key:'requirements',    label:'المتطلبات',                     weight:12, icon:'📋', color:'#10D97E' },
+  { key:'lectures',        label:'المحاضرات + جسر',               weight:10, icon:'🎓', color:'#0D9488' },
+  { key:'licenses',        label:'الرخص والعقود والاتفاقيات',     weight:5,  icon:'📜', color:'#EF4444' },
+  { key:'assignments',     label:'التكليفات',                     weight:3,  icon:'📌', color:'#8B5CF6' },
+  { key:'observations',    label:'الملاحظات',                     weight:2,  icon:'🔍', color:'#FF7C2A' },
+];
+
 function renderOverview() {
   const st = DB.dashboard;
   const obs = DB.observations; const reqs = DB.requirements;
@@ -2447,16 +2459,6 @@ function exportPoliciesCSV() {
 // ════════════════════════════════════════════════════════════════
 // WEIGHTED PROGRESS DASHBOARD
 // ════════════════════════════════════════════════════════════════
-const PILLARS = [
-  { key:'policy_writing',  label:'كتابة السياسات (106)',          weight:30, icon:'✍️', color:'#0080FF' },
-  { key:'policy_signing',  label:'توقيع السياسات',                weight:20, icon:'🖊️', color:'#7C3AED' },
-  { key:'staff_files',     label:'ملفات الموظفين',                weight:18, icon:'👥', color:'#F59E0B' },
-  { key:'requirements',    label:'المتطلبات',                     weight:12, icon:'📋', color:'#10D97E' },
-  { key:'lectures',        label:'المحاضرات + جسر',               weight:10, icon:'🎓', color:'#0D9488' },
-  { key:'licenses',        label:'الرخص والعقود والاتفاقيات',     weight:5,  icon:'📜', color:'#EF4444' },
-  { key:'assignments',     label:'التكليفات',                     weight:3,  icon:'📌', color:'#8B5CF6' },
-  { key:'observations',    label:'الملاحظات',                     weight:2,  icon:'🔍', color:'#FF7C2A' },
-];
 
 function getExtras() {
   try { return JSON.parse(localStorage.getItem('cbahi_extras_v1') || '{}'); }

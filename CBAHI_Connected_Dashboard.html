@@ -1681,7 +1681,8 @@ function renderOverview() {
 
   // استخدم نفس PILLARS من لوحة الإنجاز
   var summaryRows = '';
-  if (typeof PILLARS !== 'undefined' && typeof calcPillarPct === 'function') {
+  if (typeof PILLARS !== 'undefined' && PILLARS && typeof calcPillarPct === 'function') {
+    try {
     summaryRows = PILLARS.map(function(p) {
       var pct2 = calcPillarPct(p.key);
       var statusTxt = pct2 >= 100 ? 'مكتمل' : pct2 > 0 ? 'جارٍ' : 'معلق';
@@ -1694,7 +1695,9 @@ function renderOverview() {
         '<td>' + pill(statusTxt) + '</td>' +
         '</tr>';
     }).join('');
-  } else {
+    } catch(e) { console.warn('PILLARS error:', e); }
+  }
+  if (!summaryRows) {
     // fallback
     var sections2 = [
       {label:'الملاحظات', done:obsDone, total:obs.length, pend:cnt(obs,'status','معلقة')},

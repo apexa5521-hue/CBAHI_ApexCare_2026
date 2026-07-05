@@ -1756,7 +1756,7 @@ async function syncAll() {
     }
     // مزامنة إضافية: الرخص + ملفات الموظفين (تضمن تطابق النسب بين جميع المستخدمين)
     licFetchFromSheets();
-    if (typeof fetchEmployeeFiles === 'function') fetchEmployeeFiles();
+    if (typeof fetchEmployeeFiles === 'function') fetchEmployeeFiles(true);
     toast('✅ تمت المزامنة', 'success');
   } catch(e) {
     setSyncStatus('err');
@@ -2093,15 +2093,18 @@ function renderReq() {
   document.getElementById('req-fin-cnt').textContent = fin + ' تحتاج تمويل';
 
   document.getElementById('req-tbody').innerHTML = list.length ? list.map((r,i)=>`
-    <tr><td class="num">${i+1}</td>
-    <td class="td-main" style="max-width:240px">${r.text}</td>
-    <td><span class="badge badge-purple" style="font-size:9px">${r.cat}</span></td>
-    <td>${priPill(r.priority||r.pri||'متوسطة')}</td>
-    <td style="direction:ltr;text-align:left;font-size:11px">${r.cost?Number(r.cost).toLocaleString()+' ر.س':'–'}</td>
-    <td>${r.financial==='نعم'?pill('نعم'):pill('لا')}</td>
-    <td>${pill(r.status||'معلق')}</td>
-    <td style="font-size:11px">${r.owner||'–'}</td>
-    <td>${actionBtns('editReq','delReq',r.id)}</td></tr>`).join('')
+    <tr style="vertical-align:top">
+    <td class="num" style="vertical-align:top;padding-top:14px">${i+1}</td>
+    <td class="td-main" style="max-width:320px;vertical-align:top;padding-top:12px;padding-bottom:12px">
+      <div title="${(r.text||'').replace(/"/g,'&quot;')}" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.5;font-size:12.5px">${r.text}</div>
+    </td>
+    <td style="vertical-align:top;padding-top:12px"><span class="badge badge-purple" style="font-size:9px;white-space:nowrap">${r.cat}</span></td>
+    <td style="vertical-align:top;padding-top:12px">${priPill(r.priority||r.pri||'متوسطة')}</td>
+    <td style="direction:ltr;text-align:left;font-size:11px;vertical-align:top;padding-top:12px;white-space:nowrap">${r.cost?Number(r.cost).toLocaleString()+' ر.س':'–'}</td>
+    <td style="vertical-align:top;padding-top:12px">${r.financial==='نعم'?pill('نعم'):pill('لا')}</td>
+    <td style="vertical-align:top;padding-top:12px">${pill(r.status||'معلق')}</td>
+    <td style="font-size:11px;vertical-align:top;padding-top:12px;max-width:120px">${r.owner||'–'}</td>
+    <td style="vertical-align:top;padding-top:10px">${actionBtns('editReq','delReq',r.id)}</td></tr>`).join('')
     : '<tr><td colspan="9" style="text-align:center;color:var(--text3);padding:30px">لا توجد نتائج مطابقة</td></tr>';
 
   // دائرة الإنجاز: نسبة المتطلبات المكتملة من الإجمالي
@@ -2128,7 +2131,7 @@ function renderReqKanban() {
     const items = (DB.requirements||[]).filter(r => (r.status||'معلق') === col.key);
     const cardsHtml = items.length ? items.map(function(r) {
       return '<div onclick="editReq(\''+r.id+'\')" style="background:var(--surface);border:1px solid var(--border);border-right:3px solid '+col.color+';border-radius:10px;padding:12px;margin-bottom:10px;cursor:pointer;box-shadow:0 1px 4px rgba(0,30,64,.05)">' +
-        '<div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:8px;line-height:1.5">' + r.text + '</div>' +
+        '<div title="'+(r.text||'').replace(/"/g,'&quot;')+'" style="display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;font-size:12px;font-weight:700;color:var(--text);margin-bottom:8px;line-height:1.5">' + r.text + '</div>' +
         '<div style="display:flex;justify-content:space-between;align-items:center">' +
           priPill(r.priority||r.pri||'متوسطة') +
           '<span style="font-size:10px;color:var(--text3)">' + (r.owner||r.cat||'') + '</span>' +
@@ -3631,12 +3634,12 @@ renderAll = function() {
 
 let EMP_DATA = [];
 
-async function fetchEmployeeFiles() {
+async function fetchEmployeeFiles(silent) {
   const btn = document.getElementById('emp-sync-btn');
-  if (btn) { btn.textContent = '⟳ جاري الجلب...'; btn.disabled = true; }
+  if (btn && !silent) { btn.textContent = '⟳ جاري الجلب...'; btn.disabled = true; }
   try {
     var empUrl = EMP_GAS_URL || GAS_URL;
-    if (!empUrl) { showSettings(); throw new Error('أدخل رابط Apps Script للموظفين أولاً'); }
+    if (!empUrl) { if (!silent) showSettings(); throw new Error('أدخل رابط Apps Script للموظفين أولاً'); }
     // استدعاء بـ JSONP لتجنب CORS
     const result = await new Promise(function(resolve, reject) {
       var cbName = 'empCB_' + Date.now();
@@ -3690,12 +3693,13 @@ async function fetchEmployeeFiles() {
     }
     var el = document.getElementById('emp-last-sync');
     if (el) el.textContent = 'آخر تحديث: ' + new Date().toLocaleTimeString('ar-SA') + ' | ' + EMP_DATA.length + ' موظف';
-    toast('✅ تم جلب ' + EMP_DATA.length + ' موظف', 'success');
+    if (!silent) toast('✅ تم جلب ' + EMP_DATA.length + ' موظف', 'success');
   } catch(err) {
     try { var c = localStorage.getItem('cbahi_emp_v1'); if(c){ EMP_DATA=JSON.parse(c); renderEmpTable(); } } catch(x){}
-    toast('❌ ' + err.message, 'error');
+    if (!silent) toast('❌ ' + err.message, 'error');
+    else console.warn('fetchEmployeeFiles (silent) error:', err.message);
   } finally {
-    if (btn) { btn.textContent = '🔄 تحديث من Sheets'; btn.disabled = false; }
+    if (btn && !silent) { btn.textContent = '🔄 تحديث من Sheets'; btn.disabled = false; }
   }
 }
 

@@ -4295,10 +4295,15 @@ function auditPreviewFile(inp, labelId) {
 }
 
 // ─── فتح/إعادة تعيين النموذج ─────────────────────────────────────
-// ─── تحويل Drive fileId إلى رابط صورة مباشر (للمعاينة inline) ────
-function driveThumbUrl(fileId, size) {
-  if (!fileId) return '';
-  return 'https://drive.google.com/thumbnail?id=' + fileId + '&sz=w' + (size || 200);
+// ─── Cloudinary — رفع ومعاينة صور جولات التدقيق ──────────────────
+// (نفس حساب Cloudinary المستخدم بمنصة تدريب الممرضات — غيّر القيم إذا تبي حساب/مجلد منفصل)
+var CLOUDINARY_CLOUD_NAME = 'dnlkxh3qi';
+var CLOUDINARY_UPLOAD_PRESET = 'cmuqyx2d';
+var CLOUDINARY_AUDIT_FOLDER = 'cbahi_audits';
+
+function auditImgUrl(publicId, size) {
+  if (!publicId) return '';
+  return 'https://res.cloudinary.com/' + CLOUDINARY_CLOUD_NAME + '/image/upload/w_' + (size||200) + ',c_fill,q_auto,f_auto/' + publicId;
 }
 
 function openAuditModal(id) {
@@ -4310,10 +4315,10 @@ function openAuditModal(id) {
   document.getElementById('audit-before-file').value = '';
   document.getElementById('audit-after-file').value = '';
   document.getElementById('audit-before-label').innerHTML = (a && a.beforePhotoId)
-    ? '<img src="'+driveThumbUrl(a.beforePhotoId,80)+'" style="height:26px;border-radius:4px;margin-left:6px">✅ صورة محفوظة — اختر ملف جديد لاستبدالها'
+    ? '<img src="'+auditImgUrl(a.beforePhotoId,80)+'" style="height:26px;border-radius:4px;margin-left:6px">✅ صورة محفوظة — اختر ملف جديد لاستبدالها'
     : '📎 اختر صورة "قبل"...';
   document.getElementById('audit-after-label').innerHTML = (a && a.afterPhotoId)
-    ? '<img src="'+driveThumbUrl(a.afterPhotoId,80)+'" style="height:26px;border-radius:4px;margin-left:6px">✅ صورة محفوظة — اختر ملف جديد لاستبدالها'
+    ? '<img src="'+auditImgUrl(a.afterPhotoId,80)+'" style="height:26px;border-radius:4px;margin-left:6px">✅ صورة محفوظة — اختر ملف جديد لاستبدالها'
     : '📎 اختر صورة "بعد"...';
   document.getElementById('audit-notes').value = a ? (a.notes||'') : '';
   document.getElementById('audit-recommendation').value = a ? (a.recommendation||'') : '';
@@ -4330,13 +4335,19 @@ function openAuditModal(id) {
 
 function editAudit(id) { openAuditModal(id); }
 
-// ─── رفع صورة واحدة إلى Drive عبر GAS ────────────────────────────
+// ─── رفع صورة واحدة إلى Cloudinary (بدون المرور بـ GAS — أسرع) ───
 async function auditUploadImage(base64, fileName, mimeType) {
   try {
-    var res = await gasMutate('uploadAuditPhoto', '', String(Date.now()), {
-      fileName: fileName, base64Data: base64, mimeType: mimeType || 'image/png'
-    });
-    if (res && res.success) return { url: res.viewUrl, id: res.fileId };
+    var dataUri = 'data:' + (mimeType||'image/png') + ';base64,' + base64;
+    var publicId = CLOUDINARY_AUDIT_FOLDER + '/' + (fileName||('audit_'+Date.now())).replace(/\.[^.]+$/,'').replace(/[^a-zA-Z0-9_\-\/]/g,'_');
+    var fd = new FormData();
+    fd.append('file', dataUri);
+    fd.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+    fd.append('public_id', publicId);
+    var res = await fetch('https://api.cloudinary.com/v1_1/' + CLOUDINARY_CLOUD_NAME + '/image/upload', { method:'POST', body: fd });
+    var data = await res.json();
+    if (data && data.secure_url) return { url: data.secure_url, id: data.public_id };
+    console.warn('Cloudinary upload failed:', data);
     return null;
   } catch(e) {
     console.warn('auditUploadImage error:', e);
@@ -4474,8 +4485,8 @@ function renderAuditTable() {
     var photos = '';
     if (a.beforePhotoId || a.afterPhotoId) {
       photos = '<div style="display:flex;gap:4px;justify-content:center;cursor:pointer" onclick="openAuditPhotoView(\''+a.id+'\')">';
-      if (a.beforePhotoId) photos += '<img src="'+driveThumbUrl(a.beforePhotoId,80)+'" title="قبل" style="width:32px;height:32px;object-fit:cover;border-radius:6px;border:1px solid var(--border)">';
-      if (a.afterPhotoId) photos += '<img src="'+driveThumbUrl(a.afterPhotoId,80)+'" title="بعد" style="width:32px;height:32px;object-fit:cover;border-radius:6px;border:1px solid var(--border)">';
+      if (a.beforePhotoId) photos += '<img src="'+auditImgUrl(a.beforePhotoId,80)+'" title="قبل" style="width:32px;height:32px;object-fit:cover;border-radius:6px;border:1px solid var(--border)">';
+      if (a.afterPhotoId) photos += '<img src="'+auditImgUrl(a.afterPhotoId,80)+'" title="بعد" style="width:32px;height:32px;object-fit:cover;border-radius:6px;border:1px solid var(--border)">';
       photos += '</div>';
     } else {
       photos = '<span style="color:var(--text3);font-size:10px">—</span>';
@@ -4508,10 +4519,10 @@ function openAuditPhotoView(id) {
   var body = document.getElementById('audit-photo-view-body');
   if (!body) return;
   var beforeHtml = a.beforePhotoId
-    ? '<div style="flex:1;min-width:200px"><div style="font-size:11px;font-weight:700;color:var(--text3);margin-bottom:6px;text-align:center">قبل</div><img src="'+driveThumbUrl(a.beforePhotoId,800)+'" style="width:100%;border-radius:10px;border:1px solid var(--border)"></div>'
+    ? '<div style="flex:1;min-width:200px"><div style="font-size:11px;font-weight:700;color:var(--text3);margin-bottom:6px;text-align:center">قبل</div><img src="'+auditImgUrl(a.beforePhotoId,800)+'" style="width:100%;border-radius:10px;border:1px solid var(--border)"></div>'
     : '<div style="flex:1;min-width:200px;display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:12px">لا توجد صورة "قبل"</div>';
   var afterHtml = a.afterPhotoId
-    ? '<div style="flex:1;min-width:200px"><div style="font-size:11px;font-weight:700;color:var(--text3);margin-bottom:6px;text-align:center">بعد</div><img src="'+driveThumbUrl(a.afterPhotoId,800)+'" style="width:100%;border-radius:10px;border:1px solid var(--border)"></div>'
+    ? '<div style="flex:1;min-width:200px"><div style="font-size:11px;font-weight:700;color:var(--text3);margin-bottom:6px;text-align:center">بعد</div><img src="'+auditImgUrl(a.afterPhotoId,800)+'" style="width:100%;border-radius:10px;border:1px solid var(--border)"></div>'
     : '<div style="flex:1;min-width:200px;display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:12px">لا توجد صورة "بعد"</div>';
   body.innerHTML =
     '<div style="font-size:12px;color:var(--text3);margin-bottom:12px">📅 ' + (a.date||'') + ' — 🏥 ' + (a.branch||'') + (a.location?(' — 📍 '+a.location):'') + '</div>' +

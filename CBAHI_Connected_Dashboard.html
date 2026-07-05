@@ -167,7 +167,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
 .add-row:hover{border-color:var(--accent);color:var(--accent);background:rgba(0,194,255,.04)}
 
 /* MODAL */
-.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:999;
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:5500;
   align-items:center;justify-content:center;backdrop-filter:blur(4px)}
 .overlay.open{display:flex}
 .modal{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);
@@ -267,6 +267,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
   .app-sidebar.open{transform:translateX(0)}
   .app-content{margin-right:0!important}
   #sidebarToggleBtn{display:inline-flex!important;align-items:center}
+  #login-screen > div:last-child{display:none!important}
 }
 
 /* ═══ Stitch Overview KPI Cards ═══ */
@@ -281,6 +282,50 @@ tr:hover td{background:rgba(0,194,255,.03)}
 </style>
 </head>
 <body>
+
+<!-- ═══ شاشة تسجيل الدخول ═══ -->
+<div id="login-screen" style="position:fixed;inset:0;z-index:5000;display:flex;background:#fff;font-family:'Tajawal',sans-serif">
+  <!-- اللوحة اليمنى: النموذج -->
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:40px;min-width:340px">
+    <div style="width:100%;max-width:380px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:36px">
+        <div class="logo-icon" style="width:44px;height:44px;flex-shrink:0">AC</div>
+        <div>
+          <div style="font-size:15px;font-weight:800;color:#101828">أبكس كير</div>
+          <div style="font-size:11px;color:#006a6a">نظام إدارة اعتماد CBAHI</div>
+        </div>
+      </div>
+      <h1 style="font-size:24px;font-weight:800;color:#101828;margin-bottom:6px">تسجيل الدخول الآمن</h1>
+      <p style="font-size:12px;color:#6b7280;margin-bottom:28px">أدخل بياناتك للوصول إلى لوحة التحكم</p>
+
+      <div class="fg"><label>البريد الإلكتروني</label>
+        <input type="email" id="login-email" placeholder="name@apexcare.sa" style="font-size:13px;padding:11px 14px" onkeydown="if(event.key==='Enter') document.getElementById('login-password').focus()"></div>
+      <div class="fg" style="position:relative">
+        <label>كلمة المرور</label>
+        <input type="password" id="login-password" placeholder="••••••••" style="font-size:13px;padding:11px 14px" onkeydown="if(event.key==='Enter') doLogin()">
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin:4px 0 20px;font-size:11px">
+        <label style="display:flex;align-items:center;gap:6px;color:#43474f;cursor:pointer">
+          <input type="checkbox" id="login-remember" checked style="width:14px;height:14px"> تذكرني
+        </label>
+      </div>
+      <div id="login-error" style="display:none;background:#fef2f2;border:1px solid #fecaca;color:#991b1b;padding:9px 12px;border-radius:8px;font-size:12px;margin-bottom:14px"></div>
+      <button id="login-btn" onclick="doLogin()" style="width:100%;padding:13px;background:linear-gradient(135deg,#001e40,#003366);color:#fff;border:none;border-radius:8px;font-family:Tajawal,sans-serif;font-size:14px;font-weight:800;cursor:pointer">تسجيل الدخول</button>
+      <div style="text-align:center;margin-top:18px;font-size:11px;color:#9aa1ac">🔒 بياناتك محمية — وصول مخصص لفريق العمل فقط</div>
+      <div style="text-align:center;margin-top:10px"><button onclick="showSettings()" style="background:none;border:none;color:#6b7280;font-size:11px;cursor:pointer;text-decoration:underline">⚙️ إعدادات الاتصال (للمشرف فقط)</button></div>
+    </div>
+  </div>
+  <!-- اللوحة اليسرى: هوية بصرية -->
+  <div style="flex:1.1;background:linear-gradient(155deg,#001e40 0%,#003366 45%,#006a6a 100%);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;min-width:0">
+    <div style="position:absolute;inset:0;opacity:.08;background-image:radial-gradient(circle at 20% 30%,#fff 0,transparent 40%),radial-gradient(circle at 80% 70%,#fff 0,transparent 40%)"></div>
+    <div style="position:relative;text-align:center;color:#fff;padding:40px;max-width:420px">
+      <div style="font-size:64px;margin-bottom:20px">🏥</div>
+      <div style="font-size:22px;font-weight:800;margin-bottom:12px">مشروع اعتماد CBAHI</div>
+      <div style="font-size:13px;opacity:.85;line-height:1.8">منصة موحّدة لمتابعة جاهزية الاعتماد، السياسات، جولات التدقيق، وملفات الموظفين — لفريق عيادات أبكس كير</div>
+    </div>
+  </div>
+</div>
+
 <div class="app-shell" style="display:flex;min-height:100vh">
 
 <!-- ═══ SIDEBAR (جديد — Stitch) ═══ -->
@@ -315,8 +360,13 @@ tr:hover td{background:rgba(0,194,255,.03)}
   <button class="sb-link" data-tab="employee-files" onclick="switchTab('employee-files')"><span class="material-symbols-outlined">badge</span><span>ملفات الموظفين</span></button>
   <button class="sb-link" data-tab="licenses" onclick="switchTab('licenses')"><span class="material-symbols-outlined">verified</span><span>الرخص والعقود</span></button>
 
+  <div class="sb-group-label" id="sb-group-admin">الإدارة والصلاحيات</div>
+  <button class="sb-link" data-tab="users" onclick="switchTab('users')"><span class="material-symbols-outlined">manage_accounts</span><span>إدارة المستخدمين</span></button>
+
   <div style="margin-top:auto;padding-top:12px;border-top:1px solid rgba(0,30,64,.1)">
+    <div id="sb-current-user" style="padding:8px 10px;margin-bottom:6px;font-size:11px;color:#43474f"></div>
     <button class="sb-link" style="font-size:11px" onclick="showSettings()"><span class="material-symbols-outlined" style="font-size:18px">settings</span><span>إعدادات الاتصال</span></button>
+    <button class="sb-link" style="font-size:11px;color:#c0392b" onclick="doLogout()"><span class="material-symbols-outlined" style="font-size:18px">logout</span><span>تسجيل الخروج</span></button>
   </div>
 </aside>
 <div id="sidebarOverlay" onclick="toggleSidebar(false)" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:150"></div>
@@ -433,7 +483,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
     <div class="sec-icon" style="background:rgba(255,71,87,.1)">🔍</div>
     <div class="sec-title">الملاحظات المبدئية</div>
     <div class="sec-line"></div>
-    <button class="btn btn-primary" onclick="openObsModal()">+ إضافة</button>
+    <button class="btn btn-primary" onclick="openObsModal()" data-perm-tab="observations">+ إضافة</button>
   </div>
   <div class="info-bar">ℹ️ جميع التعديلات تُحفظ تلقائياً في Google Sheets وتظهر فوراً</div>
   <div class="tcard">
@@ -445,7 +495,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
       <table><thead><tr><th class="num">#</th><th>الملاحظة</th><th>الأولوية</th><th>المسؤول</th><th>الموعد</th><th>الحالة</th><th>إجراء</th></tr></thead>
       <tbody id="obs-tbody"></tbody></table>
     </div>
-    <button class="add-row" onclick="openObsModal()">+ إضافة ملاحظة</button>
+    <button class="add-row" onclick="openObsModal()" data-perm-tab="observations">+ إضافة ملاحظة</button>
   </div>
 </div>
 
@@ -460,7 +510,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
     <div style="display:flex;gap:8px;flex-wrap:wrap">
       <button onclick="generateAuditEscalationReport()" style="background:rgba(255,124,42,.25);border:1px solid rgba(255,124,42,.5);color:#fff;
         padding:10px 18px;border-radius:9px;font-family:Tajawal,sans-serif;font-size:13px;font-weight:800;cursor:pointer">🖨️ تقرير تصعيد للإدارة</button>
-      <button onclick="openAuditModal()" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:#fff;
+      <button onclick="openAuditModal()" data-perm-tab="site-audits" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:#fff;
         padding:10px 22px;border-radius:9px;font-family:Tajawal,sans-serif;font-size:13px;font-weight:800;cursor:pointer">＋ إضافة جولة تدقيق</button>
     </div>
   </div>
@@ -486,7 +536,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
         </tbody>
       </table>
     </div>
-    <button class="add-row" onclick="openAuditModal()">+ إضافة جولة تدقيق</button>
+    <button class="add-row" onclick="openAuditModal()" data-perm-tab="site-audits">+ إضافة جولة تدقيق</button>
   </div>
 </div>
 
@@ -512,7 +562,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
         <button id="req-view-table-btn" class="stitch-doc-filter active" style="padding:6px 14px" onclick="setReqView('table')">📋 جدول</button>
         <button id="req-view-kanban-btn" class="stitch-doc-filter" style="padding:6px 14px" onclick="setReqView('kanban')">🗂️ Kanban</button>
       </div>
-      <button class="btn btn-primary" onclick="newReq()">+ إضافة متطلب</button>
+      <button class="btn btn-primary" onclick="newReq()" data-perm-tab="requirements">+ إضافة متطلب</button>
     </div>
   </div>
 
@@ -541,7 +591,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
         <table><thead><tr><th class="num">#</th><th>المتطلب</th><th>الفئة</th><th>الأولوية</th><th>التكلفة</th><th>تمويل؟</th><th>الحالة</th><th>المسؤول</th><th></th></tr></thead>
         <tbody id="req-tbody"></tbody></table>
       </div>
-      <button class="add-row" onclick="newReq()">+ إضافة متطلب</button>
+      <button class="add-row" onclick="newReq()" data-perm-tab="requirements">+ إضافة متطلب</button>
     </div>
   </div>
 
@@ -557,10 +607,10 @@ tr:hover td{background:rgba(0,194,255,.03)}
     <div class="sec-icon" style="background:rgba(16,217,126,.1)">👥</div>
     <div class="sec-title">الفريق الداخلي</div>
     <div class="sec-line"></div>
-    <button class="btn btn-primary" onclick="newTeam()">+ إضافة</button>
+    <button class="btn btn-primary" onclick="newTeam()" data-perm-tab="team">+ إضافة</button>
   </div>
   <div class="team-grid" id="team-grid"></div>
-  <button class="add-row" style="margin-top:10px;border-radius:8px" onclick="newTeam()">+ إضافة عضو</button>
+  <button class="add-row" style="margin-top:10px;border-radius:8px" onclick="newTeam()" data-perm-tab="team">+ إضافة عضو</button>
 </div>
 
 <!-- ═══ LOCATIONS ═══ -->
@@ -571,7 +621,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
         <div class="sec-icon" style="background:rgba(0,194,255,.1)">🏥</div>
         <div class="sec-title">تعديلات دائمة</div>
         <div class="sec-line"></div>
-        <button class="btn btn-primary" onclick="newLoc()">+</button>
+        <button class="btn btn-primary" onclick="newLoc()" data-perm-tab="locations">+</button>
       </div>
       <div class="loc-grid" id="loc-perm-grid"></div>
     </div>
@@ -580,14 +630,14 @@ tr:hover td{background:rgba(0,194,255,.03)}
         <div class="sec-icon" style="background:rgba(255,124,42,.1)">🔄</div>
         <div class="sec-title">تعديلات مؤقتة (أثناء الزيارة)</div>
         <div class="sec-line"></div>
-        <button class="btn btn-primary" onclick="newTmp()">+</button>
+        <button class="btn btn-primary" onclick="newTmp()" data-perm-tab="locations">+</button>
       </div>
       <div class="tcard">
         <div class="tscroll">
           <table><thead><tr><th>العنصر</th><th>المكان</th><th>التعديل</th><th>يُعاد</th><th></th></tr></thead>
           <tbody id="tmp-tbody"></tbody></table>
         </div>
-        <button class="add-row" onclick="newTmp()">+ إضافة تعديل مؤقت</button>
+        <button class="add-row" onclick="newTmp()" data-perm-tab="locations">+ إضافة تعديل مؤقت</button>
       </div>
     </div>
   </div>
@@ -599,7 +649,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
     <div class="sec-icon" style="background:rgba(240,180,41,.1)">🎓</div>
     <div class="sec-title">المحاضرات المجدولة</div>
     <div class="sec-line"></div>
-    <button class="btn btn-primary" onclick="newLec()">+ إضافة</button>
+    <button class="btn btn-primary" onclick="newLec()" data-perm-tab="lectures">+ إضافة</button>
   </div>
   <div class="tcard">
     <div class="tcard-hdr">
@@ -610,7 +660,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
       <table><thead><tr><th class="num">#</th><th>العنوان</th><th>الملقي</th><th>البديل</th><th>التاريخ</th><th>الجمهور</th><th>تمت؟</th><th></th></tr></thead>
       <tbody id="lec-tbody"></tbody></table>
     </div>
-    <button class="add-row" onclick="newLec()">+ إضافة محاضرة</button>
+    <button class="add-row" onclick="newLec()" data-perm-tab="lectures">+ إضافة محاضرة</button>
   </div>
 </div>
 
@@ -621,7 +671,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
       <h2 style="font-size:22px;font-weight:800;color:#101828;margin-bottom:4px">إدارة المهام والتكليفات</h2>
       <p style="color:#6b7280;font-size:13px">متابعة وتنفيذ متطلبات الاعتماد الصحي وتحديثات الجودة</p>
     </div>
-    <button class="btn btn-primary" onclick="newAssign()">+ إضافة مهمة</button>
+    <button class="btn btn-primary" onclick="newAssign()" data-perm-tab="assignments">+ إضافة مهمة</button>
   </div>
 
   <div id="assign-kpi-row" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px"></div>
@@ -642,7 +692,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
       <table><thead><tr><th>اسم المهمة</th><th>المسؤول</th><th>تاريخ الاستحقاق</th><th>الأولوية</th><th>الحالة</th><th>الإجراءات</th></tr></thead>
       <tbody id="assign-tbody"></tbody></table>
     </div>
-    <button class="add-row" onclick="newAssign()">+ إضافة تكليف</button>
+    <button class="add-row" onclick="newAssign()" data-perm-tab="assignments">+ إضافة تكليف</button>
   </div>
 </div>
 
@@ -652,7 +702,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
     <div class="sec-icon" style="background:rgba(0,194,255,.1)">📜</div>
     <div class="sec-title">السياسات والموقعون</div>
     <div class="sec-line"></div>
-    <button class="btn btn-primary" onclick="newPol()">+ إضافة</button>
+    <button class="btn btn-primary" onclick="newPol()" data-perm-tab="policies">+ إضافة</button>
   </div>
   <div class="sig-grid" id="sig-grid"></div>
   <div class="tcard">
@@ -664,7 +714,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
       <table><thead><tr><th class="num">#</th><th>اسم السياسة</th><th>القسم</th><th>جاهزية المحتوى</th><th>الموقعون المطلوبون</th><th>حالة التوقيع</th><th></th></tr></thead>
       <tbody id="pol-tbody"></tbody></table>
     </div>
-    <button class="add-row" onclick="newPol()">+ إضافة سياسة</button>
+    <button class="add-row" onclick="newPol()" data-perm-tab="policies">+ إضافة سياسة</button>
   </div>
 </div>
 
@@ -677,7 +727,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
       <h2 style="margin:0 0 8px;font-size:24px;font-weight:900">📁 المستندات</h2>
       <p style="margin:0;opacity:.9;font-size:13px">أضف رابط مجلد المستندات أو سجّل مستنداتك يدوياً</p>
     </div>
-    <button onclick="newWf()" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:#fff;padding:10px 22px;border-radius:9px;font-family:Tajawal,sans-serif;font-size:13px;font-weight:800;cursor:pointer">＋ إضافة مستند</button>
+    <button onclick="newWf()" data-perm-tab="workflow" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:#fff;padding:10px 22px;border-radius:9px;font-family:Tajawal,sans-serif;font-size:13px;font-weight:800;cursor:pointer">＋ إضافة مستند</button>
   </div>
 
   <!-- Folder Link Input -->
@@ -821,7 +871,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
         <p style="margin:0;opacity:.85;font-size:12px">ارفع تقرير التحليل اليومي وتتبّع نسبة اكتمال الملفات</p>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button onclick="openModal('m-patient-file')" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:#fff;padding:10px 22px;border-radius:9px;font-family:Tajawal,sans-serif;font-size:13px;font-weight:800;cursor:pointer">＋ إضافة تقرير</button>
+        <button onclick="openModal('m-patient-file')" data-perm-tab="patient-files" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:#fff;padding:10px 22px;border-radius:9px;font-family:Tajawal,sans-serif;font-size:13px;font-weight:800;cursor:pointer">＋ إضافة تقرير</button>
         <button onclick="pfFetchFromSheets()" style="background:rgba(16,217,126,.2);border:1px solid rgba(16,217,126,.4);color:#10D97E;padding:10px 18px;border-radius:9px;font-family:Tajawal,sans-serif;font-size:13px;font-weight:800;cursor:pointer">🔄 مزامنة</button>
       </div>
     </div>
@@ -848,7 +898,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
   </div>
 
   <!-- Upload Box -->
-  <div style="background:var(--surface);border:2px dashed rgba(0,194,255,.3);border-radius:14px;padding:24px;margin-bottom:20px">
+  <div data-perm-tab="patient-files" style="background:var(--surface);border:2px dashed rgba(0,194,255,.3);border-radius:14px;padding:24px;margin-bottom:20px">
     <div style="font-size:13px;font-weight:800;color:var(--text);margin-bottom:16px">📤 رفع تقرير تحليل جديد</div>
 
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;align-items:end">
@@ -1102,7 +1152,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
         <h2 style="margin:0 0 5px;font-size:20px;font-weight:900">📋 الرخص والعقود والاتفاقيات</h2>
         <p style="margin:0;opacity:.85;font-size:12px">سجّل كل بند مع تاريخ سريانه — تؤثر على لوحة الإنجاز الكلي (وزن 5%)</p>
       </div>
-      <button onclick="licOpenModal()" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:#fff;padding:10px 22px;border-radius:9px;font-family:Tajawal,sans-serif;font-size:13px;font-weight:800;cursor:pointer">
+      <button onclick="licOpenModal()" data-perm-tab="licenses" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:#fff;padding:10px 22px;border-radius:9px;font-family:Tajawal,sans-serif;font-size:13px;font-weight:800;cursor:pointer">
         ＋ إضافة بند
       </button>
     </div>
@@ -1259,6 +1309,59 @@ tr:hover td{background:rgba(0,194,255,.03)}
     </div>
   </div>
 </div><!-- /overlay#m-lic2 -->
+
+<!-- ═══ USERS & PERMISSIONS ═══ -->
+<div class="pane" id="pane-users">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:14px;margin-bottom:20px">
+    <div>
+      <h2 style="font-size:22px;font-weight:800;color:#101828;margin-bottom:4px">إدارة المستخدمين والصلاحيات</h2>
+      <p style="color:#6b7280;font-size:12px">تحكّم بمن يستطيع الدخول والتعديل في كل قسم من النظام</p>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <input type="text" id="users-search" placeholder="🔍 بحث عن مستخدم..." oninput="renderUsersTable()"
+        style="padding:8px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:Tajawal,sans-serif;font-size:12px;min-width:200px">
+      <button class="btn btn-primary" onclick="openUserModal()">+ إضافة مستخدم جديد</button>
+    </div>
+  </div>
+
+  <div class="tcard">
+    <div class="tscroll">
+      <table>
+        <thead><tr><th>الاسم</th><th>البريد الإلكتروني</th><th>القسم</th><th>الدور</th><th style="text-align:center">الحالة</th><th style="text-align:center">صلاحيات</th><th></th></tr></thead>
+        <tbody id="users-tbody"><tr><td colspan="7" style="text-align:center;color:var(--text3);padding:30px">جاري التحميل...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- User Add/Edit Modal -->
+<div class="overlay" id="m-user">
+  <div class="modal">
+    <h3 id="m-user-title">👤 إضافة مستخدم جديد</h3>
+    <input type="hidden" id="user-eid">
+    <div class="fg"><label>الاسم الكامل *</label><input type="text" id="user-name" placeholder="مثال: د. أحمد علي"></div>
+    <div class="fg"><label>البريد الإلكتروني *</label><input type="email" id="user-email" placeholder="name@apexcare.sa" style="direction:ltr"></div>
+    <div class="fg"><label id="user-pw-label">كلمة المرور *</label><input type="password" id="user-password" placeholder="اتركه فارغاً للإبقاء على القديمة (عند التعديل)"></div>
+    <div class="fg"><label>القسم</label><input type="text" id="user-dept" placeholder="مثال: التمريض، الجودة..."></div>
+    <div class="fg"><label>الدور *</label>
+      <select id="user-role">
+        <option>مشرف</option><option>مدير الجودة</option><option>رئيس قسم</option><option selected>موظف</option>
+      </select></div>
+    <div class="fg"><label>الحالة</label>
+      <select id="user-active"><option value="نشط">نشط</option><option value="غير نشط">غير نشط</option></select></div>
+    <div style="border-top:1px solid var(--border);margin:14px 0;padding-top:14px">
+      <div style="font-size:11px;font-weight:700;color:var(--text3);margin-bottom:8px">صلاحيات إضافية (فوق صلاحيات الدور الافتراضية)</div>
+      <label style="display:flex;align-items:center;gap:8px;font-size:12px;margin-bottom:8px;cursor:pointer"><input type="checkbox" id="user-perm-reports" style="width:15px;height:15px"> عرض التقارير</label>
+      <label style="display:flex;align-items:center;gap:8px;font-size:12px;margin-bottom:8px;cursor:pointer"><input type="checkbox" id="user-perm-approve" style="width:15px;height:15px"> الموافقة على الوثائق وتوقيع السياسات</label>
+      <label style="display:flex;align-items:center;gap:8px;font-size:12px;margin-bottom:8px;cursor:pointer"><input type="checkbox" id="user-perm-reqs" style="width:15px;height:15px"> تعديل المتطلبات (حتى لو دوره لا يسمح افتراضياً)</label>
+      <label style="display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer"><input type="checkbox" id="user-perm-manage" style="width:15px;height:15px"> إدارة المستخدمين (صلاحية مشرف)</label>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-danger" onclick="closeModal('m-user')">إلغاء</button>
+      <button class="btn btn-primary" onclick="saveUserAccount()">💾 حفظ</button>
+    </div>
+  </div>
+</div>
 
 <!-- ═══ MODALS ═══ -->
 
@@ -1610,6 +1713,9 @@ function switchTab(id) {
   if (id === 'patient-files' && GAS_URL) {
     setTimeout(function(){ pfFetchFromSheets(); }, 500);
   }
+  if (id === 'users' && GAS_URL) {
+    setTimeout(function(){ loadUsers(); }, 300);
+  }
 }
 
 // ═══ Sidebar toggle (موبايل) ═══
@@ -1631,6 +1737,98 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 
+
+// ════════════════════════════════════════════════════════════════
+// نظام تسجيل الدخول والصلاحيات
+// ════════════════════════════════════════════════════════════════
+var CURRENT_USER = null;
+var ROLE_PERMISSIONS = {
+  'مشرف':        { view:'all', edit:'all', manageUsers:true },
+  'مدير الجودة': { view:'all', edit:'all', manageUsers:false },
+  'رئيس قسم':    { view:['overview','observations','site-audits','requirements','team','locations','lectures','assignments','workflow','patient-files','policies2'],
+                    edit:['observations','site-audits','requirements','team','locations','lectures','assignments'], manageUsers:false },
+  'موظف':        { view:['overview','observations','site-audits','lectures','assignments'], edit:['observations','site-audits'], manageUsers:false }
+};
+function rolePerm() { return (CURRENT_USER && ROLE_PERMISSIONS[CURRENT_USER.role]) || ROLE_PERMISSIONS['موظف']; }
+function userCanView(tab) { var p = rolePerm(); return p.view === 'all' || p.view.indexOf(tab) > -1; }
+function userCanEdit(tab) {
+  if (CURRENT_USER && CURRENT_USER.canEditRequirements && tab === 'requirements') return true;
+  var p = rolePerm();
+  return p.edit === 'all' || p.edit.indexOf(tab) > -1;
+}
+function userCanManageUsers() { return !!(CURRENT_USER && (rolePerm().manageUsers || CURRENT_USER.canManageUsers)); }
+function userCanApprove() { return !!(CURRENT_USER && (rolePerm().edit === 'all' || CURRENT_USER.canApproveDocuments)); }
+
+function applyPermissionsToUI() {
+  document.querySelectorAll('.sb-link[data-tab]').forEach(function(link) {
+    var tab = link.getAttribute('data-tab');
+    if (tab === 'users') { link.style.display = userCanManageUsers() ? '' : 'none'; return; }
+    link.style.display = userCanView(tab) ? '' : 'none';
+  });
+  var adminLabel = document.getElementById('sb-group-admin');
+  if (adminLabel) adminLabel.style.display = userCanManageUsers() ? '' : 'none';
+  document.querySelectorAll('[data-perm-tab]').forEach(function(el) {
+    var tab = el.getAttribute('data-perm-tab');
+    el.style.display = userCanEdit(tab) ? '' : 'none';
+  });
+  var curUserEl = document.getElementById('sb-current-user');
+  if (curUserEl && CURRENT_USER) {
+    curUserEl.innerHTML = '👤 <strong>' + CURRENT_USER.name + '</strong><br><span style="color:#9aa1ac">' + CURRENT_USER.role + '</span>';
+  }
+  try { renderAll(); } catch(e) {}
+}
+
+async function doLogin() {
+  var email = (document.getElementById('login-email').value||'').trim();
+  var password = document.getElementById('login-password').value||'';
+  var errEl = document.getElementById('login-error');
+  errEl.style.display = 'none';
+  if (!email || !password) { errEl.textContent = 'أدخل البريد وكلمة المرور'; errEl.style.display='block'; return; }
+  if (!GAS_URL) { errEl.textContent = '⚠️ رابط الاتصال بالنظام غير مهيأ — اضغط "إعدادات الاتصال" بالأسفل'; errEl.style.display='block'; return; }
+  var btn = document.getElementById('login-btn');
+  btn.disabled = true; btn.textContent = '⏳ جاري التحقق...';
+  try {
+    var res = await callGAS({ action:'login', email: email, password: password });
+    if (res && res.success) {
+      CURRENT_USER = res.user;
+      var remember = document.getElementById('login-remember').checked;
+      var expiry = Date.now() + (remember ? 30*86400000 : 12*3600000);
+      localStorage.setItem('cbahi_session', JSON.stringify({ user: CURRENT_USER, expiry: expiry }));
+      document.getElementById('login-screen').style.display = 'none';
+      applyPermissionsToUI();
+      toast('✅ مرحباً ' + CURRENT_USER.name, 'success');
+    } else {
+      errEl.textContent = (res && res.error) || 'فشل تسجيل الدخول'; errEl.style.display = 'block';
+    }
+  } catch(e) {
+    errEl.textContent = '⚠️ ' + e.message; errEl.style.display = 'block';
+  } finally {
+    btn.disabled = false; btn.textContent = 'تسجيل الدخول';
+  }
+}
+
+function doLogout() {
+  if (!confirm('تسجيل الخروج؟')) return;
+  localStorage.removeItem('cbahi_session');
+  location.reload();
+}
+
+function checkSession() {
+  try {
+    var raw = localStorage.getItem('cbahi_session');
+    if (!raw) return;
+    var s = JSON.parse(raw);
+    if (s && s.user && s.expiry > Date.now()) {
+      CURRENT_USER = s.user;
+      var scr = document.getElementById('login-screen');
+      if (scr) scr.style.display = 'none';
+      applyPermissionsToUI();
+      if (userCanManageUsers()) loadUsers();
+    } else {
+      localStorage.removeItem('cbahi_session');
+    }
+  } catch(e) {}
+}
 
 let DB = {
   observations:[], requirements:[], team:[],
@@ -1924,7 +2122,8 @@ const statusCls = {
 function pill(txt){ return `<span class="pill ${statusCls[txt]||'s-pend'}">${txt}</span>`; }
 function priPill(p){ const m={'عالية':'s-crit','متوسطة':'s-warn','منخفضة':'s-pend'}; return `<span class="pill ${m[p]||'s-pend'}">${p}</span>`; }
 
-function actionBtns(editFn, delFn, id) {
+function actionBtns(editFn, delFn, id, tabKey) {
+  if (tabKey && !userCanEdit(tabKey)) return '<span style="color:var(--text3);font-size:10px">—</span>';
   return `<div style="display:flex;gap:4px">
     <button class="btn btn-ghost" style="padding:3px 8px;font-size:10px" onclick="${editFn}('${id}')">تعديل</button>
     <button class="btn btn-danger" style="padding:3px 8px;font-size:10px" onclick="${delFn}('${id}')">حذف</button>
@@ -2063,7 +2262,7 @@ function renderObs() {
     <td>${o.owner||'–'}</td>
     <td style="font-size:11px">${o.due||'–'}</td>
     <td>${pill(o.status||'معلقة')}</td>
-    <td>${actionBtns('editObs','delObs',o.id)}</td></tr>`).join('');
+    <td>${actionBtns('editObs','delObs',o.id,'observations')}</td></tr>`).join('');
 }
 
 // ─── Requirements ────────────────────────────────────────────
@@ -2104,7 +2303,7 @@ function renderReq() {
     <td style="vertical-align:top;padding-top:12px">${r.financial==='نعم'?pill('نعم'):pill('لا')}</td>
     <td style="vertical-align:top;padding-top:12px">${pill(r.status||'معلق')}</td>
     <td style="font-size:11px;vertical-align:top;padding-top:12px;max-width:120px">${r.owner||'–'}</td>
-    <td style="vertical-align:top;padding-top:10px">${actionBtns('editReq','delReq',r.id)}</td></tr>`).join('')
+    <td style="vertical-align:top;padding-top:10px">${actionBtns('editReq','delReq',r.id,'requirements')}</td></tr>`).join('')
     : '<tr><td colspan="9" style="text-align:center;color:var(--text3);padding:30px">لا توجد نتائج مطابقة</td></tr>';
 
   // دائرة الإنجاز: نسبة المتطلبات المكتملة من الإجمالي
@@ -2160,8 +2359,8 @@ function renderTeam() {
         <div style="font-size:10px;color:var(--text3);margin-top:2px">${t.proj||''}</div>
       </div>
       <div style="display:flex;flex-direction:column;gap:4px">
-        <button class="btn btn-ghost" style="padding:2px 7px;font-size:9px" onclick="editTeam('${t.id}')">✏️</button>
-        <button class="btn btn-danger" style="padding:2px 7px;font-size:9px" onclick="delTeam('${t.id}')">🗑️</button>
+        ${userCanEdit('team') ? `<button class="btn btn-ghost" style="padding:2px 7px;font-size:9px" onclick="editTeam('${t.id}')">✏️</button>
+        <button class="btn btn-danger" style="padding:2px 7px;font-size:9px" onclick="delTeam('${t.id}')">🗑️</button>` : ''}
       </div>
     </div>`).join('');
 }
@@ -2173,7 +2372,7 @@ function renderLoc() {
       <div class="loc-name">🏥 ${l.name||''} ${pill(l.status||'معلق')}</div>
       <div class="loc-before">${l.before||''}</div>
       <div class="loc-after">${l.after||''}</div>
-      <div style="margin-top:8px;display:flex;gap:4px">${actionBtns('editLoc','delLoc',l.id)}</div>
+      <div style="margin-top:8px;display:flex;gap:4px">${actionBtns('editLoc','delLoc',l.id,'locations')}</div>
     </div>`).join('');
   document.getElementById('tmp-tbody').innerHTML = DB.tmpChanges.map(t=>`
     <tr>
@@ -2181,7 +2380,7 @@ function renderLoc() {
     <td style="font-size:11px">${t.loc||''}</td>
     <td style="font-size:11px;color:var(--orange)">${t.change||''}</td>
     <td style="font-size:11px;color:var(--green)">${t.restore||''}</td>
-    <td>${actionBtns('editTmp','delTmp',t.id)}</td></tr>`).join('');
+    <td>${actionBtns('editTmp','delTmp',t.id,'locations')}</td></tr>`).join('');
 }
 
 // ─── Lectures ─────────────────────────────────────────────────
@@ -2222,7 +2421,7 @@ function renderLec() {
     <td style="font-size:11px;white-space:nowrap">${(function(){var pd=parseLecDate(l.date);var t=l.time||pd.time;return '<div style=\"font-weight:700;color:var(--text)\">'+pd.display+'</div>'+(t?'<div style=\"font-size:10px;color:var(--text3)\">🕐 '+t+'</div>':'');})()}</td>
     <td><span class="badge badge-purple" style="font-size:9px">${l.audience||l.aud||''}</span></td>
     <td>${l.done==='نعم'?pill('✅ تمت'):pill('⏳ لم تتم')}</td>
-    <td>${actionBtns('editLec','delLec',l.id)}</td></tr>`).join('');
+    <td>${actionBtns('editLec','delLec',l.id,'lectures')}</td></tr>`).join('');
 }
 
 // ─── Assignments ──────────────────────────────────────────────
@@ -2287,7 +2486,7 @@ function renderAssign() {
       <td style="font-size:11px;color:${dueColor};font-weight:${a._overdue?'700':'400'}">${a.duedate||a.time||'—'}</td>
       <td>${priorityPill(a.priority||'متوسطة')}</td>
       <td>${pill(statusLabel)}</td>
-      <td>${actionBtns('editAssign','delAssign',a.id)}</td></tr>`;
+      <td>${actionBtns('editAssign','delAssign',a.id,'assignments')}</td></tr>`;
   }).join('');
   renderAssignKPIs();
 }
@@ -2315,7 +2514,7 @@ function renderPol() {
     <td>${pill(p.content||'لم تبدأ')}</td>
     <td style="font-size:11px;color:var(--text3)">${p.sigs||''}</td>
     <td>${pill(p.sigStatus||'لم يوقع')}</td>
-    <td>${actionBtns('editPol','delPol',p.id)}</td></tr>`).join('');
+    <td>${actionBtns('editPol','delPol',p.id,'policies')}</td></tr>`).join('');
 }
 
 // ─── Workflow ─────────────────────────────────────────────────
@@ -2330,7 +2529,7 @@ function renderWf() {
         <div class="wf-desc">${w.desc||''}</div>
         ${w.doc?`<div style="font-size:10px;color:var(--accent);margin-top:3px">📄 ${w.doc}</div>`:''}
       </div>
-      ${actionBtns('editWf','delWf',w.id)}
+      ${actionBtns('editWf','delWf',w.id,'workflow')}
     </div>`).join('');
 }
 
@@ -2836,6 +3035,7 @@ function renderPolTable() {
 const STATUS_CYCLE = ['لم تبدأ','قيد الإعداد','مكتملة'];
 
 async function cycleStatus(id, el) {
+  if (!userCanEdit('policies2')) { toast('⛔ لا تملك صلاحية تعديل السياسات', 'error'); return; }
   const p = POLICIES.find(x => String(x.id)===String(id));
   if (!p) return;
   const next = STATUS_CYCLE[(STATUS_CYCLE.indexOf(p.contentReady||'لم تبدأ')+1)%STATUS_CYCLE.length];
@@ -2849,6 +3049,7 @@ async function cycleStatus(id, el) {
 }
 
 async function toggleSig(id, field, el) {
+  if (!userCanApprove()) { toast('⛔ لا تملك صلاحية الموافقة على الوثائق أو التوقيع', 'error'); return; }
   const p = POLICIES.find(x => String(x.id)===String(id));
   if (!p) return;
   p[field] = p[field]==='✅' ? '⬜' : '✅';
@@ -3565,8 +3766,8 @@ function pfRender() {
       '<td style="text-align:center"><span style="font-weight:700;color:'+pctColor+'">'+pct+'%</span></td>'+
       '<td style="text-align:center">'+fileBtn+'</td>'+
       '<td style="text-align:center;display:flex;gap:4px;justify-content:center">'+
-        '<button onclick="pfEdit(\''+p.id+'\')" style="padding:3px 8px;background:rgba(0,194,255,.08);border:1px solid rgba(0,194,255,.2);color:var(--accent);border-radius:5px;font-size:10px;cursor:pointer">✏️</button>'+
-        '<button onclick="pfDelete(\''+p.id+'\')" style="padding:3px 8px;background:rgba(255,71,87,.08);border:1px solid rgba(255,71,87,.2);color:var(--red);border-radius:5px;font-size:10px;cursor:pointer">🗑️</button>'+
+        (userCanEdit('patient-files') ? '<button onclick="pfEdit(\''+p.id+'\')" style="padding:3px 8px;background:rgba(0,194,255,.08);border:1px solid rgba(0,194,255,.2);color:var(--accent);border-radius:5px;font-size:10px;cursor:pointer">✏️</button>'+
+        '<button onclick="pfDelete(\''+p.id+'\')" style="padding:3px 8px;background:rgba(255,71,87,.08);border:1px solid rgba(255,71,87,.2);color:var(--red);border-radius:5px;font-size:10px;cursor:pointer">🗑️</button>' : '—')+
       '</td>'+
     '</tr>';
   }).join('');
@@ -3591,6 +3792,9 @@ renderAll = function() {
 // AUTO-SYNC SYSTEM
 // ════════════════════════════════════════════════════════════════
 (function() {
+  // تحقق من وجود جلسة دخول محفوظة
+  checkSession();
+
   // Load local data first
   loadLocalFallback();
   renderAll();
@@ -4012,8 +4216,8 @@ function licRender() {
       '<td style="text-align:center"><span class="pill '+sc+'" style="font-size:10px">'+it.status+'</span></td>'+
       '<td style="text-align:center"><div style="display:flex;gap:4px;justify-content:center;align-items:center">'+
         linkBtn+
-        '<button onclick="licOpenModal(\''+it.id+'\')" style="padding:3px 8px;background:rgba(0,194,255,.08);border:1px solid rgba(0,194,255,.2);color:var(--accent);border-radius:5px;font-size:10px;cursor:pointer">✏️</button>'+
-        '<button onclick="licDelete(\''+it.id+'\')" style="padding:3px 8px;background:rgba(255,71,87,.08);border:1px solid rgba(255,71,87,.2);color:var(--red);border-radius:5px;font-size:10px;cursor:pointer">🗑️</button>'+
+        (userCanEdit('licenses') ? '<button onclick="licOpenModal(\''+it.id+'\')" style="padding:3px 8px;background:rgba(0,194,255,.08);border:1px solid rgba(0,194,255,.2);color:var(--accent);border-radius:5px;font-size:10px;cursor:pointer">✏️</button>'+
+        '<button onclick="licDelete(\''+it.id+'\')" style="padding:3px 8px;background:rgba(255,71,87,.08);border:1px solid rgba(255,71,87,.2);color:var(--red);border-radius:5px;font-size:10px;cursor:pointer">🗑️</button>' : '')+
       '</div></td>'+
     '</tr>';
   }).join('');
@@ -4719,8 +4923,8 @@ function renderAuditTable() {
       '<td style="text-align:center">' + sigs + '</td>' +
       '<td>' + statusHtml + '</td>' +
       '<td style="display:flex;gap:4px">' +
-        '<button class="btn btn-ghost" style="padding:3px 8px;font-size:10px" onclick="editAudit(\''+a.id+'\')">تعديل</button>' +
-        '<button class="btn btn-danger" style="padding:3px 8px;font-size:10px" onclick="delAudit(\''+a.id+'\')">حذف</button>' +
+        (userCanEdit('site-audits') ? '<button class="btn btn-ghost" style="padding:3px 8px;font-size:10px" onclick="editAudit(\''+a.id+'\')">تعديل</button>' +
+        '<button class="btn btn-danger" style="padding:3px 8px;font-size:10px" onclick="delAudit(\''+a.id+'\')">حذف</button>' : '<span style="color:var(--text3);font-size:10px">—</span>') +
       '</td>' +
     '</tr>';
   }).join('');
@@ -4820,6 +5024,140 @@ renderAll = function() {
   renderAuditTable();
   renderAuditKPIs();
 };
+
+// ════════════════════════════════════════════════════════════════
+// إدارة المستخدمين والصلاحيات
+// ════════════════════════════════════════════════════════════════
+var USERS_LIST = [];
+
+async function loadUsers() {
+  if (!GAS_URL) return;
+  var tbody = document.getElementById('users-tbody');
+  if (tbody) tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:30px">جاري التحميل...</td></tr>';
+  try {
+    var res = await gasGet('getUsers');
+    if (res && res.success) { USERS_LIST = res.data || []; renderUsersTable(); }
+    else if (tbody) tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--red);padding:30px">تعذّر جلب المستخدمين</td></tr>';
+  } catch(e) {
+    console.warn('loadUsers error:', e);
+    if (tbody) tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--red);padding:30px">⚠️ ' + e.message + '</td></tr>';
+  }
+}
+
+function isUserActive(u) { return u.active === true || u.active === '✅' || u.active === 'نشط' || u.active === 'TRUE' || u.active === true; }
+
+function renderUsersTable() {
+  var tbody = document.getElementById('users-tbody');
+  if (!tbody) return;
+  var search = ((document.getElementById('users-search')||{}).value||'').toLowerCase();
+  var list = USERS_LIST.filter(function(u){
+    return !search || (u.name||'').toLowerCase().indexOf(search)>-1 || (u.email||'').toLowerCase().indexOf(search)>-1;
+  });
+  if (!list.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:30px">لا يوجد مستخدمون بعد</td></tr>'; return; }
+  var roleColors = {'مشرف':'#a855f7','مدير الجودة':'#1a8f5c','رئيس قسم':'#0066cc','موظف':'#6b7280'};
+  tbody.innerHTML = list.map(function(u) {
+    var initial = (u.name||'؟').trim().charAt(0);
+    var active = isUserActive(u);
+    var roleColor = roleColors[u.role] || '#6b7280';
+    var permIcons = [];
+    if (u.canViewReports==='✅'||u.canViewReports===true) permIcons.push('<span title="عرض التقارير">📊</span>');
+    if (u.canApproveDocuments==='✅'||u.canApproveDocuments===true) permIcons.push('<span title="الموافقة على الوثائق">✅</span>');
+    if (u.canEditRequirements==='✅'||u.canEditRequirements===true) permIcons.push('<span title="تعديل المتطلبات">📋</span>');
+    if (u.canManageUsers==='✅'||u.canManageUsers===true) permIcons.push('<span title="إدارة المستخدمين">👑</span>');
+    var permsHtml = permIcons.length ? permIcons.join(' ') : '<span style="color:var(--text3);font-size:10px">—</span>';
+    return '<tr>' +
+      '<td class="td-main"><div style="display:flex;align-items:center;gap:8px">' +
+        '<div style="width:30px;height:30px;border-radius:50%;background:'+roleColor+'22;color:'+roleColor+';display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0">'+initial+'</div>' +
+        '<span>'+(u.name||'')+'</span></div></td>' +
+      '<td style="font-size:11px;color:var(--text2);direction:ltr;text-align:right">'+(u.email||'')+'</td>' +
+      '<td style="font-size:11px">'+(u.department||'—')+'</td>' +
+      '<td><span style="background:'+roleColor+'1a;color:'+roleColor+';padding:3px 10px;border-radius:999px;font-size:10px;font-weight:700">'+(u.role||'')+'</span></td>' +
+      '<td style="text-align:center"><label style="position:relative;display:inline-block;width:36px;height:20px;cursor:pointer">' +
+        '<input type="checkbox" '+(active?'checked':'')+' onchange="toggleUserActive(\''+u.id+'\',this.checked)" style="opacity:0;width:0;height:0">' +
+        '<span style="position:absolute;inset:0;background:'+(active?'#1a8f5c':'#c3c6d1')+';border-radius:20px;transition:.2s;pointer-events:none"></span>' +
+        '<span style="position:absolute;width:16px;height:16px;right:'+(active?'2px':'18px')+';top:2px;background:#fff;border-radius:50%;transition:.2s;pointer-events:none"></span>' +
+      '</label></td>' +
+      '<td style="text-align:center;font-size:13px">'+permsHtml+'</td>' +
+      '<td><div style="display:flex;gap:4px">' +
+        '<button class="btn btn-ghost" style="padding:3px 10px;font-size:10px" onclick="openUserModal(\''+u.id+'\')">تعديل</button>' +
+        '<button class="btn btn-danger" style="padding:3px 10px;font-size:10px" onclick="deleteUserAccount(\''+u.id+'\')">حذف</button>' +
+      '</div></td>' +
+    '</tr>';
+  }).join('');
+}
+
+function openUserModal(id) {
+  var u = id ? USERS_LIST.find(function(x){ return String(x.id)===String(id); }) : null;
+  document.getElementById('user-eid').value = u ? u.id : '';
+  document.getElementById('m-user-title').textContent = u ? '✏️ تعديل مستخدم' : '👤 إضافة مستخدم جديد';
+  document.getElementById('user-name').value = u ? (u.name||'') : '';
+  document.getElementById('user-email').value = u ? (u.email||'') : '';
+  document.getElementById('user-password').value = '';
+  document.getElementById('user-password').placeholder = u ? 'اتركه فارغاً للإبقاء على القديمة' : '••••••••';
+  document.getElementById('user-pw-label').textContent = u ? 'كلمة المرور (اختياري)' : 'كلمة المرور *';
+  document.getElementById('user-dept').value = u ? (u.department||'') : '';
+  document.getElementById('user-role').value = u ? (u.role||'موظف') : 'موظف';
+  document.getElementById('user-active').value = u ? (isUserActive(u) ? 'نشط' : 'غير نشط') : 'نشط';
+  document.getElementById('user-perm-reports').checked = !!(u && (u.canViewReports==='✅'||u.canViewReports===true));
+  document.getElementById('user-perm-approve').checked = !!(u && (u.canApproveDocuments==='✅'||u.canApproveDocuments===true));
+  document.getElementById('user-perm-reqs').checked = !!(u && (u.canEditRequirements==='✅'||u.canEditRequirements===true));
+  document.getElementById('user-perm-manage').checked = !!(u && (u.canManageUsers==='✅'||u.canManageUsers===true));
+  openModal('m-user');
+}
+
+async function saveUserAccount() {
+  var name = document.getElementById('user-name').value.trim();
+  var email = document.getElementById('user-email').value.trim();
+  if (!name || !email) { toast('⚠️ الاسم والبريد مطلوبان','error'); return; }
+  var id = document.getElementById('user-eid').value;
+  var password = document.getElementById('user-password').value;
+  if (!id && !password) { toast('⚠️ كلمة المرور مطلوبة للمستخدم الجديد','error'); return; }
+  var obj = {
+    name: name, email: email,
+    department: document.getElementById('user-dept').value,
+    role: document.getElementById('user-role').value,
+    active: document.getElementById('user-active').value === 'نشط',
+    canViewReports: document.getElementById('user-perm-reports').checked,
+    canApproveDocuments: document.getElementById('user-perm-approve').checked,
+    canEditRequirements: document.getElementById('user-perm-reqs').checked,
+    canManageUsers: document.getElementById('user-perm-manage').checked
+  };
+  if (id) obj.id = id;
+  if (password) obj.password = password;
+  try {
+    var res = await gasMutate('saveUser', '', '', obj);
+    if (res && res.ok) {
+      toast('✅ تم الحفظ', 'success');
+      closeModal('m-user');
+      loadUsers();
+    } else {
+      toast('❌ ' + ((res&&res.error)||'فشل الحفظ'), 'error');
+    }
+  } catch(e) { toast('⚠️ ' + e.message, 'error'); }
+}
+
+async function toggleUserActive(id, checked) {
+  var u = USERS_LIST.find(function(x){ return String(x.id)===String(id); });
+  if (u) u.active = checked; // تحديث محلي فوري
+  renderUsersTable();
+  try {
+    await gasMutate('saveUser','','',{ id:id, active: checked });
+    toast(checked?'✅ تم تفعيل الحساب':'⛔ تم تعطيل الحساب','info');
+  } catch(e) {
+    toast('⚠️ ' + e.message, 'error');
+    loadUsers(); // تراجع بجلب الحالة الحقيقية من الشيت
+  }
+}
+
+async function deleteUserAccount(id) {
+  if (!confirm('حذف هذا المستخدم نهائياً؟ لن يستطيع تسجيل الدخول بعدها.')) return;
+  try {
+    await apiCall('delete','users',id);
+    USERS_LIST = USERS_LIST.filter(function(x){ return String(x.id)!==String(id); });
+    renderUsersTable();
+    toast('🗑️ تم الحذف','info');
+  } catch(e) { toast('⚠️ ' + e.message, 'error'); }
+}
 
 </script>
 

@@ -492,22 +492,62 @@ tr:hover td{background:rgba(0,194,255,.03)}
 
 <!-- ═══ REQUIREMENTS ═══ -->
 <div class="pane" id="pane-requirements">
-  <div class="sec-hdr">
-    <div class="sec-icon" style="background:rgba(168,85,247,.1)">📋</div>
-    <div class="sec-title">المتطلبات الكاملة</div>
-    <div class="sec-line"></div>
-    <button class="btn btn-primary" onclick="newReq()">+ إضافة</button>
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:16px;margin-bottom:20px">
+    <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+      <div style="position:relative;width:64px;height:64px;flex-shrink:0">
+        <svg viewBox="0 0 64 64" style="width:100%;height:100%;transform:rotate(-90deg)">
+          <circle cx="32" cy="32" r="26" fill="none" stroke="#eceef4" stroke-width="7"></circle>
+          <circle id="req-donut" cx="32" cy="32" r="26" fill="none" stroke="#7c3aed" stroke-width="7"
+            stroke-linecap="round" style="stroke-dasharray:163;stroke-dashoffset:163;transition:stroke-dashoffset .8s ease"></circle>
+        </svg>
+        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#101828" id="req-donut-text">0%</div>
+      </div>
+      <div>
+        <h2 style="font-size:20px;font-weight:800;color:#101828;margin-bottom:2px">المتطلبات الكاملة</h2>
+        <p style="color:#6b7280;font-size:12px">كل المتطلبات المرصودة نحو إتمام الفريق للمهام</p>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <div style="display:flex;background:var(--surface2);border-radius:8px;padding:3px;gap:2px">
+        <button id="req-view-table-btn" class="stitch-doc-filter active" style="padding:6px 14px" onclick="setReqView('table')">📋 جدول</button>
+        <button id="req-view-kanban-btn" class="stitch-doc-filter" style="padding:6px 14px" onclick="setReqView('kanban')">🗂️ Kanban</button>
+      </div>
+      <button class="btn btn-primary" onclick="newReq()">+ إضافة متطلب</button>
+    </div>
   </div>
-  <div class="tcard">
-    <div class="tcard-hdr">
-      <div class="tcard-title">📌 المتطلبات <span class="badge badge-blue" id="req-cnt">0</span></div>
-      <span class="badge badge-gold" id="req-fin-cnt">0 تحتاج تمويل</span>
+
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center">
+    <input type="text" id="req-search" placeholder="🔍 ابحث عن متطلب..." oninput="renderReq()"
+      style="padding:8px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:Tajawal,sans-serif;font-size:12px;flex:1;min-width:200px">
+    <select id="req-filter-cat" onchange="renderReq()" style="padding:8px 12px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:Tajawal,sans-serif;font-size:12px">
+      <option value="ALL">كل التصنيفات</option>
+      <option>سياسات وإجراءات</option><option>بنية تحتية</option><option>تدريب وتأهيل</option>
+      <option>أجهزة ومعدات</option><option>سجلات وملفات</option><option>سلامة بيئية</option>
+      <option>مستلزمات</option><option>أخرى</option>
+    </select>
+    <select id="req-filter-priority" onchange="renderReq()" style="padding:8px 12px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:Tajawal,sans-serif;font-size:12px">
+      <option value="ALL">كل الأولويات</option><option>عالية</option><option>متوسطة</option><option>منخفضة</option>
+    </select>
+  </div>
+
+  <!-- عرض الجدول -->
+  <div id="req-table-view">
+    <div class="tcard">
+      <div class="tcard-hdr">
+        <div class="tcard-title">📌 المتطلبات <span class="badge badge-blue" id="req-cnt">0</span></div>
+        <span class="badge badge-gold" id="req-fin-cnt">0 تحتاج تمويل</span>
+      </div>
+      <div class="tscroll">
+        <table><thead><tr><th class="num">#</th><th>المتطلب</th><th>الفئة</th><th>الأولوية</th><th>التكلفة</th><th>تمويل؟</th><th>الحالة</th><th>المسؤول</th><th></th></tr></thead>
+        <tbody id="req-tbody"></tbody></table>
+      </div>
+      <button class="add-row" onclick="newReq()">+ إضافة متطلب</button>
     </div>
-    <div class="tscroll">
-      <table><thead><tr><th class="num">#</th><th>المتطلب</th><th>الفئة</th><th>الأولوية</th><th>التكلفة</th><th>تمويل؟</th><th>الحالة</th><th>المسؤول</th><th></th></tr></thead>
-      <tbody id="req-tbody"></tbody></table>
-    </div>
-    <button class="add-row" onclick="newReq()">+ إضافة متطلب</button>
+  </div>
+
+  <!-- عرض Kanban -->
+  <div id="req-kanban-view" style="display:none">
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px" id="req-kanban-cols"></div>
   </div>
 </div>
 
@@ -2025,11 +2065,32 @@ function renderObs() {
 }
 
 // ─── Requirements ────────────────────────────────────────────
+var REQ_VIEW = 'table';
+
+function setReqView(v) {
+  REQ_VIEW = v;
+  document.getElementById('req-view-table-btn').classList.toggle('active', v === 'table');
+  document.getElementById('req-view-kanban-btn').classList.toggle('active', v === 'kanban');
+  document.getElementById('req-table-view').style.display = v === 'table' ? 'block' : 'none';
+  document.getElementById('req-kanban-view').style.display = v === 'kanban' ? 'block' : 'none';
+  if (v === 'kanban') renderReqKanban();
+}
+
 function renderReq() {
+  const search = ((document.getElementById('req-search')||{}).value||'').toLowerCase();
+  const fCat = (document.getElementById('req-filter-cat')||{}).value||'ALL';
+  const fPri = (document.getElementById('req-filter-priority')||{}).value||'ALL';
+
+  let list = DB.requirements || [];
+  if (search) list = list.filter(r => (r.text||'').toLowerCase().includes(search) || (r.owner||'').toLowerCase().includes(search));
+  if (fCat !== 'ALL') list = list.filter(r => r.cat === fCat);
+  if (fPri !== 'ALL') list = list.filter(r => (r.priority||r.pri||'متوسطة') === fPri);
+
   const fin = DB.requirements.filter(r=>r.financial==='نعم').length;
-  document.getElementById('req-cnt').textContent = DB.requirements.length;
+  document.getElementById('req-cnt').textContent = list.length;
   document.getElementById('req-fin-cnt').textContent = fin + ' تحتاج تمويل';
-  document.getElementById('req-tbody').innerHTML = DB.requirements.map((r,i)=>`
+
+  document.getElementById('req-tbody').innerHTML = list.length ? list.map((r,i)=>`
     <tr><td class="num">${i+1}</td>
     <td class="td-main" style="max-width:240px">${r.text}</td>
     <td><span class="badge badge-purple" style="font-size:9px">${r.cat}</span></td>
@@ -2038,7 +2099,48 @@ function renderReq() {
     <td>${r.financial==='نعم'?pill('نعم'):pill('لا')}</td>
     <td>${pill(r.status||'معلق')}</td>
     <td style="font-size:11px">${r.owner||'–'}</td>
-    <td>${actionBtns('editReq','delReq',r.id)}</td></tr>`).join('');
+    <td>${actionBtns('editReq','delReq',r.id)}</td></tr>`).join('')
+    : '<tr><td colspan="9" style="text-align:center;color:var(--text3);padding:30px">لا توجد نتائج مطابقة</td></tr>';
+
+  // دائرة الإنجاز: نسبة المتطلبات المكتملة من الإجمالي
+  const total = DB.requirements.length;
+  const done = DB.requirements.filter(r => r.status === 'مكتمل').length;
+  const pct = total ? Math.round(done/total*100) : 0;
+  const donut = document.getElementById('req-donut');
+  const donutText = document.getElementById('req-donut-text');
+  if (donut) donut.style.strokeDashoffset = 163 - (pct/100*163);
+  if (donutText) donutText.textContent = pct + '%';
+
+  if (REQ_VIEW === 'kanban') renderReqKanban();
+}
+
+function renderReqKanban() {
+  const el = document.getElementById('req-kanban-cols');
+  if (!el) return;
+  const cols = [
+    { key:'معلق', label:'⏳ قيد الانتظار', color:'#8fa8cc' },
+    { key:'جارٍ', label:'🔵 جاري العمل', color:'#0066cc' },
+    { key:'مكتمل', label:'✅ مكتمل', color:'#1a8f5c' }
+  ];
+  el.innerHTML = cols.map(function(col) {
+    const items = (DB.requirements||[]).filter(r => (r.status||'معلق') === col.key);
+    const cardsHtml = items.length ? items.map(function(r) {
+      return '<div onclick="editReq(\''+r.id+'\')" style="background:var(--surface);border:1px solid var(--border);border-right:3px solid '+col.color+';border-radius:10px;padding:12px;margin-bottom:10px;cursor:pointer;box-shadow:0 1px 4px rgba(0,30,64,.05)">' +
+        '<div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:8px;line-height:1.5">' + r.text + '</div>' +
+        '<div style="display:flex;justify-content:space-between;align-items:center">' +
+          priPill(r.priority||r.pri||'متوسطة') +
+          '<span style="font-size:10px;color:var(--text3)">' + (r.owner||r.cat||'') + '</span>' +
+        '</div>' +
+      '</div>';
+    }).join('') : '<div style="text-align:center;color:var(--text3);font-size:11px;padding:20px">لا توجد بنود</div>';
+    return '<div>' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 4px;margin-bottom:8px;border-bottom:2px solid '+col.color+'22">' +
+        '<span style="font-size:13px;font-weight:800;color:var(--text)">' + col.label + '</span>' +
+        '<span class="badge badge-blue" style="font-size:10px">' + items.length + '</span>' +
+      '</div>' +
+      cardsHtml +
+    '</div>';
+  }).join('');
 }
 
 // ─── Team ─────────────────────────────────────────────────────

@@ -1252,29 +1252,14 @@ tr:hover td{background:rgba(0,194,255,.03)}
     </div>
     <div class="fg"><label>📍 الموقع / القسم</label><input type="text" id="audit-location" placeholder="مثال: غرفة التعقيم، عيادة الأسنان..."></div>
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <div class="fg">
-        <label>📷 صورة قبل</label>
-        <div style="position:relative;border:1px solid var(--border);border-radius:9px;overflow:hidden;height:42px">
-          <input type="file" id="audit-before-file" accept="image/*" onchange="auditPreviewFile(this,'audit-before-label')"
-            style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;z-index:2">
-          <div id="audit-before-label" style="position:absolute;inset:0;padding:10px 12px;font-size:11px;color:var(--text3);
-            display:flex;align-items:center;gap:6px;pointer-events:none">📎 اختر صورة "قبل"...</div>
-        </div>
-      </div>
-      <div class="fg">
-        <label>📷 صورة بعد</label>
-        <div style="position:relative;border:1px solid var(--border);border-radius:9px;overflow:hidden;height:42px">
-          <input type="file" id="audit-after-file" accept="image/*" onchange="auditPreviewFile(this,'audit-after-label')"
-            style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;z-index:2">
-          <div id="audit-after-label" style="position:absolute;inset:0;padding:10px 12px;font-size:11px;color:var(--text3);
-            display:flex;align-items:center;gap:6px;pointer-events:none">📎 اختر صورة "بعد"...</div>
-        </div>
-      </div>
+    <div class="fg">
+      <label>📷 صور قبل/بعد (أضف زوج لكل مكان — كل زوج له تعليقه الخاص)</label>
+      <div id="audit-photo-items-list"></div>
+      <button type="button" class="btn btn-ghost" style="margin-top:6px;width:100%" onclick="addAuditPhotoItem()">+ إضافة صورة قبل/بعد أخرى</button>
     </div>
 
-    <div class="fg"><label>💬 الملاحظات</label><textarea id="audit-notes" rows="2" placeholder="وصف ما شوهد أثناء الجولة..."></textarea></div>
-    <div class="fg"><label>✅ التوصية</label><textarea id="audit-recommendation" rows="2" placeholder="الإجراء المطلوب..."></textarea></div>
+    <div class="fg"><label>💬 ملاحظات عامة على الجولة (اختياري)</label><textarea id="audit-notes" rows="2" placeholder="وصف عام إضافي..."></textarea></div>
+    <div class="fg"><label>✅ التوصية العامة</label><textarea id="audit-recommendation" rows="2" placeholder="الإجراء المطلوب..."></textarea></div>
     <div class="fg"><label>الحالة</label><select id="audit-status"><option>قيد المتابعة</option><option>تم المعالجة</option></select></div>
 
     <!-- توقيع المفتش -->
@@ -4310,25 +4295,112 @@ function auditImgUrl(publicId, size) {
   return 'https://res.cloudinary.com/' + CLOUDINARY_CLOUD_NAME + '/image/upload/w_' + (size||200) + ',c_fill,q_auto,f_auto/' + publicId;
 }
 
+// ─── قائمة صور قبل/بعد الديناميكية ────────────────────────────────
+var AUDIT_ITEMS = [];
+var AUDIT_ITEM_SEQ = 0;
+
+function newAuditItemObj() {
+  AUDIT_ITEM_SEQ++;
+  return {
+    localId: AUDIT_ITEM_SEQ,
+    beforeFile: null, afterFile: null,
+    beforePreview: '', afterPreview: '',
+    existingBeforeUrl: '', existingBeforeId: '',
+    existingAfterUrl: '', existingAfterId: '',
+    note: ''
+  };
+}
+
+function addAuditPhotoItem() {
+  AUDIT_ITEMS.push(newAuditItemObj());
+  renderAuditPhotoItemsUI();
+}
+
+function removeAuditPhotoItem(localId) {
+  AUDIT_ITEMS = AUDIT_ITEMS.filter(function(it){ return it.localId != localId; });
+  renderAuditPhotoItemsUI();
+}
+
+function auditItemFileChange(localId, which, inputEl) {
+  var item = AUDIT_ITEMS.find(function(it){ return it.localId == localId; });
+  if (!item || !inputEl.files || !inputEl.files[0]) return;
+  var file = inputEl.files[0];
+  item[which + 'File'] = file;
+  item[which + 'Preview'] = URL.createObjectURL(file);
+  renderAuditPhotoItemsUI();
+}
+
+function auditItemNoteChange(localId, val) {
+  var item = AUDIT_ITEMS.find(function(it){ return it.localId == localId; });
+  if (item) item.note = val; // بدون إعادة رسم — حتى لا يفقد التركيز أثناء الكتابة
+}
+
+function renderAuditPhotoItemsUI() {
+  var el = document.getElementById('audit-photo-items-list');
+  if (!el) return;
+  if (!AUDIT_ITEMS.length) {
+    el.innerHTML = '<div style="font-size:11px;color:var(--text3);padding:8px 0">لم تُضف أي صورة بعد — اضغط "+ إضافة صورة قبل/بعد" بالأسفل</div>';
+    return;
+  }
+  el.innerHTML = AUDIT_ITEMS.map(function(it, idx) {
+    var beforeThumb = it.beforePreview ? it.beforePreview : (it.existingBeforeId ? auditImgUrl(it.existingBeforeId, 100) : '');
+    var afterThumb  = it.afterPreview  ? it.afterPreview  : (it.existingAfterId  ? auditImgUrl(it.existingAfterId, 100)  : '');
+    return '<div style="border:1px dashed var(--border);border-radius:10px;padding:12px;margin-bottom:10px;background:var(--surface2)">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">' +
+        '<span style="font-size:11px;font-weight:700;color:var(--text3)">📍 صورة #' + (idx+1) + '</span>' +
+        '<button type="button" onclick="removeAuditPhotoItem(' + it.localId + ')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:11px;font-weight:700">🗑️ حذف هذا الزوج</button>' +
+      '</div>' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">' +
+        '<div>' +
+          '<label style="font-size:10px;color:var(--text3);display:block;margin-bottom:3px">قبل</label>' +
+          (beforeThumb ? '<img src="'+beforeThumb+'" style="width:100%;height:70px;object-fit:cover;border-radius:6px;margin-bottom:4px">' : '') +
+          '<input type="file" accept="image/*" onchange="auditItemFileChange(' + it.localId + ',\'before\',this)" style="font-size:10px;width:100%">' +
+        '</div>' +
+        '<div>' +
+          '<label style="font-size:10px;color:var(--text3);display:block;margin-bottom:3px">بعد</label>' +
+          (afterThumb ? '<img src="'+afterThumb+'" style="width:100%;height:70px;object-fit:cover;border-radius:6px;margin-bottom:4px">' : '') +
+          '<input type="file" accept="image/*" onchange="auditItemFileChange(' + it.localId + ',\'after\',this)" style="font-size:10px;width:100%">' +
+        '</div>' +
+      '</div>' +
+      '<input type="text" placeholder="💬 تعليق أو ملاحظة على هذه الصورة..." value="' + (it.note||'').replace(/"/g,'&quot;') + '" ' +
+        'oninput="auditItemNoteChange(' + it.localId + ',this.value)" ' +
+        'style="width:100%;padding:7px 10px;background:var(--surface);border:1px solid var(--border);border-radius:7px;color:var(--text);font-family:Tajawal,sans-serif;font-size:12px">' +
+    '</div>';
+  }).join('');
+}
+
 function openAuditModal(id) {
   var a = id ? (DB.siteAudits || []).find(function(x){ return String(x.id) === String(id); }) : null;
   document.getElementById('audit-eid').value = a ? a.id : '';
   document.getElementById('audit-date').value = a ? (a.date||'') : '';
   document.getElementById('audit-branch').value = a ? (a.branch||'بريدة') : 'بريدة';
   document.getElementById('audit-location').value = a ? (a.location||'') : '';
-  document.getElementById('audit-before-file').value = '';
-  document.getElementById('audit-after-file').value = '';
-  document.getElementById('audit-before-label').innerHTML = (a && a.beforePhotoId)
-    ? '<img src="'+auditImgUrl(a.beforePhotoId,80)+'" style="height:26px;border-radius:4px;margin-left:6px">✅ صورة محفوظة — اختر ملف جديد لاستبدالها'
-    : '📎 اختر صورة "قبل"...';
-  document.getElementById('audit-after-label').innerHTML = (a && a.afterPhotoId)
-    ? '<img src="'+auditImgUrl(a.afterPhotoId,80)+'" style="height:26px;border-radius:4px;margin-left:6px">✅ صورة محفوظة — اختر ملف جديد لاستبدالها'
-    : '📎 اختر صورة "بعد"...';
   document.getElementById('audit-notes').value = a ? (a.notes||'') : '';
   document.getElementById('audit-recommendation').value = a ? (a.recommendation||'') : '';
   document.getElementById('audit-status').value = a ? (a.status||'قيد المتابعة') : 'قيد المتابعة';
   document.getElementById('audit-inspector-name').value = a ? (a.inspectorName||'') : '';
   document.getElementById('audit-manager-name').value = a ? (a.branchManagerName||'') : '';
+
+  // تهيئة قائمة الصور — من photoItems الجديدة أو من الحقول القديمة (توافق مع الجولات السابقة)
+  AUDIT_ITEMS = [];
+  if (a) {
+    var existingItems = [];
+    try { existingItems = a.photoItems ? JSON.parse(a.photoItems) : []; } catch(e) { existingItems = []; }
+    if (!existingItems.length && (a.beforePhotoId || a.afterPhotoId)) {
+      // جولة قديمة بصيغة صورة واحدة — حوّلها لعنصر واحد بالقائمة الجديدة
+      existingItems = [{ beforeUrl:a.beforePhotoUrl||'', beforeId:a.beforePhotoId||'', afterUrl:a.afterPhotoUrl||'', afterId:a.afterPhotoId||'', note:'' }];
+    }
+    existingItems.forEach(function(ex) {
+      var it = newAuditItemObj();
+      it.existingBeforeUrl = ex.beforeUrl||''; it.existingBeforeId = ex.beforeId||'';
+      it.existingAfterUrl  = ex.afterUrl||'';  it.existingAfterId  = ex.afterId||'';
+      it.note = ex.note||'';
+      AUDIT_ITEMS.push(it);
+    });
+  }
+  if (!AUDIT_ITEMS.length) AUDIT_ITEMS.push(newAuditItemObj()); // ابدأ بعنصر واحد فاضي جاهز للتعبئة
+  renderAuditPhotoItemsUI();
+
   openModal('m-audit');
   // تهيئة لوحات التوقيع بعد ظهور المودال (حتى تُقاس أبعاد الكانفس صح)
   setTimeout(function() {
@@ -4376,7 +4448,7 @@ async function saveAudit() {
 
   var btn = document.getElementById('audit-save-btn');
   if (btn) { btn.disabled = true; btn.textContent = '⏳ جاري الحفظ...'; }
-  toast('⏳ جاري رفع الصور والتوقيعات...', 'info', 8000);
+  toast('⏳ جاري رفع الصور والتوقيعات...', 'info', 10000);
 
   var eid = document.getElementById('audit-eid').value;
   var id = eid || String(Date.now());
@@ -4392,30 +4464,39 @@ async function saveAudit() {
     status: document.getElementById('audit-status').value,
     inspectorName: document.getElementById('audit-inspector-name').value,
     branchManagerName: document.getElementById('audit-manager-name').value,
-    // احتفظ بالقيم القديمة إذا كانت الجولة تُعدَّل ولم يُرفع ملف جديد
-    beforePhotoUrl: existing ? (existing.beforePhotoUrl||'') : '',
-    beforePhotoId:  existing ? (existing.beforePhotoId||'')  : '',
-    afterPhotoUrl:  existing ? (existing.afterPhotoUrl||'')  : '',
-    afterPhotoId:   existing ? (existing.afterPhotoId||'')   : '',
     inspectorSignUrl:     existing ? (existing.inspectorSignUrl||'')     : '',
     branchManagerSignUrl: existing ? (existing.branchManagerSignUrl||'') : ''
   };
 
   try {
-    // صورة قبل
-    var beforeInput = document.getElementById('audit-before-file');
-    if (beforeInput.files && beforeInput.files[0]) {
-      var b64 = await fileToBase64(beforeInput.files[0]);
-      var up = await auditUploadImage(b64, 'before_' + id + '_' + beforeInput.files[0].name, beforeInput.files[0].type);
-      if (up) { obj.beforePhotoUrl = up.url; obj.beforePhotoId = up.id; }
+    // ─── رفع كل زوج صور بالقائمة الديناميكية ───
+    var finalItems = [];
+    for (var i = 0; i < AUDIT_ITEMS.length; i++) {
+      var it = AUDIT_ITEMS[i];
+      var beforeUrl = it.existingBeforeUrl, beforeId = it.existingBeforeId;
+      var afterUrl  = it.existingAfterUrl,  afterId  = it.existingAfterId;
+      if (it.beforeFile) {
+        var b64 = await fileToBase64(it.beforeFile);
+        var up = await auditUploadImage(b64, 'before_' + id + '_' + i + '_' + it.beforeFile.name, it.beforeFile.type);
+        if (up) { beforeUrl = up.url; beforeId = up.id; }
+      }
+      if (it.afterFile) {
+        var b64b = await fileToBase64(it.afterFile);
+        var up2 = await auditUploadImage(b64b, 'after_' + id + '_' + i + '_' + it.afterFile.name, it.afterFile.type);
+        if (up2) { afterUrl = up2.url; afterId = up2.id; }
+      }
+      // تجاهل العناصر الفاضية بالكامل (بدون صور ولا ملاحظة)
+      if (beforeUrl || afterUrl || (it.note||'').trim()) {
+        finalItems.push({ beforeUrl: beforeUrl||'', beforeId: beforeId||'', afterUrl: afterUrl||'', afterId: afterId||'', note: it.note||'' });
+      }
     }
-    // صورة بعد
-    var afterInput = document.getElementById('audit-after-file');
-    if (afterInput.files && afterInput.files[0]) {
-      var b64b = await fileToBase64(afterInput.files[0]);
-      var up2 = await auditUploadImage(b64b, 'after_' + id + '_' + afterInput.files[0].name, afterInput.files[0].type);
-      if (up2) { obj.afterPhotoUrl = up2.url; obj.afterPhotoId = up2.id; }
-    }
+    obj.photoItems = JSON.stringify(finalItems);
+    // حقول قديمة للتوافق مع أي كود سابق — نعبّيها من أول عنصر
+    obj.beforePhotoUrl = finalItems[0] ? finalItems[0].beforeUrl : '';
+    obj.beforePhotoId  = finalItems[0] ? finalItems[0].beforeId  : '';
+    obj.afterPhotoUrl  = finalItems[0] ? finalItems[0].afterUrl  : '';
+    obj.afterPhotoId   = finalItems[0] ? finalItems[0].afterId   : '';
+
     // توقيع المفتش
     var sigInspector = getSignatureBase64('sigpad-inspector');
     if (sigInspector) {
@@ -4494,11 +4575,18 @@ function renderAuditTable() {
     return;
   }
   tbody.innerHTML = list.map(function(a, i) {
+    var items = [];
+    try { items = a.photoItems ? JSON.parse(a.photoItems) : []; } catch(e) { items = []; }
+    if (!items.length && (a.beforePhotoId || a.afterPhotoId)) {
+      items = [{ beforeId: a.beforePhotoId||'', afterId: a.afterPhotoId||'' }];
+    }
     var photos = '';
-    if (a.beforePhotoId || a.afterPhotoId) {
-      photos = '<div style="display:flex;gap:4px;justify-content:center;cursor:pointer" onclick="openAuditPhotoView(\''+a.id+'\')">';
-      if (a.beforePhotoId) photos += '<img src="'+auditImgUrl(a.beforePhotoId,80)+'" title="قبل" style="width:32px;height:32px;object-fit:cover;border-radius:6px;border:1px solid var(--border)">';
-      if (a.afterPhotoId) photos += '<img src="'+auditImgUrl(a.afterPhotoId,80)+'" title="بعد" style="width:32px;height:32px;object-fit:cover;border-radius:6px;border:1px solid var(--border)">';
+    if (items.length) {
+      var first = items[0];
+      photos = '<div style="display:flex;gap:4px;justify-content:center;align-items:center;cursor:pointer" onclick="openAuditPhotoView(\''+a.id+'\')">';
+      if (first.beforeId) photos += '<img src="'+auditImgUrl(first.beforeId,80)+'" title="قبل" style="width:32px;height:32px;object-fit:cover;border-radius:6px;border:1px solid var(--border)">';
+      if (first.afterId) photos += '<img src="'+auditImgUrl(first.afterId,80)+'" title="بعد" style="width:32px;height:32px;object-fit:cover;border-radius:6px;border:1px solid var(--border)">';
+      if (items.length > 1) photos += '<span class="badge badge-blue" style="font-size:9px">+' + (items.length-1) + '</span>';
       photos += '</div>';
     } else {
       photos = '<span style="color:var(--text3);font-size:10px">—</span>';
@@ -4585,17 +4673,32 @@ function openAuditPhotoView(id) {
   if (!a) return;
   var body = document.getElementById('audit-photo-view-body');
   if (!body) return;
-  var beforeHtml = a.beforePhotoId
-    ? '<div style="flex:1;min-width:200px"><div style="font-size:11px;font-weight:700;color:var(--text3);margin-bottom:6px;text-align:center">قبل</div><img src="'+auditImgUrl(a.beforePhotoId,800)+'" style="width:100%;border-radius:10px;border:1px solid var(--border)"></div>'
-    : '<div style="flex:1;min-width:200px;display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:12px">لا توجد صورة "قبل"</div>';
-  var afterHtml = a.afterPhotoId
-    ? '<div style="flex:1;min-width:200px"><div style="font-size:11px;font-weight:700;color:var(--text3);margin-bottom:6px;text-align:center">بعد</div><img src="'+auditImgUrl(a.afterPhotoId,800)+'" style="width:100%;border-radius:10px;border:1px solid var(--border)"></div>'
-    : '<div style="flex:1;min-width:200px;display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:12px">لا توجد صورة "بعد"</div>';
+
+  var items = [];
+  try { items = a.photoItems ? JSON.parse(a.photoItems) : []; } catch(e) { items = []; }
+  if (!items.length && (a.beforePhotoId || a.afterPhotoId)) {
+    items = [{ beforeId: a.beforePhotoId||'', afterId: a.afterPhotoId||'', note: '' }];
+  }
+
+  var itemsHtml = items.length ? items.map(function(it, idx) {
+    var beforeHtml = it.beforeId
+      ? '<div style="flex:1;min-width:180px"><div style="font-size:11px;font-weight:700;color:var(--text3);margin-bottom:6px;text-align:center">قبل</div><img src="'+auditImgUrl(it.beforeId,600)+'" style="width:100%;border-radius:10px;border:1px solid var(--border)"></div>'
+      : '<div style="flex:1;min-width:180px;display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:12px">لا توجد صورة "قبل"</div>';
+    var afterHtml = it.afterId
+      ? '<div style="flex:1;min-width:180px"><div style="font-size:11px;font-weight:700;color:var(--text3);margin-bottom:6px;text-align:center">بعد</div><img src="'+auditImgUrl(it.afterId,600)+'" style="width:100%;border-radius:10px;border:1px solid var(--border)"></div>'
+      : '<div style="flex:1;min-width:180px;display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:12px">لا توجد صورة "بعد"</div>';
+    return '<div style="'+(idx>0?'margin-top:18px;padding-top:18px;border-top:1px dashed var(--border);':'')+'">' +
+      '<div style="font-size:11px;font-weight:700;color:var(--accent);margin-bottom:8px">📍 صورة #' + (idx+1) + '</div>' +
+      '<div style="display:flex;gap:14px;flex-wrap:wrap">' + beforeHtml + afterHtml + '</div>' +
+      (it.note ? '<div style="margin-top:8px;padding:10px;background:var(--surface2);border-radius:8px;font-size:12px">💬 ' + it.note + '</div>' : '') +
+    '</div>';
+  }).join('') : '<div style="text-align:center;color:var(--text3);padding:20px">لا توجد صور مرفقة</div>';
+
   body.innerHTML =
     '<div style="font-size:12px;color:var(--text3);margin-bottom:12px">📅 ' + (a.date||'') + ' — 🏥 ' + (a.branch||'') + (a.location?(' — 📍 '+a.location):'') + '</div>' +
-    '<div style="display:flex;gap:14px;flex-wrap:wrap">' + beforeHtml + afterHtml + '</div>' +
-    (a.notes ? '<div style="margin-top:14px;padding:12px;background:var(--surface2);border-radius:8px;font-size:12px"><strong>الملاحظات:</strong> ' + a.notes + '</div>' : '') +
-    (a.recommendation ? '<div style="margin-top:8px;padding:12px;background:var(--surface2);border-radius:8px;font-size:12px"><strong>التوصية:</strong> ' + a.recommendation + '</div>' : '');
+    itemsHtml +
+    (a.notes ? '<div style="margin-top:14px;padding:12px;background:var(--surface2);border-radius:8px;font-size:12px"><strong>ملاحظات عامة:</strong> ' + a.notes + '</div>' : '') +
+    (a.recommendation ? '<div style="margin-top:8px;padding:12px;background:var(--surface2);border-radius:8px;font-size:12px"><strong>التوصية العامة:</strong> ' + a.recommendation + '</div>' : '');
   openModal('m-audit-photo-view');
 }
 

@@ -1300,6 +1300,17 @@ tr:hover td{background:rgba(0,194,255,.03)}
   </div>
 </div>
 
+<!-- Audit Photo Comparison Viewer -->
+<div class="overlay" id="m-audit-photo-view">
+  <div class="modal" style="max-width:720px">
+    <h3>📷 مقارنة قبل / بعد</h3>
+    <div id="audit-photo-view-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-danger" onclick="closeModal('m-audit-photo-view')">إغلاق</button>
+    </div>
+  </div>
+</div>
+
 <!-- Observation Modal -->
 <div class="overlay" id="m-obs">
   <div class="modal">
@@ -4284,20 +4295,31 @@ function auditPreviewFile(inp, labelId) {
 }
 
 // ─── فتح/إعادة تعيين النموذج ─────────────────────────────────────
-function openAuditModal() {
-  document.getElementById('audit-eid').value = '';
-  document.getElementById('audit-date').value = '';
-  document.getElementById('audit-branch').value = 'بريدة';
-  document.getElementById('audit-location').value = '';
+// ─── تحويل Drive fileId إلى رابط صورة مباشر (للمعاينة inline) ────
+function driveThumbUrl(fileId, size) {
+  if (!fileId) return '';
+  return 'https://drive.google.com/thumbnail?id=' + fileId + '&sz=w' + (size || 200);
+}
+
+function openAuditModal(id) {
+  var a = id ? (DB.siteAudits || []).find(function(x){ return String(x.id) === String(id); }) : null;
+  document.getElementById('audit-eid').value = a ? a.id : '';
+  document.getElementById('audit-date').value = a ? (a.date||'') : '';
+  document.getElementById('audit-branch').value = a ? (a.branch||'بريدة') : 'بريدة';
+  document.getElementById('audit-location').value = a ? (a.location||'') : '';
   document.getElementById('audit-before-file').value = '';
   document.getElementById('audit-after-file').value = '';
-  document.getElementById('audit-before-label').innerHTML = '📎 اختر صورة "قبل"...';
-  document.getElementById('audit-after-label').innerHTML = '📎 اختر صورة "بعد"...';
-  document.getElementById('audit-notes').value = '';
-  document.getElementById('audit-recommendation').value = '';
-  document.getElementById('audit-status').value = 'قيد المتابعة';
-  document.getElementById('audit-inspector-name').value = '';
-  document.getElementById('audit-manager-name').value = '';
+  document.getElementById('audit-before-label').innerHTML = (a && a.beforePhotoId)
+    ? '<img src="'+driveThumbUrl(a.beforePhotoId,80)+'" style="height:26px;border-radius:4px;margin-left:6px">✅ صورة محفوظة — اختر ملف جديد لاستبدالها'
+    : '📎 اختر صورة "قبل"...';
+  document.getElementById('audit-after-label').innerHTML = (a && a.afterPhotoId)
+    ? '<img src="'+driveThumbUrl(a.afterPhotoId,80)+'" style="height:26px;border-radius:4px;margin-left:6px">✅ صورة محفوظة — اختر ملف جديد لاستبدالها'
+    : '📎 اختر صورة "بعد"...';
+  document.getElementById('audit-notes').value = a ? (a.notes||'') : '';
+  document.getElementById('audit-recommendation').value = a ? (a.recommendation||'') : '';
+  document.getElementById('audit-status').value = a ? (a.status||'قيد المتابعة') : 'قيد المتابعة';
+  document.getElementById('audit-inspector-name').value = a ? (a.inspectorName||'') : '';
+  document.getElementById('audit-manager-name').value = a ? (a.branchManagerName||'') : '';
   openModal('m-audit');
   // تهيئة لوحات التوقيع بعد ظهور المودال (حتى تُقاس أبعاد الكانفس صح)
   setTimeout(function() {
@@ -4305,6 +4327,8 @@ function openAuditModal() {
     initSignaturePad('sigpad-manager');
   }, 100);
 }
+
+function editAudit(id) { openAuditModal(id); }
 
 // ─── رفع صورة واحدة إلى Drive عبر GAS ────────────────────────────
 async function auditUploadImage(base64, fileName, mimeType) {
@@ -4339,7 +4363,10 @@ async function saveAudit() {
   if (btn) { btn.disabled = true; btn.textContent = '⏳ جاري الحفظ...'; }
   toast('⏳ جاري رفع الصور والتوقيعات...', 'info', 8000);
 
-  var id = document.getElementById('audit-eid').value || String(Date.now());
+  var eid = document.getElementById('audit-eid').value;
+  var id = eid || String(Date.now());
+  var existing = eid ? (DB.siteAudits || []).find(function(x){ return String(x.id) === String(eid); }) : null;
+
   var obj = {
     id: id,
     date: date,
@@ -4350,8 +4377,13 @@ async function saveAudit() {
     status: document.getElementById('audit-status').value,
     inspectorName: document.getElementById('audit-inspector-name').value,
     branchManagerName: document.getElementById('audit-manager-name').value,
-    beforePhotoUrl: '', beforePhotoId: '', afterPhotoUrl: '', afterPhotoId: '',
-    inspectorSignUrl: '', branchManagerSignUrl: ''
+    // احتفظ بالقيم القديمة إذا كانت الجولة تُعدَّل ولم يُرفع ملف جديد
+    beforePhotoUrl: existing ? (existing.beforePhotoUrl||'') : '',
+    beforePhotoId:  existing ? (existing.beforePhotoId||'')  : '',
+    afterPhotoUrl:  existing ? (existing.afterPhotoUrl||'')  : '',
+    afterPhotoId:   existing ? (existing.afterPhotoId||'')   : '',
+    inspectorSignUrl:     existing ? (existing.inspectorSignUrl||'')     : '',
+    branchManagerSignUrl: existing ? (existing.branchManagerSignUrl||'') : ''
   };
 
   try {
@@ -4385,7 +4417,7 @@ async function saveAudit() {
     toast('⚠️ حدث خطأ أثناء رفع الملفات: ' + e.message, 'info');
   }
 
-  // إضافة محلية فورية
+  // إضافة/تحديث محلي فوري
   var idx = DB.siteAudits.findIndex(function(a){ return String(a.id) === String(id); });
   if (idx > -1) DB.siteAudits[idx] = Object.assign({}, DB.siteAudits[idx], obj);
   else DB.siteAudits.unshift(obj);
@@ -4440,9 +4472,14 @@ function renderAuditTable() {
   }
   tbody.innerHTML = list.map(function(a, i) {
     var photos = '';
-    if (a.beforePhotoUrl) photos += '<a href="'+a.beforePhotoUrl+'" target="_blank" style="color:var(--accent);font-size:10px;margin-left:4px">قبل</a>';
-    if (a.afterPhotoUrl) photos += '<a href="'+a.afterPhotoUrl+'" target="_blank" style="color:var(--green);font-size:10px">بعد</a>';
-    if (!photos) photos = '<span style="color:var(--text3);font-size:10px">—</span>';
+    if (a.beforePhotoId || a.afterPhotoId) {
+      photos = '<div style="display:flex;gap:4px;justify-content:center;cursor:pointer" onclick="openAuditPhotoView(\''+a.id+'\')">';
+      if (a.beforePhotoId) photos += '<img src="'+driveThumbUrl(a.beforePhotoId,80)+'" title="قبل" style="width:32px;height:32px;object-fit:cover;border-radius:6px;border:1px solid var(--border)">';
+      if (a.afterPhotoId) photos += '<img src="'+driveThumbUrl(a.afterPhotoId,80)+'" title="بعد" style="width:32px;height:32px;object-fit:cover;border-radius:6px;border:1px solid var(--border)">';
+      photos += '</div>';
+    } else {
+      photos = '<span style="color:var(--text3);font-size:10px">—</span>';
+    }
     var sigs = '';
     if (a.inspectorSignUrl) sigs += '<a href="'+a.inspectorSignUrl+'" target="_blank" title="توقيع المفتش" style="font-size:13px;margin-left:4px">✍️مفتش</a>';
     if (a.branchManagerSignUrl) sigs += '<a href="'+a.branchManagerSignUrl+'" target="_blank" title="توقيع مدير الفرع" style="font-size:13px">✍️مدير</a>';
@@ -4456,10 +4493,34 @@ function renderAuditTable() {
       '<td style="text-align:center">' + photos + '</td>' +
       '<td style="text-align:center">' + sigs + '</td>' +
       '<td>' + pill(a.status||'قيد المتابعة') + '</td>' +
-      '<td><button class="btn btn-danger" style="padding:3px 8px;font-size:10px" onclick="delAudit(\''+a.id+'\')">حذف</button></td>' +
+      '<td style="display:flex;gap:4px">' +
+        '<button class="btn btn-ghost" style="padding:3px 8px;font-size:10px" onclick="editAudit(\''+a.id+'\')">تعديل</button>' +
+        '<button class="btn btn-danger" style="padding:3px 8px;font-size:10px" onclick="delAudit(\''+a.id+'\')">حذف</button>' +
+      '</td>' +
     '</tr>';
   }).join('');
 }
+
+// ─── نافذة معاينة قبل/بعد ─────────────────────────────────────────
+function openAuditPhotoView(id) {
+  var a = (DB.siteAudits || []).find(function(x){ return String(x.id) === String(id); });
+  if (!a) return;
+  var body = document.getElementById('audit-photo-view-body');
+  if (!body) return;
+  var beforeHtml = a.beforePhotoId
+    ? '<div style="flex:1;min-width:200px"><div style="font-size:11px;font-weight:700;color:var(--text3);margin-bottom:6px;text-align:center">قبل</div><img src="'+driveThumbUrl(a.beforePhotoId,800)+'" style="width:100%;border-radius:10px;border:1px solid var(--border)"></div>'
+    : '<div style="flex:1;min-width:200px;display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:12px">لا توجد صورة "قبل"</div>';
+  var afterHtml = a.afterPhotoId
+    ? '<div style="flex:1;min-width:200px"><div style="font-size:11px;font-weight:700;color:var(--text3);margin-bottom:6px;text-align:center">بعد</div><img src="'+driveThumbUrl(a.afterPhotoId,800)+'" style="width:100%;border-radius:10px;border:1px solid var(--border)"></div>'
+    : '<div style="flex:1;min-width:200px;display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:12px">لا توجد صورة "بعد"</div>';
+  body.innerHTML =
+    '<div style="font-size:12px;color:var(--text3);margin-bottom:12px">📅 ' + (a.date||'') + ' — 🏥 ' + (a.branch||'') + (a.location?(' — 📍 '+a.location):'') + '</div>' +
+    '<div style="display:flex;gap:14px;flex-wrap:wrap">' + beforeHtml + afterHtml + '</div>' +
+    (a.notes ? '<div style="margin-top:14px;padding:12px;background:var(--surface2);border-radius:8px;font-size:12px"><strong>الملاحظات:</strong> ' + a.notes + '</div>' : '') +
+    (a.recommendation ? '<div style="margin-top:8px;padding:12px;background:var(--surface2);border-radius:8px;font-size:12px"><strong>التوصية:</strong> ' + a.recommendation + '</div>' : '');
+  openModal('m-audit-photo-view');
+}
+
 
 // ربط العرض مع دورة التحديث العامة
 const _origRenderAllAudits = renderAll;

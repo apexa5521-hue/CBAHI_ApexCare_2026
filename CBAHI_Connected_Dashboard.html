@@ -6,15 +6,52 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CBAHI – أبكس كير | لوحة تحكم مشروع الاعتماد</title>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+<!-- ═══ STITCH DESIGN SYSTEM (نظرة عامة الجديدة) — لا يمس تنسيق باقي التبويبات ═══ -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600;700&family=Inter:wght@500;600&display=swap" rel="stylesheet"/>
+<script>
+  // preflight:false = Tailwind ما يعيد ضبط أي CSS موجود، يضيف فقط أدوات utility جديدة للتصميم الجديد
+  tailwind.config = {
+    corePlugins: { preflight: false },
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "primary": "#001e40", "primary-container": "#003366",
+          "on-primary": "#ffffff", "on-primary-container": "#799dd6", "primary-fixed": "#d5e3ff",
+          "primary-fixed-dim": "#a7c8ff", "on-primary-fixed-variant": "#1f477b",
+          "secondary": "#006a6a", "secondary-container": "#90efef", "on-secondary": "#ffffff",
+          "on-secondary-container": "#006e6e", "secondary-fixed": "#93f2f2", "secondary-fixed-dim": "#76d6d5",
+          "on-secondary-fixed-variant": "#004f4f",
+          "tertiary": "#1b1f20", "tertiary-fixed": "#e0e3e5", "tertiary-container": "#303436",
+          "error": "#ba1a1a", "error-container": "#ffdad6", "on-error": "#ffffff", "on-error-container": "#93000a",
+          "background": "#f9f9fe", "surface": "#f9f9fe", "surface-bright": "#f9f9fe",
+          "surface-container-lowest": "#ffffff", "surface-container-low": "#f4f3f8",
+          "surface-container": "#eeedf2", "surface-container-high": "#e8e8ed",
+          "on-surface": "#1a1c1f", "on-surface-variant": "#43474f", "on-background": "#1a1c1f",
+          "outline": "#737780", "outline-variant": "#c3c6d1"
+        },
+        borderRadius: { "DEFAULT": "0.5rem", "lg": "0.75rem", "xl": "1rem", "full": "999px" },
+        spacing: { "card-padding": "20px", "gutter": "16px", "section-gap": "28px" },
+        fontFamily: {
+          "title-sm": ["IBM Plex Sans", "Tajawal"], "display-lg": ["IBM Plex Sans", "Tajawal"],
+          "headline-md": ["IBM Plex Sans", "Tajawal"], "body-md": ["Tajawal"], "body-sm": ["Tajawal"],
+          "status-label": ["Inter", "Tajawal"], "label-caps": ["Inter", "Tajawal"]
+        }
+      }
+    }
+  }
+</script>
 <style>
 
 
 :root {
-  --bg:#0a0e1a; --surface:#111827; --surface2:#1a2235; --surface3:#1e2d45;
-  --accent:#00c2ff; --accent2:#0080ff; --gold:#f0b429; --green:#10d97e;
-  --red:#ff4757; --orange:#ff7c2a; --purple:#a855f7;
-  --border:rgba(0,194,255,0.12); --text:#e2eaf8; --text2:#8fa8cc; --text3:#5a7599;
-  --glow:0 0 20px rgba(0,194,255,0.15); --radius:14px; --radius-sm:8px;
+  --bg:#f7f8fc; --surface:#ffffff; --surface2:#f4f5f9; --surface3:#eceef4;
+  --accent:#0066cc; --accent2:#003366; --gold:#b7791f; --green:#1a8f5c;
+  --red:#c0392b; --orange:#c2530f; --purple:#7c3aed;
+  --border:rgba(0,30,64,0.12); --text:#101828; --text2:#43474f; --text3:#6b7280;
+  --glow:0 4px 16px rgba(0,30,64,0.08); --radius:14px; --radius-sm:8px;
 }
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:var(--bg);color:var(--text);font-family:'Tajawal',sans-serif;min-height:100vh}
@@ -217,77 +254,175 @@ tr:hover td{background:rgba(0,194,255,.03)}
 }
 #report-print-area{display:none}
 
+/* ═══ SIDEBAR الجديد (Stitch) ═══ */
+.sb-group-label{font-size:10px;color:#9aa1ac;font-weight:700;letter-spacing:.5px;margin:14px 10px 4px;text-transform:uppercase}
+.sb-link{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:none;background:transparent;
+  color:#43474f;font-family:'Tajawal',sans-serif;font-size:13px;font-weight:600;cursor:pointer;text-align:right;width:100%;transition:.15s}
+.sb-link .material-symbols-outlined{font-size:20px}
+.sb-link:hover{background:#f4f5f9;color:#101828}
+.sb-link.active{background:linear-gradient(135deg,#e6f0ff,#d5e8e8);color:#001e40;font-weight:800;box-shadow:inset 3px 0 0 #006a6a}
+
+@media (max-width:900px){
+  .app-sidebar{transform:translateX(280px)}
+  .app-sidebar.open{transform:translateX(0)}
+  .app-content{margin-right:0!important}
+  #sidebarToggleBtn{display:inline-flex!important;align-items:center}
+}
+
+/* ═══ Stitch Overview KPI Cards ═══ */
+.stitch-kpi-card{background:#ffffff;border:1px solid rgba(0,30,64,.1);border-radius:14px;padding:18px;
+  display:flex;flex-direction:column;gap:10px;box-shadow:0 2px 10px rgba(0,30,64,.06);transition:.2s}
+.stitch-kpi-card:hover{box-shadow:0 8px 20px rgba(0,30,64,.1);transform:translateY(-2px)}
+.stitch-doc-filter{padding:6px 16px;border-radius:999px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid rgba(0,30,64,.15);
+  background:transparent;color:#43474f;font-family:'Tajawal',sans-serif;transition:.15s}
+.stitch-doc-filter.active{background:#001e40;color:#fff;border-color:transparent}
+.stitch-doc-filter:hover:not(.active){background:#f4f5f9}
 
 </style>
 </head>
 <body>
-<!-- HEADER -->
-<div class="header">
-  <div class="logo">
-    <div class="logo-icon">AC</div>
-    <div><div class="logo-text">APEX CARE – أبكس كير</div><div class="logo-sub">CBAHI PROJECT DASHBOARD</div></div>
+<div class="app-shell" style="display:flex;min-height:100vh">
+
+<!-- ═══ SIDEBAR (جديد — Stitch) ═══ -->
+<aside id="appSidebar" class="app-sidebar" style="width:272px;flex-shrink:0;background:#ffffff;border-left:1px solid rgba(0,30,64,.1);display:flex;flex-direction:column;padding:16px 12px;gap:4px;position:fixed;top:0;bottom:0;right:0;overflow-y:auto;z-index:200;transition:transform .25s ease;box-shadow:2px 0 12px rgba(0,30,64,.04)">
+  <div class="flex items-center gap-3" style="padding:10px 8px 18px;border-bottom:1px solid rgba(0,30,64,.1);margin-bottom:10px">
+    <div class="logo-icon" style="width:40px;height:40px;flex-shrink:0">AC</div>
+    <div>
+      <div style="font-size:14px;font-weight:800;color:#101828">أبكس كير</div>
+      <div style="font-size:10px;color:#006a6a;letter-spacing:.5px">CBAHI PROJECT</div>
+    </div>
   </div>
-  <div class="header-actions">
-    <span class="sync-badge sync-load" id="syncBadge">⟳ جاري الاتصال</span>
-    <button class="btn btn-ghost" onclick="syncAll()">🔄 مزامنة</button>
-    <button class="btn btn-gold" onclick="generateReport()" title="تصدير تقرير شامل">🖨️ تقرير</button>
+
+  <button class="sb-link active" data-tab="overview" onclick="switchTab('overview')">
+    <span class="material-symbols-outlined">dashboard</span><span>لوحة القيادة</span>
+  </button>
+
+  <div class="sb-group-label">الإدارة اليومية</div>
+  <button class="sb-link" data-tab="observations" onclick="switchTab('observations')"><span class="material-symbols-outlined">visibility</span><span>الملاحظات</span></button>
+  <button class="sb-link" data-tab="site-audits" onclick="switchTab('site-audits')"><span class="material-symbols-outlined">fact_check</span><span>جولات التدقيق</span></button>
+  <button class="sb-link" data-tab="requirements" onclick="switchTab('requirements')"><span class="material-symbols-outlined">checklist</span><span>المتطلبات</span></button>
+  <button class="sb-link" data-tab="team" onclick="switchTab('team')"><span class="material-symbols-outlined">group</span><span>الفريق</span></button>
+  <button class="sb-link" data-tab="locations" onclick="switchTab('locations')"><span class="material-symbols-outlined">location_on</span><span>الأماكن</span></button>
+  <button class="sb-link" data-tab="lectures" onclick="switchTab('lectures')"><span class="material-symbols-outlined">school</span><span>المحاضرات</span></button>
+  <button class="sb-link" data-tab="assignments" onclick="switchTab('assignments')"><span class="material-symbols-outlined">assignment_ind</span><span>التكليفات</span></button>
+
+  <div class="sb-group-label">السياسات والوثائق</div>
+  <button class="sb-link" data-tab="policies2" onclick="switchTab('policies2')"><span class="material-symbols-outlined">description</span><span>السياسات (106)</span></button>
+  <button class="sb-link" data-tab="workflow" onclick="switchTab('workflow')"><span class="material-symbols-outlined">folder_open</span><span>المستندات</span></button>
+
+  <div class="sb-group-label">الملفات والتراخيص</div>
+  <button class="sb-link" data-tab="patient-files" onclick="switchTab('patient-files')"><span class="material-symbols-outlined">folder_shared</span><span>ملفات المرضى</span></button>
+  <button class="sb-link" data-tab="employee-files" onclick="switchTab('employee-files')"><span class="material-symbols-outlined">badge</span><span>ملفات الموظفين</span></button>
+  <button class="sb-link" data-tab="licenses" onclick="switchTab('licenses')"><span class="material-symbols-outlined">verified</span><span>الرخص والعقود</span></button>
+
+  <div style="margin-top:auto;padding-top:12px;border-top:1px solid rgba(0,30,64,.1)">
+    <button class="sb-link" style="font-size:11px" onclick="showSettings()"><span class="material-symbols-outlined" style="font-size:18px">settings</span><span>إعدادات الاتصال</span></button>
   </div>
-</div>
+</aside>
+<div id="sidebarOverlay" onclick="toggleSidebar(false)" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:150"></div>
 
-<!-- STATUS BAR -->
-<div class="status-bar">
-  <div class="sb-item"><div class="sb-dot" id="apiDot" style="background:var(--gold);animation:pulse 1s infinite"></div><span id="apiStatus">جاري الاتصال بـ Google Sheets...</span></div>
-  <div class="sb-item">📅 تاريخ البداية: <strong>10/02/2026</strong></div>
-  <div class="sb-item">🎯 الوقت المتوقع لجاهزية المنشأة: <strong style="color:var(--gold)">20/08/2026</strong></div>
-  <div class="sb-item" id="lastSyncSb">آخر مزامنة: –</div>
-  <div class="sb-item" style="margin-right:auto">
-    <button class="btn btn-ghost" style="padding:3px 10px;font-size:10px" onclick="showSettings()">⚙️ إعدادات الاتصال</button>
+<!-- ═══ CONTENT WRAPPER ═══ -->
+<div class="app-content" style="flex:1;margin-right:272px;display:flex;flex-direction:column;min-height:100vh">
+
+  <!-- TOPBAR (جديد) -->
+  <div class="app-topbar" style="position:sticky;top:0;z-index:100;background:#ffffff;border-bottom:1px solid rgba(0,30,64,.1);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+    <div style="display:flex;align-items:center;gap:10px">
+      <button id="sidebarToggleBtn" onclick="toggleSidebar()" style="display:none;background:none;border:none;color:#101828;cursor:pointer;padding:6px">
+        <span class="material-symbols-outlined">menu</span>
+      </button>
+      <div class="sb-item" style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text3)">
+        <div class="sb-dot" id="apiDot" style="width:7px;height:7px;border-radius:50%;background:var(--gold);animation:pulse 1s infinite"></div>
+        <span id="apiStatus">جاري الاتصال بـ Google Sheets...</span>
+      </div>
+      <span class="sb-item" style="font-size:11px;color:var(--text3)" id="lastSyncSb">آخر مزامنة: –</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <span class="sync-badge sync-load" id="syncBadge">⟳ جاري الاتصال</span>
+      <button class="btn btn-ghost" onclick="syncAll()">🔄 مزامنة</button>
+      <button class="btn btn-gold" onclick="generateReport()" title="تصدير تقرير شامل">🖨️ تقرير</button>
+    </div>
   </div>
-</div>
 
-<!-- TABS -->
-<div class="tabs">
-  <button class="tab active" onclick="switchTab('overview')">📊 نظرة عامة</button>
-  <button class="tab" onclick="switchTab('observations')">🔍 الملاحظات</button>
-  <button class="tab" onclick="switchTab('requirements')">📋 المتطلبات</button>
-  <button class="tab" onclick="switchTab('team')">👥 الفريق</button>
-  <button class="tab" onclick="switchTab('locations')">🏥 الأماكن</button>
-  <button class="tab" onclick="switchTab('lectures')">🎓 المحاضرات</button>
-  <button class="tab" onclick="switchTab('assignments')">📌 التكليفات</button>
+<div class="main" style="margin-right:0">
 
-  <button class="tab" onclick="switchTab('progress')" style="background:linear-gradient(135deg,#10d97e,#0080ff);color:#fff;font-weight:800">🎯 لوحة الإنجاز الكلي</button>
-    <button class="tab" onclick="switchTab('workflow')">📁 المستندات</button>
-    <button class="tab" onclick="switchTab('policies2')">📜 السياسات الكاملة (106)</button>
-    <button class="tab" onclick="switchTab('patient-files')">📂 ملفات المرضى</button>
-    <button class="tab" onclick="switchTab('licenses')">📋 الرخص والعقود</button>
-    <button class="tab" onclick="switchTab('employee-files')">🪪 ملفات الموظفين</button>
-</div>
-
-<div class="main">
-
-<!-- ═══ OVERVIEW ═══ -->
+<!-- ═══ OVERVIEW (تصميم Stitch الجديد) ═══ -->
 <div class="pane active" id="pane-overview">
-  <div class="kpi-grid">
-    <div class="kpi blue"><div class="kpi-lbl">نسبة الإنجاز الكلية</div><div class="kpi-val" id="k-overall">–</div><div class="pbar"><div class="pfill blue" id="pf-overall" style="width:0%"></div></div><div class="kpi-sub">متوسط جميع الأقسام</div></div>
-    <div class="kpi gold"><div class="kpi-lbl">الأيام المتبقية</div><div class="kpi-val" id="k-days">–</div><div class="kpi-sub">حتى 01 يوليو 2026</div></div>
-    <div class="kpi green"><div class="kpi-lbl">ملاحظات محلولة</div><div class="kpi-val" id="k-obs">–</div><div class="pbar"><div class="pfill green" id="pf-obs" style="width:0%"></div></div><div class="kpi-sub" id="k-obs-sub">من 0</div></div>
-    <div class="kpi red"><div class="kpi-lbl">متطلبات تحتاج تمويل</div><div class="kpi-val" id="k-fin">–</div><div class="kpi-sub" id="k-cost">التكلفة: –</div></div>
+
+  <!-- Hero: دائرة الإنجاز + وصف -->
+  <div style="background:#ffffff;border:1px solid rgba(0,30,64,.1);border-radius:16px;padding:24px;box-shadow:0 2px 10px rgba(0,30,64,.06);
+    display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;margin-bottom:24px">
+    <div style="flex:1;min-width:240px">
+      <h2 style="font-size:26px;font-weight:800;color:#101828;margin-bottom:8px;font-family:'Cairo',sans-serif">حالة جاهزية الاعتماد</h2>
+      <p style="color:#43474f;font-size:14px;max-width:520px;line-height:1.7">نظرة عامة على تقدم العيادة نحو تحقيق متطلبات اعتماد CBAHI. ركّز على المحاور ذات اللون الأحمر والأصفر أدناه لضمان الامتثال الكامل قبل موعد الزيارة.</p>
+    </div>
+    <div style="position:relative;width:180px;height:180px;flex-shrink:0">
+      <svg viewBox="0 0 160 160" style="width:100%;height:100%;transform:rotate(-90deg)">
+        <circle cx="80" cy="80" r="70" fill="none" stroke="#eceef4" stroke-width="12"></circle>
+        <circle id="readiness-donut" cx="80" cy="80" r="70" fill="none" stroke="#001e40" stroke-width="12"
+          stroke-linecap="round" style="stroke-dasharray:440;stroke-dashoffset:440;transition:stroke-dashoffset 1s ease"></circle>
+      </svg>
+      <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">
+        <span id="donut-pct-text" style="font-size:34px;font-weight:900;color:#101828;font-family:'Cairo',sans-serif">–</span>
+        <span style="font-size:11px;color:#43474f">جاهزية</span>
+      </div>
+    </div>
   </div>
-  <!-- Countdown -->
-  <div class="cd-grid">
-    <div class="cd-box"><div class="cd-num" id="cd-d">–</div><div class="cd-lbl">يوم</div></div>
-    <div class="cd-box"><div class="cd-num" id="cd-h">–</div><div class="cd-lbl">ساعة</div></div>
-    <div class="cd-box"><div class="cd-num" id="cd-m">–</div><div class="cd-lbl">دقيقة</div></div>
-    <div class="cd-box"><div class="cd-num" id="cd-s">–</div><div class="cd-lbl">ثانية</div></div>
+
+  <!-- 8 محاور موزونة -->
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+    <h3 style="font-size:16px;font-weight:800;color:#101828">مؤشرات الأداء الرئيسية (الوزن النسبي)</h3>
+    <span style="font-size:11px;color:#6b7280" id="donut-days-left">–</span>
   </div>
-  <!-- Summary Table -->
-  <div class="tcard">
-    <div class="tcard-hdr"><div class="tcard-title">📊 ملخص التقدم حسب القسم</div></div>
-    <div class="tscroll">
-      <table>
-        <thead><tr><th>القسم</th><th class="num">الإجمالي</th><th class="num">منجز</th><th class="num">معلق</th><th class="num">النسبة</th><th>الحالة</th></tr></thead>
-        <tbody id="summary-tbody"></tbody>
+  <div id="stitch-kpi-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px"></div>
+
+  <!-- تتبع أهم البنود المعلّقة -->
+  <div style="background:#ffffff;border:1px solid rgba(0,30,64,.1);border-radius:14px;overflow:hidden;box-shadow:0 2px 10px rgba(0,30,64,.06)">
+    <div style="padding:16px 20px;border-bottom:1px solid rgba(0,30,64,.08);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+      <h3 style="font-size:14px;font-weight:800;color:#101828">🔎 أهم البنود المعلّقة الآن</h3>
+      <div style="display:flex;gap:6px" id="stitch-doc-filters">
+        <button class="stitch-doc-filter active" data-f="all" onclick="setDocFilter('all')">الكل</button>
+        <button class="stitch-doc-filter" data-f="pending" onclick="setDocFilter('pending')">قيد الانتظار</button>
+        <button class="stitch-doc-filter" data-f="late" onclick="setDocFilter('late')">متأخر</button>
+      </div>
+    </div>
+    <div style="overflow-x:auto">
+      <table style="width:100%;font-size:12px">
+        <thead style="background:#f7f8fc">
+          <tr>
+            <th style="padding:10px 16px;text-align:right;color:#6b7280;font-size:10px">البند</th>
+            <th style="padding:10px 16px;text-align:right;color:#6b7280;font-size:10px">النوع</th>
+            <th style="padding:10px 16px;text-align:right;color:#6b7280;font-size:10px">الحالة</th>
+            <th style="padding:10px 16px;text-align:right;color:#6b7280;font-size:10px">المسؤول</th>
+            <th style="padding:10px 16px;text-align:right;color:#6b7280;font-size:10px">الموعد</th>
+          </tr>
+        </thead>
+        <tbody id="stitch-doc-tbody"></tbody>
       </table>
+    </div>
+  </div>
+
+  <!-- العناصر القديمة — مخفية، تبقى لضمان استمرار عمل الدوال الحالية بدون أخطاء -->
+  <div style="display:none">
+    <div class="kpi-grid">
+      <div class="kpi blue"><div class="kpi-lbl">نسبة الإنجاز الكلية</div><div class="kpi-val" id="k-overall">–</div><div class="pbar"><div class="pfill blue" id="pf-overall" style="width:0%"></div></div><div class="kpi-sub">متوسط جميع الأقسام</div></div>
+      <div class="kpi gold"><div class="kpi-lbl">الأيام المتبقية</div><div class="kpi-val" id="k-days">–</div><div class="kpi-sub">حتى 01 يوليو 2026</div></div>
+      <div class="kpi green"><div class="kpi-lbl">ملاحظات محلولة</div><div class="kpi-val" id="k-obs">–</div><div class="pbar"><div class="pfill green" id="pf-obs" style="width:0%"></div></div><div class="kpi-sub" id="k-obs-sub">من 0</div></div>
+      <div class="kpi red"><div class="kpi-lbl">متطلبات تحتاج تمويل</div><div class="kpi-val" id="k-fin">–</div><div class="kpi-sub" id="k-cost">التكلفة: –</div></div>
+    </div>
+    <div class="cd-grid">
+      <div class="cd-box"><div class="cd-num" id="cd-d">–</div><div class="cd-lbl">يوم</div></div>
+      <div class="cd-box"><div class="cd-num" id="cd-h">–</div><div class="cd-lbl">ساعة</div></div>
+      <div class="cd-box"><div class="cd-num" id="cd-m">–</div><div class="cd-lbl">دقيقة</div></div>
+      <div class="cd-box"><div class="cd-num" id="cd-s">–</div><div class="cd-lbl">ثانية</div></div>
+    </div>
+    <div class="tcard">
+      <div class="tcard-hdr"><div class="tcard-title">📊 ملخص التقدم حسب القسم</div></div>
+      <div class="tscroll">
+        <table>
+          <thead><tr><th>القسم</th><th class="num">الإجمالي</th><th class="num">منجز</th><th class="num">معلق</th><th class="num">النسبة</th><th>الحالة</th></tr></thead>
+          <tbody id="summary-tbody"></tbody>
+        </table>
+      </div>
     </div>
   </div>
 </div>
@@ -311,6 +446,43 @@ tr:hover td{background:rgba(0,194,255,.03)}
       <tbody id="obs-tbody"></tbody></table>
     </div>
     <button class="add-row" onclick="openObsModal()">+ إضافة ملاحظة</button>
+  </div>
+</div>
+
+<!-- ═══ SITE AUDITS (جولات التدقيق) ═══ -->
+<div class="pane" id="pane-site-audits">
+  <div style="background:linear-gradient(135deg,#0d1f3c,#003366);border-radius:14px;padding:22px 28px;margin-bottom:20px;
+    color:white;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+    <div>
+      <h2 style="margin:0 0 6px;font-size:20px;font-weight:900">🔍 جولات التدقيق الميداني</h2>
+      <p style="margin:0;opacity:.85;font-size:12px">وثّق كل جولة بصور قبل/بعد، ملاحظات، توصية، وتوقيع المفتش ومدير الفرع</p>
+    </div>
+    <button onclick="openAuditModal()" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:#fff;
+      padding:10px 22px;border-radius:9px;font-family:Tajawal,sans-serif;font-size:13px;font-weight:800;cursor:pointer">＋ إضافة جولة تدقيق</button>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px" id="audit-kpi-row"></div>
+
+  <div class="tcard">
+    <div class="tcard-hdr">
+      <div class="tcard-title">📋 سجل جولات التدقيق <span class="badge badge-blue" id="audit-count">0</span></div>
+      <button class="btn btn-ghost" onclick="syncAll()">🔄 مزامنة</button>
+    </div>
+    <div class="tscroll">
+      <table>
+        <thead>
+          <tr>
+            <th class="num">#</th><th>التاريخ</th><th>الفرع</th><th>الموقع</th>
+            <th>التوصية</th><th style="text-align:center">الصور</th><th style="text-align:center">التوقيعات</th>
+            <th>الحالة</th><th></th>
+          </tr>
+        </thead>
+        <tbody id="audit-tbody">
+          <tr><td colspan="9" style="text-align:center;color:var(--text3);padding:40px">لا توجد جولات تدقيق بعد</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <button class="add-row" onclick="openAuditModal()">+ إضافة جولة تدقيق</button>
   </div>
 </div>
 
@@ -400,15 +572,30 @@ tr:hover td{background:rgba(0,194,255,.03)}
 
 <!-- ═══ ASSIGNMENTS ═══ -->
 <div class="pane" id="pane-assignments">
-  <div class="sec-hdr">
-    <div class="sec-icon" style="background:rgba(255,124,42,.1)">📌</div>
-    <div class="sec-title">التكليفات</div>
-    <div class="sec-line"></div>
-    <button class="btn btn-primary" onclick="newAssign()">+ إضافة</button>
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:14px;margin-bottom:20px">
+    <div>
+      <h2 style="font-size:22px;font-weight:800;color:#101828;margin-bottom:4px">إدارة المهام والتكليفات</h2>
+      <p style="color:#6b7280;font-size:13px">متابعة وتنفيذ متطلبات الاعتماد الصحي وتحديثات الجودة</p>
+    </div>
+    <button class="btn btn-primary" onclick="newAssign()">+ إضافة مهمة</button>
   </div>
+
+  <div id="assign-kpi-row" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px"></div>
+
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center">
+    <input type="text" id="assign-search" placeholder="🔍 ابحث باسم المهمة أو المسؤول..." oninput="renderAssign()"
+      style="padding:8px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:Tajawal,sans-serif;font-size:12px;flex:1;min-width:200px">
+    <select id="assign-filter-status" onchange="renderAssign()" style="padding:8px 12px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:Tajawal,sans-serif;font-size:12px">
+      <option value="ALL">كل الحالات</option><option>معلق</option><option>جارٍ</option><option>مكتمل</option><option>متأخرة</option>
+    </select>
+    <select id="assign-filter-priority" onchange="renderAssign()" style="padding:8px 12px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:Tajawal,sans-serif;font-size:12px">
+      <option value="ALL">كل الأولويات</option><option>عالية</option><option>متوسطة</option><option>منخفضة</option>
+    </select>
+  </div>
+
   <div class="tcard">
     <div class="tscroll">
-      <table><thead><tr><th class="num">#</th><th>القسم</th><th>النوع</th><th>السبب</th><th>الوقت</th><th>المسؤول</th><th>الحالة</th><th></th></tr></thead>
+      <table><thead><tr><th>اسم المهمة</th><th>المسؤول</th><th>تاريخ الاستحقاق</th><th>الأولوية</th><th>الحالة</th><th>الإجراءات</th></tr></thead>
       <tbody id="assign-tbody"></tbody></table>
     </div>
     <button class="add-row" onclick="newAssign()">+ إضافة تكليف</button>
@@ -793,16 +980,16 @@ tr:hover td{background:rgba(0,194,255,.03)}
 <div class="pane" id="pane-progress">
 
   <!-- Hero KPI: Total Progress -->
-  <div style="background:linear-gradient(135deg,#0a1628,#0d1f3c);border:1px solid var(--border);border-radius:var(--radius);padding:28px;margin-bottom:20px;text-align:center;position:relative;overflow:hidden">
-    <div style="font-size:13px;color:var(--text3);font-weight:700;letter-spacing:2px;margin-bottom:10px">نسبة الإنجاز الكلية لمشروع CBAHI</div>
+  <div style="background:linear-gradient(135deg,#0a1628,#0d1f3c);border:1px solid rgba(255,255,255,.08);border-radius:var(--radius);padding:28px;margin-bottom:20px;text-align:center;position:relative;overflow:hidden">
+    <div style="font-size:13px;color:#8fa8cc;font-weight:700;letter-spacing:2px;margin-bottom:10px">نسبة الإنجاز الكلية لمشروع CBAHI</div>
     <div id="total-progress-num" style="font-size:80px;font-weight:900;font-family:'Cairo',sans-serif;background:linear-gradient(135deg,#10d97e,#00c2ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1;margin-bottom:14px">0%</div>
-    <div style="height:14px;background:rgba(255,255,255,.06);border-radius:7px;overflow:hidden;margin:0 auto;max-width:600px">
+    <div style="height:14px;background:rgba(255,255,255,.1);border-radius:7px;overflow:hidden;margin:0 auto;max-width:600px">
       <div id="total-progress-bar" style="height:100%;width:0%;background:linear-gradient(90deg,#0080ff,#10d97e,#00c2ff);border-radius:7px;transition:width 1.2s ease;box-shadow:0 0 20px rgba(16,217,126,.5)"></div>
     </div>
     <div style="display:flex;gap:24px;justify-content:center;margin-top:18px;flex-wrap:wrap">
-      <div><span style="color:var(--text3);font-size:11px">⏰ الأيام المتبقية</span> <strong id="prog-days" style="color:var(--gold);font-size:18px;margin-right:8px">–</strong></div>
-      <div><span style="color:var(--text3);font-size:11px">📅 الوقت المتوقع لجاهزية المنشأة</span> <strong style="color:var(--accent);font-size:14px;margin-right:8px">20/08/2026</strong></div>
-      <div><span style="color:var(--text3);font-size:11px">🚀 تاريخ البداية</span> <strong style="color:var(--text2);font-size:14px;margin-right:8px">10/02/2026</strong></div>
+      <div><span style="color:#8fa8cc;font-size:11px">⏰ الأيام المتبقية</span> <strong id="prog-days" style="color:#f0b429;font-size:18px;margin-right:8px">–</strong></div>
+      <div><span style="color:#8fa8cc;font-size:11px">📅 الوقت المتوقع لجاهزية المنشأة</span> <strong style="color:#00c2ff;font-size:14px;margin-right:8px">20/08/2026</strong></div>
+      <div><span style="color:#8fa8cc;font-size:11px">🚀 تاريخ البداية</span> <strong style="color:#e2eaf8;font-size:14px;margin-right:8px">10/02/2026</strong></div>
     </div>
   </div>
 
@@ -830,6 +1017,8 @@ tr:hover td{background:rgba(0,194,255,.03)}
     <button class="btn btn-gold" style="padding:14px;font-size:13px" onclick="syncAll()">🔄 مزامنة كل البيانات</button>
   </div>
 </div>
+
+</div><!-- /.main -->
 
 <!-- Extras Modal — رخص / عقود / مستندات / موظفين -->
 <div class="overlay" id="m-extras">
@@ -1044,6 +1233,73 @@ tr:hover td{background:rgba(0,194,255,.03)}
   </div>
 </div>
 
+<!-- Site Audit Modal -->
+<div class="overlay" id="m-audit">
+  <div class="modal" style="max-width:640px">
+    <div style="background:linear-gradient(135deg,#0d1f3c,#003366);padding:18px 22px;margin:-26px -26px 18px;border-radius:14px 14px 0 0">
+      <h3 style="margin:0;color:#fff;font-size:15px">🔍 إضافة جولة تدقيق</h3>
+    </div>
+    <input type="hidden" id="audit-eid">
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="fg"><label>📅 تاريخ الزيارة *</label><input type="date" id="audit-date"></div>
+      <div class="fg"><label>🏥 الفرع *</label>
+        <select id="audit-branch"><option>بريدة</option><option>عنيزة</option><option>كلا الفرعين</option></select></div>
+    </div>
+    <div class="fg"><label>📍 الموقع / القسم</label><input type="text" id="audit-location" placeholder="مثال: غرفة التعقيم، عيادة الأسنان..."></div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="fg">
+        <label>📷 صورة قبل</label>
+        <div style="position:relative;border:1px solid var(--border);border-radius:9px;overflow:hidden;height:42px">
+          <input type="file" id="audit-before-file" accept="image/*" onchange="auditPreviewFile(this,'audit-before-label')"
+            style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;z-index:2">
+          <div id="audit-before-label" style="position:absolute;inset:0;padding:10px 12px;font-size:11px;color:var(--text3);
+            display:flex;align-items:center;gap:6px;pointer-events:none">📎 اختر صورة "قبل"...</div>
+        </div>
+      </div>
+      <div class="fg">
+        <label>📷 صورة بعد</label>
+        <div style="position:relative;border:1px solid var(--border);border-radius:9px;overflow:hidden;height:42px">
+          <input type="file" id="audit-after-file" accept="image/*" onchange="auditPreviewFile(this,'audit-after-label')"
+            style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;z-index:2">
+          <div id="audit-after-label" style="position:absolute;inset:0;padding:10px 12px;font-size:11px;color:var(--text3);
+            display:flex;align-items:center;gap:6px;pointer-events:none">📎 اختر صورة "بعد"...</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="fg"><label>💬 الملاحظات</label><textarea id="audit-notes" rows="2" placeholder="وصف ما شوهد أثناء الجولة..."></textarea></div>
+    <div class="fg"><label>✅ التوصية</label><textarea id="audit-recommendation" rows="2" placeholder="الإجراء المطلوب..."></textarea></div>
+    <div class="fg"><label>الحالة</label><select id="audit-status"><option>قيد المتابعة</option><option>تم المعالجة</option></select></div>
+
+    <!-- توقيع المفتش -->
+    <div class="fg">
+      <label>✍️ توقيع المفتش</label>
+      <input type="text" id="audit-inspector-name" placeholder="اسم المفتش" style="margin-bottom:6px">
+      <div style="border:1px solid var(--border);border-radius:9px;overflow:hidden;background:#fff">
+        <canvas id="sigpad-inspector" width="560" height="120" style="width:100%;height:120px;touch-action:none;cursor:crosshair"></canvas>
+      </div>
+      <button type="button" class="btn btn-ghost" style="margin-top:5px;padding:4px 12px;font-size:11px" onclick="clearSignature('sigpad-inspector')">🗑️ مسح التوقيع</button>
+    </div>
+
+    <!-- توقيع مدير الفرع -->
+    <div class="fg">
+      <label>✍️ توقيع مدير الفرع</label>
+      <input type="text" id="audit-manager-name" placeholder="اسم مدير الفرع" style="margin-bottom:6px">
+      <div style="border:1px solid var(--border);border-radius:9px;overflow:hidden;background:#fff">
+        <canvas id="sigpad-manager" width="560" height="120" style="width:100%;height:120px;touch-action:none;cursor:crosshair"></canvas>
+      </div>
+      <button type="button" class="btn btn-ghost" style="margin-top:5px;padding:4px 12px;font-size:11px" onclick="clearSignature('sigpad-manager')">🗑️ مسح التوقيع</button>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-danger" onclick="closeModal('m-audit')">إلغاء</button>
+      <button class="btn btn-primary" id="audit-save-btn" onclick="saveAudit()">💾 حفظ الجولة</button>
+    </div>
+  </div>
+</div>
+
 <!-- Observation Modal -->
 <div class="overlay" id="m-obs">
   <div class="modal">
@@ -1161,12 +1417,16 @@ tr:hover td{background:rgba(0,194,255,.03)}
   <div class="modal">
     <h3>📌 إضافة تكليف</h3>
     <input type="hidden" id="assign-eid">
-    <div class="fg"><label>القسم</label><input type="text" id="assign-dept" placeholder="القسم"></div>
+    <div class="fg"><label>اسم المهمة / القسم</label><input type="text" id="assign-dept" placeholder="القسم أو اسم المهمة"></div>
     <div class="fg"><label>نوع التكليف</label><select id="assign-type">
       <option>تكليف رسمي موثق</option><option>تكليف كتابي</option>
       <option>تفويض صلاحيات</option><option>مهمة ميدانية</option>
       <option>تكليف تدريبي إلزامي</option></select></div>
     <div class="fg"><label>السبب والهدف</label><textarea id="assign-reason" rows="2"></textarea></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="fg"><label>📅 تاريخ الاستحقاق</label><input type="date" id="assign-duedate"></div>
+      <div class="fg"><label>⚡ الأولوية</label><select id="assign-priority"><option>عالية</option><option selected>متوسطة</option><option>منخفضة</option></select></div>
+    </div>
     <div class="fg"><label>الوقت المطلوب</label><input type="text" id="assign-time" placeholder="يومي / أسبوعي / مرة واحدة"></div>
     <div class="fg"><label>المسؤول</label><input type="text" id="assign-owner" placeholder="اسم المسؤول"></div>
     <div class="fg"><label>الحالة</label><select id="assign-stat"><option>معلق</option><option>جارٍ</option><option>مكتمل</option></select></div>
@@ -1295,14 +1555,29 @@ function closeModal(id) {
 function switchTab(id) {
   document.querySelectorAll('.tab').forEach(function(b){ b.classList.remove('active'); });
   document.querySelectorAll('.pane').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('.sb-link').forEach(function(b){ b.classList.remove('active'); });
   const btn = document.querySelector('[onclick="switchTab(\''+id+'\')"]');
   if (btn) btn.classList.add('active');
+  const sbBtn = document.querySelector('.sb-link[data-tab="'+id+'"]');
+  if (sbBtn) sbBtn.classList.add('active');
   const pane = document.getElementById('pane-'+id);
   if (pane) pane.classList.add('active');
+  // إغلاق القائمة الجانبية تلقائياً على الجوال بعد الاختيار
+  toggleSidebar(false);
   // جلب تلقائي عند فتح ملفات المرضى
   if (id === 'patient-files' && GAS_URL) {
     setTimeout(function(){ pfFetchFromSheets(); }, 500);
   }
+}
+
+// ═══ Sidebar toggle (موبايل) ═══
+function toggleSidebar(force) {
+  const sb = document.getElementById('appSidebar');
+  const ov = document.getElementById('sidebarOverlay');
+  if (!sb || !ov) return;
+  const open = (typeof force === 'boolean') ? force : !sb.classList.contains('open');
+  sb.classList.toggle('open', open);
+  ov.style.display = open ? 'block' : 'none';
 }
 
 // Close modals on overlay click
@@ -1319,6 +1594,7 @@ let DB = {
   observations:[], requirements:[], team:[],
   locations:[], tmpChanges:[], lectures:[],
   assignments:[], policies:[], workflow:[],
+  siteAudits:[],
   dashboard: null
 };
 let isSyncing = false;
@@ -1424,7 +1700,7 @@ async function syncAll() {
     const d = await gasGet('getData');
     if (d.error) throw new Error(d.error);
     ['observations','requirements','team','locations','tmpChanges',
-     'lectures','assignments','policies','workflow','dashboard']
+     'lectures','assignments','policies','workflow','siteAudits','dashboard']
       .forEach(k => { if (d[k]) DB[k] = d[k]; });
     renderAll();
     setSyncStatus('ok');
@@ -1436,6 +1712,9 @@ async function syncAll() {
       localStorage.setItem('cbahi_policies_v1', JSON.stringify(POLICIES));
       renderPoliciesTab();
     }
+    // مزامنة إضافية: الرخص + ملفات الموظفين (تضمن تطابق النسب بين جميع المستخدمين)
+    licFetchFromSheets();
+    if (typeof fetchEmployeeFiles === 'function') fetchEmployeeFiles();
     toast('✅ تمت المزامنة', 'success');
   } catch(e) {
     setSyncStatus('err');
@@ -1840,16 +2119,70 @@ function renderLec() {
 }
 
 // ─── Assignments ──────────────────────────────────────────────
+function priorityPill(p) {
+  const m = {'عالية':'s-crit','متوسطة':'s-warn','منخفضة':'s-pend'};
+  return `<span class="pill ${m[p]||'s-pend'}">${p||'متوسطة'}</span>`;
+}
+
+function renderAssignKPIs() {
+  const el = document.getElementById('assign-kpi-row');
+  if (!el) return;
+  const list = DB.assignments || [];
+  const today = new Date(); today.setHours(0,0,0,0);
+  const isOverdue = (a) => a.duedate && a.status !== 'مكتمل' && new Date(a.duedate) < today;
+  const total = list.length;
+  const overdue = list.filter(isOverdue).length;
+  const inProgress = list.filter(a => a.status === 'جارٍ').length;
+  const completedToday = list.filter(a => {
+    if (a.status !== 'مكتمل' || !a.updatedAt) return false;
+    const d = new Date(a.updatedAt);
+    return d.toDateString() === new Date().toDateString();
+  }).length;
+  el.innerHTML =
+    `<div class="kpi blue"><div class="kpi-lbl">إجمالي المهام</div><div class="kpi-val">${total}</div><div class="kpi-sub">مهمة</div></div>` +
+    `<div class="kpi red"><div class="kpi-lbl">متأخرة</div><div class="kpi-val">${overdue}</div><div class="kpi-sub">تحتاج تدخل</div></div>` +
+    `<div class="kpi gold"><div class="kpi-lbl">قيد التنفيذ</div><div class="kpi-val" style="color:var(--gold)">${inProgress}</div><div class="kpi-sub">مهمة نشطة</div></div>` +
+    `<div class="kpi green"><div class="kpi-lbl">مكتملة اليوم</div><div class="kpi-val" style="color:var(--green)">${completedToday}</div><div class="kpi-sub">أُنجزت</div></div>`;
+}
+
 function renderAssign() {
-  document.getElementById('assign-tbody').innerHTML = DB.assignments.map((a,i)=>`
-    <tr><td class="num">${i+1}</td>
-    <td class="td-main">${a.dept||''}</td>
-    <td><span class="badge badge-orange" style="font-size:9px">${a.type||''}</span></td>
-    <td style="font-size:11px;color:var(--text3);max-width:200px">${a.reason||''}</td>
-    <td style="font-size:11px">${a.time||''}</td>
-    <td style="font-size:11px;color:var(--accent)">${a.owner||''}</td>
-    <td>${pill(a.status||'معلق')}</td>
-    <td>${actionBtns('editAssign','delAssign',a.id)}</td></tr>`).join('');
+  const tbody = document.getElementById('assign-tbody');
+  if (!tbody) return;
+  const search = ((document.getElementById('assign-search')||{}).value||'').toLowerCase();
+  const fStatus = (document.getElementById('assign-filter-status')||{}).value||'ALL';
+  const fPriority = (document.getElementById('assign-filter-priority')||{}).value||'ALL';
+  const today = new Date(); today.setHours(0,0,0,0);
+
+  let list = DB.assignments || [];
+  list = list.map(a => {
+    const overdue = a.duedate && a.status !== 'مكتمل' && new Date(a.duedate) < today;
+    return Object.assign({}, a, { _overdue: overdue });
+  });
+  if (search) list = list.filter(a => (a.dept||'').toLowerCase().includes(search) || (a.owner||'').toLowerCase().includes(search));
+  if (fStatus !== 'ALL') list = fStatus === 'متأخرة' ? list.filter(a => a._overdue) : list.filter(a => a.status === fStatus);
+  if (fPriority !== 'ALL') list = list.filter(a => (a.priority||'متوسطة') === fPriority);
+
+  if (!list.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:30px">لا توجد مهام مطابقة</td></tr>';
+    renderAssignKPIs();
+    return;
+  }
+
+  tbody.innerHTML = list.map(a => {
+    const initial = (a.owner||'?').trim().charAt(0) || '؟';
+    const dueColor = a._overdue ? 'var(--red)' : 'var(--text2)';
+    const statusLabel = a._overdue ? 'متأخرة' : (a.status||'معلق');
+    return `<tr>
+      <td class="td-main">${a.dept||''}<div style="font-size:10px;color:var(--text3);font-weight:400;max-width:260px">${a.reason||''}</div></td>
+      <td><div style="display:flex;align-items:center;gap:6px">
+        <div style="width:24px;height:24px;border-radius:50%;background:var(--accent2);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700">${initial}</div>
+        <span style="font-size:11px">${a.owner||'—'}</span></div></td>
+      <td style="font-size:11px;color:${dueColor};font-weight:${a._overdue?'700':'400'}">${a.duedate||a.time||'—'}</td>
+      <td>${priorityPill(a.priority||'متوسطة')}</td>
+      <td>${pill(statusLabel)}</td>
+      <td>${actionBtns('editAssign','delAssign',a.id)}</td></tr>`;
+  }).join('');
+  renderAssignKPIs();
 }
 
 // ─── Policies ─────────────────────────────────────────────────
@@ -2018,6 +2351,8 @@ function newAssign() {
   document.getElementById('assign-dept').value = '';
   document.getElementById('assign-type').value = 'تكليف رسمي موثق';
   document.getElementById('assign-reason').value = '';
+  document.getElementById('assign-duedate').value = '';
+  document.getElementById('assign-priority').value = 'متوسطة';
   document.getElementById('assign-time').value = '';
   document.getElementById('assign-owner').value = '';
   document.getElementById('assign-stat').value = 'معلق';
@@ -2075,9 +2410,9 @@ async function saveLec(){
 // ═══════════════════════════════════════════════════════════════
 // CRUD — Assignments
 // ═══════════════════════════════════════════════════════════════
-function editAssign(id){ const a=DB.assignments.find(x=>String(x.id)===String(id))||{}; document.getElementById('assign-eid').value=a.id||''; document.getElementById('assign-dept').value=a.dept||''; document.getElementById('assign-type').value=a.type||'تكليف رسمي موثق'; document.getElementById('assign-reason').value=a.reason||''; document.getElementById('assign-time').value=a.time||''; document.getElementById('assign-owner').value=a.owner||''; document.getElementById('assign-stat').value=a.status||'معلق'; openModal('m-assign'); }
+function editAssign(id){ const a=DB.assignments.find(x=>String(x.id)===String(id))||{}; document.getElementById('assign-eid').value=a.id||''; document.getElementById('assign-dept').value=a.dept||''; document.getElementById('assign-type').value=a.type||'تكليف رسمي موثق'; document.getElementById('assign-reason').value=a.reason||''; document.getElementById('assign-duedate').value=a.duedate||''; document.getElementById('assign-priority').value=a.priority||'متوسطة'; document.getElementById('assign-time').value=a.time||''; document.getElementById('assign-owner').value=a.owner||''; document.getElementById('assign-stat').value=a.status||'معلق'; openModal('m-assign'); }
 async function delAssign(id){ if(!confirm('حذف؟')) return; DB.assignments=DB.assignments.filter(a=>String(a.id)!==String(id)); renderAll(); await apiCall('delete','assignments',id); setTimeout(() => syncAll(), 1000); toast('🗑️ تم الحذف','info'); }
-async function saveAssign(){ const id=document.getElementById('assign-eid').value; const obj={id:id||String(Date.now()),dept:document.getElementById('assign-dept').value,type:document.getElementById('assign-type').value,reason:document.getElementById('assign-reason').value,time:document.getElementById('assign-time').value,owner:document.getElementById('assign-owner').value,status:document.getElementById('assign-stat').value}; if(id){const idx=DB.assignments.findIndex(a=>String(a.id)===id);DB.assignments[idx]={...DB.assignments[idx],...obj};}else DB.assignments.push(obj); renderAll();closeModal('m-assign'); await apiCall(id?'update':'add','assignments',obj.id,obj); setTimeout(() => syncAll(), 1000); toast('✅ تم الحفظ','success'); }
+async function saveAssign(){ const id=document.getElementById('assign-eid').value; const obj={id:id||String(Date.now()),dept:document.getElementById('assign-dept').value,type:document.getElementById('assign-type').value,reason:document.getElementById('assign-reason').value,duedate:document.getElementById('assign-duedate').value,priority:document.getElementById('assign-priority').value,time:document.getElementById('assign-time').value,owner:document.getElementById('assign-owner').value,status:document.getElementById('assign-stat').value,updatedAt:new Date().toISOString()}; if(id){const idx=DB.assignments.findIndex(a=>String(a.id)===id);DB.assignments[idx]={...DB.assignments[idx],...obj};}else DB.assignments.push(obj); renderAll();closeModal('m-assign'); await apiCall(id?'update':'add','assignments',obj.id,obj); setTimeout(() => syncAll(), 1000); toast('✅ تم الحفظ','success'); }
 
 // ═══════════════════════════════════════════════════════════════
 // CRUD — Policies
@@ -2474,21 +2809,11 @@ async function saveExtras() {
   };
   localStorage.setItem('cbahi_extras_v1', JSON.stringify(ex));
   closeModal('m-extras');
-  toast('✅ تم الحفظ محلياً...', 'info', 1500);
-  
-  // Send to backend if connected
-  if (GAS_URL) {
-    try {
-      setSyncStatus('load');
-      await callGAS({ action: 'updateExtras', data: ex });
-      setSyncStatus('ok');
-      toast('✅ حُفظ في Google Sheets', 'success');
-    } catch(e) {
-      setSyncStatus('err');
-      toast('⚠️ حُفظ محلياً فقط', 'info');
-    }
-  }
-  
+
+  // ملاحظة: قيمة staff تُحدّث تلقائياً من شيت HR الحقيقي عبر fetchEmployeeFiles()
+  // هذا الحقل الآن يُستخدم فقط لبونص "جسر" اليدوي
+  toast('✅ تم الحفظ محلياً (جسر فقط — ملفات الموظفين تُحدَّث من الشيت تلقائياً)', 'info');
+
   renderProgressDashboard();
 }
 
@@ -2606,11 +2931,130 @@ function renderProgressDashboard() {
   }
 }
 
-// Override renderAll to also update progress dashboard
+// ════════════════════════════════════════════════════════════════
+// STITCH OVERVIEW — دائرة الجاهزية + 8 محاور + جدول البنود المعلّقة
+// نفس بيانات calcPillarPct() ونفس مصفوفة PILLARS بالضبط، بدون أي endpoint جديد
+// ════════════════════════════════════════════════════════════════
+var DOC_FILTER = 'all';
+
+function statusColor(pct) {
+  if (pct >= 80) return { bg:'rgba(26,143,92,.1)', fg:'#1a8f5c', icon:'check_circle' };
+  if (pct >= 40) return { bg:'rgba(183,121,31,.1)', fg:'#b7791f', icon:'pending' };
+  return { bg:'rgba(192,57,43,.1)', fg:'#c0392b', icon:'error' };
+}
+
+function renderStitchKPIGrid() {
+  const grid = document.getElementById('stitch-kpi-grid');
+  if (!grid || typeof PILLARS === 'undefined') return;
+  grid.innerHTML = PILLARS.map(function(p) {
+    const pct = calcPillarPct(p.key);
+    const c = statusColor(pct);
+    return '<div class="stitch-kpi-card">' +
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start">' +
+        '<h4 style="font-size:13px;font-weight:700;color:#101828">' + p.icon + ' ' + p.label + '</h4>' +
+        '<span style="background:' + c.bg + ';color:' + c.fg + ';font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;display:flex;align-items:center;gap:3px;white-space:nowrap">' +
+          '<span class="material-symbols-outlined" style="font-size:14px">' + c.icon + '</span>' + pct + '%' +
+        '</span>' +
+      '</div>' +
+      '<div style="font-size:11px;color:#6b7280">الوزن: ' + p.weight + '%</div>' +
+      '<div style="width:100%;height:5px;background:#eceef4;border-radius:3px;overflow:hidden;margin-top:auto">' +
+        '<div style="height:100%;width:' + pct + '%;background:' + c.fg + ';border-radius:3px;transition:width .8s"></div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function renderStitchDonut() {
+  const overall = (function() {
+    try {
+      var total = 0;
+      PILLARS.forEach(function(p) { total += calcPillarPct(p.key) * p.weight / 100; });
+      return Math.round(total);
+    } catch(e) { return 0; }
+  })();
+  const circle = document.getElementById('readiness-donut');
+  const text = document.getElementById('donut-pct-text');
+  if (circle) {
+    const circumference = 440; // 2*PI*70 تقريباً، مطابق لقيمة stroke-dasharray
+    const offset = circumference - (overall / 100) * circumference;
+    circle.style.strokeDashoffset = offset;
+  }
+  if (text) text.textContent = overall + '%';
+  const daysEl = document.getElementById('donut-days-left');
+  if (daysEl) {
+    const diff = new Date('2026-08-20') - new Date();
+    const days = Math.max(0, Math.floor(diff/86400000));
+    daysEl.textContent = '⏰ ' + days + ' يوم متبقٍ حتى جاهزية المنشأة';
+  }
+}
+
+function buildDocTrackingRows() {
+  const rows = [];
+  (DB.policies||[]).forEach(function(p) {
+    if (p.sigStatus !== 'موقع كامل') {
+      rows.push({ name: p.name||p.title||'سياسة بدون اسم', type:'📜 سياسة', status: p.sigStatus||'لم يوقع',
+        owner: p.dept||'—', due:'—', late:false });
+    }
+  });
+  (DB.requirements||[]).forEach(function(r) {
+    if (r.status !== 'مكتمل') {
+      rows.push({ name: r.text||'متطلب', type:'📋 متطلب', status: r.status||'معلق',
+        owner: r.owner||'—', due:'—', late:(r.status==='معلق') });
+    }
+  });
+  (DB.observations||[]).forEach(function(o) {
+    if (o.status !== 'محلولة') {
+      const isLate = !!(o.due && new Date(o.due) < new Date());
+      rows.push({ name: o.text||'ملاحظة', type:'🔍 ملاحظة', status: isLate ? 'متأخر' : (o.status||'معلقة'),
+        owner: o.owner||'—', due: o.due||'—', late: isLate });
+    }
+  });
+  return rows;
+}
+
+function setDocFilter(f) {
+  DOC_FILTER = f;
+  document.querySelectorAll('.stitch-doc-filter').forEach(function(b){
+    b.classList.toggle('active', b.getAttribute('data-f') === f);
+  });
+  renderStitchDocTable();
+}
+
+function renderStitchDocTable() {
+  const tbody = document.getElementById('stitch-doc-tbody');
+  if (!tbody) return;
+  let rows = buildDocTrackingRows();
+  if (DOC_FILTER === 'late') rows = rows.filter(function(r){ return r.late; });
+  else if (DOC_FILTER === 'pending') rows = rows.filter(function(r){ return !r.late; });
+  rows = rows.slice(0, 10);
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:24px;color:#6b7280">لا توجد بنود مطابقة 🎉</td></tr>';
+    return;
+  }
+  tbody.innerHTML = rows.map(function(r) {
+    const cls = r.late ? 's-crit' : (r.status==='محلولة'||r.status==='مكتمل'||r.status==='موقع كامل') ? 's-done' : 's-warn';
+    return '<tr style="border-bottom:1px solid rgba(0,30,64,.06)">' +
+      '<td style="padding:10px 16px;color:#101828;font-weight:600;max-width:260px">' + r.name + '</td>' +
+      '<td style="padding:10px 16px;color:#43474f">' + r.type + '</td>' +
+      '<td style="padding:10px 16px"><span class="pill ' + cls + '">' + r.status + '</span></td>' +
+      '<td style="padding:10px 16px;color:#43474f">' + r.owner + '</td>' +
+      '<td style="padding:10px 16px;color:' + (r.late?'#c0392b':'#43474f') + '">' + r.due + '</td>' +
+    '</tr>';
+  }).join('');
+}
+
+function renderOverviewStitch() {
+  renderStitchDonut();
+  renderStitchKPIGrid();
+  renderStitchDocTable();
+}
+
+// Override renderAll to also update progress dashboard + التصميم الجديد
 const _origRenderAll = renderAll;
 renderAll = function() {
   _origRenderAll();
   renderProgressDashboard();
+  renderOverviewStitch();
 };
 
 // Render once on load
@@ -3272,6 +3716,21 @@ var LIC_DRIVE = 'cbahi_lic_drive_v3';
 function licGet()       { try { return JSON.parse(localStorage.getItem(LIC_KEY)||'[]'); } catch(e){ return []; } }
 function licSet(arr)    { try { localStorage.setItem(LIC_KEY, JSON.stringify(arr)); } catch(e){} }
 
+// ── مزامنة الرخص مع Google Sheets ──────────────────────────
+async function licFetchFromSheets() {
+  if (!GAS_URL) return;
+  try {
+    var res = await gasGet('getLicenses');
+    if (res && res.success && Array.isArray(res.data)) {
+      licSet(res.data);
+      licRender(); licKPIs();
+      renderProgressDashboard();
+    }
+  } catch(e) {
+    console.warn('licFetchFromSheets error:', e);
+  }
+}
+
 // ── Drive helpers ─────────────────────────────────────
 function licSaveDrive() {
   var v = (document.getElementById('lic-drive-input').value||'').trim();
@@ -3325,13 +3784,12 @@ function licOpenModal(id) {
   } catch(e) { console.error('licOpenModal error:', e); toast('⚠️ خطأ في فتح النموذج','error'); }
 }
 
-function licSave() {
+async function licSave() {
   var name = (document.getElementById('lic2-m-name').value||'').trim();
   if (!name) { toast('⚠️ الاسم مطلوب','error'); return; }
-  var id = document.getElementById('lic2-edit-id').value;
-  var items = licGet();
+  var id = document.getElementById('lic2-edit-id').value || String(Date.now());
   var obj = {
-    id:      id || String(Date.now()),
+    id:      id,
     type:    document.getElementById('lic2-m-type').value,
     status:  document.getElementById('lic2-m-status').value,
     name:    name,
@@ -3341,21 +3799,27 @@ function licSave() {
     link:    document.getElementById('lic2-m-link').value,
     notes:   document.getElementById('lic2-m-notes').value
   };
-  if (id) {
-    var idx = items.findIndex(function(x){ return x.id===id; });
-    if (idx > -1) items[idx] = obj; else items.push(obj);
-  } else { items.push(obj); }
+  // حفظ محلي فوري (استجابة سريعة بالواجهة)
+  var items = licGet();
+  var idx = items.findIndex(function(x){ return x.id===id; });
+  if (idx > -1) items[idx] = obj; else items.push(obj);
   licSet(items);
   closeModal('m-lic2');
   licRender(); licKPIs(); renderProgressDashboard();
-  toast('✅ تم الحفظ','success');
+
+  // مزامنة فعلية مع Google Sheets
+  var isNew = idx === -1;
+  var ok = await apiCall(isNew?'add':'update','licenses',obj.id,obj);
+  if (ok) setTimeout(licFetchFromSheets, 1000);
 }
 
-function licDelete(id) {
+async function licDelete(id) {
   if (!confirm('حذف هذا البند؟')) return;
   licSet(licGet().filter(function(x){ return x.id!==id; }));
   licRender(); licKPIs(); renderProgressDashboard();
+  await apiCall('delete','licenses',id);
   toast('🗑️ تم الحذف','info');
+  setTimeout(licFetchFromSheets, 1000);
 }
 
 // ── KPIs ──────────────────────────────────────────────
@@ -3457,7 +3921,12 @@ function licRender() {
 })();
 
 // ── Init ──────────────────────────────────────────────
-function licInit() { licInitDrive(); licRender(); licKPIs(); }
+function licInit() {
+  licInitDrive();
+  licRender();
+  licKPIs();
+  licFetchFromSheets(); // ← جلب فوري من Sheets عند فتح اللوحة
+}
 setTimeout(licInit, 500);
 
 // stubs for any legacy calls
@@ -3736,6 +4205,270 @@ function _section(title) {
   return '<div style="font-size:15px;font-weight:800;color:#0a1628;border-right:4px solid #0a1628;padding-right:10px;margin:20px 0 12px">' + title + '</div>';
 }
 
+// ════════════════════════════════════════════════════════════════
+// SITE AUDITS — جولات التدقيق الميداني (صور قبل/بعد + توقيعات)
+// ════════════════════════════════════════════════════════════════
+
+// ─── لوحات التوقيع (Signature Pads) ─────────────────────────────
+var SIGPADS = {}; // { canvasId: { ctx, drawing, hasSignature } }
+
+function initSignaturePad(canvasId) {
+  var canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  var ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.strokeStyle = '#0a1628';
+  ctx.lineWidth = 2;
+  ctx.lineCap = 'round';
+  SIGPADS[canvasId] = { ctx: ctx, drawing: false, hasSignature: false };
+
+  function getPos(e) {
+    var rect = canvas.getBoundingClientRect();
+    var scaleX = canvas.width / rect.width;
+    var scaleY = canvas.height / rect.height;
+    var clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    var clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    return { x: (clientX - rect.left) * scaleX, y: (clientY - rect.top) * scaleY };
+  }
+  function start(e) {
+    e.preventDefault();
+    var p = getPos(e);
+    SIGPADS[canvasId].drawing = true;
+    SIGPADS[canvasId].hasSignature = true;
+    ctx.beginPath();
+    ctx.moveTo(p.x, p.y);
+  }
+  function move(e) {
+    if (!SIGPADS[canvasId].drawing) return;
+    e.preventDefault();
+    var p = getPos(e);
+    ctx.lineTo(p.x, p.y);
+    ctx.stroke();
+  }
+  function end() { SIGPADS[canvasId].drawing = false; }
+
+  canvas.addEventListener('mousedown', start);
+  canvas.addEventListener('mousemove', move);
+  canvas.addEventListener('mouseup', end);
+  canvas.addEventListener('mouseleave', end);
+  canvas.addEventListener('touchstart', start, { passive:false });
+  canvas.addEventListener('touchmove', move, { passive:false });
+  canvas.addEventListener('touchend', end);
+}
+
+function clearSignature(canvasId) {
+  var canvas = document.getElementById(canvasId);
+  if (!canvas || !SIGPADS[canvasId]) return;
+  var ctx = SIGPADS[canvasId].ctx;
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  SIGPADS[canvasId].hasSignature = false;
+}
+
+function getSignatureBase64(canvasId) {
+  var canvas = document.getElementById(canvasId);
+  if (!canvas || !SIGPADS[canvasId] || !SIGPADS[canvasId].hasSignature) return null;
+  return canvas.toDataURL('image/png').split(',')[1];
+}
+
+// ─── معاينة اسم ملف الصورة ───────────────────────────────────────
+function auditPreviewFile(inp, labelId) {
+  var label = document.getElementById(labelId);
+  if (!label) return;
+  if (inp.files && inp.files[0]) {
+    label.innerHTML = '✅ <span style="color:var(--green);font-weight:700">' + inp.files[0].name + '</span>';
+  } else {
+    label.innerHTML = '📎 اختر صورة...';
+  }
+}
+
+// ─── فتح/إعادة تعيين النموذج ─────────────────────────────────────
+function openAuditModal() {
+  document.getElementById('audit-eid').value = '';
+  document.getElementById('audit-date').value = '';
+  document.getElementById('audit-branch').value = 'بريدة';
+  document.getElementById('audit-location').value = '';
+  document.getElementById('audit-before-file').value = '';
+  document.getElementById('audit-after-file').value = '';
+  document.getElementById('audit-before-label').innerHTML = '📎 اختر صورة "قبل"...';
+  document.getElementById('audit-after-label').innerHTML = '📎 اختر صورة "بعد"...';
+  document.getElementById('audit-notes').value = '';
+  document.getElementById('audit-recommendation').value = '';
+  document.getElementById('audit-status').value = 'قيد المتابعة';
+  document.getElementById('audit-inspector-name').value = '';
+  document.getElementById('audit-manager-name').value = '';
+  openModal('m-audit');
+  // تهيئة لوحات التوقيع بعد ظهور المودال (حتى تُقاس أبعاد الكانفس صح)
+  setTimeout(function() {
+    initSignaturePad('sigpad-inspector');
+    initSignaturePad('sigpad-manager');
+  }, 100);
+}
+
+// ─── رفع صورة واحدة إلى Drive عبر GAS ────────────────────────────
+async function auditUploadImage(base64, fileName, mimeType) {
+  try {
+    var res = await gasMutate('uploadAuditPhoto', '', String(Date.now()), {
+      fileName: fileName, base64Data: base64, mimeType: mimeType || 'image/png'
+    });
+    if (res && res.success) return { url: res.viewUrl, id: res.fileId };
+    return null;
+  } catch(e) {
+    console.warn('auditUploadImage error:', e);
+    return null;
+  }
+}
+
+function fileToBase64(file) {
+  return new Promise(function(res, rej) {
+    var reader = new FileReader();
+    reader.onload = function(e) { res(e.target.result.split(',')[1]); };
+    reader.onerror = function() { rej(new Error('فشل قراءة الملف')); };
+    reader.readAsDataURL(file);
+  });
+}
+
+// ─── الحفظ ────────────────────────────────────────────────────────
+async function saveAudit() {
+  var date = document.getElementById('audit-date').value;
+  var branch = document.getElementById('audit-branch').value;
+  if (!date) { toast('⚠️ حدد تاريخ الزيارة', 'error'); return; }
+
+  var btn = document.getElementById('audit-save-btn');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ جاري الحفظ...'; }
+  toast('⏳ جاري رفع الصور والتوقيعات...', 'info', 8000);
+
+  var id = document.getElementById('audit-eid').value || String(Date.now());
+  var obj = {
+    id: id,
+    date: date,
+    branch: branch,
+    location: document.getElementById('audit-location').value,
+    notes: document.getElementById('audit-notes').value,
+    recommendation: document.getElementById('audit-recommendation').value,
+    status: document.getElementById('audit-status').value,
+    inspectorName: document.getElementById('audit-inspector-name').value,
+    branchManagerName: document.getElementById('audit-manager-name').value,
+    beforePhotoUrl: '', beforePhotoId: '', afterPhotoUrl: '', afterPhotoId: '',
+    inspectorSignUrl: '', branchManagerSignUrl: ''
+  };
+
+  try {
+    // صورة قبل
+    var beforeInput = document.getElementById('audit-before-file');
+    if (beforeInput.files && beforeInput.files[0]) {
+      var b64 = await fileToBase64(beforeInput.files[0]);
+      var up = await auditUploadImage(b64, 'before_' + id + '_' + beforeInput.files[0].name, beforeInput.files[0].type);
+      if (up) { obj.beforePhotoUrl = up.url; obj.beforePhotoId = up.id; }
+    }
+    // صورة بعد
+    var afterInput = document.getElementById('audit-after-file');
+    if (afterInput.files && afterInput.files[0]) {
+      var b64b = await fileToBase64(afterInput.files[0]);
+      var up2 = await auditUploadImage(b64b, 'after_' + id + '_' + afterInput.files[0].name, afterInput.files[0].type);
+      if (up2) { obj.afterPhotoUrl = up2.url; obj.afterPhotoId = up2.id; }
+    }
+    // توقيع المفتش
+    var sigInspector = getSignatureBase64('sigpad-inspector');
+    if (sigInspector) {
+      var upSig1 = await auditUploadImage(sigInspector, 'sig_inspector_' + id + '.png', 'image/png');
+      if (upSig1) obj.inspectorSignUrl = upSig1.url;
+    }
+    // توقيع مدير الفرع
+    var sigManager = getSignatureBase64('sigpad-manager');
+    if (sigManager) {
+      var upSig2 = await auditUploadImage(sigManager, 'sig_manager_' + id + '.png', 'image/png');
+      if (upSig2) obj.branchManagerSignUrl = upSig2.url;
+    }
+  } catch(e) {
+    toast('⚠️ حدث خطأ أثناء رفع الملفات: ' + e.message, 'info');
+  }
+
+  // إضافة محلية فورية
+  var idx = DB.siteAudits.findIndex(function(a){ return String(a.id) === String(id); });
+  if (idx > -1) DB.siteAudits[idx] = Object.assign({}, DB.siteAudits[idx], obj);
+  else DB.siteAudits.unshift(obj);
+  renderAuditTable();
+  renderAuditKPIs();
+  closeModal('m-audit');
+
+  await apiCall(idx>-1?'update':'add', 'siteAudits', id, obj);
+  if (btn) { btn.disabled = false; btn.textContent = '💾 حفظ الجولة'; }
+  toast('✅ تم حفظ جولة التدقيق', 'success');
+  setTimeout(function(){ syncAll(); }, 1200);
+}
+
+async function delAudit(id) {
+  if (!confirm('حذف جولة التدقيق هذه؟')) return;
+  DB.siteAudits = DB.siteAudits.filter(function(a){ return String(a.id) !== String(id); });
+  renderAuditTable();
+  renderAuditKPIs();
+  await apiCall('delete', 'siteAudits', id);
+  toast('🗑️ تم الحذف', 'info');
+}
+
+// ─── العرض ────────────────────────────────────────────────────────
+function renderAuditKPIs() {
+  var el = document.getElementById('audit-kpi-row');
+  if (!el) return;
+  var list = DB.siteAudits || [];
+  var total = list.length;
+  var pending = list.filter(function(a){ return a.status === 'قيد المتابعة'; }).length;
+  var resolved = list.filter(function(a){ return a.status === 'تم المعالجة'; }).length;
+  var thisMonth = list.filter(function(a){
+    if (!a.date) return false;
+    var d = new Date(a.date), now = new Date();
+    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+  }).length;
+  el.innerHTML =
+    '<div class="kpi blue"><div class="kpi-lbl">إجمالي الجولات</div><div class="kpi-val">' + total + '</div><div class="kpi-sub">منذ البداية</div></div>' +
+    '<div class="kpi gold"><div class="kpi-lbl">قيد المتابعة</div><div class="kpi-val" style="color:var(--gold)">' + pending + '</div><div class="kpi-sub">تحتاج إجراء</div></div>' +
+    '<div class="kpi green"><div class="kpi-lbl">تم المعالجة</div><div class="kpi-val" style="color:var(--green)">' + resolved + '</div><div class="kpi-sub">مغلقة</div></div>' +
+    '<div class="kpi red"><div class="kpi-lbl">هذا الشهر</div><div class="kpi-val">' + thisMonth + '</div><div class="kpi-sub">جولة</div></div>';
+}
+
+function renderAuditTable() {
+  var tbody = document.getElementById('audit-tbody');
+  var cnt = document.getElementById('audit-count');
+  var list = DB.siteAudits || [];
+  if (cnt) cnt.textContent = list.length;
+  if (!tbody) return;
+  if (!list.length) {
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--text3);padding:40px">لا توجد جولات تدقيق بعد</td></tr>';
+    return;
+  }
+  tbody.innerHTML = list.map(function(a, i) {
+    var photos = '';
+    if (a.beforePhotoUrl) photos += '<a href="'+a.beforePhotoUrl+'" target="_blank" style="color:var(--accent);font-size:10px;margin-left:4px">قبل</a>';
+    if (a.afterPhotoUrl) photos += '<a href="'+a.afterPhotoUrl+'" target="_blank" style="color:var(--green);font-size:10px">بعد</a>';
+    if (!photos) photos = '<span style="color:var(--text3);font-size:10px">—</span>';
+    var sigs = '';
+    if (a.inspectorSignUrl) sigs += '<a href="'+a.inspectorSignUrl+'" target="_blank" title="توقيع المفتش" style="font-size:13px;margin-left:4px">✍️مفتش</a>';
+    if (a.branchManagerSignUrl) sigs += '<a href="'+a.branchManagerSignUrl+'" target="_blank" title="توقيع مدير الفرع" style="font-size:13px">✍️مدير</a>';
+    if (!sigs) sigs = '<span style="color:var(--text3);font-size:10px">—</span>';
+    return '<tr>' +
+      '<td class="num">' + (i+1) + '</td>' +
+      '<td style="font-size:11px">' + (a.date||'') + '</td>' +
+      '<td class="td-main">' + (a.branch||'') + '</td>' +
+      '<td style="font-size:11px;color:var(--text3)">' + (a.location||'—') + '</td>' +
+      '<td style="font-size:11px;max-width:200px">' + (a.recommendation||'—') + '</td>' +
+      '<td style="text-align:center">' + photos + '</td>' +
+      '<td style="text-align:center">' + sigs + '</td>' +
+      '<td>' + pill(a.status||'قيد المتابعة') + '</td>' +
+      '<td><button class="btn btn-danger" style="padding:3px 8px;font-size:10px" onclick="delAudit(\''+a.id+'\')">حذف</button></td>' +
+    '</tr>';
+  }).join('');
+}
+
+// ربط العرض مع دورة التحديث العامة
+const _origRenderAllAudits = renderAll;
+renderAll = function() {
+  _origRenderAllAudits();
+  renderAuditTable();
+  renderAuditKPIs();
+};
+
 </script>
 
 <!-- Patient File Report Modal -->
@@ -3781,6 +4514,9 @@ function _section(title) {
     </div>
   </div>
 </div>
+
+</div><!-- /.app-content -->
+</div><!-- /.app-shell -->
 </body>
 
 </html>

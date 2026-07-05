@@ -1239,6 +1239,8 @@ tr:hover td{background:rgba(0,194,255,.03)}
     </div>
     <div class="fg"><label>الاسم *</label>
       <input type="text" id="lic2-m-name" placeholder="مثال: رخصة البلدية – فرع بريدة"></div>
+    <div class="fg"><label>الجهة المصدرة / النشاط</label>
+      <input type="text" id="lic2-m-entity" placeholder="مثال: أمانة المنطقة، خدمات بلدي..."></div>
     <div class="fg"><label>الغرض</label>
       <textarea id="lic2-m-purpose" rows="2" placeholder="مثال: تصريح تشغيل المنشأة الصحية"></textarea></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
@@ -3877,6 +3879,7 @@ function licOpenModal(id) {
     if(g('lic2-m-type'))     g('lic2-m-type').value            = (it&&it.type)    || 'رخصة';
     if(g('lic2-m-status'))   g('lic2-m-status').value          = (it&&it.status)  || 'لم يتم';
     if(g('lic2-m-name'))     g('lic2-m-name').value            = (it&&it.name)    || '';
+    if(g('lic2-m-entity'))   g('lic2-m-entity').value          = (it&&it.entity)  || '';
     if(g('lic2-m-purpose'))  g('lic2-m-purpose').value         = (it&&it.purpose) || '';
     if(g('lic2-m-start'))    g('lic2-m-start').value           = (it&&it.start)   || '';
     if(g('lic2-m-expiry'))   g('lic2-m-expiry').value          = (it&&it.expiry)  || '';
@@ -3895,11 +3898,13 @@ async function licSave() {
     type:    document.getElementById('lic2-m-type').value,
     status:  document.getElementById('lic2-m-status').value,
     name:    name,
+    entity:  document.getElementById('lic2-m-entity').value,
     purpose: document.getElementById('lic2-m-purpose').value,
     start:   document.getElementById('lic2-m-start').value,
     expiry:  document.getElementById('lic2-m-expiry').value,
     link:    document.getElementById('lic2-m-link').value,
-    notes:   document.getElementById('lic2-m-notes').value
+    notes:   document.getElementById('lic2-m-notes').value,
+    updatedAt: new Date().toISOString()
   };
   // حفظ محلي فوري (استجابة سريعة بالواجهة)
   var items = licGet();
@@ -3995,7 +4000,7 @@ function licRender() {
     return '<tr>'+
       '<td class="num" style="font-size:10px;color:var(--text3)">'+(i+1)+'</td>'+
       '<td><span style="font-size:11px;font-weight:800;color:'+color+';background:'+color+'1a;padding:2px 9px;border-radius:8px">'+icon+' '+it.type+'</span></td>'+
-      '<td style="min-width:140px"><div style="font-size:12px;font-weight:700;color:var(--text)">'+it.name+'</div>'+(it.notes?'<div style="font-size:10px;color:var(--text3);margin-top:1px">'+it.notes+'</div>':'')+'</td>'+
+      '<td style="min-width:140px"><div style="font-size:12px;font-weight:700;color:var(--text)">'+it.name+'</div>'+(it.entity?'<div style="font-size:10px;color:var(--accent);margin-top:1px">🏛️ '+it.entity+'</div>':'')+(it.notes?'<div style="font-size:10px;color:var(--text3);margin-top:1px">'+it.notes+'</div>':'')+'</td>'+
       '<td style="font-size:11px;color:var(--text2);max-width:150px">'+(it.purpose||'—')+'</td>'+
       '<td style="text-align:center;font-size:11px;color:var(--text3)">'+(it.start||'—')+'</td>'+
       '<td style="text-align:center;font-size:11px;color:var(--text2);font-weight:700">'+(it.expiry||'—')+'</td>'+

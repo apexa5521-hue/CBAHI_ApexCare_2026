@@ -3324,7 +3324,7 @@ function pfReset() {
 
 // حذف سجل
 function pfEdit(id) {
-  var r = pfGet().find(function(x){ return x.id === id; });
+  var r = pfGet().find(function(x){ return String(x.id) === String(id); });
   if (!r) return;
   // عبّأ الحقول بالبيانات الموجودة
   var _v = function(elId, val){ var el=document.getElementById(elId); if(el) el.value=val||''; };
@@ -3368,7 +3368,7 @@ function pfUpdateReport() {
 
   var pct = Math.round(complete / total * 100);
   var records = pfGet();
-  var idx = records.findIndex(function(x){ return x.id === id; });
+  var idx = records.findIndex(function(x){ return String(x.id) === String(id); });
   if (idx === -1) { toast('⚠️ التقرير غير موجود','error'); return; }
 
   // حدّث البيانات مع الاحتفاظ بالـ PDF القديم
@@ -3470,7 +3470,7 @@ async function pfFetchFromSheets() {
       // دمج: الـ Sheets هي المصدر الرئيسي، احتفظ بالـ pdfData المحلي
       var local = pfGet();
       var merged = res.data.map(function(r) {
-        var localRec = local.find(function(l){ return l.id === r.id; });
+        var localRec = local.find(function(l){ return String(l.id) === String(r.id); });
         return Object.assign({ pdfData: null, pdfName: '' }, r, {
           pdfData: localRec ? localRec.pdfData : null
         });
@@ -3870,7 +3870,7 @@ function licExpiry(dateStr) {
 function licOpenModal(id) {
   try {
     var items = licGet();
-    var it = id ? items.find(function(x){ return x.id===id; }) : null;
+    var it = id ? items.find(function(x){ return String(x.id)===String(id); }) : null;
     var g = function(elId){ return document.getElementById(elId); };
     if(g('lic2-edit-id'))    g('lic2-edit-id').value           = id||'';
     if(g('lic2-modal-ttl'))  g('lic2-modal-ttl').textContent   = id ? '✏️ تعديل البند' : '📋 إضافة بند جديد';
@@ -3903,25 +3903,24 @@ async function licSave() {
   };
   // حفظ محلي فوري (استجابة سريعة بالواجهة)
   var items = licGet();
-  var idx = items.findIndex(function(x){ return x.id===id; });
+  var idx = items.findIndex(function(x){ return String(x.id)===String(id); });
   if (idx > -1) items[idx] = obj; else items.push(obj);
   licSet(items);
   closeModal('m-lic2');
   licRender(); licKPIs(); renderProgressDashboard();
 
-  // مزامنة فعلية مع Google Sheets
+  // مزامنة فعلية مع Google Sheets — بدون إعادة جلب فورية (تفادياً لسباق القراءة/الكتابة)
   var isNew = idx === -1;
-  var ok = await apiCall(isNew?'add':'update','licenses',obj.id,obj);
-  if (ok) setTimeout(licFetchFromSheets, 1000);
+  await apiCall(isNew?'add':'update','licenses',obj.id,obj);
+  // التحديث النهائي من الشيت يصير تلقائياً مع أي مزامنة لاحقة (زر مزامنة، تبديل تبويب، أو المزامنة الدورية)
 }
 
 async function licDelete(id) {
   if (!confirm('حذف هذا البند؟')) return;
-  licSet(licGet().filter(function(x){ return x.id!==id; }));
+  licSet(licGet().filter(function(x){ return String(x.id)!==String(id); }));
   licRender(); licKPIs(); renderProgressDashboard();
   await apiCall('delete','licenses',id);
   toast('🗑️ تم الحذف','info');
-  setTimeout(licFetchFromSheets, 1000);
 }
 
 // ── KPIs ──────────────────────────────────────────────

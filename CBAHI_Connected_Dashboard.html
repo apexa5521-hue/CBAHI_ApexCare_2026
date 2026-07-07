@@ -3728,9 +3728,16 @@ function pfRender() {
   var cntEl   = document.getElementById('pf-count');
   if (cntEl) cntEl.textContent = records.length;
 
+  // آخر تقرير = الأحدث فعلياً حسب "تاريخ التحليل" (date) — وليس أول عنصر بالمصفوفة
+  var latest = null;
+  records.forEach(function(r) {
+    if (!r.date) return;
+    if (!latest || r.date > latest.date) latest = r;
+  });
+  if (!latest && records.length) latest = records[0]; // احتياطي إذا كل السجلات بلا تاريخ
+
   // كروت الملخص — آخر تقرير
-  if (records.length > 0) {
-    var latest = records[0];
+  if (latest) {
     var el = function(id,v){ var e=document.getElementById(id); if(e) e.textContent=v; };
     el('pf-total',      latest.total);
     el('pf-complete',   latest.complete);
@@ -3776,7 +3783,10 @@ function pfRender() {
     return;
   }
 
-  tbody.innerHTML = records.map(function(p, i) {
+  // ترتيب العرض بالجدول: من الأقدم إلى الأحدث حسب تاريخ التحليل
+  var sortedForDisplay = records.slice().sort(function(a,b){ return (a.date||'').localeCompare(b.date||''); });
+
+  tbody.innerHTML = sortedForDisplay.map(function(p, i) {
     var pct = p.pct || 0;
     var pctColor = pct >= 90 ? '#10D97E' : pct >= 70 ? '#F97316' : '#EF4444';
     var driveLink = p.driveUrl || p.pdfData || '';

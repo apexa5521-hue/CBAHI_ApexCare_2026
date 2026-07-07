@@ -519,6 +519,22 @@ tr:hover td{background:rgba(0,194,255,.03)}
 
   <div class="tcard">
     <div class="tcard-hdr">
+      <div class="tcard-title">📍 تحليل الأماكن المتكررة <span class="badge badge-orange" id="audit-places-count">0</span></div>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-ghost" style="font-size:10px" onclick="setPlacesSortMode('count')">🔽 الأكثر تكراراً</button>
+        <button class="btn btn-ghost" style="font-size:10px" onclick="setPlacesSortMode('recent')">🕐 الأحدث</button>
+      </div>
+    </div>
+    <div class="tscroll">
+      <table>
+        <thead><tr><th>المكان</th><th class="num">عدد المرات</th><th>آخر ذكر</th><th></th></tr></thead>
+        <tbody id="audit-places-tbody"><tr><td colspan="4" style="text-align:center;color:var(--text3);padding:20px">لا توجد بيانات بعد</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="tcard">
+    <div class="tcard-hdr">
       <div class="tcard-title">📋 سجل جولات التدقيق <span class="badge badge-blue" id="audit-count">0</span></div>
       <button class="btn btn-ghost" onclick="syncAll()">🔄 مزامنة</button>
     </div>
@@ -1385,6 +1401,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
 <!-- Site Audit Modal -->
 <div class="overlay" id="m-audit">
   <div class="modal" style="max-width:640px">
+    <datalist id="audit-known-places"></datalist>
     <div style="background:linear-gradient(135deg,#0d1f3c,#003366);padding:18px 22px;margin:-26px -26px 18px;border-radius:14px 14px 0 0">
       <h3 style="margin:0;color:#fff;font-size:15px">🔍 إضافة جولة تدقيق</h3>
     </div>
@@ -1441,6 +1458,17 @@ tr:hover td{background:rgba(0,194,255,.03)}
     <div id="audit-photo-view-body"></div>
     <div class="modal-footer">
       <button class="btn btn-danger" onclick="closeModal('m-audit-photo-view')">إغلاق</button>
+    </div>
+  </div>
+</div>
+
+<!-- Place Details Modal -->
+<div class="overlay" id="m-place-details">
+  <div class="modal" style="max-width:760px">
+    <h3 id="m-place-details-title">📍 تفاصيل المكان</h3>
+    <div id="place-details-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-danger" onclick="closeModal('m-place-details')">إغلاق</button>
     </div>
   </div>
 </div>
@@ -4621,7 +4649,7 @@ function newAuditItemObj() {
     beforePreview: '', afterPreview: '',
     existingBeforeUrl: '', existingBeforeId: '',
     existingAfterUrl: '', existingAfterId: '',
-    note: ''
+    place: '', note: ''
   };
 }
 
@@ -4642,6 +4670,11 @@ function auditItemFileChange(localId, which, inputEl) {
   item[which + 'File'] = file;
   item[which + 'Preview'] = URL.createObjectURL(file);
   renderAuditPhotoItemsUI();
+}
+
+function auditItemPlaceChange(localId, val) {
+  var item = AUDIT_ITEMS.find(function(it){ return it.localId == localId; });
+  if (item) item.place = val; // بدون إعادة رسم — حتى لا يفقد التركيز أثناء الكتابة
 }
 
 function auditItemNoteChange(localId, val) {
@@ -4676,6 +4709,10 @@ function renderAuditPhotoItemsUI() {
           '<input type="file" accept="image/*" onchange="auditItemFileChange(' + it.localId + ',\'after\',this)" style="font-size:10px;width:100%">' +
         '</div>' +
       '</div>' +
+      '<label style="font-size:10px;color:var(--text3);display:block;margin-bottom:3px">📍 مكان هذه الملاحظة (يُستخدم للفرز لاحقاً)</label>' +
+      '<input type="text" list="audit-known-places" placeholder="مثال: غرفة التعقيم، الممر الجانبي..." value="' + (it.place||'').replace(/"/g,'&quot;') + '" ' +
+        'oninput="auditItemPlaceChange(' + it.localId + ',this.value)" ' +
+        'style="width:100%;padding:7px 10px;background:var(--surface);border:1px solid var(--border);border-radius:7px;color:var(--text);font-family:Tajawal,sans-serif;font-size:12px;margin-bottom:6px">' +
       '<input type="text" placeholder="💬 تعليق أو ملاحظة على هذه الصورة..." value="' + (it.note||'').replace(/"/g,'&quot;') + '" ' +
         'oninput="auditItemNoteChange(' + it.localId + ',this.value)" ' +
         'style="width:100%;padding:7px 10px;background:var(--surface);border:1px solid var(--border);border-radius:7px;color:var(--text);font-family:Tajawal,sans-serif;font-size:12px">' +
@@ -4683,7 +4720,24 @@ function renderAuditPhotoItemsUI() {
   }).join('');
 }
 
+function getKnownAuditPlaces() {
+  var set = {};
+  (DB.siteAudits||[]).forEach(function(a) {
+    var items = [];
+    try { items = a.photoItems ? JSON.parse(a.photoItems) : []; } catch(e) {}
+    items.forEach(function(it) { if (it.place) set[it.place.trim()] = true; });
+  });
+  return Object.keys(set);
+}
+
+function populateKnownPlacesDatalist() {
+  var dl = document.getElementById('audit-known-places');
+  if (!dl) return;
+  dl.innerHTML = getKnownAuditPlaces().map(function(p){ return '<option value="'+p.replace(/"/g,'&quot;')+'">'; }).join('');
+}
+
 function openAuditModal(id) {
+  populateKnownPlacesDatalist();
   var a = id ? (DB.siteAudits || []).find(function(x){ return String(x.id) === String(id); }) : null;
   document.getElementById('audit-eid').value = a ? a.id : '';
   document.getElementById('audit-date').value = a ? (a.date||'') : '';
@@ -4708,6 +4762,7 @@ function openAuditModal(id) {
       var it = newAuditItemObj();
       it.existingBeforeUrl = ex.beforeUrl||''; it.existingBeforeId = ex.beforeId||'';
       it.existingAfterUrl  = ex.afterUrl||'';  it.existingAfterId  = ex.afterId||'';
+      it.place = ex.place||'';
       it.note = ex.note||'';
       AUDIT_ITEMS.push(it);
     });
@@ -4799,9 +4854,9 @@ async function saveAudit() {
         var up2 = await auditUploadImage(b64b, 'after_' + id + '_' + i + '_' + it.afterFile.name, it.afterFile.type);
         if (up2) { afterUrl = up2.url; afterId = up2.id; }
       }
-      // تجاهل العناصر الفاضية بالكامل (بدون صور ولا ملاحظة)
-      if (beforeUrl || afterUrl || (it.note||'').trim()) {
-        finalItems.push({ beforeUrl: beforeUrl||'', beforeId: beforeId||'', afterUrl: afterUrl||'', afterId: afterId||'', note: it.note||'' });
+      // تجاهل العناصر الفاضية بالكامل (بدون صور ولا مكان ولا ملاحظة)
+      if (beforeUrl || afterUrl || (it.note||'').trim() || (it.place||'').trim()) {
+        finalItems.push({ beforeUrl: beforeUrl||'', beforeId: beforeId||'', afterUrl: afterUrl||'', afterId: afterId||'', place: it.place||'', note: it.note||'' });
       }
     }
     obj.photoItems = JSON.stringify(finalItems);
@@ -4876,6 +4931,82 @@ function renderAuditKPIs() {
     '<div class="kpi gold"><div class="kpi-lbl">قيد المتابعة</div><div class="kpi-val" style="color:var(--gold)">' + pending + '</div><div class="kpi-sub">تحتاج إجراء</div></div>' +
     '<div class="kpi red"><div class="kpi-lbl">متأخرة (تصعيد)</div><div class="kpi-val">' + delayed + '</div><div class="kpi-sub">أكثر من ' + AUDIT_ESCALATION_DAYS + ' أيام بدون رد</div></div>' +
     '<div class="kpi green"><div class="kpi-lbl">تم المعالجة</div><div class="kpi-val" style="color:var(--green)">' + resolved + '</div><div class="kpi-sub">مغلقة</div></div>';
+}
+
+// ─── تحليل الأماكن المتكررة ────────────────────────────────────────
+var PLACES_SORT_MODE = 'count'; // 'count' أو 'recent'
+
+function buildPlacesIndex() {
+  var map = {}; // place -> { count, lastDate, entries:[{auditId,date,branch,note,beforeId,afterId,status}] }
+  (DB.siteAudits||[]).forEach(function(a) {
+    var items = [];
+    try { items = a.photoItems ? JSON.parse(a.photoItems) : []; } catch(e) {}
+    items.forEach(function(it) {
+      var place = (it.place||'').trim();
+      if (!place) return;
+      if (!map[place]) map[place] = { count:0, lastDate:'', entries:[] };
+      map[place].count++;
+      if (!map[place].lastDate || (a.date && a.date > map[place].lastDate)) map[place].lastDate = a.date||'';
+      map[place].entries.push({
+        auditId: a.id, date: a.date||'', branch: a.branch||'', status: a.status||'',
+        note: it.note||'', beforeId: it.beforeId||'', afterId: it.afterId||''
+      });
+    });
+  });
+  return map;
+}
+
+function setPlacesSortMode(mode) {
+  PLACES_SORT_MODE = mode;
+  renderPlacesAnalysis();
+}
+
+function renderPlacesAnalysis() {
+  var tbody = document.getElementById('audit-places-tbody');
+  var cntEl = document.getElementById('audit-places-count');
+  if (!tbody) return;
+  var map = buildPlacesIndex();
+  var places = Object.keys(map);
+  if (cntEl) cntEl.textContent = places.length;
+  if (!places.length) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text3);padding:20px">لا توجد أماكن مسجّلة بعد — أضف "مكان الملاحظة" عند رفع الصور</td></tr>';
+    return;
+  }
+  places.sort(function(a,b) {
+    if (PLACES_SORT_MODE === 'recent') return (map[b].lastDate||'').localeCompare(map[a].lastDate||'');
+    return map[b].count - map[a].count;
+  });
+  tbody.innerHTML = places.map(function(place) {
+    var d = map[place];
+    var urgency = d.count >= 3 ? '🔴' : d.count === 2 ? '🟡' : '⚪';
+    return '<tr>' +
+      '<td class="td-main">' + urgency + ' ' + place + '</td>' +
+      '<td class="num"><span class="badge badge-orange" style="font-size:11px">' + d.count + '</span></td>' +
+      '<td style="font-size:11px;color:var(--text3)">' + (d.lastDate||'—') + '</td>' +
+      '<td><button class="btn btn-ghost" style="padding:3px 10px;font-size:10px" onclick="showPlaceDetails(\'' + place.replace(/'/g,"\\'") + '\')">عرض التفاصيل</button></td>' +
+    '</tr>';
+  }).join('');
+}
+
+function showPlaceDetails(place) {
+  var map = buildPlacesIndex();
+  var d = map[place];
+  if (!d) return;
+  document.getElementById('m-place-details-title').textContent = '📍 ' + place + ' — ذُكر ' + d.count + ' مرة';
+  var entries = d.entries.slice().sort(function(a,b){ return (b.date||'').localeCompare(a.date||''); });
+  document.getElementById('place-details-body').innerHTML = entries.map(function(e, idx) {
+    var photos = '';
+    if (e.beforeId) photos += '<img src="'+auditImgUrl(e.beforeId,120)+'" style="width:60px;height:60px;object-fit:cover;border-radius:6px;margin-left:4px">';
+    if (e.afterId) photos += '<img src="'+auditImgUrl(e.afterId,120)+'" style="width:60px;height:60px;object-fit:cover;border-radius:6px">';
+    return '<div style="'+(idx>0?'margin-top:12px;padding-top:12px;border-top:1px solid var(--border);':'')+'display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap">' +
+      '<div style="display:flex">' + (photos || '<span style="color:var(--text3);font-size:11px">لا صور</span>') + '</div>' +
+      '<div style="flex:1;min-width:180px">' +
+        '<div style="font-size:12px;font-weight:700;color:var(--text)">📅 ' + e.date + ' — 🏥 ' + e.branch + ' ' + pill(e.status||'قيد المتابعة') + '</div>' +
+        (e.note ? '<div style="font-size:11px;color:var(--text2);margin-top:4px">💬 ' + e.note + '</div>' : '') +
+      '</div>' +
+    '</div>';
+  }).join('');
+  openModal('m-place-details');
 }
 
 function renderAuditTable() {
@@ -5002,7 +5133,7 @@ function openAuditPhotoView(id) {
       ? '<div style="flex:1;min-width:180px"><div style="font-size:11px;font-weight:700;color:var(--text3);margin-bottom:6px;text-align:center">بعد</div><img src="'+auditImgUrl(it.afterId,600)+'" style="width:100%;border-radius:10px;border:1px solid var(--border)"></div>'
       : '<div style="flex:1;min-width:180px;display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:12px">لا توجد صورة "بعد"</div>';
     return '<div style="'+(idx>0?'margin-top:18px;padding-top:18px;border-top:1px dashed var(--border);':'')+'">' +
-      '<div style="font-size:11px;font-weight:700;color:var(--accent);margin-bottom:8px">📍 صورة #' + (idx+1) + '</div>' +
+      '<div style="font-size:11px;font-weight:700;color:var(--accent);margin-bottom:8px">📍 ' + (it.place ? it.place : ('صورة #' + (idx+1))) + '</div>' +
       '<div style="display:flex;gap:14px;flex-wrap:wrap">' + beforeHtml + afterHtml + '</div>' +
       (it.note ? '<div style="margin-top:8px;padding:10px;background:var(--surface2);border-radius:8px;font-size:12px">💬 ' + it.note + '</div>' : '') +
     '</div>';
@@ -5023,6 +5154,7 @@ renderAll = function() {
   _origRenderAllAudits();
   renderAuditTable();
   renderAuditKPIs();
+  renderPlacesAnalysis();
 };
 
 // ════════════════════════════════════════════════════════════════

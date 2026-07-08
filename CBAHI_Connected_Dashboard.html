@@ -1843,6 +1843,17 @@ function applyPermissionsToUI() {
   if (curUserEl && CURRENT_USER) {
     curUserEl.innerHTML = '👤 <strong>' + CURRENT_USER.name + '</strong><br><span style="color:#9aa1ac">' + CURRENT_USER.role + '</span>';
   }
+  // ⚠️ تصحيح أمني: إذا التبويب النشط حالياً غير مسموح لهذا المستخدم، حوّله فوراً لأول تبويب مسموح
+  var activePane = document.querySelector('.pane.active');
+  var activeTab = activePane ? activePane.id.replace('pane-','') : null;
+  if (activeTab && !userCanView(activeTab)) {
+    var firstAllowedLink = null;
+    document.querySelectorAll('.sb-link[data-tab]').forEach(function(link) {
+      if (!firstAllowedLink && link.style.display !== 'none') firstAllowedLink = link;
+    });
+    var targetTab = firstAllowedLink ? firstAllowedLink.getAttribute('data-tab') : 'site-audits';
+    switchTab(targetTab); // يبدّل الـ pane النشط فقط — لا يستدعي applyPermissionsToUI، فنكمل التنفيذ تحت بأمان
+  }
   // واجهة مدير الفرع المبسّطة — بطاقات + توقيع فقط، بدون لوحة المشرف الكاملة
   var adminView = document.getElementById('audit-admin-view');
   var managerView = document.getElementById('audit-manager-view');
@@ -5297,25 +5308,122 @@ function openBranchManagerSignModal(auditId) {
   openModal('m-manager-sign');
 }
 
+// ─── بناء صورة موحّدة: تفاصيل التقرير + التوقيع بنفس الصورة (للمحاسبة) ──
+function wrapCanvasText(ctx, text, x, maxWidth, y, lineHeight) {
+  var words = String(text).split(' ');
+  var line = '';
+  var curY = y;
+  for (var i = 0; i < words.length; i++) {
+    var testLine = line + words[i] + ' ';
+    if (ctx.measureText(testLine).width > maxWidth && line !== '') {
+      ctx.fillText(line.trim(), x, curY);
+      line = words[i] + ' ';
+      curY += lineHeight;
+    } else {
+      line = testLine;
+    }
+  }
+  ctx.fillText(line.trim(), x, curY);
+  return curY + lineHeight;
+}
+
+function buildSignedReportSnapshot(a, managerName) {
+  var W = 720, H = 560;
+  var canvas = document.createElement('canvas');
+  canvas.width = W; canvas.height = H;
+  var ctx = canvas.getContext('2d');
+
+  ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, W, H);
+  ctx.strokeStyle = '#001e40'; ctx.lineWidth = 4;
+  ctx.strokeRect(8, 8, W - 16, H - 16);
+
+  ctx.textAlign = 'right';
+  ctx.fillStyle = '#001e40';
+  ctx.font = 'bold 22px Tajawal, Arial, sans-serif';
+  ctx.fillText('تقرير جولة تدقيق ميداني — إقرار وتوقيع مدير الفرع', W - 36, 50);
+  ctx.strokeStyle = '#e2e2e7'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(36, 62); ctx.lineTo(W - 36, 62); ctx.stroke();
+
+  ctx.fillStyle = '#333333';
+  ctx.font = '15px Tajawal, Arial, sans-serif';
+  var y = 95;
+  var lineH = 24;
+  var maxW = W - 72;
+  var fields = [
+    ['رقم الجولة', String(a.id||'')],
+    ['التاريخ', a.date||'—'],
+    ['الفرع', a.branch||'—'],
+    ['الموقع', a.location||'—'],
+    ['المفتش', a.inspectorName||'—']
+  ];
+  fields.forEach(function(f) {
+    ctx.font = 'bold 14px Tajawal, Arial, sans-serif';
+    ctx.fillText(f[0] + ':', W - 36, y);
+    ctx.font = '14px Tajawal, Arial, sans-serif';
+    ctx.fillText(f[1], W - 150, y);
+    y += lineH;
+  });
+
+  y += 6;
+  if (a.recommendation) {
+    ctx.font = 'bold 14px Tajawal, Arial, sans-serif';
+    ctx.fillText('التوصية:', W - 36, y);
+    y += lineH;
+    ctx.font = '13px Tajawal, Arial, sans-serif';
+    y = wrapCanvasText(ctx, a.recommendation, W - 36, maxW, y, 20);
+  }
+  if (a.notes) {
+    y += 6;
+    ctx.font = 'bold 14px Tajawal, Arial, sans-serif';
+    ctx.fillText('ملاحظات عامة:', W - 36, y);
+    y += lineH;
+    ctx.font = '13px Tajawal, Arial, sans-serif';
+    y = wrapCanvasText(ctx, a.notes, W - 36, maxW, y, 20);
+  }
+
+  // خانة التوقيع
+  var sigW = 560, sigH = 130;
+  var sigX = (W - sigW) / 2;
+  var sigY = H - sigH - 90;
+  ctx.strokeStyle = '#c3c6d1'; ctx.lineWidth = 1;
+  ctx.strokeRect(sigX, sigY, sigW, sigH);
+  var sigCanvas = document.getElementById('sigpad-manager-only');
+  if (sigCanvas) ctx.drawImage(sigCanvas, sigX, sigY, sigW, sigH);
+
+  ctx.font = 'bold 15px Tajawal, Arial, sans-serif';
+  ctx.fillStyle = '#001e40';
+  ctx.fillText('توقيع: ' + managerName + '  (مدير الفرع)', W - 36, sigY + sigH + 24);
+  ctx.font = '11px Tajawal, Arial, sans-serif';
+  ctx.fillStyle = '#888888';
+  ctx.fillText('تم التوقيع إلكترونياً بتاريخ ' + new Date().toLocaleString('ar-SA'), W - 36, sigY + sigH + 44);
+
+  return canvas.toDataURL('image/png').split(',')[1]; // base64 فقط
+}
+
 async function saveBranchManagerSignature() {
   var id = document.getElementById('mgr-sign-audit-id').value;
   var name = document.getElementById('mgr-sign-name').value.trim();
   if (!name) { toast('⚠️ أدخل اسمك', 'error'); return; }
-  var sig = getSignatureBase64('sigpad-manager-only');
-  if (!sig) { toast('⚠️ وقّع بالخانة المخصصة أولاً', 'error'); return; }
+  var sigCheck = getSignatureBase64('sigpad-manager-only');
+  if (!sigCheck) { toast('⚠️ وقّع بالخانة المخصصة أولاً', 'error'); return; }
+
+  var a = (DB.siteAudits || []).find(function(x){ return String(x.id) === String(id); });
+  if (!a) { toast('⚠️ تعذّر إيجاد التقرير', 'error'); return; }
 
   var btn = document.getElementById('mgr-sign-save-btn');
-  btn.disabled = true; btn.textContent = '⏳ جاري الحفظ...';
+  btn.disabled = true; btn.textContent = '⏳ جاري إنشاء المستند الموقّع...';
   try {
-    var up = await auditUploadImage(sig, 'sig_manager_' + id + '.png', 'image/png');
-    if (!up) throw new Error('فشل رفع التوقيع');
-    var idx = DB.siteAudits.findIndex(function(a){ return String(a.id) === String(id); });
+    // نبني صورة واحدة موحّدة: تفاصيل التقرير + التوقيع معاً (وليس توقيع منفصل)
+    var combinedImage = buildSignedReportSnapshot(a, name);
+    var up = await auditUploadImage(combinedImage, 'signed_report_' + id + '.png', 'image/png');
+    if (!up) throw new Error('فشل رفع المستند الموقّع');
+    var idx = DB.siteAudits.findIndex(function(x){ return String(x.id) === String(id); });
     if (idx > -1) {
       DB.siteAudits[idx].branchManagerSignUrl = up.url;
       DB.siteAudits[idx].branchManagerName = name;
     }
     await apiCall('update', 'siteAudits', id, { id: id, branchManagerSignUrl: up.url, branchManagerName: name });
-    toast('✅ تم التوقيع بنجاح', 'success');
+    toast('✅ تم التوقيع وحفظ المستند الموقّع كاملاً', 'success');
     closeModal('m-manager-sign');
     renderAuditManagerView();
   } catch(e) {

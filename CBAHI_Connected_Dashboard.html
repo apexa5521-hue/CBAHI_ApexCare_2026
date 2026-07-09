@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <link rel="icon" href="data:,">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>نظام إدارة الجودة – أبكس كير</title>
+<title>نظام إدارة الجودة – Tracking System</title>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
 <!-- ═══ STITCH DESIGN SYSTEM (نظرة عامة الجديدة) — لا يمس تنسيق باقي التبويبات ═══ -->
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
@@ -252,6 +252,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
   .pane{display:none!important}
   #report-print-area{display:block!important}
   #app-footer-credit{display:none!important}
+  .app-topbar,.app-sidebar,#sidebarOverlay{display:none!important}
 }
 #report-print-area{display:none}
 
@@ -292,7 +293,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:36px">
         <div class="logo-icon" style="width:44px;height:44px;flex-shrink:0">AC</div>
         <div>
-          <div style="font-size:15px;font-weight:800;color:#101828">أبكس كير</div>
+          <div style="font-size:15px;font-weight:800;color:#101828">Tracking System</div>
           <div style="font-size:11px;color:#006a6a">نظام إدارة الجودة</div>
         </div>
       </div>
@@ -322,7 +323,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
     <div style="position:relative;text-align:center;color:#fff;padding:40px;max-width:420px">
       <div style="font-size:64px;margin-bottom:20px">🏥</div>
       <div style="font-size:22px;font-weight:800;margin-bottom:12px">نظام إدارة الجودة</div>
-      <div style="font-size:13px;opacity:.85;line-height:1.8">منصة موحّدة لمتابعة جاهزية الاعتماد، السياسات، جولات التدقيق، وملفات الموظفين — لفريق عيادات أبكس كير</div>
+      <div style="font-size:13px;opacity:.85;line-height:1.8">منصة موحّدة لمتابعة جاهزية الاعتماد، السياسات، جولات التدقيق، وملفات الموظفين — لفريق عيادات Tracking System</div>
     </div>
   </div>
 </div>
@@ -334,7 +335,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
   <div class="flex items-center gap-3" style="padding:10px 8px 18px;border-bottom:1px solid rgba(0,30,64,.1);margin-bottom:10px">
     <div class="logo-icon" style="width:40px;height:40px;flex-shrink:0">AC</div>
     <div>
-      <div style="font-size:14px;font-weight:800;color:#101828">أبكس كير</div>
+      <div style="font-size:14px;font-weight:800;color:#101828">Tracking System</div>
       <div style="font-size:10px;color:#006a6a;letter-spacing:.5px">نظام إدارة الجودة</div>
     </div>
   </div>
@@ -4496,7 +4497,7 @@ function generateReport() {
     // ─ Header
     '<div style="text-align:center;border-bottom:3px solid #0a1628;padding-bottom:20px;margin-bottom:28px">' +
       '<div style="font-size:28px;font-weight:900;color:#0a1628">تقرير متابعة مشروع اعتماد CBAHI</div>' +
-      '<div style="font-size:16px;color:#374151;margin-top:6px">عيادات أبكس كير — بريدة وعنيزة</div>' +
+      '<div style="font-size:16px;color:#374151;margin-top:6px">عيادات Tracking System — بريدة وعنيزة</div>' +
       '<div style="font-size:13px;color:#6b7280;margin-top:4px">تاريخ التقرير: ' + dateStr + '</div>' +
     '</div>' +
 
@@ -4609,7 +4610,7 @@ function generateReport() {
 
     // ─ Footer
     '<div style="text-align:center;border-top:2px solid #e5e7eb;padding-top:16px;margin-top:24px;color:#6b7280;font-size:12px">' +
-      'تم إنشاء هذا التقرير تلقائياً من نظام إدارة الجودة — أبكس كير · ' + dateStr +
+      'تم إنشاء هذا التقرير تلقائياً من نظام إدارة الجودة — Tracking System · ' + dateStr +
     '</div>' +
 
   '</div>';
@@ -5193,30 +5194,30 @@ function viewAndPrintAuditReport(id) {
     var b = it.beforeId ? '<img src="'+auditImgUrl(it.beforeId,500)+'" style="width:100%;border-radius:8px;border:1px solid #e5e7eb">' : '<div style="color:#9ca3af;font-size:12px;text-align:center;padding:20px">لا صورة</div>';
     var af = it.afterId ? '<img src="'+auditImgUrl(it.afterId,500)+'" style="width:100%;border-radius:8px;border:1px solid #e5e7eb">' : '<div style="color:#9ca3af;font-size:12px;text-align:center;padding:20px">لا صورة</div>';
     return '<div style="margin-bottom:20px;' + (idx>0?'padding-top:16px;border-top:1px dashed #e5e7eb;':'') + '">' +
-      (it.place ? '<div style="font-size:13px;font-weight:800;color:#001e40;margin-bottom:8px">📍 ' + it.place + '</div>' : '<div style="font-size:12px;font-weight:700;color:#6b7280;margin-bottom:8px">صورة #' + (idx+1) + '</div>') +
+      (it.place ? '<div style="font-size:13px;font-weight:800;color:#001e40;margin-bottom:8px">' + it.place + '</div>' : '<div style="font-size:12px;font-weight:700;color:#6b7280;margin-bottom:8px">صورة رقم ' + (idx+1) + '</div>') +
       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">' +
         '<div><div style="font-size:11px;color:#6b7280;text-align:center;margin-bottom:4px">قبل</div>' + b + '</div>' +
         '<div><div style="font-size:11px;color:#6b7280;text-align:center;margin-bottom:4px">بعد</div>' + af + '</div>' +
       '</div>' +
-      (it.note ? '<div style="margin-top:8px;font-size:12px;color:#374151">💬 ' + it.note + '</div>' : '') +
+      (it.note ? '<div style="margin-top:8px;font-size:12px;color:#374151">ملاحظة: ' + it.note + '</div>' : '') +
     '</div>';
   }).join('') : '<div style="color:#6b7280;font-size:13px">لا توجد صور مرفقة</div>';
 
   var signaturesHtml = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:24px">';
   signaturesHtml += '<div style="border:1px solid #e5e7eb;border-radius:10px;padding:14px">' +
-    '<div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:8px">✍️ توقيع المفتش' + (a.inspectorName ? ' — ' + a.inspectorName : '') + '</div>' +
-    (a.inspectorSignUrl ? '<img src="'+a.inspectorSignUrl+'" style="width:100%;max-height:130px;object-fit:contain;border:1px solid #f3f4f6;border-radius:6px">' : '<div style="color:#dc2626;font-size:12px">❌ لم يتم التوقيع بعد</div>') +
+    '<div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:8px">توقيع المفتش' + (a.inspectorName ? ' — ' + a.inspectorName : '') + '</div>' +
+    (a.inspectorSignUrl ? '<img src="'+a.inspectorSignUrl+'" style="width:100%;max-height:130px;object-fit:contain;border:1px solid #f3f4f6;border-radius:6px">' : '<div style="color:#dc2626;font-size:12px">لم يتم التوقيع بعد</div>') +
   '</div>';
   signaturesHtml += '<div style="border:1px solid #e5e7eb;border-radius:10px;padding:14px">' +
-    '<div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:8px">✍️ توقيع مدير الفرع' + (a.branchManagerName ? ' — ' + a.branchManagerName : '') + '</div>' +
-    (a.branchManagerSignUrl ? '<img src="'+a.branchManagerSignUrl+'" style="width:100%;max-height:200px;object-fit:contain;border:1px solid #f3f4f6;border-radius:6px">' : '<div style="color:#dc2626;font-size:12px">⏳ بانتظار التوقيع</div>') +
+    '<div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:8px">توقيع مدير الفرع' + (a.branchManagerName ? ' — ' + a.branchManagerName : '') + '</div>' +
+    (a.branchManagerSignUrl ? '<img src="'+a.branchManagerSignUrl+'" style="width:100%;max-height:200px;object-fit:contain;border:1px solid #f3f4f6;border-radius:6px">' : '<div style="color:#dc2626;font-size:12px">بانتظار التوقيع</div>') +
   '</div>';
   signaturesHtml += '</div>';
 
   var html = '<div dir="rtl" style="font-family:Tajawal,Arial,sans-serif;color:#111;padding:32px;max-width:900px;margin:0 auto">' +
     '<div style="text-align:center;border-bottom:3px solid #001e40;padding-bottom:18px;margin-bottom:24px">' +
       '<div style="font-size:24px;font-weight:900;color:#001e40">تقرير جولة تدقيق ميداني</div>' +
-      '<div style="font-size:14px;color:#374151;margin-top:6px">عيادات أبكس كير — ' + (a.branch||'') + '</div>' +
+      '<div style="font-size:14px;color:#374151;margin-top:6px">Tracking System — ' + (a.branch||'') + '</div>' +
       '<div style="font-size:12px;color:#6b7280;margin-top:4px">تاريخ الطباعة: ' + dateStr + '</div>' +
     '</div>' +
     '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:24px">' +
@@ -5225,12 +5226,12 @@ function viewAndPrintAuditReport(id) {
       _card('الموقع', a.location||'—', '', '#7c3aed') +
       _card('الحالة', a.status||'قيد المتابعة', '', a.status==='تم المعالجة'?'#1a8f5c':'#b7791f') +
     '</div>' +
-    (a.recommendation ? _section('✅ التوصية') + '<div style="font-size:13px;color:#374151;margin-bottom:20px;line-height:1.8">' + a.recommendation + '</div>' : '') +
-    (a.notes ? _section('💬 ملاحظات عامة') + '<div style="font-size:13px;color:#374151;margin-bottom:20px;line-height:1.8">' + a.notes + '</div>' : '') +
-    _section('📷 الصور الموثّقة') + itemsHtml +
-    _section('✍️ التوقيعات والإقرار') + signaturesHtml +
+    (a.recommendation ? _section('التوصية') + '<div style="font-size:13px;color:#374151;margin-bottom:20px;line-height:1.8">' + a.recommendation + '</div>' : '') +
+    (a.notes ? _section('ملاحظات عامة') + '<div style="font-size:13px;color:#374151;margin-bottom:20px;line-height:1.8">' + a.notes + '</div>' : '') +
+    _section('الصور الموثّقة') + itemsHtml +
+    _section('التوقيعات والإقرار') + signaturesHtml +
     '<div style="text-align:center;border-top:2px solid #e5e7eb;padding-top:16px;margin-top:28px;color:#6b7280;font-size:11px">' +
-      'تم إنشاء هذا التقرير تلقائياً من نظام إدارة الجودة — أبكس كير · ' + dateStr +
+      'تم إنشاء هذا التقرير تلقائياً من نظام إدارة الجودة — Tracking System · ' + dateStr +
     '</div>' +
   '</div>';
 
@@ -5247,7 +5248,7 @@ function generateAuditEscalationReport() {
 
   var rowsHtml = delayedList.length ? delayedList.map(function(a, i) {
     var days = auditDaysElapsed(a);
-    var signed = a.branchManagerSignUrl ? '✅ نعم' : '❌ لا';
+    var signed = a.branchManagerSignUrl ? 'نعم' : 'لا';
     return '<tr style="border-bottom:1px solid #e5e7eb">' +
       '<td style="padding:8px 10px;text-align:center;color:#6b7280;font-size:12px">' + (i+1) + '</td>' +
       '<td style="padding:8px 10px;font-weight:700;font-size:13px">' + (a.branch||'') + '</td>' +
@@ -5258,16 +5259,16 @@ function generateAuditEscalationReport() {
       '<td style="padding:8px 10px;text-align:center;font-size:12px">' + signed + '</td>' +
       '<td style="padding:8px 10px;font-size:12px;max-width:200px">' + (a.recommendation||a.notes||'—') + '</td>' +
     '</tr>';
-  }).join('') : '<tr><td colspan="8" style="text-align:center;padding:20px;color:#6b7280">لا توجد جولات متأخرة حالياً ✅</td></tr>';
+  }).join('') : '<tr><td colspan="8" style="text-align:center;padding:20px;color:#6b7280">لا توجد جولات متأخرة حالياً</td></tr>';
 
   var html = '<div dir="rtl" style="font-family:Tajawal,Arial,sans-serif;color:#111;padding:32px;max-width:1000px;margin:0 auto">' +
     '<div style="text-align:center;border-bottom:3px solid #c0392b;padding-bottom:18px;margin-bottom:24px">' +
-      '<div style="font-size:24px;font-weight:900;color:#c0392b">🚨 تقرير تصعيد — جولات تدقيق متأخرة الاستجابة</div>' +
-      '<div style="font-size:14px;color:#374151;margin-top:6px">عيادات أبكس كير — بريدة وعنيزة</div>' +
+      '<div style="font-size:24px;font-weight:900;color:#c0392b">تقرير تصعيد — جولات تدقيق متأخرة الاستجابة</div>' +
+      '<div style="font-size:14px;color:#374151;margin-top:6px">Tracking System — بريدة وعنيزة</div>' +
       '<div style="font-size:12px;color:#6b7280;margin-top:4px">تاريخ التقرير: ' + dateStr + '</div>' +
     '</div>' +
     '<div style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:14px;margin-bottom:20px;font-size:13px;color:#991b1b">' +
-      '⚠️ هذا التقرير يشمل الجولات التي حالتها "قيد المتابعة" ولم تُغلَق خلال ' + AUDIT_ESCALATION_DAYS + ' أيام من تاريخ الزيارة — عدد الجولات المتأخرة: <strong>' + delayedList.length + '</strong>' +
+      'هذا التقرير يشمل الجولات التي حالتها "قيد المتابعة" ولم تُغلَق خلال ' + AUDIT_ESCALATION_DAYS + ' أيام من تاريخ الزيارة — عدد الجولات المتأخرة: <strong>' + delayedList.length + '</strong>' +
     '</div>' +
     '<table style="width:100%;border-collapse:collapse;font-size:13px">' +
       '<thead><tr style="background:#c0392b;color:#fff">' +
@@ -5283,7 +5284,7 @@ function generateAuditEscalationReport() {
       '<tbody>' + rowsHtml + '</tbody>' +
     '</table>' +
     '<div style="text-align:center;border-top:2px solid #e5e7eb;padding-top:14px;margin-top:24px;color:#6b7280;font-size:11px">' +
-      'تم إنشاء هذا التقرير تلقائياً من نظام إدارة الجودة — أبكس كير · ' + dateStr +
+      'تم إنشاء هذا التقرير تلقائياً من نظام إدارة الجودة — Tracking System · ' + dateStr +
     '</div>' +
   '</div>';
 

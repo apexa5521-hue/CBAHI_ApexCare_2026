@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <link rel="icon" href="data:,">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CBAHI – أبكس كير | لوحة تحكم مشروع الاعتماد</title>
+<title>نظام إدارة الجودة – أبكس كير</title>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
 <!-- ═══ STITCH DESIGN SYSTEM (نظرة عامة الجديدة) — لا يمس تنسيق باقي التبويبات ═══ -->
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
@@ -251,6 +251,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
   .header,.tabs,.header-actions,.overlay,.toast-wrap,.spacer{display:none!important}
   .pane{display:none!important}
   #report-print-area{display:block!important}
+  #app-footer-credit{display:none!important}
 }
 #report-print-area{display:none}
 
@@ -292,7 +293,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
         <div class="logo-icon" style="width:44px;height:44px;flex-shrink:0">AC</div>
         <div>
           <div style="font-size:15px;font-weight:800;color:#101828">أبكس كير</div>
-          <div style="font-size:11px;color:#006a6a">نظام إدارة اعتماد CBAHI</div>
+          <div style="font-size:11px;color:#006a6a">نظام إدارة الجودة</div>
         </div>
       </div>
       <h1 style="font-size:24px;font-weight:800;color:#101828;margin-bottom:6px">تسجيل الدخول الآمن</h1>
@@ -320,7 +321,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
     <div style="position:absolute;inset:0;opacity:.08;background-image:radial-gradient(circle at 20% 30%,#fff 0,transparent 40%),radial-gradient(circle at 80% 70%,#fff 0,transparent 40%)"></div>
     <div style="position:relative;text-align:center;color:#fff;padding:40px;max-width:420px">
       <div style="font-size:64px;margin-bottom:20px">🏥</div>
-      <div style="font-size:22px;font-weight:800;margin-bottom:12px">مشروع اعتماد CBAHI</div>
+      <div style="font-size:22px;font-weight:800;margin-bottom:12px">نظام إدارة الجودة</div>
       <div style="font-size:13px;opacity:.85;line-height:1.8">منصة موحّدة لمتابعة جاهزية الاعتماد، السياسات، جولات التدقيق، وملفات الموظفين — لفريق عيادات أبكس كير</div>
     </div>
   </div>
@@ -334,7 +335,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
     <div class="logo-icon" style="width:40px;height:40px;flex-shrink:0">AC</div>
     <div>
       <div style="font-size:14px;font-weight:800;color:#101828">أبكس كير</div>
-      <div style="font-size:10px;color:#006a6a;letter-spacing:.5px">CBAHI PROJECT</div>
+      <div style="font-size:10px;color:#006a6a;letter-spacing:.5px">نظام إدارة الجودة</div>
     </div>
   </div>
 
@@ -546,11 +547,11 @@ tr:hover td{background:rgba(0,194,255,.03)}
             <tr>
               <th class="num">#</th><th>التاريخ</th><th>الفرع</th><th>الموقع</th>
               <th>التوصية</th><th style="text-align:center">الصور</th><th style="text-align:center">التوقيعات</th>
-              <th>الحالة</th><th></th>
+              <th>الحالة</th><th style="text-align:center">التقرير</th><th></th>
             </tr>
           </thead>
           <tbody id="audit-tbody">
-            <tr><td colspan="9" style="text-align:center;color:var(--text3);padding:40px">لا توجد جولات تدقيق بعد</td></tr>
+            <tr><td colspan="10" style="text-align:center;color:var(--text3);padding:40px">لا توجد جولات تدقيق بعد</td></tr>
           </tbody>
         </table>
       </div>
@@ -1137,6 +1138,14 @@ tr:hover td{background:rgba(0,194,255,.03)}
 </div>
 
 </div><!-- /.main -->
+
+<!-- Footer ثابت — يظهر أسفل كل صفحة -->
+<div id="app-footer-credit" style="padding:18px 24px;text-align:center;border-top:1px solid rgba(0,30,64,.08);background:var(--surface);margin-top:auto">
+  <div style="font-size:11px;color:#9aa1ac;line-height:1.8">
+    Built and Developed by <strong style="color:#43474f">Mr. Ibrahim Alluhaydi</strong><br>
+    تم بناء وتطوير النظام بواسطة مسؤول الجودة <strong style="color:#43474f">إبراهيم اللهيدي</strong>
+  </div>
+</div>
 
 <!-- Extras Modal — رخص / عقود / مستندات / موظفين -->
 <div class="overlay" id="m-extras">
@@ -4600,7 +4609,7 @@ function generateReport() {
 
     // ─ Footer
     '<div style="text-align:center;border-top:2px solid #e5e7eb;padding-top:16px;margin-top:24px;color:#6b7280;font-size:12px">' +
-      'تم إنشاء هذا التقرير تلقائياً من لوحة تحكم CBAHI — أبكس كير · ' + dateStr +
+      'تم إنشاء هذا التقرير تلقائياً من نظام إدارة الجودة — أبكس كير · ' + dateStr +
     '</div>' +
 
   '</div>';
@@ -4942,16 +4951,18 @@ async function saveAudit() {
     obj.afterPhotoUrl  = finalItems[0] ? finalItems[0].afterUrl  : '';
     obj.afterPhotoId   = finalItems[0] ? finalItems[0].afterId   : '';
 
-    // توقيع المفتش
+    // توقيع المفتش — يُرفع كتقرير كامل موحّد مع التوقيع، وليس صورة توقيع منفصلة
     var sigInspector = getSignatureBase64('sigpad-inspector');
     if (sigInspector) {
-      var upSig1 = await auditUploadImage(sigInspector, 'sig_inspector_' + id + '.png', 'image/png');
+      var inspectorSnapshot = buildSignedReportSnapshot(obj, obj.inspectorName || 'المفتش', 'المفتش', 'sigpad-inspector');
+      var upSig1 = await auditUploadImage(inspectorSnapshot, 'signed_report_inspector_' + id + '.png', 'image/png');
       if (upSig1) obj.inspectorSignUrl = upSig1.url;
     }
-    // توقيع مدير الفرع
+    // توقيع مدير الفرع — نفس المبدأ
     var sigManager = getSignatureBase64('sigpad-manager');
     if (sigManager) {
-      var upSig2 = await auditUploadImage(sigManager, 'sig_manager_' + id + '.png', 'image/png');
+      var managerSnapshot = buildSignedReportSnapshot(obj, obj.branchManagerName || 'مدير الفرع', 'مدير الفرع', 'sigpad-manager');
+      var upSig2 = await auditUploadImage(managerSnapshot, 'signed_report_manager_' + id + '.png', 'image/png');
       if (upSig2) obj.branchManagerSignUrl = upSig2.url;
     }
   } catch(e) {
@@ -5025,7 +5036,8 @@ function buildPlacesIndex() {
       if (!map[place].lastDate || (a.date && a.date > map[place].lastDate)) map[place].lastDate = a.date||'';
       map[place].entries.push({
         auditId: a.id, date: a.date||'', branch: a.branch||'', status: a.status||'',
-        note: it.note||'', beforeId: it.beforeId||'', afterId: it.afterId||''
+        note: it.note||'', beforeId: it.beforeId||'', afterId: it.afterId||'',
+        inspectorSignUrl: a.inspectorSignUrl||'', branchManagerSignUrl: a.branchManagerSignUrl||''
       });
     });
   });
@@ -5064,6 +5076,17 @@ function renderPlacesAnalysis() {
   }).join('');
 }
 
+// ─── تنسيق تاريخ آمن — يتعامل مع أي تاريخ فاسد أو بصيغة ISO كاملة ──
+function formatDateSafe(raw) {
+  if (!raw) return '—';
+  var s = String(raw).trim();
+  if (s.indexOf('T') > -1) s = s.split('T')[0];
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return '⚠️ تاريخ غير صالح';
+  var d = new Date(s + 'T00:00:00');
+  if (isNaN(d.getTime()) || d.getFullYear() < 2020 || d.getFullYear() > 2100) return '⚠️ تاريخ غير صالح';
+  return s;
+}
+
 function showPlaceDetails(place) {
   var map = buildPlacesIndex();
   var d = map[place];
@@ -5072,13 +5095,27 @@ function showPlaceDetails(place) {
   var entries = d.entries.slice().sort(function(a,b){ return (b.date||'').localeCompare(a.date||''); });
   document.getElementById('place-details-body').innerHTML = entries.map(function(e, idx) {
     var photos = '';
-    if (e.beforeId) photos += '<img src="'+auditImgUrl(e.beforeId,120)+'" style="width:60px;height:60px;object-fit:cover;border-radius:6px;margin-left:4px">';
-    if (e.afterId) photos += '<img src="'+auditImgUrl(e.afterId,120)+'" style="width:60px;height:60px;object-fit:cover;border-radius:6px">';
-    return '<div style="'+(idx>0?'margin-top:12px;padding-top:12px;border-top:1px solid var(--border);':'')+'display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap">' +
-      '<div style="display:flex">' + (photos || '<span style="color:var(--text3);font-size:11px">لا صور</span>') + '</div>' +
-      '<div style="flex:1;min-width:180px">' +
-        '<div style="font-size:12px;font-weight:700;color:var(--text)">📅 ' + e.date + ' — 🏥 ' + e.branch + ' ' + pill(e.status||'قيد المتابعة') + '</div>' +
-        (e.note ? '<div style="font-size:11px;color:var(--text2);margin-top:4px">💬 ' + e.note + '</div>' : '') +
+    if (e.beforeId) photos += '<img src="'+auditImgUrl(e.beforeId,140)+'" style="width:70px;height:70px;object-fit:cover;border-radius:8px;border:1px solid var(--border)">';
+    if (e.afterId) photos += '<img src="'+auditImgUrl(e.afterId,140)+'" style="width:70px;height:70px;object-fit:cover;border-radius:8px;border:1px solid var(--border)">';
+    var sigBadges = '';
+    sigBadges += e.inspectorSignUrl ? '<span style="font-size:10px;color:var(--green)">✅ المفتش وقّع</span>' : '<span style="font-size:10px;color:var(--text3)">⏳ المفتش لم يوقّع</span>';
+    sigBadges += ' &nbsp; ';
+    sigBadges += e.branchManagerSignUrl ? '<span style="font-size:10px;color:var(--green)">✅ مدير الفرع وقّع</span>' : '<span style="font-size:10px;color:var(--text3)">⏳ مدير الفرع لم يوقّع</span>';
+    return '<div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;' + (idx>0?'margin-top:12px;':'') + '">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px">' +
+        '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">' +
+          '<span style="font-size:12px;font-weight:800;color:var(--text)">📅 ' + formatDateSafe(e.date) + '</span>' +
+          '<span style="font-size:11px;color:var(--text3)">🏥 ' + (e.branch||'—') + '</span>' +
+          pill(e.status||'قيد المتابعة') +
+        '</div>' +
+        '<button class="btn btn-ghost" style="padding:4px 12px;font-size:10px" onclick="viewAndPrintAuditReport(\''+e.auditId+'\')">🖨️ عرض التقرير الكامل</button>' +
+      '</div>' +
+      '<div style="display:flex;gap:14px;flex-wrap:wrap;align-items:flex-start">' +
+        '<div style="display:flex;gap:6px">' + (photos || '<span style="color:var(--text3);font-size:11px">لا صور</span>') + '</div>' +
+        '<div style="flex:1;min-width:160px">' +
+          (e.note ? '<div style="font-size:12px;color:var(--text2);margin-bottom:8px">💬 ' + e.note + '</div>' : '') +
+          '<div style="display:flex;gap:4px;flex-wrap:wrap">' + sigBadges + '</div>' +
+        '</div>' +
       '</div>' +
     '</div>';
   }).join('');
@@ -5092,7 +5129,7 @@ function renderAuditTable() {
   if (cnt) cnt.textContent = list.length;
   if (!tbody) return;
   if (!list.length) {
-    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--text3);padding:40px">لا توجد جولات تدقيق بعد</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:var(--text3);padding:40px">لا توجد جولات تدقيق بعد</td></tr>';
     return;
   }
   tbody.innerHTML = list.map(function(a, i) {
@@ -5122,19 +5159,84 @@ function renderAuditTable() {
       : pill(a.status||'قيد المتابعة');
     return '<tr' + (delayed ? ' style="background:rgba(255,71,87,.04)"' : '') + '>' +
       '<td class="num">' + (i+1) + '</td>' +
-      '<td style="font-size:11px">' + (a.date||'') + '</td>' +
+      '<td style="font-size:11px">' + formatDateSafe(a.date) + '</td>' +
       '<td class="td-main">' + (a.branch||'') + '</td>' +
       '<td style="font-size:11px;color:var(--text3)">' + (a.location||'—') + '</td>' +
       '<td style="font-size:11px;max-width:200px">' + (a.recommendation||'—') + '</td>' +
       '<td style="text-align:center">' + photos + '</td>' +
       '<td style="text-align:center">' + sigs + '</td>' +
       '<td>' + statusHtml + '</td>' +
+      '<td style="text-align:center"><button class="btn btn-ghost" style="padding:3px 10px;font-size:10px" onclick="viewAndPrintAuditReport(\''+a.id+'\')">🖨️ عرض التقرير</button></td>' +
       '<td style="display:flex;gap:4px">' +
         (userCanEdit('site-audits') ? '<button class="btn btn-ghost" style="padding:3px 8px;font-size:10px" onclick="editAudit(\''+a.id+'\')">تعديل</button>' +
         '<button class="btn btn-danger" style="padding:3px 8px;font-size:10px" onclick="delAudit(\''+a.id+'\')">حذف</button>' : '<span style="color:var(--text3);font-size:10px">—</span>') +
       '</td>' +
     '</tr>';
   }).join('');
+}
+
+// ─── تقرير تصعيد للإدارة — الجولات المتأخرة فقط ───────────────────
+// ─── عرض التقرير الكامل لجولة تدقيق + إمكانية الحفظ PDF (عبر طباعة المتصفح) ──
+function viewAndPrintAuditReport(id) {
+  var a = (DB.siteAudits || []).find(function(x){ return String(x.id) === String(id); });
+  if (!a) { toast('⚠️ تعذّر إيجاد التقرير', 'error'); return; }
+
+  var items = [];
+  try { items = a.photoItems ? JSON.parse(a.photoItems) : []; } catch(e) {}
+  if (!items.length && (a.beforePhotoId || a.afterPhotoId)) {
+    items = [{ beforeId: a.beforePhotoId||'', afterId: a.afterPhotoId||'', place:'', note:'' }];
+  }
+
+  var dateStr = new Date().toLocaleDateString('ar-SA', { year:'numeric', month:'long', day:'numeric' });
+
+  var itemsHtml = items.length ? items.map(function(it, idx) {
+    var b = it.beforeId ? '<img src="'+auditImgUrl(it.beforeId,500)+'" style="width:100%;border-radius:8px;border:1px solid #e5e7eb">' : '<div style="color:#9ca3af;font-size:12px;text-align:center;padding:20px">لا صورة</div>';
+    var af = it.afterId ? '<img src="'+auditImgUrl(it.afterId,500)+'" style="width:100%;border-radius:8px;border:1px solid #e5e7eb">' : '<div style="color:#9ca3af;font-size:12px;text-align:center;padding:20px">لا صورة</div>';
+    return '<div style="margin-bottom:20px;' + (idx>0?'padding-top:16px;border-top:1px dashed #e5e7eb;':'') + '">' +
+      (it.place ? '<div style="font-size:13px;font-weight:800;color:#001e40;margin-bottom:8px">📍 ' + it.place + '</div>' : '<div style="font-size:12px;font-weight:700;color:#6b7280;margin-bottom:8px">صورة #' + (idx+1) + '</div>') +
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">' +
+        '<div><div style="font-size:11px;color:#6b7280;text-align:center;margin-bottom:4px">قبل</div>' + b + '</div>' +
+        '<div><div style="font-size:11px;color:#6b7280;text-align:center;margin-bottom:4px">بعد</div>' + af + '</div>' +
+      '</div>' +
+      (it.note ? '<div style="margin-top:8px;font-size:12px;color:#374151">💬 ' + it.note + '</div>' : '') +
+    '</div>';
+  }).join('') : '<div style="color:#6b7280;font-size:13px">لا توجد صور مرفقة</div>';
+
+  var signaturesHtml = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:24px">';
+  signaturesHtml += '<div style="border:1px solid #e5e7eb;border-radius:10px;padding:14px">' +
+    '<div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:8px">✍️ توقيع المفتش' + (a.inspectorName ? ' — ' + a.inspectorName : '') + '</div>' +
+    (a.inspectorSignUrl ? '<img src="'+a.inspectorSignUrl+'" style="width:100%;max-height:130px;object-fit:contain;border:1px solid #f3f4f6;border-radius:6px">' : '<div style="color:#dc2626;font-size:12px">❌ لم يتم التوقيع بعد</div>') +
+  '</div>';
+  signaturesHtml += '<div style="border:1px solid #e5e7eb;border-radius:10px;padding:14px">' +
+    '<div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:8px">✍️ توقيع مدير الفرع' + (a.branchManagerName ? ' — ' + a.branchManagerName : '') + '</div>' +
+    (a.branchManagerSignUrl ? '<img src="'+a.branchManagerSignUrl+'" style="width:100%;max-height:200px;object-fit:contain;border:1px solid #f3f4f6;border-radius:6px">' : '<div style="color:#dc2626;font-size:12px">⏳ بانتظار التوقيع</div>') +
+  '</div>';
+  signaturesHtml += '</div>';
+
+  var html = '<div dir="rtl" style="font-family:Tajawal,Arial,sans-serif;color:#111;padding:32px;max-width:900px;margin:0 auto">' +
+    '<div style="text-align:center;border-bottom:3px solid #001e40;padding-bottom:18px;margin-bottom:24px">' +
+      '<div style="font-size:24px;font-weight:900;color:#001e40">تقرير جولة تدقيق ميداني</div>' +
+      '<div style="font-size:14px;color:#374151;margin-top:6px">عيادات أبكس كير — ' + (a.branch||'') + '</div>' +
+      '<div style="font-size:12px;color:#6b7280;margin-top:4px">تاريخ الطباعة: ' + dateStr + '</div>' +
+    '</div>' +
+    '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:24px">' +
+      _card('تاريخ الزيارة', formatDateSafe(a.date), '', '#001e40') +
+      _card('الفرع', a.branch||'—', '', '#0066cc') +
+      _card('الموقع', a.location||'—', '', '#7c3aed') +
+      _card('الحالة', a.status||'قيد المتابعة', '', a.status==='تم المعالجة'?'#1a8f5c':'#b7791f') +
+    '</div>' +
+    (a.recommendation ? _section('✅ التوصية') + '<div style="font-size:13px;color:#374151;margin-bottom:20px;line-height:1.8">' + a.recommendation + '</div>' : '') +
+    (a.notes ? _section('💬 ملاحظات عامة') + '<div style="font-size:13px;color:#374151;margin-bottom:20px;line-height:1.8">' + a.notes + '</div>' : '') +
+    _section('📷 الصور الموثّقة') + itemsHtml +
+    _section('✍️ التوقيعات والإقرار') + signaturesHtml +
+    '<div style="text-align:center;border-top:2px solid #e5e7eb;padding-top:16px;margin-top:28px;color:#6b7280;font-size:11px">' +
+      'تم إنشاء هذا التقرير تلقائياً من نظام إدارة الجودة — أبكس كير · ' + dateStr +
+    '</div>' +
+  '</div>';
+
+  var area = document.getElementById('report-print-area');
+  if (area) area.innerHTML = html;
+  window.print();
 }
 
 // ─── تقرير تصعيد للإدارة — الجولات المتأخرة فقط ───────────────────
@@ -5150,7 +5252,7 @@ function generateAuditEscalationReport() {
       '<td style="padding:8px 10px;text-align:center;color:#6b7280;font-size:12px">' + (i+1) + '</td>' +
       '<td style="padding:8px 10px;font-weight:700;font-size:13px">' + (a.branch||'') + '</td>' +
       '<td style="padding:8px 10px;font-size:12px">' + (a.location||'—') + '</td>' +
-      '<td style="padding:8px 10px;text-align:center;font-size:12px">' + (a.date||'') + '</td>' +
+      '<td style="padding:8px 10px;text-align:center;font-size:12px">' + formatDateSafe(a.date) + '</td>' +
       '<td style="padding:8px 10px;text-align:center;font-weight:800;color:#c0392b">' + days + ' يوم</td>' +
       '<td style="padding:8px 10px;font-size:12px">' + (a.inspectorName||'—') + '</td>' +
       '<td style="padding:8px 10px;text-align:center;font-size:12px">' + signed + '</td>' +
@@ -5181,7 +5283,7 @@ function generateAuditEscalationReport() {
       '<tbody>' + rowsHtml + '</tbody>' +
     '</table>' +
     '<div style="text-align:center;border-top:2px solid #e5e7eb;padding-top:14px;margin-top:24px;color:#6b7280;font-size:11px">' +
-      'تم إنشاء هذا التقرير تلقائياً من لوحة تحكم CBAHI — أبكس كير · ' + dateStr +
+      'تم إنشاء هذا التقرير تلقائياً من نظام إدارة الجودة — أبكس كير · ' + dateStr +
     '</div>' +
   '</div>';
 
@@ -5216,7 +5318,7 @@ function openAuditPhotoView(id) {
   }).join('') : '<div style="text-align:center;color:var(--text3);padding:20px">لا توجد صور مرفقة</div>';
 
   body.innerHTML =
-    '<div style="font-size:12px;color:var(--text3);margin-bottom:12px">📅 ' + (a.date||'') + ' — 🏥 ' + (a.branch||'') + (a.location?(' — 📍 '+a.location):'') + '</div>' +
+    '<div style="font-size:12px;color:var(--text3);margin-bottom:12px">📅 ' + formatDateSafe(a.date) + ' — 🏥 ' + (a.branch||'') + (a.location?(' — 📍 '+a.location):'') + '</div>' +
     itemsHtml +
     (a.notes ? '<div style="margin-top:14px;padding:12px;background:var(--surface2);border-radius:8px;font-size:12px"><strong>ملاحظات عامة:</strong> ' + a.notes + '</div>' : '') +
     (a.recommendation ? '<div style="margin-top:8px;padding:12px;background:var(--surface2);border-radius:8px;font-size:12px"><strong>التوصية العامة:</strong> ' + a.recommendation + '</div>' : '');
@@ -5249,7 +5351,7 @@ function renderAuditManagerView() {
     return '<div class="tcard" style="padding:18px">' +
       '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;margin-bottom:10px">' +
         '<div>' +
-          '<div style="font-size:14px;font-weight:800;color:var(--text)">📅 ' + (a.date||'') + ' — ' + (a.location||a.branch||'') + '</div>' +
+          '<div style="font-size:14px;font-weight:800;color:var(--text)">📅 ' + formatDateSafe(a.date) + ' — ' + (a.location||a.branch||'') + '</div>' +
           '<div style="font-size:11px;color:var(--text3);margin-top:2px">📷 ' + thumbCount + ' صورة موثّقة</div>' +
         '</div>' +
         (signed ? pill('تم المعالجة') : pill(a.status||'قيد المتابعة')) +
@@ -5285,7 +5387,7 @@ function openBranchManagerSignModal(auditId) {
   }).join('') : '<div style="color:var(--text3);font-size:12px">لا توجد صور مرفقة</div>';
 
   document.getElementById('mgr-sign-report-body').innerHTML =
-    '<div style="font-size:12px;color:var(--text3);margin-bottom:10px">📅 ' + (a.date||'') + ' — 🏥 ' + (a.branch||'') + (a.location?(' — 📍 '+a.location):'') + '</div>' +
+    '<div style="font-size:12px;color:var(--text3);margin-bottom:10px">📅 ' + formatDateSafe(a.date) + ' — 🏥 ' + (a.branch||'') + (a.location?(' — 📍 '+a.location):'') + '</div>' +
     itemsHtml +
     (a.notes ? '<div style="margin-top:12px;padding:10px;background:var(--surface2);border-radius:8px;font-size:12px"><strong>ملاحظات عامة:</strong> ' + a.notes + '</div>' : '') +
     (a.recommendation ? '<div style="margin-top:8px;padding:10px;background:var(--surface2);border-radius:8px;font-size:12px"><strong>التوصية:</strong> ' + a.recommendation + '</div>' : '') +
@@ -5327,7 +5429,7 @@ function wrapCanvasText(ctx, text, x, maxWidth, y, lineHeight) {
   return curY + lineHeight;
 }
 
-function buildSignedReportSnapshot(a, managerName) {
+function buildSignedReportSnapshot(a, signerName, signerRoleLabel, canvasId) {
   var W = 720, H = 560;
   var canvas = document.createElement('canvas');
   canvas.width = W; canvas.height = H;
@@ -5340,7 +5442,7 @@ function buildSignedReportSnapshot(a, managerName) {
   ctx.textAlign = 'right';
   ctx.fillStyle = '#001e40';
   ctx.font = 'bold 22px Tajawal, Arial, sans-serif';
-  ctx.fillText('تقرير جولة تدقيق ميداني — إقرار وتوقيع مدير الفرع', W - 36, 50);
+  ctx.fillText('تقرير جولة تدقيق ميداني — إقرار وتوقيع ' + signerRoleLabel, W - 36, 50);
   ctx.strokeStyle = '#e2e2e7'; ctx.lineWidth = 1;
   ctx.beginPath(); ctx.moveTo(36, 62); ctx.lineTo(W - 36, 62); ctx.stroke();
 
@@ -5351,7 +5453,7 @@ function buildSignedReportSnapshot(a, managerName) {
   var maxW = W - 72;
   var fields = [
     ['رقم الجولة', String(a.id||'')],
-    ['التاريخ', a.date||'—'],
+    ['التاريخ', formatDateSafe(a.date)],
     ['الفرع', a.branch||'—'],
     ['الموقع', a.location||'—'],
     ['المفتش', a.inspectorName||'—']
@@ -5387,12 +5489,12 @@ function buildSignedReportSnapshot(a, managerName) {
   var sigY = H - sigH - 90;
   ctx.strokeStyle = '#c3c6d1'; ctx.lineWidth = 1;
   ctx.strokeRect(sigX, sigY, sigW, sigH);
-  var sigCanvas = document.getElementById('sigpad-manager-only');
+  var sigCanvas = document.getElementById(canvasId);
   if (sigCanvas) ctx.drawImage(sigCanvas, sigX, sigY, sigW, sigH);
 
   ctx.font = 'bold 15px Tajawal, Arial, sans-serif';
   ctx.fillStyle = '#001e40';
-  ctx.fillText('توقيع: ' + managerName + '  (مدير الفرع)', W - 36, sigY + sigH + 24);
+  ctx.fillText('توقيع: ' + signerName + '  (' + signerRoleLabel + ')', W - 36, sigY + sigH + 24);
   ctx.font = '11px Tajawal, Arial, sans-serif';
   ctx.fillStyle = '#888888';
   ctx.fillText('تم التوقيع إلكترونياً بتاريخ ' + new Date().toLocaleString('ar-SA'), W - 36, sigY + sigH + 44);
@@ -5414,7 +5516,7 @@ async function saveBranchManagerSignature() {
   btn.disabled = true; btn.textContent = '⏳ جاري إنشاء المستند الموقّع...';
   try {
     // نبني صورة واحدة موحّدة: تفاصيل التقرير + التوقيع معاً (وليس توقيع منفصل)
-    var combinedImage = buildSignedReportSnapshot(a, name);
+    var combinedImage = buildSignedReportSnapshot(a, name, 'مدير الفرع', 'sigpad-manager-only');
     var up = await auditUploadImage(combinedImage, 'signed_report_' + id + '.png', 'image/png');
     if (!up) throw new Error('فشل رفع المستند الموقّع');
     var idx = DB.siteAudits.findIndex(function(x){ return String(x.id) === String(id); });

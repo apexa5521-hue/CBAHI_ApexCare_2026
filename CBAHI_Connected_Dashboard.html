@@ -513,7 +513,9 @@ tr:hover td{background:rgba(0,194,255,.03)}
       <button onclick="generateAuditEscalationReport()" style="background:rgba(255,124,42,.25);border:1px solid rgba(255,124,42,.5);color:#fff;
         padding:10px 18px;border-radius:9px;font-family:Tajawal,sans-serif;font-size:13px;font-weight:800;cursor:pointer">🖨️ تقرير تصعيد للإدارة</button>
       <button onclick="openAuditModal()" data-perm-tab="site-audits" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:#fff;
-        padding:10px 22px;border-radius:9px;font-family:Tajawal,sans-serif;font-size:13px;font-weight:800;cursor:pointer">＋ إضافة جولة تدقيق</button>
+        padding:10px 22px;border-radius:9px;font-family:Tajawal,sans-serif;font-size:13px;font-weight:800;cursor:pointer">＋ زيارة جديدة</button>
+      <button onclick="openFollowUpModal()" data-perm-tab="site-audits" style="background:rgba(0,194,255,.25);border:1px solid rgba(0,194,255,.5);color:#fff;
+        padding:10px 22px;border-radius:9px;font-family:Tajawal,sans-serif;font-size:13px;font-weight:800;cursor:pointer">↻ زيارة متابعة</button>
     </div>
   </div>
 
@@ -1437,9 +1439,9 @@ tr:hover td{background:rgba(0,194,255,.03)}
     <div class="fg"><label>📍 الموقع / القسم</label><input type="text" id="audit-location" placeholder="مثال: غرفة التعقيم، عيادة الأسنان..."></div>
 
     <div class="fg">
-      <label>📷 صور قبل/بعد (أضف زوج لكل مكان — كل زوج له تعليقه الخاص)</label>
+      <label>📷 صور توثيق الزيارة (صورة لكل مكان — "بعد التصحيح" اختياري)</label>
       <div id="audit-photo-items-list"></div>
-      <button type="button" class="btn btn-ghost" style="margin-top:6px;width:100%" onclick="addAuditPhotoItem()">+ إضافة صورة قبل/بعد أخرى</button>
+      <button type="button" class="btn btn-ghost" style="margin-top:6px;width:100%" onclick="addAuditPhotoItem()">+ إضافة صورة أخرى</button>
     </div>
 
     <div class="fg"><label>💬 ملاحظات عامة على الجولة (اختياري)</label><textarea id="audit-notes" rows="2" placeholder="وصف عام إضافي..."></textarea></div>
@@ -1474,6 +1476,50 @@ tr:hover td{background:rgba(0,194,255,.03)}
 </div>
 
 <!-- Audit Photo Comparison Viewer -->
+<!-- Follow-up Visit Modal -->
+<div class="overlay" id="m-followup">
+  <div class="modal" style="max-width:680px">
+    <div style="background:linear-gradient(135deg,#003366,#0066cc);padding:18px 22px;margin:-26px -26px 18px;border-radius:14px 14px 0 0">
+      <h3 style="margin:0;color:#fff;font-size:15px">↻ إضافة زيارة متابعة</h3>
+      <p style="margin:6px 0 0;color:rgba(255,255,255,.8);font-size:11px">لقياس التغيير مقارنةً بزيارة سابقة</p>
+    </div>
+    <input type="hidden" id="followup-eid">
+
+    <div class="fg">
+      <label>اختر الزيارة الأصلية التي تريد متابعتها *</label>
+      <select id="followup-parent-select" onchange="onFollowUpParentChange()">
+        <option value="">— اختر زيارة —</option>
+      </select>
+    </div>
+
+    <div id="followup-parent-preview" style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:14px">
+      <div style="font-size:11px;font-weight:700;color:var(--text3);margin-bottom:8px">📌 الزيارة الأصلية (مرجع للمقارنة)</div>
+      <div id="followup-parent-body"></div>
+    </div>
+
+    <div id="followup-fields" style="display:none">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="fg"><label>📅 تاريخ زيارة المتابعة *</label><input type="date" id="followup-date"></div>
+        <div class="fg"><label>الحالة</label><select id="followup-status"><option>قيد المتابعة</option><option>تم المعالجة</option></select></div>
+      </div>
+
+      <div class="fg">
+        <label>📷 صور المتابعة (سيتم مقارنتها بصور الزيارة الأصلية)</label>
+        <div id="followup-photo-items-list"></div>
+        <button type="button" class="btn btn-ghost" style="margin-top:6px;width:100%" onclick="addFollowUpPhotoItem()">+ إضافة صورة متابعة أخرى</button>
+      </div>
+
+      <div class="fg"><label>💬 ملاحظات المتابعة</label><textarea id="followup-notes" rows="2" placeholder="هل تحسّن الوضع؟ هل ما زالت هناك مخالفة؟"></textarea></div>
+      <div class="fg"><label>✅ التوصية</label><textarea id="followup-recommendation" rows="2" placeholder="الإجراء التالي إن وجد..."></textarea></div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-danger" onclick="closeModal('m-followup')">إلغاء</button>
+      <button class="btn btn-primary" id="followup-save-btn" onclick="saveFollowUp()">💾 حفظ زيارة المتابعة</button>
+    </div>
+  </div>
+</div>
+
 <div class="overlay" id="m-audit-photo-view">
   <div class="modal" style="max-width:720px">
     <h3>📷 مقارنة قبل / بعد</h3>
@@ -4610,7 +4656,7 @@ function generateReport() {
 
     // ─ Footer
     '<div style="text-align:center;border-top:2px solid #e5e7eb;padding-top:16px;margin-top:24px;color:#6b7280;font-size:12px">' +
-      'تم إنشاء هذا التقرير بواسطة نظام المتابعة  — Tracking System · ' + dateStr +
+      'تم إنشاء هذا التقرير تلقائياً من نظام إدارة الجودة — Tracking System · ' + dateStr +
     '</div>' +
 
   '</div>';
@@ -4619,6 +4665,16 @@ function generateReport() {
   var area = document.getElementById('report-print-area');
   if (area) area.innerHTML = html;
   window.print();
+}
+
+function _photoFrame(photoId, heightPx) {
+  var h = heightPx || 220;
+  if (!photoId) {
+    return '<div style="width:100%;height:'+h+'px;border-radius:8px;border:1px solid #e5e7eb;background:#f9fafb;display:flex;align-items:center;justify-content:center;color:#9ca3af;font-size:12px">لا صورة</div>';
+  }
+  return '<div style="width:100%;height:'+h+'px;border-radius:8px;border:1px solid #e5e7eb;overflow:hidden;background:#f3f4f6">' +
+    '<img src="'+auditImgUrl(photoId,600)+'" style="width:100%;height:100%;object-fit:cover;display:block">' +
+  '</div>';
 }
 
 function _card(label, value, pct, color) {
@@ -4772,7 +4828,7 @@ function renderAuditPhotoItemsUI() {
   var el = document.getElementById('audit-photo-items-list');
   if (!el) return;
   if (!AUDIT_ITEMS.length) {
-    el.innerHTML = '<div style="font-size:11px;color:var(--text3);padding:8px 0">لم تُضف أي صورة بعد — اضغط "+ إضافة صورة قبل/بعد" بالأسفل</div>';
+    el.innerHTML = '<div style="font-size:11px;color:var(--text3);padding:8px 0">لم تُضف أي صورة بعد — اضغط "+ إضافة صورة" بالأسفل</div>';
     return;
   }
   el.innerHTML = AUDIT_ITEMS.map(function(it, idx) {
@@ -4781,20 +4837,21 @@ function renderAuditPhotoItemsUI() {
     return '<div style="border:1px dashed var(--border);border-radius:10px;padding:12px;margin-bottom:10px;background:var(--surface2)">' +
       '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">' +
         '<span style="font-size:11px;font-weight:700;color:var(--text3)">📍 صورة #' + (idx+1) + '</span>' +
-        '<button type="button" onclick="removeAuditPhotoItem(' + it.localId + ')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:11px;font-weight:700">🗑️ حذف هذا الزوج</button>' +
+        '<button type="button" onclick="removeAuditPhotoItem(' + it.localId + ')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:11px;font-weight:700">🗑️ حذف</button>' +
       '</div>' +
       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">' +
         '<div>' +
-          '<label style="font-size:10px;color:var(--text3);display:block;margin-bottom:3px">قبل</label>' +
+          '<label style="font-size:10px;color:var(--text3);display:block;margin-bottom:3px">📷 الصورة (توثيق الحالة الحالية)</label>' +
           (beforeThumb ? '<img src="'+beforeThumb+'" style="width:100%;height:70px;object-fit:cover;border-radius:6px;margin-bottom:4px">' : '') +
           '<input type="file" accept="image/*" onchange="auditItemFileChange(' + it.localId + ',\'before\',this)" style="font-size:10px;width:100%">' +
         '</div>' +
         '<div>' +
-          '<label style="font-size:10px;color:var(--text3);display:block;margin-bottom:3px">بعد</label>' +
+          '<label style="font-size:10px;color:var(--accent);display:block;margin-bottom:3px">✅ بعد التصحيح (اختياري — فقط إذا صُحّح فوراً بنفس الزيارة)</label>' +
           (afterThumb ? '<img src="'+afterThumb+'" style="width:100%;height:70px;object-fit:cover;border-radius:6px;margin-bottom:4px">' : '') +
           '<input type="file" accept="image/*" onchange="auditItemFileChange(' + it.localId + ',\'after\',this)" style="font-size:10px;width:100%">' +
         '</div>' +
       '</div>' +
+      '<div style="font-size:10px;color:var(--text3);margin-bottom:8px;background:rgba(0,102,204,.06);padding:6px 8px;border-radius:6px">ℹ️ إذا احتاجت المخالفة وقتاً للتصحيح، اترك خانة "بعد التصحيح" فارغة — سجّلها لاحقاً كـ"↻ زيارة متابعة" من التبويب الرئيسي، ولن تُحتسب عليك كتقصير.</div>' +
       '<label style="font-size:10px;color:var(--text3);display:block;margin-bottom:3px">📍 مكان هذه الملاحظة (يُستخدم للفرز لاحقاً)</label>' +
       '<input type="text" list="audit-known-places" placeholder="مثال: غرفة التعقيم، الممر الجانبي..." value="' + (it.place||'').replace(/"/g,'&quot;') + '" ' +
         'oninput="auditItemPlaceChange(' + it.localId + ',this.value)" ' +
@@ -4865,6 +4922,224 @@ function openAuditModal(id) {
 }
 
 function editAudit(id) { openAuditModal(id); }
+
+// ════════════════════════════════════════════════════════════════
+// زيارات المتابعة — مقارنة قبل/بعد/متابعة عبر زيارات متعددة
+// ════════════════════════════════════════════════════════════════
+var FOLLOWUP_ITEMS = [];
+var FOLLOWUP_ITEM_SEQ = 0;
+
+function newFollowUpItemObj() {
+  FOLLOWUP_ITEM_SEQ++;
+  return { localId: FOLLOWUP_ITEM_SEQ, file: null, preview: '', place: '', note: '' };
+}
+
+function openFollowUpModal() {
+  document.getElementById('followup-eid').value = '';
+  document.getElementById('followup-date').value = '';
+  document.getElementById('followup-status').value = 'قيد المتابعة';
+  document.getElementById('followup-notes').value = '';
+  document.getElementById('followup-recommendation').value = '';
+  document.getElementById('followup-parent-preview').style.display = 'none';
+  document.getElementById('followup-fields').style.display = 'none';
+  FOLLOWUP_ITEMS = [newFollowUpItemObj()];
+
+  // تعبئة القائمة المنسدلة بكل الزيارات (الموقع/الفرع — التاريخ)، الأحدث أولاً
+  var select = document.getElementById('followup-parent-select');
+  var list = (DB.siteAudits || []).slice().sort(function(a,b){ return (b.date||'').localeCompare(a.date||''); });
+  select.innerHTML = '<option value="">— اختر زيارة —</option>' + list.map(function(a) {
+    var label = formatDateSafe(a.date) + ' — ' + (a.branch||'') + (a.location ? (' — ' + a.location) : '');
+    return '<option value="'+a.id+'">'+label+'</option>';
+  }).join('');
+  openModal('m-followup');
+}
+
+function onFollowUpParentChange() {
+  var parentId = document.getElementById('followup-parent-select').value;
+  var previewBox = document.getElementById('followup-parent-preview');
+  var fieldsBox = document.getElementById('followup-fields');
+  if (!parentId) { previewBox.style.display = 'none'; fieldsBox.style.display = 'none'; return; }
+
+  var a = (DB.siteAudits || []).find(function(x){ return String(x.id) === String(parentId); });
+  if (!a) return;
+  var items = [];
+  try { items = a.photoItems ? JSON.parse(a.photoItems) : []; } catch(e) {}
+
+  var thumbsHtml = items.length ? items.map(function(it) {
+    var b = it.beforeId ? '<img src="'+auditImgUrl(it.beforeId,120)+'" style="width:56px;height:56px;object-fit:cover;border-radius:6px;margin-left:3px">' : '';
+    var af = it.afterId ? '<img src="'+auditImgUrl(it.afterId,120)+'" style="width:56px;height:56px;object-fit:cover;border-radius:6px">' : '';
+    return '<div style="display:inline-flex;gap:3px;margin:2px 6px 2px 0" title="'+(it.place||'')+'">' + b + af + '</div>';
+  }).join('') : '<span style="color:var(--text3);font-size:11px">لا صور بالزيارة الأصلية</span>';
+
+  document.getElementById('followup-parent-body').innerHTML =
+    '<div style="font-size:12px;color:var(--text2);margin-bottom:8px">التاريخ: ' + formatDateSafe(a.date) + ' — الحالة: ' + (a.status||'') + (a.recommendation ? '<br>التوصية: ' + a.recommendation : '') + '</div>' +
+    '<div>' + thumbsHtml + '</div>';
+
+  previewBox.style.display = 'block';
+  fieldsBox.style.display = 'block';
+}
+
+function addFollowUpPhotoItem() {
+  FOLLOWUP_ITEMS.push(newFollowUpItemObj());
+  renderFollowUpPhotoItemsUI();
+}
+function removeFollowUpPhotoItem(localId) {
+  FOLLOWUP_ITEMS = FOLLOWUP_ITEMS.filter(function(it){ return it.localId != localId; });
+  renderFollowUpPhotoItemsUI();
+}
+function followUpItemFileChange(localId, inputEl) {
+  var item = FOLLOWUP_ITEMS.find(function(it){ return it.localId == localId; });
+  if (!item || !inputEl.files || !inputEl.files[0]) return;
+  item.file = inputEl.files[0];
+  item.preview = URL.createObjectURL(item.file);
+  renderFollowUpPhotoItemsUI();
+}
+function followUpItemPlaceChange(localId, val) {
+  var item = FOLLOWUP_ITEMS.find(function(it){ return it.localId == localId; });
+  if (item) item.place = val;
+}
+function followUpItemNoteChange(localId, val) {
+  var item = FOLLOWUP_ITEMS.find(function(it){ return it.localId == localId; });
+  if (item) item.note = val;
+}
+
+function renderFollowUpPhotoItemsUI() {
+  var el = document.getElementById('followup-photo-items-list');
+  if (!el) return;
+  el.innerHTML = FOLLOWUP_ITEMS.map(function(it, idx) {
+    var thumb = it.preview ? '<img src="'+it.preview+'" style="width:100%;height:90px;object-fit:cover;border-radius:6px;margin-bottom:4px">' : '';
+    return '<div style="border:1px dashed var(--border);border-radius:10px;padding:12px;margin-bottom:10px;background:var(--surface2)">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">' +
+        '<span style="font-size:11px;font-weight:700;color:var(--text3)">📷 صورة متابعة #' + (idx+1) + '</span>' +
+        '<button type="button" onclick="removeFollowUpPhotoItem(' + it.localId + ')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:11px;font-weight:700">🗑️ حذف</button>' +
+      '</div>' +
+      thumb +
+      '<input type="file" accept="image/*" onchange="followUpItemFileChange(' + it.localId + ',this)" style="font-size:10px;width:100%;margin-bottom:8px">' +
+      '<input type="text" list="audit-known-places" placeholder="📍 المكان (اختياري)" value="' + (it.place||'').replace(/"/g,'&quot;') + '" ' +
+        'oninput="followUpItemPlaceChange(' + it.localId + ',this.value)" ' +
+        'style="width:100%;padding:6px 9px;background:var(--surface);border:1px solid var(--border);border-radius:7px;color:var(--text);font-family:Tajawal,sans-serif;font-size:11px;margin-bottom:6px">' +
+      '<input type="text" placeholder="💬 ملاحظة على هذه الصورة..." value="' + (it.note||'').replace(/"/g,'&quot;') + '" ' +
+        'oninput="followUpItemNoteChange(' + it.localId + ',this.value)" ' +
+        'style="width:100%;padding:6px 9px;background:var(--surface);border:1px solid var(--border);border-radius:7px;color:var(--text);font-family:Tajawal,sans-serif;font-size:11px">' +
+    '</div>';
+  }).join('');
+}
+
+async function saveFollowUp() {
+  var parentId = document.getElementById('followup-parent-select').value;
+  var date = document.getElementById('followup-date').value;
+  if (!parentId) { toast('⚠️ اختر الزيارة الأصلية أولاً', 'error'); return; }
+  if (!date) { toast('⚠️ حدد تاريخ زيارة المتابعة', 'error'); return; }
+
+  var parent = (DB.siteAudits || []).find(function(x){ return String(x.id) === String(parentId); });
+  if (!parent) { toast('⚠️ تعذّر إيجاد الزيارة الأصلية', 'error'); return; }
+
+  var btn = document.getElementById('followup-save-btn');
+  btn.disabled = true; btn.textContent = '⏳ جاري الحفظ...';
+  toast('⏳ جاري رفع صور المتابعة...', 'info', 8000);
+
+  var id = String(Date.now());
+  var obj = {
+    id: id,
+    date: date,
+    branch: parent.branch || '',
+    location: parent.location || '',
+    notes: document.getElementById('followup-notes').value,
+    recommendation: document.getElementById('followup-recommendation').value,
+    status: document.getElementById('followup-status').value,
+    parentAuditId: parentId,
+    inspectorName: '', inspectorSignUrl: '', branchManagerName: '', branchManagerSignUrl: ''
+  };
+
+  try {
+    var finalItems = [];
+    for (var i = 0; i < FOLLOWUP_ITEMS.length; i++) {
+      var it = FOLLOWUP_ITEMS[i];
+      if (!it.file && !(it.note||'').trim() && !(it.place||'').trim()) continue;
+      var photoUrl = '', photoId = '';
+      if (it.file) {
+        var b64 = await fileToBase64(it.file);
+        var up = await auditUploadImage(b64, 'followup_' + id + '_' + i + '_' + it.file.name, it.file.type);
+        if (up) { photoUrl = up.url; photoId = up.id; }
+      }
+      // نستخدم afterUrl/afterId لتخزين صورة المتابعة (لعرضها بجانب "بعد" الأصلية بالمقارنة)
+      finalItems.push({ beforeUrl:'', beforeId:'', afterUrl: photoUrl, afterId: photoId, place: it.place||'', note: it.note||'' });
+    }
+    obj.photoItems = JSON.stringify(finalItems);
+    obj.beforePhotoUrl = ''; obj.beforePhotoId = '';
+    obj.afterPhotoUrl = finalItems[0] ? finalItems[0].afterUrl : '';
+    obj.afterPhotoId  = finalItems[0] ? finalItems[0].afterId  : '';
+  } catch(e) {
+    toast('⚠️ خطأ أثناء رفع الصور: ' + e.message, 'info');
+  }
+
+  DB.siteAudits.unshift(obj);
+  renderAll();
+  closeModal('m-followup');
+
+  await apiCall('add', 'siteAudits', id, obj);
+  btn.disabled = false; btn.textContent = '💾 حفظ زيارة المتابعة';
+  toast('✅ تم حفظ زيارة المتابعة', 'success');
+  setTimeout(function(){ syncAll(); }, 1200);
+}
+
+// ─── عرض مقارنة: الزيارة الأصلية (قبل/بعد) مقابل كل زيارات المتابعة ──
+function viewFollowUpComparison(auditId) {
+  var root = (DB.siteAudits || []).find(function(x){ return String(x.id) === String(auditId); });
+  if (!root) return;
+  // إذا كانت هذي بالأصل زيارة متابعة، ارجع لأصلها الجذري
+  while (root.parentAuditId) {
+    var p = (DB.siteAudits || []).find(function(x){ return String(x.id) === String(root.parentAuditId); });
+    if (!p) break;
+    root = p;
+  }
+  var followUps = (DB.siteAudits || []).filter(function(a){ return String(a.parentAuditId) === String(root.id); })
+    .sort(function(a,b){ return (a.date||'').localeCompare(b.date||''); });
+
+  var rootItems = [];
+  try { rootItems = root.photoItems ? JSON.parse(root.photoItems) : []; } catch(e) {}
+  // هل فيه أي تصحيح فوري وثّق بنفس زيارة الأصل؟ (صورة "بعد" لنفس اليوم)
+  var hasSameDayAfter = rootItems.some(function(it){ return !!it.afterId; });
+  var colCount = (hasSameDayAfter ? 2 : 1) + followUps.length;
+  var dateStr = new Date().toLocaleDateString('ar-SA', { year:'numeric', month:'long', day:'numeric' });
+
+  var headerCells = '<div style="text-align:center;font-size:11px;font-weight:700;color:#6b7280">قبل (الزيارة الأصلية)</div>';
+  if (hasSameDayAfter) headerCells += '<div style="text-align:center;font-size:11px;font-weight:700;color:#6b7280">بعد التصحيح الفوري (نفس الزيارة)</div>';
+  headerCells += followUps.map(function(f){ return '<div style="text-align:center;font-size:11px;font-weight:700;color:#0066cc">متابعة — ' + formatDateSafe(f.date) + '</div>'; }).join('');
+  var stagesHtml = '<div style="display:grid;grid-template-columns:repeat('+colCount+',1fr);gap:12px;margin-bottom:10px">' + headerCells + '</div>';
+
+  var rowsHtml = rootItems.length ? rootItems.map(function(it, idx) {
+    var cells = '<div>' + _photoFrame(it.beforeId, 180) + '</div>';
+    if (hasSameDayAfter) cells += '<div>' + _photoFrame(it.afterId, 180) + '</div>';
+    followUps.forEach(function(f) {
+      var fItems = [];
+      try { fItems = f.photoItems ? JSON.parse(f.photoItems) : []; } catch(e) {}
+      var match = fItems[idx] || fItems.find(function(fi){ return fi.place && fi.place === it.place; });
+      cells += '<div>' + _photoFrame(match ? match.afterId : '', 180) + (match && match.note ? '<div style="font-size:10px;color:#374151;margin-top:4px">' + match.note + '</div>' : '') + '</div>';
+    });
+    return '<div style="margin-bottom:20px;' + (idx>0?'padding-top:16px;border-top:1px dashed #e5e7eb;':'') + '">' +
+      (it.place ? '<div style="font-size:13px;font-weight:800;color:#001e40;margin-bottom:8px">' + it.place + '</div>' : '') +
+      '<div style="display:grid;grid-template-columns:repeat('+colCount+',1fr);gap:12px">' + cells + '</div>' +
+      (it.note ? '<div style="margin-top:8px;font-size:12px;color:#374151">ملاحظة أصلية: ' + it.note + '</div>' : '') +
+    '</div>';
+  }).join('') : '<div style="color:#6b7280;font-size:13px">لا توجد صور بالزيارة الأصلية</div>';
+
+  var html = '<div dir="rtl" style="font-family:Tajawal,Arial,sans-serif;color:#111;padding:32px;max-width:1100px;margin:0 auto">' +
+    '<div style="text-align:center;border-bottom:3px solid #0066cc;padding-bottom:18px;margin-bottom:24px">' +
+      '<div style="font-size:24px;font-weight:900;color:#0066cc">تقرير متابعة — مقارنة التغيير عبر الزيارات</div>' +
+      '<div style="font-size:14px;color:#374151;margin-top:6px">Tracking System — ' + (root.branch||'') + (root.location?(' — '+root.location):'') + '</div>' +
+      '<div style="font-size:12px;color:#6b7280;margin-top:4px">تاريخ الطباعة: ' + dateStr + ' — عدد زيارات المتابعة: ' + followUps.length + '</div>' +
+    '</div>' +
+    stagesHtml + rowsHtml +
+    '<div style="text-align:center;border-top:2px solid #e5e7eb;padding-top:16px;margin-top:28px;color:#6b7280;font-size:11px">' +
+      'تم إنشاء هذا التقرير تلقائياً من نظام إدارة الجودة — Tracking System · ' + dateStr +
+    '</div>' +
+  '</div>';
+
+  var area = document.getElementById('report-print-area');
+  if (area) area.innerHTML = html;
+  window.print();
+}
 
 // ─── رفع صورة واحدة إلى Cloudinary (بدون المرور بـ GAS — أسرع) ───
 async function auditUploadImage(base64, fileName, mimeType) {
@@ -5158,16 +5433,22 @@ function renderAuditTable() {
     var statusHtml = delayed
       ? '<span class="pill s-crit">⏰ متأخرة (' + auditDaysElapsed(a) + ' يوم)</span>'
       : pill(a.status||'قيد المتابعة');
+    var hasFollowUps = (DB.siteAudits||[]).some(function(x){ return String(x.parentAuditId) === String(a.id); });
+    var isFollowUp = !!a.parentAuditId;
+    var locationLabel = (isFollowUp ? '<span class="badge badge-blue" style="font-size:9px;margin-left:4px">↻ متابعة</span>' : '') + (a.location||'—');
+    var compareBtn = (isFollowUp || hasFollowUps)
+      ? '<button class="btn btn-ghost" style="padding:3px 10px;font-size:10px;margin-top:4px" onclick="viewFollowUpComparison(\''+a.id+'\')">↻ مقارنة التغيير</button>'
+      : '';
     return '<tr' + (delayed ? ' style="background:rgba(255,71,87,.04)"' : '') + '>' +
       '<td class="num">' + (i+1) + '</td>' +
       '<td style="font-size:11px">' + formatDateSafe(a.date) + '</td>' +
       '<td class="td-main">' + (a.branch||'') + '</td>' +
-      '<td style="font-size:11px;color:var(--text3)">' + (a.location||'—') + '</td>' +
+      '<td style="font-size:11px;color:var(--text3)">' + locationLabel + '</td>' +
       '<td style="font-size:11px;max-width:200px">' + (a.recommendation||'—') + '</td>' +
       '<td style="text-align:center">' + photos + '</td>' +
       '<td style="text-align:center">' + sigs + '</td>' +
       '<td>' + statusHtml + '</td>' +
-      '<td style="text-align:center"><button class="btn btn-ghost" style="padding:3px 10px;font-size:10px" onclick="viewAndPrintAuditReport(\''+a.id+'\')">🖨️ عرض التقرير</button></td>' +
+      '<td style="text-align:center"><button class="btn btn-ghost" style="padding:3px 10px;font-size:10px" onclick="viewAndPrintAuditReport(\''+a.id+'\')">🖨️ عرض التقرير</button>' + (compareBtn?'<br>'+compareBtn:'') + '</td>' +
       '<td style="display:flex;gap:4px">' +
         (userCanEdit('site-audits') ? '<button class="btn btn-ghost" style="padding:3px 8px;font-size:10px" onclick="editAudit(\''+a.id+'\')">تعديل</button>' +
         '<button class="btn btn-danger" style="padding:3px 8px;font-size:10px" onclick="delAudit(\''+a.id+'\')">حذف</button>' : '<span style="color:var(--text3);font-size:10px">—</span>') +
@@ -5191,15 +5472,20 @@ function viewAndPrintAuditReport(id) {
   var dateStr = new Date().toLocaleDateString('ar-SA', { year:'numeric', month:'long', day:'numeric' });
 
   var itemsHtml = items.length ? items.map(function(it, idx) {
-    var b = it.beforeId ? '<img src="'+auditImgUrl(it.beforeId,500)+'" style="width:100%;border-radius:8px;border:1px solid #e5e7eb">' : '<div style="color:#9ca3af;font-size:12px;text-align:center;padding:20px">لا صورة</div>';
-    var af = it.afterId ? '<img src="'+auditImgUrl(it.afterId,500)+'" style="width:100%;border-radius:8px;border:1px solid #e5e7eb">' : '<div style="color:#9ca3af;font-size:12px;text-align:center;padding:20px">لا صورة</div>';
-    return '<div style="margin-bottom:20px;' + (idx>0?'padding-top:16px;border-top:1px dashed #e5e7eb;':'') + '">' +
-      (it.place ? '<div style="font-size:13px;font-weight:800;color:#001e40;margin-bottom:8px">' + it.place + '</div>' : '<div style="font-size:12px;font-weight:700;color:#6b7280;margin-bottom:8px">صورة رقم ' + (idx+1) + '</div>') +
-      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">' +
-        '<div><div style="font-size:11px;color:#6b7280;text-align:center;margin-bottom:4px">قبل</div>' + b + '</div>' +
-        '<div><div style="font-size:11px;color:#6b7280;text-align:center;margin-bottom:4px">بعد</div>' + af + '</div>' +
-      '</div>' +
-      (it.note ? '<div style="margin-top:8px;font-size:12px;color:#374151">ملاحظة: ' + it.note + '</div>' : '') +
+    var photosBlock;
+    if (it.beforeId && it.afterId) {
+      photosBlock = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">' +
+        '<div><div style="font-size:11px;font-weight:700;color:#6b7280;text-align:center;margin-bottom:6px">قبل</div>' + _photoFrame(it.beforeId, 240) + '</div>' +
+        '<div><div style="font-size:11px;font-weight:700;color:#1a8f5c;text-align:center;margin-bottom:6px">بعد التصحيح (نفس الزيارة)</div>' + _photoFrame(it.afterId, 240) + '</div>' +
+      '</div>';
+    } else {
+      var mainId = it.beforeId || it.afterId;
+      photosBlock = '<div style="max-width:360px">' + _photoFrame(mainId, 240) + '</div>';
+    }
+    return '<div style="margin-bottom:24px;' + (idx>0?'padding-top:18px;border-top:1px dashed #e5e7eb;':'') + '">' +
+      (it.place ? '<div style="font-size:13px;font-weight:800;color:#001e40;margin-bottom:10px">' + it.place + '</div>' : '<div style="font-size:12px;font-weight:700;color:#6b7280;margin-bottom:10px">صورة رقم ' + (idx+1) + '</div>') +
+      photosBlock +
+      (it.note ? '<div style="margin-top:10px;font-size:12px;color:#374151;background:#f9fafb;border-radius:6px;padding:8px 10px">ملاحظة: ' + it.note + '</div>' : '') +
     '</div>';
   }).join('') : '<div style="color:#6b7280;font-size:13px">لا توجد صور مرفقة</div>';
 
@@ -5305,12 +5591,14 @@ function openAuditPhotoView(id) {
   }
 
   var itemsHtml = items.length ? items.map(function(it, idx) {
-    var beforeHtml = it.beforeId
-      ? '<div style="flex:1;min-width:180px"><div style="font-size:11px;font-weight:700;color:var(--text3);margin-bottom:6px;text-align:center">قبل</div><img src="'+auditImgUrl(it.beforeId,600)+'" style="width:100%;border-radius:10px;border:1px solid var(--border)"></div>'
-      : '<div style="flex:1;min-width:180px;display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:12px">لا توجد صورة "قبل"</div>';
-    var afterHtml = it.afterId
-      ? '<div style="flex:1;min-width:180px"><div style="font-size:11px;font-weight:700;color:var(--text3);margin-bottom:6px;text-align:center">بعد</div><img src="'+auditImgUrl(it.afterId,600)+'" style="width:100%;border-radius:10px;border:1px solid var(--border)"></div>'
-      : '<div style="flex:1;min-width:180px;display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:12px">لا توجد صورة "بعد"</div>';
+    var mainId = it.beforeId || it.afterId;
+    var mainLabel = it.beforeId ? 'الصورة' : 'صورة المتابعة';
+    var beforeHtml = mainId
+      ? '<div style="flex:1;min-width:180px"><div style="font-size:11px;font-weight:700;color:var(--text3);margin-bottom:6px;text-align:center">'+mainLabel+'</div><img src="'+auditImgUrl(mainId,600)+'" style="width:100%;border-radius:10px;border:1px solid var(--border)"></div>'
+      : '';
+    var afterHtml = (it.beforeId && it.afterId)
+      ? '<div style="flex:1;min-width:180px"><div style="font-size:11px;font-weight:700;color:var(--green);margin-bottom:6px;text-align:center">بعد التصحيح (نفس الزيارة)</div><img src="'+auditImgUrl(it.afterId,600)+'" style="width:100%;border-radius:10px;border:1px solid var(--border)"></div>'
+      : '';
     return '<div style="'+(idx>0?'margin-top:18px;padding-top:18px;border-top:1px dashed var(--border);':'')+'">' +
       '<div style="font-size:11px;font-weight:700;color:var(--accent);margin-bottom:8px">📍 ' + (it.place ? it.place : ('صورة #' + (idx+1))) + '</div>' +
       '<div style="display:flex;gap:14px;flex-wrap:wrap">' + beforeHtml + afterHtml + '</div>' +

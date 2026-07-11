@@ -2058,6 +2058,13 @@ async function callGAS(params) {
       return encodeURIComponent(k) + '=' +
         encodeURIComponent(typeof p[k]==='object' ? JSON.stringify(p[k]) : String(p[k]));
     }).join('&');
+    // ⚠️ حماية: روابط GAS الطويلة جداً (بيانات كبيرة) تفشل بصمت بمعظم المتصفحات/الخوادم.
+    // نحذّر بوضوح بدل ما نتركها "تختفي" بدون تفسير.
+    if ((currentUrl + '?' + qs).length > 7000) {
+      clearTimeout(tid);
+      reject(new Error('البيانات المرسلة كبيرة جداً (صور/ملاحظات كثيرة) — قسّم الحفظ لعدة أجزاء أصغر أو قلّل عدد الصور بنفس الجولة'));
+      return;
+    }
     const s = document.createElement('script');
     s.id = cb;
     s.src = currentUrl + '?' + qs;
@@ -2075,11 +2082,53 @@ async function gasGet(action, extra) {
   return callGAS(Object.assign({ action }, extra || {}));
 }
 
+// ════════════════════════════════════════════════════════════════
+// إرسال عبر POST حقيقي (نموذج مخفي + iframe مخفي) — بلا حد لطول البيانات
+// يُستخدم لكل عمليات الحفظ/التعديل/الحذف، لأن رابط GET له حد أقصى للطول
+// يفشل بصمت مع التقارير الطويلة (صور كثيرة + نصوص مفصّلة)
+// ════════════════════════════════════════════════════════════════
+function ensureGasPostIframe() {
+  if (document.getElementById('gas-post-iframe')) return;
+  var iframe = document.createElement('iframe');
+  iframe.name = 'gas-post-target';
+  iframe.id = 'gas-post-iframe';
+  iframe.style.display = 'none';
+  document.body.appendChild(iframe);
+}
+
+function callGASPost(params) {
+  return new Promise(function(resolve, reject) {
+    var currentUrl = localStorage.getItem('cbahi_gas_url') || GAS_URL;
+    if (!currentUrl) { showSettings(); reject(new Error('أدخل رابط Apps Script')); return; }
+    ensureGasPostIframe();
+    var form = document.createElement('form');
+    form.method = 'POST';
+    form.action = currentUrl;
+    form.target = 'gas-post-target';
+    form.style.display = 'none';
+    Object.keys(params).forEach(function(k) {
+      var input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = k;
+      input.value = typeof params[k] === 'object' ? JSON.stringify(params[k]) : String(params[k]);
+      form.appendChild(input);
+    });
+    document.body.appendChild(form);
+    form.submit();
+    // ملاحظة: لا يمكننا قراءة استجابة iframe عابر النطاقات (قيود المتصفح الطبيعية)،
+    // لذا نفترض النجاح بعد مهلة كافية للتنفيذ، والمزامنة الدورية تؤكد لاحقاً
+    setTimeout(function() {
+      if (form.parentNode) form.parentNode.removeChild(form);
+      resolve({ ok: true });
+    }, 1500);
+  });
+}
+
 async function gasMutate(action, sheet, id, data) {
-  // All mutations go as GET (Apps Script handles them in doGet)
+  // كل عمليات التعديل تمر عبر POST حقيقي (بلا حد لطول البيانات) بدل GET/JSONP
   const p = { action, sheet: sheet||'', id: String(id||'') };
   if (data) p.data = JSON.stringify(data);
-  return callGAS(p);
+  return callGASPost(p);
 }
 
 async function syncAll() {
@@ -2911,7 +2960,7 @@ async function delWf(id){
   
   if (GAS_URL) {
     try {
-      await callGAS({action: 'delete', sheet: 'workflow', id});
+      await callGASPost({action: 'delete', sheet: 'workflow', id});
       toast('✅ حُذف من Google Sheets', 'success');
     } catch(e) {
       toast('✅ حُذف محلياً', 'info');
@@ -2956,7 +3005,7 @@ async function saveWf(){
   if (GAS_URL) {
     try {
       setSyncStatus('load');
-      await callGAS({action: id ? 'update' : 'add', sheet: 'workflow', id: obj.id, data: obj});
+      await callGASPost({action: id ? 'update' : 'add', sheet: 'workflow', id: obj.id, data: obj});
       setSyncStatus('ok');
       toast('✅ حُفظ في Google Sheets', 'success');
     } catch(e) {
@@ -5056,18 +5105,18 @@ async function saveFollowUp() {
     for (var i = 0; i < FOLLOWUP_ITEMS.length; i++) {
       var it = FOLLOWUP_ITEMS[i];
       if (!it.file && !(it.note||'').trim() && !(it.place||'').trim()) continue;
-      var photoUrl = '', photoId = '';
+      var photoId = '';
       if (it.file) {
         var b64 = await fileToBase64(it.file);
         var up = await auditUploadImage(b64, 'followup_' + id + '_' + i + '_' + it.file.name, it.file.type);
-        if (up) { photoUrl = up.url; photoId = up.id; }
+        if (up) photoId = up.id;
       }
-      // نستخدم afterUrl/afterId لتخزين صورة المتابعة (لعرضها بجانب "بعد" الأصلية بالمقارنة)
-      finalItems.push({ beforeUrl:'', beforeId:'', afterUrl: photoUrl, afterId: photoId, place: it.place||'', note: it.note||'' });
+      // نستخدم afterId لتخزين صورة المتابعة (لعرضها بجانب "بعد" الأصلية بالمقارنة) — المعرّف فقط، لا الرابط الكامل
+      finalItems.push({ beforeId:'', afterId: photoId, place: it.place||'', note: it.note||'' });
     }
     obj.photoItems = JSON.stringify(finalItems);
     obj.beforePhotoUrl = ''; obj.beforePhotoId = '';
-    obj.afterPhotoUrl = finalItems[0] ? finalItems[0].afterUrl : '';
+    obj.afterPhotoUrl = finalItems[0] && finalItems[0].afterId ? auditImgUrl(finalItems[0].afterId, 600) : '';
     obj.afterPhotoId  = finalItems[0] ? finalItems[0].afterId  : '';
   } catch(e) {
     toast('⚠️ خطأ أثناء رفع الصور: ' + e.message, 'info');
@@ -5203,28 +5252,30 @@ async function saveAudit() {
     var finalItems = [];
     for (var i = 0; i < AUDIT_ITEMS.length; i++) {
       var it = AUDIT_ITEMS[i];
-      var beforeUrl = it.existingBeforeUrl, beforeId = it.existingBeforeId;
-      var afterUrl  = it.existingAfterUrl,  afterId  = it.existingAfterId;
+      var beforeId = it.existingBeforeId;
+      var afterId  = it.existingAfterId;
       if (it.beforeFile) {
         var b64 = await fileToBase64(it.beforeFile);
         var up = await auditUploadImage(b64, 'before_' + id + '_' + i + '_' + it.beforeFile.name, it.beforeFile.type);
-        if (up) { beforeUrl = up.url; beforeId = up.id; }
+        if (up) beforeId = up.id;
       }
       if (it.afterFile) {
         var b64b = await fileToBase64(it.afterFile);
         var up2 = await auditUploadImage(b64b, 'after_' + id + '_' + i + '_' + it.afterFile.name, it.afterFile.type);
-        if (up2) { afterUrl = up2.url; afterId = up2.id; }
+        if (up2) afterId = up2.id;
       }
       // تجاهل العناصر الفاضية بالكامل (بدون صور ولا مكان ولا ملاحظة)
-      if (beforeUrl || afterUrl || (it.note||'').trim() || (it.place||'').trim()) {
-        finalItems.push({ beforeUrl: beforeUrl||'', beforeId: beforeId||'', afterUrl: afterUrl||'', afterId: afterId||'', place: it.place||'', note: it.note||'' });
+      // ملاحظة: نخزّن المعرّف (id) القصير فقط — لا الرابط الكامل — لتقليل حجم البيانات المرسلة لـ GAS
+      // (رابط الصورة يُعاد بناؤه عند العرض عبر auditImgUrl())
+      if (beforeId || afterId || (it.note||'').trim() || (it.place||'').trim()) {
+        finalItems.push({ beforeId: beforeId||'', afterId: afterId||'', place: it.place||'', note: it.note||'' });
       }
     }
     obj.photoItems = JSON.stringify(finalItems);
-    // حقول قديمة للتوافق مع أي كود سابق — نعبّيها من أول عنصر
-    obj.beforePhotoUrl = finalItems[0] ? finalItems[0].beforeUrl : '';
+    // حقول قديمة للتوافق مع أي كود سابق — نعبّيها من أول عنصر (روابط تُبنى من المعرّف عند الحاجة)
+    obj.beforePhotoUrl = finalItems[0] && finalItems[0].beforeId ? auditImgUrl(finalItems[0].beforeId, 600) : '';
     obj.beforePhotoId  = finalItems[0] ? finalItems[0].beforeId  : '';
-    obj.afterPhotoUrl  = finalItems[0] ? finalItems[0].afterUrl  : '';
+    obj.afterPhotoUrl  = finalItems[0] && finalItems[0].afterId  ? auditImgUrl(finalItems[0].afterId, 600)  : '';
     obj.afterPhotoId   = finalItems[0] ? finalItems[0].afterId   : '';
 
     // توقيع المفتش — يُرفع كتقرير كامل موحّد مع التوقيع، وليس صورة توقيع منفصلة

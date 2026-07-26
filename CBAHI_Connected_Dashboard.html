@@ -1161,8 +1161,11 @@ tr:hover td{background:rgba(0,194,255,.03)}
         <span>📜</span> الرخص والعقود تُدار الآن من تبويب <strong style="color:var(--accent)">الرخص والعقود</strong> مباشرةً
       </div>
     </div>
-    <div class="fg"><label>📝 محاضرات جسر — تم الإبلاغ عنها (من المحاضرات المنجزة)</label>
-      <select id="ex-jisr"><option value="none">لم يُبلَّغ بعد</option><option value="partial">بعضها</option><option value="all">الكل</option></select></div>
+    <div style="background:rgba(13,148,136,.06);border:1px solid rgba(13,148,136,.15);border-radius:8px;padding:12px;margin-bottom:12px">
+      <div style="font-size:12px;color:var(--text3);display:flex;align-items:center;gap:8px">
+        <span>🎓</span> "محاضرات وتدريب" تُحسب الآن تلقائياً من نسبة إنجاز المحاضرات فقط بتبويب <strong style="color:var(--accent)">المحاضرات</strong>
+      </div>
+    </div>
     <div class="fg"><label>👥 ملفات الموظفين المكتملة (نسبة %)</label>
       <input type="number" id="ex-staff" min="0" max="100" placeholder="0-100"></div>
     <div class="fg"><label>🤝 تعاون الفريق (نسبة %)</label>
@@ -2359,7 +2362,7 @@ var PILLARS = [
   { key:'policy_signing',  label:'توقيع السياسات',                weight:20, icon:'🖊️', color:'#7C3AED' },
   { key:'staff_files',     label:'ملفات الموظفين',                weight:18, icon:'👥', color:'#F59E0B' },
   { key:'requirements',    label:'المتطلبات',                     weight:12, icon:'📋', color:'#10D97E' },
-  { key:'lectures',        label:'المحاضرات + جسر',               weight:10, icon:'🎓', color:'#0D9488' },
+  { key:'lectures',        label:'محاضرات وتدريب',                weight:10, icon:'🎓', color:'#0D9488' },
   { key:'licenses',        label:'الرخص والعقود والاتفاقيات',     weight:5,  icon:'📜', color:'#EF4444' },
   { key:'assignments',     label:'التكليفات',                     weight:3,  icon:'📌', color:'#8B5CF6' },
   { key:'observations',    label:'الملاحظات',                     weight:2,  icon:'🔍', color:'#FF7C2A' },
@@ -3309,17 +3312,14 @@ function getExtras() {
 
 async function saveExtras() {
   var _g = function(id){ var el=document.getElementById(id); return el ? (Number(el.value)||0) : 0; };
-  var _s = function(id){ var el=document.getElementById(id); return el ? el.value : ''; };
   const ex = {
-    jisr:  _s('ex-jisr'),
     staff: _g('ex-staff'),
   };
   localStorage.setItem('cbahi_extras_v1', JSON.stringify(ex));
   closeModal('m-extras');
 
   // ملاحظة: قيمة staff تُحدّث تلقائياً من شيت HR الحقيقي عبر fetchEmployeeFiles()
-  // هذا الحقل الآن يُستخدم فقط لبونص "جسر" اليدوي
-  toast('✅ تم الحفظ محلياً (جسر فقط — ملفات الموظفين تُحدَّث من الشيت تلقائياً)', 'info');
+  toast('✅ تم الحفظ محلياً — ملفات الموظفين تُحدَّث من الشيت تلقائياً', 'info');
 
   renderProgressDashboard();
 }
@@ -3327,7 +3327,6 @@ async function saveExtras() {
 function openExtras() {
   const ex = getExtras();
   var _s = function(id,val){ var el=document.getElementById(id); if(el) el.value=val||''; };
-  _s('ex-jisr',  ex.jisr  || 'none');
   _s('ex-staff', ex.staff || '');
   openModal('m-extras');
 }
@@ -3344,7 +3343,12 @@ function calcPillarPct(key) {
       if (!POLICIES.length) return 0;
       let total = 0, signed = 0;
       POLICIES.forEach(p => {
-        SIG_FIELDS.forEach(s => { total++; if (p[s.key] === '✅') signed++; });
+        const reqRaw = (p.required_sigs || '').trim();
+        const reqList = reqRaw ? reqRaw.split(',').map(x => x.trim()).filter(Boolean) : SIG_FIELDS.map(s => s.key);
+        reqList.forEach(key => {
+          total++;
+          if (p[key] === '✅') signed++;
+        });
       });
       return total ? Math.round(signed / total * 100) : 0;
     }
@@ -3358,9 +3362,7 @@ function calcPillarPct(key) {
     case 'lectures': {
       if (!DB.lectures.length) return 0;
       const done = DB.lectures.filter(l => l.done === 'نعم').length;
-      const lecPct = Math.round(done / DB.lectures.length * 100);
-      const jisrBonus = ex.jisr === 'all' ? 100 : ex.jisr === 'partial' ? 50 : 0;
-      return Math.round((lecPct * 0.7) + (jisrBonus * 0.3));
+      return Math.round(done / DB.lectures.length * 100);
     }
     case 'documents': {
       const total = 14; // ovr(1) + manual(1) + checklists(12)

@@ -3228,14 +3228,22 @@ function renderPolTable() {
         <div style="height:100%;width:${pct}%;background:${pct>=100?'var(--green)':pct>0?'var(--gold)':'var(--red)'};border-radius:2px"></div>
       </div><span style="font-size:10px;color:var(--text3);min-width:26px">${pct}%</span></div>`;
 
-    const sigs = SIG_FIELDS.map(s =>
-      `<td style="text-align:center;font-size:14px;cursor:pointer"
-        onclick="toggleSig('${p.id}','${s.key}',this)">${p[s.key]||'⬜'}</td>`
-    ).join('');
+    // حدّد الموقّعين المطلوبين فعلياً لهذي السياسة تحديداً (من عمود required_sigs)
+    const reqRawRow = (p.required_sigs || '').trim();
+    const reqListRow = reqRawRow ? reqRawRow.split(',').map(x => x.trim()).filter(Boolean) : SIG_FIELDS.map(s => s.key);
 
-    // Calculate sigStatus from individual signatures
-    const sigsDone = SIG_FIELDS.filter(s => p[s.key]==='✅').length;
-    const sigsTotal = SIG_FIELDS.length;
+    const sigs = SIG_FIELDS.map(s => {
+      const isRequired = reqListRow.indexOf(s.key) > -1;
+      if (!isRequired) {
+        return `<td style="text-align:center;font-size:11px;color:var(--text3);opacity:.4" title="غير مطلوب توقيعه على هذي السياسة">—</td>`;
+      }
+      return `<td style="text-align:center;font-size:14px;cursor:pointer"
+        onclick="toggleSig('${p.id}','${s.key}',this)">${p[s.key]||'⬜'}</td>`;
+    }).join('');
+
+    // Calculate sigStatus من الموقّعين المطلوبين فعلياً فقط (وليس كل الـ9)
+    const sigsDone = reqListRow.filter(key => p[key]==='✅').length;
+    const sigsTotal = reqListRow.length;
     const sigStatus = sigsDone===0?'لم يوقع':sigsDone===sigsTotal?'موقع كامل':'موقع جزئياً ('+sigsDone+'/'+sigsTotal+')';
     const sigStatusCls = sigsDone===sigsTotal?'s-done':sigsDone>0?'s-warn':'s-crit';
 

@@ -848,9 +848,22 @@ tr:hover td{background:rgba(0,194,255,.03)}
       <option value="قيد الإعداد">⏳ قيد الإعداد</option>
       <option value="لم تبدأ">❌ لم تبدأ</option>
     </select>
+    <select id="pol2-signer-select" onchange="POL_FILTER_SIGNER=this.value;renderPolTable()"
+      style="padding:7px 12px;background:var(--surface);border:1px solid var(--border);border-radius:7px;color:var(--text);font-family:Tajawal,sans-serif;font-size:12px">
+      <option value="ALL">كل الموقّعين</option>
+      <option value="sig_quality">مدير الجودة</option>
+      <option value="sig_medical">مدير طبي</option>
+      <option value="sig_branch">مدير الفرع</option>
+      <option value="sig_nursing">رئيسة التمريض</option>
+      <option value="sig_hr">مدير الموارد</option>
+      <option value="sig_safety">مهندس السلامة</option>
+      <option value="sig_ceo">الرئيس التنفيذي</option>
+      <option value="sig_ipc">مسؤول مكافحة العدوى</option>
+      <option value="sig_biomed">مهندس طبي حيوي</option>
+    </select>
     <input type="text" placeholder="🔍 بحث..." oninput="POL_SEARCH=this.value;renderPolTable()"
       style="padding:7px 12px;background:var(--surface);border:1px solid var(--border);border-radius:7px;color:var(--text);font-family:Tajawal,sans-serif;font-size:12px;flex:1;min-width:150px">
-    <button class="btn btn-ghost" onclick="POL_FILTER_SEC='ALL';POL_FILTER_STATUS='ALL';POL_SEARCH='';renderPolTable()">مسح</button>
+    <button class="btn btn-ghost" onclick="POL_FILTER_SEC='ALL';POL_FILTER_STATUS='ALL';POL_FILTER_SIGNER='ALL';document.getElementById('pol2-signer-select').value='ALL';POL_SEARCH='';renderPolTable()">مسح</button>
   </div>
 
   <div class="info-bar">💡 اضغط على الحالة لتغييرها · اضغط ⬜ لتسجيل التوقيع · عدّل النسبة مباشرة · كل تعديل يُحفظ في Google Sheets فوراً</div>
@@ -1995,6 +2008,7 @@ let POLICIES = [];
 let POL_STATS = null;
 let POL_FILTER_SEC = 'ALL';
 let POL_FILTER_STATUS = 'ALL';
+let POL_FILTER_SIGNER = 'ALL';
 let POL_SEARCH = '';
 const SECTIONS_META = {
   IPC:  { label:'IPC – مكافحة العدوى',    color:'#0D9488', light:'#CCFBF1', count:28 },
@@ -3184,6 +3198,15 @@ function renderPolTable() {
   let filtered = [...POLICIES];
   if (POL_FILTER_SEC !== 'ALL')    filtered = filtered.filter(p => p.section === POL_FILTER_SEC);
   if (POL_FILTER_STATUS !== 'ALL') filtered = filtered.filter(p => p.contentReady === POL_FILTER_STATUS);
+  if (POL_FILTER_SIGNER !== 'ALL') {
+    filtered = filtered.filter(p => {
+      const reqRaw = (p.required_sigs || '').trim();
+      const reqList = reqRaw ? reqRaw.split(',').map(x => x.trim()) : SIG_FIELDS.map(s => s.key);
+      const isRequired = reqList.indexOf(POL_FILTER_SIGNER) > -1;
+      const alreadySigned = p[POL_FILTER_SIGNER] === '✅';
+      return isRequired && !alreadySigned; // بس السياسات الباقية (مطلوب توقيعه ولسا ما وقّع)
+    });
+  }
   if (POL_SEARCH) {
     const q = POL_SEARCH.toLowerCase();
     filtered = filtered.filter(p =>

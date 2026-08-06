@@ -127,7 +127,7 @@ body{background:var(--bg);color:var(--text);font-family:'Tajawal',sans-serif;min
 table{width:100%;border-collapse:separate;border-spacing:0;font-size:12px}
 th{padding:9px 14px;text-align:right;font-size:10px;color:var(--text3);font-weight:700;
   letter-spacing:.5px;background:var(--surface);border-bottom:1px solid var(--border);
-  position:sticky;top:60px;z-index:20}
+  position:sticky;top:var(--topbar-h,60px);z-index:20}
 td{padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.04);color:var(--text2);vertical-align:middle}
 tr:last-child td{border-bottom:none}
 tr:hover td{background:rgba(0,194,255,.03)}
@@ -1007,7 +1007,10 @@ tr:hover td{background:rgba(0,194,255,.03)}
   <div class="tcard">
     <div class="tcard-hdr">
       <div class="tcard-title">📋 سجل التقارير <span class="badge badge-blue" id="pf-count">0</span></div>
-      <button onclick="pfClearAll()" style="padding:5px 12px;background:rgba(255,71,87,.08);border:1px solid rgba(255,71,87,.2);color:var(--red);border-radius:6px;font-family:Tajawal,sans-serif;font-size:11px;cursor:pointer">🗑️ مسح الكل</button>
+      <div style="display:flex;gap:8px">
+        <button onclick="exportPatientFilesComparisonReport()" style="padding:5px 14px;background:rgba(0,102,204,.08);border:1px solid rgba(0,102,204,.25);color:var(--accent);border-radius:6px;font-family:Tajawal,sans-serif;font-size:11px;font-weight:700;cursor:pointer">🖨️ تصدير تقرير مقارنة التقدم</button>
+        <button onclick="pfClearAll()" style="padding:5px 12px;background:rgba(255,71,87,.08);border:1px solid rgba(255,71,87,.2);color:var(--red);border-radius:6px;font-family:Tajawal,sans-serif;font-size:11px;cursor:pointer">🗑️ مسح الكل</button>
+      </div>
     </div>
     <div class="tscroll">
       <table>
@@ -1855,6 +1858,7 @@ function switchTab(id) {
   if (id === 'users' && GAS_URL) {
     setTimeout(function(){ loadUsers(); }, 300);
   }
+  setTimeout(updateTopbarHeightVar, 50);
 }
 
 // ═══ Sidebar toggle (موبايل) ═══
@@ -1866,6 +1870,21 @@ function toggleSidebar(force) {
   sb.classList.toggle('open', open);
   ov.style.display = open ? 'block' : 'none';
 }
+
+// ═══ ضبط ارتفاع الشريط العلوي تلقائياً — حتى تلتصق رؤوس الجداول بالمكان الصحيح دايماً ═══
+function updateTopbarHeightVar() {
+  const bar = document.querySelector('.app-topbar');
+  if (!bar) return;
+  const h = Math.ceil(bar.getBoundingClientRect().height);
+  if (h > 0) document.documentElement.style.setProperty('--topbar-h', h + 'px');
+}
+window.addEventListener('load', updateTopbarHeightVar);
+window.addEventListener('resize', function() {
+  clearTimeout(window._topbarResizeTimer);
+  window._topbarResizeTimer = setTimeout(updateTopbarHeightVar, 150);
+});
+setTimeout(updateTopbarHeightVar, 300);
+setTimeout(updateTopbarHeightVar, 1200); // إعادة قياس بعد اكتمال الخطوط/التحميل الكامل
 
 // Close modals on overlay click
 document.addEventListener('DOMContentLoaded', function() {
@@ -3897,6 +3916,99 @@ function pfClearAll() {
   pfSet([]);
   pfRender();
   toast('🗑️ تم مسح السجل','info');
+}
+
+// ─── تصدير تقرير مقارنة تقدّم ملفات المرضى عبر كل التقارير المرفوعة ──
+function exportPatientFilesComparisonReport() {
+  var records = pfGet().slice().sort(function(a,b){ return (a.date||'').localeCompare(b.date||''); });
+  if (!records.length) { toast('⚠️ لا توجد تقارير لتصديرها بعد', 'error'); return; }
+
+  var dateStr = new Date().toLocaleDateString('ar-SA', { year:'numeric', month:'long', day:'numeric' });
+  var first = records[0], last = records[records.length-1];
+  var overallChange = (last.pct||0) - (first.pct||0);
+  var changeColor = overallChange > 0 ? '#1a8f5c' : overallChange < 0 ? '#c0392b' : '#6b7280';
+  var changeArrow = overallChange > 0 ? '▲' : overallChange < 0 ? '▼' : '—';
+
+  // ─── رسم بياني بسيط (SVG) يوضح اتجاه نسبة الاكتمال عبر الزمن ───
+  var chartW = 780, chartH = 180, padL = 40, padR = 20, padT = 20, padB = 30;
+  var plotW = chartW - padL - padR, plotH = chartH - padT - padB;
+  var n = records.length;
+  var points = records.map(function(r, i) {
+    var x = padL + (n === 1 ? plotW/2 : (i/(n-1)) * plotW);
+    var y = padT + plotH - ((r.pct||0)/100) * plotH;
+    return { x: x, y: y, pct: r.pct||0, date: formatDateSafe ? formatDateSafe(r.date) : (r.date||'') };
+  });
+  var polylinePoints = points.map(function(p){ return p.x + ',' + p.y; }).join(' ');
+  var dotsSvg = points.map(function(p){
+    return '<circle cx="'+p.x+'" cy="'+p.y+'" r="4" fill="#0066cc"></circle>' +
+           '<text x="'+p.x+'" y="'+(p.y-10)+'" font-size="11" text-anchor="middle" fill="#001e40" font-weight="bold">'+p.pct+'%</text>';
+  }).join('');
+  var gridLines = [0,25,50,75,100].map(function(v){
+    var y = padT + plotH - (v/100)*plotH;
+    return '<line x1="'+padL+'" y1="'+y+'" x2="'+(chartW-padR)+'" y2="'+y+'" stroke="#e5e7eb" stroke-width="1"></line>' +
+           '<text x="'+(padL-8)+'" y="'+(y+4)+'" font-size="10" text-anchor="end" fill="#9ca3af">'+v+'%</text>';
+  }).join('');
+  var chartSvg = '<svg viewBox="0 0 '+chartW+' '+chartH+'" style="width:100%;height:auto">' +
+    gridLines +
+    '<polyline points="'+polylinePoints+'" fill="none" stroke="#0066cc" stroke-width="2.5"></polyline>' +
+    dotsSvg +
+  '</svg>';
+
+  // ─── جدول تفصيلي مع التغيّر عن التقرير السابق ───
+  var rowsHtml = records.map(function(r, i) {
+    var prev = i > 0 ? records[i-1] : null;
+    var change = prev ? (r.pct||0) - (prev.pct||0) : null;
+    var changeHtml = change === null
+      ? '<span style="color:#9ca3af">—</span>'
+      : '<span style="color:'+(change>0?'#1a8f5c':change<0?'#c0392b':'#6b7280')+';font-weight:700">'+(change>0?'+':'')+change+'%</span>';
+    return '<tr style="border-bottom:1px solid #e5e7eb">' +
+      '<td style="padding:8px 10px;text-align:center;color:#6b7280;font-size:12px">'+(i+1)+'</td>' +
+      '<td style="padding:8px 10px;font-size:12px;font-weight:700">'+(formatDateSafe ? formatDateSafe(r.date) : (r.date||''))+'</td>' +
+      '<td style="padding:8px 10px;text-align:center;font-size:11px;color:#6b7280">'+(r.dateFrom||'—')+' → '+(r.dateTo||'—')+'</td>' +
+      '<td style="padding:8px 10px;text-align:center;font-size:12px">'+(r.total||0)+'</td>' +
+      '<td style="padding:8px 10px;text-align:center;font-size:12px;color:#1a8f5c;font-weight:700">'+(r.complete||0)+'</td>' +
+      '<td style="padding:8px 10px;text-align:center;font-size:12px;color:#c0392b;font-weight:700">'+(r.incomplete||0)+'</td>' +
+      '<td style="padding:8px 10px;text-align:center;font-size:13px;font-weight:800">'+(r.pct||0)+'%</td>' +
+      '<td style="padding:8px 10px;text-align:center;font-size:12px">'+changeHtml+'</td>' +
+    '</tr>';
+  }).join('');
+
+  var html = '<div dir="rtl" style="font-family:Tajawal,Arial,sans-serif;color:#111;padding:32px;max-width:900px;margin:0 auto">' +
+    '<div style="text-align:center;border-bottom:3px solid #0066cc;padding-bottom:18px;margin-bottom:24px">' +
+      '<div style="font-size:24px;font-weight:900;color:#0066cc">تقرير مقارنة تقدّم ملفات المرضى</div>' +
+      '<div style="font-size:14px;color:#374151;margin-top:6px">Tracking System</div>' +
+      '<div style="font-size:12px;color:#6b7280;margin-top:4px">تاريخ الطباعة: ' + dateStr + ' — عدد التقارير المقارَنة: ' + records.length + '</div>' +
+    '</div>' +
+    '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:24px">' +
+      _card('أول تقرير', (first.pct||0) + '%', formatDateSafe ? formatDateSafe(first.date) : (first.date||''), '#6b7280') +
+      _card('آخر تقرير', (last.pct||0) + '%', formatDateSafe ? formatDateSafe(last.date) : (last.date||''), '#0066cc') +
+      _card('التغيّر الإجمالي', changeArrow + ' ' + Math.abs(overallChange) + '%', '', changeColor) +
+      _card('عدد التقارير', records.length, '', '#7c3aed') +
+    '</div>' +
+    _section('اتجاه نسبة الاكتمال عبر الزمن') +
+    '<div style="border:1px solid #e5e7eb;border-radius:10px;padding:16px;margin-bottom:24px">' + chartSvg + '</div>' +
+    _section('التفاصيل الكاملة لكل تقرير') +
+    '<table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:20px">' +
+      '<thead><tr style="background:#0066cc;color:#fff">' +
+        '<th style="padding:10px;text-align:center">#</th>' +
+        '<th style="padding:10px;text-align:right">تاريخ التحليل</th>' +
+        '<th style="padding:10px;text-align:center">الفترة</th>' +
+        '<th style="padding:10px;text-align:center">الإجمالي</th>' +
+        '<th style="padding:10px;text-align:center">المكتمل</th>' +
+        '<th style="padding:10px;text-align:center">الناقص</th>' +
+        '<th style="padding:10px;text-align:center">النسبة</th>' +
+        '<th style="padding:10px;text-align:center">التغيّر</th>' +
+      '</tr></thead>' +
+      '<tbody>' + rowsHtml + '</tbody>' +
+    '</table>' +
+    '<div style="text-align:center;border-top:2px solid #e5e7eb;padding-top:16px;margin-top:24px;color:#6b7280;font-size:11px">' +
+      'تم إنشاء هذا التقرير تلقائياً من نظام إدارة الجودة — Tracking System · ' + dateStr +
+    '</div>' +
+  '</div>';
+
+  var area = document.getElementById('report-print-area');
+  if (area) area.innerHTML = html;
+  window.print();
 }
 
 // عرض الجدول والكروت

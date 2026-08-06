@@ -3925,50 +3925,57 @@ function exportPatientFilesComparisonReport() {
 
   var dateStr = new Date().toLocaleDateString('ar-SA', { year:'numeric', month:'long', day:'numeric' });
   var first = records[0], last = records[records.length-1];
-  var overallChange = (last.pct||0) - (first.pct||0);
-  var changeColor = overallChange > 0 ? '#1a8f5c' : overallChange < 0 ? '#c0392b' : '#6b7280';
-  var changeArrow = overallChange > 0 ? '▲' : overallChange < 0 ? '▼' : '—';
+  var incompleteReduction = (first.incomplete||0) - (last.incomplete||0); // موجب = تحسّن (نقص بالناقص)
+  var reductionColor = incompleteReduction > 0 ? '#1a8f5c' : incompleteReduction < 0 ? '#c0392b' : '#6b7280';
+  var reductionArrow = incompleteReduction > 0 ? '▼' : incompleteReduction < 0 ? '▲' : '—';
+  var reductionPctOfFirst = first.incomplete ? Math.round((Math.abs(incompleteReduction)/first.incomplete)*100) : 0;
 
-  // ─── رسم بياني بسيط (SVG) يوضح اتجاه نسبة الاكتمال عبر الزمن ───
-  var chartW = 780, chartH = 180, padL = 40, padR = 20, padT = 20, padB = 30;
+  // ─── رسم بياني (SVG) يوضح اتجاه عدد الملفات الناقصة عبر الزمن — المؤشر الحقيقي للتقدم ───
+  // (وليس النسبة %، لأن الإجمالي نفسه يتغيّر حسب دفعات الملفات المستلمة، فيشوّه نسبة الاكتمال)
+  var chartW = 780, chartH = 200, padL = 50, padR = 20, padT = 20, padB = 30;
   var plotW = chartW - padL - padR, plotH = chartH - padT - padB;
   var n = records.length;
+  var maxIncomplete = Math.max.apply(null, records.map(function(r){ return r.incomplete||0; }).concat([1]));
+  var niceMax = Math.ceil(maxIncomplete / 100) * 100 || 100;
   var points = records.map(function(r, i) {
     var x = padL + (n === 1 ? plotW/2 : (i/(n-1)) * plotW);
-    var y = padT + plotH - ((r.pct||0)/100) * plotH;
-    return { x: x, y: y, pct: r.pct||0, date: formatDateSafe ? formatDateSafe(r.date) : (r.date||'') };
+    var y = padT + plotH - ((r.incomplete||0)/niceMax) * plotH;
+    return { x: x, y: y, val: r.incomplete||0 };
   });
   var polylinePoints = points.map(function(p){ return p.x + ',' + p.y; }).join(' ');
   var dotsSvg = points.map(function(p){
-    return '<circle cx="'+p.x+'" cy="'+p.y+'" r="4" fill="#0066cc"></circle>' +
-           '<text x="'+p.x+'" y="'+(p.y-10)+'" font-size="11" text-anchor="middle" fill="#001e40" font-weight="bold">'+p.pct+'%</text>';
+    return '<circle cx="'+p.x+'" cy="'+p.y+'" r="4" fill="#c0392b"></circle>' +
+           '<text x="'+p.x+'" y="'+(p.y-10)+'" font-size="11" text-anchor="middle" fill="#001e40" font-weight="bold">'+p.val+'</text>';
   }).join('');
-  var gridLines = [0,25,50,75,100].map(function(v){
-    var y = padT + plotH - (v/100)*plotH;
-    return '<line x1="'+padL+'" y1="'+y+'" x2="'+(chartW-padR)+'" y2="'+y+'" stroke="#e5e7eb" stroke-width="1"></line>' +
-           '<text x="'+(padL-8)+'" y="'+(y+4)+'" font-size="10" text-anchor="end" fill="#9ca3af">'+v+'%</text>';
-  }).join('');
+  var steps = 4;
+  var gridLines = [];
+  for (var gi = 0; gi <= steps; gi++) {
+    var v = Math.round(niceMax * gi / steps);
+    var y = padT + plotH - (v/niceMax)*plotH;
+    gridLines.push('<line x1="'+padL+'" y1="'+y+'" x2="'+(chartW-padR)+'" y2="'+y+'" stroke="#e5e7eb" stroke-width="1"></line>' +
+           '<text x="'+(padL-8)+'" y="'+(y+4)+'" font-size="10" text-anchor="end" fill="#9ca3af">'+v+'</text>');
+  }
   var chartSvg = '<svg viewBox="0 0 '+chartW+' '+chartH+'" style="width:100%;height:auto">' +
-    gridLines +
-    '<polyline points="'+polylinePoints+'" fill="none" stroke="#0066cc" stroke-width="2.5"></polyline>' +
+    gridLines.join('') +
+    '<polyline points="'+polylinePoints+'" fill="none" stroke="#c0392b" stroke-width="2.5"></polyline>' +
     dotsSvg +
   '</svg>';
 
-  // ─── جدول تفصيلي مع التغيّر عن التقرير السابق ───
+  // ─── جدول تفصيلي مع التغيّر بعدد الملفات الناقصة عن التقرير السابق ───
   var rowsHtml = records.map(function(r, i) {
     var prev = i > 0 ? records[i-1] : null;
-    var change = prev ? (r.pct||0) - (prev.pct||0) : null;
+    var change = prev ? (r.incomplete||0) - (prev.incomplete||0) : null; // سالب = تحسّن
     var changeHtml = change === null
       ? '<span style="color:#9ca3af">—</span>'
-      : '<span style="color:'+(change>0?'#1a8f5c':change<0?'#c0392b':'#6b7280')+';font-weight:700">'+(change>0?'+':'')+change+'%</span>';
+      : '<span style="color:'+(change<0?'#1a8f5c':change>0?'#c0392b':'#6b7280')+';font-weight:700">'+(change>0?'+':'')+change+'</span>';
     return '<tr style="border-bottom:1px solid #e5e7eb">' +
       '<td style="padding:8px 10px;text-align:center;color:#6b7280;font-size:12px">'+(i+1)+'</td>' +
       '<td style="padding:8px 10px;font-size:12px;font-weight:700">'+(formatDateSafe ? formatDateSafe(r.date) : (r.date||''))+'</td>' +
       '<td style="padding:8px 10px;text-align:center;font-size:11px;color:#6b7280">'+(r.dateFrom||'—')+' → '+(r.dateTo||'—')+'</td>' +
       '<td style="padding:8px 10px;text-align:center;font-size:12px">'+(r.total||0)+'</td>' +
       '<td style="padding:8px 10px;text-align:center;font-size:12px;color:#1a8f5c;font-weight:700">'+(r.complete||0)+'</td>' +
-      '<td style="padding:8px 10px;text-align:center;font-size:12px;color:#c0392b;font-weight:700">'+(r.incomplete||0)+'</td>' +
-      '<td style="padding:8px 10px;text-align:center;font-size:13px;font-weight:800">'+(r.pct||0)+'%</td>' +
+      '<td style="padding:8px 10px;text-align:center;font-size:13px;color:#c0392b;font-weight:900">'+(r.incomplete||0)+'</td>' +
+      '<td style="padding:8px 10px;text-align:center;font-size:12px">'+(r.pct||0)+'%</td>' +
       '<td style="padding:8px 10px;text-align:center;font-size:12px">'+changeHtml+'</td>' +
     '</tr>';
   }).join('');
@@ -3979,13 +3986,18 @@ function exportPatientFilesComparisonReport() {
       '<div style="font-size:14px;color:#374151;margin-top:6px">Tracking System</div>' +
       '<div style="font-size:12px;color:#6b7280;margin-top:4px">تاريخ الطباعة: ' + dateStr + ' — عدد التقارير المقارَنة: ' + records.length + '</div>' +
     '</div>' +
+    '<div style="background:'+(incompleteReduction>0?'#f0faf5':'#fef2f2')+';border:1px solid '+(incompleteReduction>0?'#a7e8c5':'#fecaca')+';border-radius:12px;padding:20px;margin-bottom:24px;text-align:center">' +
+      '<div style="font-size:13px;color:#374151;margin-bottom:8px">التقدّم الفعلي — عدد الملفات الناقصة</div>' +
+      '<div style="font-size:32px;font-weight:900;color:'+reductionColor+'">' + (first.incomplete||0) + ' ← ' + (last.incomplete||0) + '</div>' +
+      '<div style="font-size:14px;color:'+reductionColor+';font-weight:700;margin-top:6px">' + reductionArrow + ' ' + Math.abs(incompleteReduction) + ' ملف (' + reductionPctOfFirst + '%) ' + (incompleteReduction>0?'تمت معالجتها':'زيادة بالنواقص') + '</div>' +
+    '</div>' +
     '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:24px">' +
-      _card('أول تقرير', (first.pct||0) + '%', formatDateSafe ? formatDateSafe(first.date) : (first.date||''), '#6b7280') +
-      _card('آخر تقرير', (last.pct||0) + '%', formatDateSafe ? formatDateSafe(last.date) : (last.date||''), '#0066cc') +
-      _card('التغيّر الإجمالي', changeArrow + ' ' + Math.abs(overallChange) + '%', '', changeColor) +
+      _card('أول تقرير', (first.incomplete||0) + ' ناقص', formatDateSafe ? formatDateSafe(first.date) : (first.date||''), '#6b7280') +
+      _card('آخر تقرير', (last.incomplete||0) + ' ناقص', formatDateSafe ? formatDateSafe(last.date) : (last.date||''), '#c0392b') +
+      _card('نسبة الاكتمال الحالية', (last.pct||0) + '%', 'من ' + (last.total||0) + ' ملف', '#0066cc') +
       _card('عدد التقارير', records.length, '', '#7c3aed') +
     '</div>' +
-    _section('اتجاه نسبة الاكتمال عبر الزمن') +
+    _section('اتجاه عدد الملفات الناقصة عبر الزمن (كلما قلّ = تقدّم أفضل)') +
     '<div style="border:1px solid #e5e7eb;border-radius:10px;padding:16px;margin-bottom:24px">' + chartSvg + '</div>' +
     _section('التفاصيل الكاملة لكل تقرير') +
     '<table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:20px">' +
@@ -3997,10 +4009,13 @@ function exportPatientFilesComparisonReport() {
         '<th style="padding:10px;text-align:center">المكتمل</th>' +
         '<th style="padding:10px;text-align:center">الناقص</th>' +
         '<th style="padding:10px;text-align:center">النسبة</th>' +
-        '<th style="padding:10px;text-align:center">التغيّر</th>' +
+        '<th style="padding:10px;text-align:center">تغيّر الناقص</th>' +
       '</tr></thead>' +
       '<tbody>' + rowsHtml + '</tbody>' +
     '</table>' +
+    '<div style="background:#f9fafb;border-radius:8px;padding:12px 16px;margin-bottom:20px;font-size:11px;color:#6b7280">' +
+      'ملاحظة: "الإجمالي" قد يتغيّر بين التقارير حسب دفعات الملفات المستلمة للتحليل، لذلك المؤشر الأدق للتقدّم هو انخفاض عدد الملفات الناقصة أعلاه، وليس فرق النسبة المئوية وحدها.' +
+    '</div>' +
     '<div style="text-align:center;border-top:2px solid #e5e7eb;padding-top:16px;margin-top:24px;color:#6b7280;font-size:11px">' +
       'تم إنشاء هذا التقرير تلقائياً من نظام إدارة الجودة — Tracking System · ' + dateStr +
     '</div>' +

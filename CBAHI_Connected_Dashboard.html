@@ -126,8 +126,8 @@ body{background:var(--bg);color:var(--text);font-family:'Tajawal',sans-serif;min
 .tscroll{overflow-x:auto;overflow-y:visible}
 table{width:100%;border-collapse:separate;border-spacing:0;font-size:12px}
 th{padding:9px 14px;text-align:right;font-size:10px;color:var(--text3);font-weight:700;
-  letter-spacing:.5px;background:var(--surface);border-bottom:1px solid var(--border);
-  position:sticky;top:var(--topbar-h,60px);z-index:20}
+  letter-spacing:.5px;background:var(--surface);border-bottom:1px solid var(--border)}
+.sticky-th{position:sticky;top:var(--topbar-h,60px);z-index:20}
 td{padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.04);color:var(--text2);vertical-align:middle}
 tr:last-child td{border-bottom:none}
 tr:hover td{background:rgba(0,194,255,.03)}
@@ -442,11 +442,11 @@ tr:hover td{background:rgba(0,194,255,.03)}
       <table style="width:100%;font-size:12px">
         <thead style="background:#f7f8fc">
           <tr>
-            <th style="padding:10px 16px;text-align:right;color:#6b7280;font-size:10px">البند</th>
-            <th style="padding:10px 16px;text-align:right;color:#6b7280;font-size:10px">النوع</th>
-            <th style="padding:10px 16px;text-align:right;color:#6b7280;font-size:10px">الحالة</th>
-            <th style="padding:10px 16px;text-align:right;color:#6b7280;font-size:10px">المسؤول</th>
-            <th style="padding:10px 16px;text-align:right;color:#6b7280;font-size:10px">الموعد</th>
+            <th style="position:static;padding:10px 16px;text-align:right;color:#6b7280;font-size:10px">البند</th>
+            <th style="position:static;padding:10px 16px;text-align:right;color:#6b7280;font-size:10px">النوع</th>
+            <th style="position:static;padding:10px 16px;text-align:right;color:#6b7280;font-size:10px">الحالة</th>
+            <th style="position:static;padding:10px 16px;text-align:right;color:#6b7280;font-size:10px">المسؤول</th>
+            <th style="position:static;padding:10px 16px;text-align:right;color:#6b7280;font-size:10px">الموعد</th>
           </tr>
         </thead>
         <tbody id="stitch-doc-tbody"></tbody>
@@ -534,7 +534,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
       </div>
       <div class="tscroll">
         <table>
-          <thead><tr><th>المكان</th><th class="num">عدد المرات</th><th>آخر ذكر</th><th></th></tr></thead>
+          <thead><tr><th style="position:static">المكان</th><th class="num" style="position:static">عدد المرات</th><th style="position:static">آخر ذكر</th><th style="position:static"></th></tr></thead>
           <tbody id="audit-places-tbody"><tr><td colspan="4" style="text-align:center;color:var(--text3);padding:20px">لا توجد بيانات بعد</td></tr></tbody>
         </table>
       </div>
@@ -874,23 +874,23 @@ tr:hover td{background:rgba(0,194,255,.03)}
       <table>
         <thead>
           <tr>
-            <th class="num">#</th>
-            <th>الرمز</th>
-            <th>عنوان السياسة</th>
-            <th>القسم</th>
-            <th>✍️ حالة الكتابة</th>
-            <th>التقدم %</th>
-            <th>🖊️ حالة التوقيع</th>
-            <th style="background:#CFEAE7;color:#0D9488;text-align:center">مدير الجودة</th>
-            <th style="background:#CFF1E6;color:#10B981;text-align:center">مدير طبي</th>
-            <th style="background:#E5D8FB;color:#7C3AED;text-align:center">مدير الفرع</th>
-            <th style="background:#FDECCE;color:#F59E0B;text-align:center">رئيسة التمريض</th>
-            <th style="background:#FEE3D0;color:#F97316;text-align:center">مدير الموارد</th>
-            <th style="background:#FCDADA;color:#EF4444;text-align:center">مهندس السلامة</th>
-            <th style="background:#DCE3F0;color:#1E3A5F;text-align:center">الرئيس التنفيذي</th>
-            <th style="background:#DAF3F9;color:#06B6D4;text-align:center">م. مكافحة العدوى</th>
-            <th style="background:#F1E6FE;color:#A855F7;text-align:center">مهندس طبي حيوي</th>
-            <th>ملاحظات</th>
+            <th class="num sticky-th">#</th>
+            <th class="sticky-th">الرمز</th>
+            <th class="sticky-th">عنوان السياسة</th>
+            <th class="sticky-th">القسم</th>
+            <th class="sticky-th">✍️ حالة الكتابة</th>
+            <th class="sticky-th">التقدم %</th>
+            <th class="sticky-th">🖊️ حالة التوقيع</th>
+            <th class="sticky-th" style="background:#CFEAE7;color:#0D9488;text-align:center">مدير الجودة</th>
+            <th class="sticky-th" style="background:#CFF1E6;color:#10B981;text-align:center">مدير طبي</th>
+            <th class="sticky-th" style="background:#E5D8FB;color:#7C3AED;text-align:center">مدير الفرع</th>
+            <th class="sticky-th" style="background:#FDECCE;color:#F59E0B;text-align:center">رئيسة التمريض</th>
+            <th class="sticky-th" style="background:#FEE3D0;color:#F97316;text-align:center">مدير الموارد</th>
+            <th class="sticky-th" style="background:#FCDADA;color:#EF4444;text-align:center">مهندس السلامة</th>
+            <th class="sticky-th" style="background:#DCE3F0;color:#1E3A5F;text-align:center">الرئيس التنفيذي</th>
+            <th class="sticky-th" style="background:#DAF3F9;color:#06B6D4;text-align:center">م. مكافحة العدوى</th>
+            <th class="sticky-th" style="background:#F1E6FE;color:#A855F7;text-align:center">مهندس طبي حيوي</th>
+            <th class="sticky-th">ملاحظات</th>
           </tr>
         </thead>
         <tbody id="pol2-tbody"></tbody>
@@ -2055,8 +2055,12 @@ const SIG_FIELDS = [
 // Requires: Execute as=Me, Who has access=Anyone
 // ════════════════════════════════════════════════════════════════
 const CFG_KEY = 'cbahi_gas_url';
-let GAS_URL = localStorage.getItem(CFG_KEY) || '';
-var EMP_GAS_URL = localStorage.getItem('cbahi_emp_gas_url') || '';
+// روابط افتراضية مثبّتة بالكود — أي جهاز جديد يشتغل تلقائياً بدون إعداد يدوي
+// (لو تغيّر الرابط مستقبلاً، عدّله هنا مباشرة، أو من إعدادات الاتصال باللوحة وبيتخزن بالمتصفح ويطغى على هذا الافتراضي)
+const DEFAULT_GAS_URL = 'https://script.google.com/macros/s/AKfycbyixuWIM0rLvFvB2LjSzfJe4hkh4wRKfWUmxzT8TuQAXB-aBPAR6Uza1IKDFJhCPNHX/exec';
+const DEFAULT_EMP_GAS_URL = 'https://script.google.com/macros/s/AKfycbzOcf_SaSZ4na9lYjIajTLkT3-apapMxoPruXRG6UCFTIm5UujF_JEYh9mCOL-Mg7pQ2Q/exec';
+let GAS_URL = localStorage.getItem(CFG_KEY) || DEFAULT_GAS_URL;
+var EMP_GAS_URL = localStorage.getItem('cbahi_emp_gas_url') || DEFAULT_EMP_GAS_URL;
 
 async function callGAS(params) {
   if (!GAS_URL) {
@@ -2191,6 +2195,9 @@ async function syncAll() {
     // مزامنة إضافية: الرخص + ملفات الموظفين (تضمن تطابق النسب بين جميع المستخدمين)
     licFetchFromSheets();
     if (typeof fetchEmployeeFiles === 'function') fetchEmployeeFiles(true);
+    // تحديث روابط المجلدات المتزامنة مركزياً (المستندات + الرخص)
+    if (typeof renderWfFolder === 'function') renderWfFolder();
+    if (typeof licInitDrive === 'function') licInitDrive();
     toast('✅ تمت المزامنة', 'success');
   } catch(e) {
     setSyncStatus('err');
@@ -4350,13 +4357,16 @@ function exportEmpCSV() {
 // ═══════════════════════════════════════════════════════════════
 const WF_FOLDER_KEY = 'cbahi_wf_folder';
 
-function saveWfFolder() {
+async function saveWfFolder() {
   var url = (document.getElementById('wf-folder-url').value || '').trim();
   if (!url) { toast('⚠️ أدخل الرابط أولاً', 'error'); return; }
   if (!url.startsWith('http')) { toast('⚠️ الرابط غير صحيح', 'error'); return; }
   localStorage.setItem(WF_FOLDER_KEY, url);
   renderWfFolder();
   toast('✅ تم حفظ رابط المجلد', 'success');
+  // مزامنة مركزية — حتى يظهر الرابط تلقائياً لأي جهاز آخر بدون إعداد يدوي
+  try { await gasMutate('saveDashboardSetting', '', '', { key: 'wf_folder_url', value: url }); }
+  catch(e) { console.warn('wf folder sync error:', e); }
 }
 
 function openWfFolder() {
@@ -4366,7 +4376,10 @@ function openWfFolder() {
 }
 
 function renderWfFolder() {
-  var url = localStorage.getItem(WF_FOLDER_KEY) || '';
+  // نفضّل القيمة المتزامنة من الشيت (DB.dashboard) إن وُجدت، وإلا نستخدم النسخة المحلية المخزّنة
+  var synced = (DB && DB.dashboard && DB.dashboard.wf_folder_url) ? String(DB.dashboard.wf_folder_url).trim() : '';
+  if (synced) localStorage.setItem(WF_FOLDER_KEY, synced);
+  var url = synced || localStorage.getItem(WF_FOLDER_KEY) || '';
   var input = document.getElementById('wf-folder-url');
   var card  = document.getElementById('wf-folder-card');
   var empty = document.getElementById('wf-empty-state');
@@ -4414,12 +4427,14 @@ async function licFetchFromSheets() {
 }
 
 // ── Drive helpers ─────────────────────────────────────
-function licSaveDrive() {
+async function licSaveDrive() {
   var v = (document.getElementById('lic-drive-input').value||'').trim();
   if (!v || !v.startsWith('http')) { toast('⚠️ أدخل رابطاً صحيحاً','error'); return; }
   localStorage.setItem(LIC_DRIVE, v);
   document.getElementById('lic-drive-btn').href = v;
   toast('✅ تم حفظ الرابط','success');
+  try { await gasMutate('saveDashboardSetting', '', '', { key: 'lic_drive_url', value: v }); }
+  catch(e) { console.warn('license drive sync error:', e); }
 }
 function licOpenDrive(a) {
   var v = localStorage.getItem(LIC_DRIVE)||'';
@@ -4427,7 +4442,9 @@ function licOpenDrive(a) {
   a.href = v; return true;
 }
 function licInitDrive() {
-  var v = localStorage.getItem(LIC_DRIVE)||'';
+  var synced = (DB && DB.dashboard && DB.dashboard.lic_drive_url) ? String(DB.dashboard.lic_drive_url).trim() : '';
+  if (synced) localStorage.setItem(LIC_DRIVE, synced);
+  var v = synced || localStorage.getItem(LIC_DRIVE)||'';
   var inp = document.getElementById('lic-drive-input');
   var btn = document.getElementById('lic-drive-btn');
   if (inp) inp.value = v;

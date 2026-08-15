@@ -86,7 +86,8 @@ body{background:var(--bg);color:var(--text);font-family:'Tajawal',sans-serif;min
   border-color:transparent;box-shadow:0 0 12px rgba(0,194,255,0.3)}
 
 .main{padding:20px 24px;max-width:1440px;margin:0 auto}
-.pane{display:none} .pane.active{display:block}
+.pane{display:none} .pane.active{display:block;animation:paneIn .35s ease}
+@keyframes paneIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 
 /* KPI */
 .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
@@ -121,9 +122,21 @@ body{background:var(--bg);color:var(--text);font-family:'Tajawal',sans-serif;min
 /* COUNTDOWN */
 .cd-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
 .cd-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
-  padding:18px;text-align:center;box-shadow:0 2px 10px rgba(0,30,64,.06)}
+  padding:18px;text-align:center;box-shadow:0 2px 10px rgba(0,30,64,.06);transition:.2s}
+.cd-box:hover{transform:translateY(-2px);box-shadow:var(--glow)}
 .cd-num{font-size:38px;font-weight:900;color:var(--accent);line-height:1;font-family:'Cairo',sans-serif}
 .cd-lbl{font-size:11px;color:var(--text3);margin-top:4px;font-weight:600}
+
+/* PAGE HERO — shared header style so every tab reads as one system */
+.page-hero{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px 28px;
+  margin-bottom:20px;box-shadow:0 2px 10px rgba(0,30,64,.06);display:flex;align-items:center;
+  justify-content:space-between;flex-wrap:wrap;gap:16px;transition:.2s}
+.page-hero:hover{box-shadow:0 6px 18px rgba(0,30,64,.09)}
+.page-hero-txt h2{margin:0 0 6px;font-size:20px;font-weight:900;color:var(--text);display:flex;align-items:center;gap:8px}
+.page-hero-txt p{margin:0;color:var(--text3);font-size:12px;line-height:1.6}
+.page-hero-icon{width:52px;height:52px;border-radius:12px;display:flex;align-items:center;justify-content:center;
+  font-size:24px;flex-shrink:0;color:#fff;box-shadow:0 4px 12px rgba(0,30,64,.15)}
+.page-hero-actions{display:flex;gap:8px;flex-wrap:wrap}
 
 /* SECTION */
 .sec-hdr{display:flex;align-items:center;gap:8px;margin:24px 0 14px}
@@ -273,7 +286,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
 /* ═══ SIDEBAR الجديد (Stitch) ═══ */
 .sb-group-label{font-size:10px;color:#5b6472;font-weight:700;letter-spacing:.5px;margin:14px 10px 4px;text-transform:uppercase}
 .sb-link{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:none;background:transparent;
-  color:#43474f;font-family:'Tajawal',sans-serif;font-size:13px;font-weight:600;cursor:pointer;text-align:right;width:100%;transition:.15s}
+  color:#43474f;font-family:'Tajawal',sans-serif;font-size:13px;font-weight:600;cursor:pointer;text-align:right;width:100%;transition:.2s}
 .sb-link .material-symbols-outlined{font-size:20px}
 .sb-link:hover{background:#f4f5f9;color:#101828}
 .sb-link.active{background:linear-gradient(135deg,#e6f0ff,#d5e8e8);color:#001e40;font-weight:800;box-shadow:inset 3px 0 0 #006a6a}
@@ -291,7 +304,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
   display:flex;flex-direction:column;gap:10px;box-shadow:0 2px 10px rgba(0,30,64,.06);transition:.2s}
 .stitch-kpi-card:hover{box-shadow:0 8px 20px rgba(0,30,64,.1);transform:translateY(-2px)}
 .stitch-doc-filter{padding:6px 16px;border-radius:999px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid rgba(0,30,64,.15);
-  background:transparent;color:#43474f;font-family:'Tajawal',sans-serif;transition:.15s}
+  background:transparent;color:#43474f;font-family:'Tajawal',sans-serif;transition:.2s}
 .stitch-doc-filter.active{background:#001e40;color:#fff;border-color:transparent}
 .stitch-doc-filter:hover:not(.active){background:#f4f5f9}
 
@@ -517,19 +530,18 @@ tr:hover td{background:rgba(0,194,255,.03)}
 
 <!-- ═══ SITE AUDITS (جولات التدقيق) ═══ -->
 <div class="pane" id="pane-site-audits">
-  <div style="background:linear-gradient(135deg,#0d1f3c,#003366);border-radius:14px;padding:22px 28px;margin-bottom:20px;
-    color:white;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
-    <div>
-      <h2 style="margin:0 0 6px;font-size:20px;font-weight:900">🔍 جولات التدقيق الميداني</h2>
-      <p style="margin:0;opacity:.85;font-size:12px" id="audit-header-subtitle">وثّق كل جولة بصور قبل/بعد، ملاحظات، توصية، وتوقيع المفتش ومدير الفرع</p>
+  <div class="page-hero">
+    <div style="display:flex;align-items:center;gap:16px">
+      <div class="page-hero-icon" style="background:linear-gradient(135deg,#0d1f3c,#003366)">🔍</div>
+      <div class="page-hero-txt">
+        <h2>جولات التدقيق الميداني</h2>
+        <p id="audit-header-subtitle">وثّق كل جولة بصور قبل/بعد، ملاحظات، توصية، وتوقيع المفتش ومدير الفرع</p>
+      </div>
     </div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap" data-perm-tab="site-audits">
-      <button onclick="generateAuditEscalationReport()" style="background:rgba(255,124,42,.25);border:1px solid rgba(255,124,42,.5);color:#fff;
-        padding:10px 18px;border-radius:9px;font-family:Tajawal,sans-serif;font-size:13px;font-weight:800;cursor:pointer">🖨️ تقرير تصعيد للإدارة</button>
-      <button onclick="openAuditModal()" data-perm-tab="site-audits" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:#fff;
-        padding:10px 22px;border-radius:9px;font-family:Tajawal,sans-serif;font-size:13px;font-weight:800;cursor:pointer">＋ زيارة جديدة</button>
-      <button onclick="openFollowUpModal()" data-perm-tab="site-audits" style="background:rgba(0,194,255,.25);border:1px solid rgba(0,194,255,.5);color:#fff;
-        padding:10px 22px;border-radius:9px;font-family:Tajawal,sans-serif;font-size:13px;font-weight:800;cursor:pointer">↻ زيارة متابعة</button>
+    <div class="page-hero-actions" data-perm-tab="site-audits">
+      <button class="btn btn-gold" onclick="generateAuditEscalationReport()">🖨️ تقرير تصعيد للإدارة</button>
+      <button class="btn btn-primary" onclick="openAuditModal()" data-perm-tab="site-audits">＋ زيارة جديدة</button>
+      <button class="btn btn-ghost" onclick="openFollowUpModal()" data-perm-tab="site-audits">↻ زيارة متابعة</button>
     </div>
   </div>
 
@@ -590,7 +602,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
         <svg viewBox="0 0 64 64" style="width:100%;height:100%;transform:rotate(-90deg)">
           <circle cx="32" cy="32" r="26" fill="none" stroke="#eceef4" stroke-width="7"></circle>
           <circle id="req-donut" cx="32" cy="32" r="26" fill="none" stroke="#7c3aed" stroke-width="7"
-            stroke-linecap="round" style="stroke-dasharray:163;stroke-dashoffset:163;transition:stroke-dashoffset .8s ease"></circle>
+            stroke-linecap="round" style="stroke-dasharray:163;stroke-dashoffset:163;transition:stroke-dashoffset 1s ease"></circle>
         </svg>
         <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#101828" id="req-donut-text">0%</div>
       </div>
@@ -764,12 +776,15 @@ tr:hover td{background:rgba(0,194,255,.03)}
 <div class="pane" id="pane-workflow">
 
   <!-- Header -->
-  <div style="background:linear-gradient(135deg,#7C3AED,#0080FF);border-radius:12px;padding:24px;margin-bottom:20px;color:white;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
-    <div>
-      <h2 style="margin:0 0 8px;font-size:24px;font-weight:900">📁 المستندات</h2>
-      <p style="margin:0;opacity:.9;font-size:13px">أضف رابط مجلد المستندات أو سجّل مستنداتك يدوياً</p>
+  <div class="page-hero">
+    <div style="display:flex;align-items:center;gap:16px">
+      <div class="page-hero-icon" style="background:linear-gradient(135deg,#7C3AED,#0080FF)">📁</div>
+      <div class="page-hero-txt">
+        <h2>المستندات</h2>
+        <p>أضف رابط مجلد المستندات أو سجّل مستنداتك يدوياً</p>
+      </div>
     </div>
-    <button onclick="newWf()" data-perm-tab="workflow" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:#fff;padding:10px 22px;border-radius:9px;font-family:Tajawal,sans-serif;font-size:13px;font-weight:800;cursor:pointer">＋ إضافة مستند</button>
+    <button class="btn btn-primary" onclick="newWf()" data-perm-tab="workflow">＋ إضافة مستند</button>
   </div>
 
   <!-- Folder Link Input -->
@@ -918,38 +933,26 @@ tr:hover td{background:rgba(0,194,255,.03)}
 <div class="pane" id="pane-patient-files">
 
   <!-- Header -->
-  <div style="background:linear-gradient(135deg,#0047AB,#0080FF,#10D97E);border-radius:14px;padding:22px 28px;margin-bottom:20px;color:white;position:relative;overflow:hidden">
-    <div style="position:absolute;left:-20px;top:-20px;width:120px;height:120px;background:rgba(255,255,255,.05);border-radius:50%"></div>
-    <div style="position:relative;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
-      <div>
-        <h2 style="margin:0 0 4px;font-size:20px;font-weight:900">📂 ملفات المرضى</h2>
-        <p style="margin:0;opacity:.85;font-size:12px">ارفع تقرير التحليل اليومي وتتبّع نسبة اكتمال الملفات</p>
+  <div class="page-hero">
+    <div style="display:flex;align-items:center;gap:16px">
+      <div class="page-hero-icon" style="background:linear-gradient(135deg,#0047AB,#0080FF,#10D97E)">📂</div>
+      <div class="page-hero-txt">
+        <h2>ملفات المرضى</h2>
+        <p>ارفع تقرير التحليل اليومي وتتبّع نسبة اكتمال الملفات</p>
       </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button onclick="openModal('m-patient-file')" data-perm-tab="patient-files" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:#fff;padding:10px 22px;border-radius:9px;font-family:Tajawal,sans-serif;font-size:13px;font-weight:800;cursor:pointer">＋ إضافة تقرير</button>
-        <button onclick="pfFetchFromSheets()" style="background:rgba(16,217,126,.2);border:1px solid rgba(16,217,126,.4);color:#10D97E;padding:10px 18px;border-radius:9px;font-family:Tajawal,sans-serif;font-size:13px;font-weight:800;cursor:pointer">🔄 مزامنة</button>
-      </div>
+    </div>
+    <div class="page-hero-actions">
+      <button class="btn btn-primary" onclick="openModal('m-patient-file')" data-perm-tab="patient-files">＋ إضافة تقرير</button>
+      <button class="btn btn-ghost" onclick="pfFetchFromSheets()">🔄 مزامنة</button>
     </div>
   </div>
 
   <!-- Summary Cards -->
   <div class="kpi-grid" style="gap:12px;margin-bottom:20px">
-    <div style="background:linear-gradient(135deg,#0047AB,#0080FF);border-radius:12px;padding:18px;color:white;text-align:center">
-      <div style="font-size:11px;opacity:.9;margin-bottom:4px">📊 إجمالي الملفات</div>
-      <div style="font-size:34px;font-weight:900;font-family:Cairo,sans-serif" id="pf-total">0</div>
-    </div>
-    <div style="background:linear-gradient(135deg,#10D97E,#0D9488);border-radius:12px;padding:18px;color:white;text-align:center">
-      <div style="font-size:11px;opacity:.9;margin-bottom:4px">✅ المكتملة</div>
-      <div style="font-size:34px;font-weight:900;font-family:Cairo,sans-serif" id="pf-complete">0</div>
-    </div>
-    <div style="background:linear-gradient(135deg,#F97316,#EF4444);border-radius:12px;padding:18px;color:white;text-align:center">
-      <div style="font-size:11px;opacity:.9;margin-bottom:4px">⚠️ الناقصة</div>
-      <div style="font-size:34px;font-weight:900;font-family:Cairo,sans-serif" id="pf-incomplete">0</div>
-    </div>
-    <div style="background:var(--surface);border:1px solid rgba(0,194,255,.2);border-radius:12px;padding:18px;text-align:center">
-      <div style="font-size:11px;color:var(--text3);margin-bottom:4px">📈 نسبة الاكتمال</div>
-      <div style="font-size:34px;font-weight:900;font-family:Cairo,sans-serif;color:var(--accent)" id="pf-pct">0%</div>
-    </div>
+    <div class="kpi blue"><div class="kpi-lbl">📊 إجمالي الملفات</div><div class="kpi-val" id="pf-total">0</div></div>
+    <div class="kpi green"><div class="kpi-lbl">✅ المكتملة</div><div class="kpi-val" id="pf-complete">0</div></div>
+    <div class="kpi red"><div class="kpi-lbl">⚠️ الناقصة</div><div class="kpi-val" id="pf-incomplete">0</div></div>
+    <div class="kpi blue"><div class="kpi-lbl">📈 نسبة الاكتمال</div><div class="kpi-val" id="pf-pct">0%</div></div>
   </div>
 
   <!-- Upload Box -->
@@ -1172,14 +1175,6 @@ tr:hover td{background:rgba(0,194,255,.03)}
 
 </div><!-- /.main -->
 
-<!-- Footer ثابت — يظهر أسفل كل صفحة -->
-<div id="app-footer-credit" style="padding:18px 24px;text-align:center;border-top:1px solid rgba(0,30,64,.08);background:var(--surface);margin-top:auto">
-  <div style="font-size:11px;color:#5b6472;line-height:1.8">
-    Built and Developed by <strong style="color:#43474f">Mr. Ibrahim Alluhaydi</strong><br>
-    تم بناء وتطوير النظام بواسطة مسؤول الجودة <strong style="color:#43474f">إبراهيم اللهيدي</strong>
-  </div>
-</div>
-
 <!-- Extras Modal — رخص / عقود / مستندات / موظفين -->
 <div class="overlay" id="m-extras">
   <div class="modal" style="max-width:600px">
@@ -1211,20 +1206,18 @@ tr:hover td{background:rgba(0,194,255,.03)}
 
 
 <!-- ═══ LICENSES & CONTRACTS ═══ -->
-<div class="pane" id="pane-licenses">
+<div class="pane" id="pane-licenses" style="padding:20px 24px;max-width:1440px;margin:0 auto">
 
   <!-- Header -->
-  <div style="background:linear-gradient(135deg,#7C2D12,#DC2626,#EA580C);border-radius:14px;padding:22px 28px;margin-bottom:18px;color:white;position:relative;overflow:hidden">
-    <div style="position:absolute;right:-30px;top:-30px;width:130px;height:130px;background:rgba(255,255,255,.05);border-radius:50%"></div>
-    <div style="position:relative;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
-      <div>
-        <h2 style="margin:0 0 5px;font-size:20px;font-weight:900">📋 الرخص والعقود والاتفاقيات</h2>
-        <p style="margin:0;opacity:.85;font-size:12px">سجّل كل بند مع تاريخ سريانه — تؤثر على لوحة الإنجاز الكلي (وزن 5%)</p>
+  <div class="page-hero" style="margin-bottom:18px">
+    <div style="display:flex;align-items:center;gap:16px">
+      <div class="page-hero-icon" style="background:linear-gradient(135deg,#7C2D12,#DC2626,#EA580C)">📋</div>
+      <div class="page-hero-txt">
+        <h2>الرخص والعقود والاتفاقيات</h2>
+        <p>سجّل كل بند مع تاريخ سريانه — تؤثر على لوحة الإنجاز الكلي (وزن 5%)</p>
       </div>
-      <button onclick="licOpenModal()" data-perm-tab="licenses" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:#fff;padding:10px 22px;border-radius:9px;font-family:Tajawal,sans-serif;font-size:13px;font-weight:800;cursor:pointer">
-        ＋ إضافة بند
-      </button>
     </div>
+    <button class="btn btn-primary" onclick="licOpenModal()" data-perm-tab="licenses">＋ إضافة بند</button>
   </div>
 
   <!-- Drive link -->
@@ -1338,9 +1331,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
 <!-- ── LICENSE MODAL ── -->
 <div class="overlay" id="m-lic2">
   <div class="modal" style="max-width:520px">
-    <div style="background:linear-gradient(135deg,#7C2D12,#DC2626,#EA580C);padding:18px 22px;margin:-26px -26px 18px;border-radius:14px 14px 0 0">
-      <h3 style="margin:0;color:#fff;font-size:15px" id="lic2-modal-ttl">📋 إضافة بند جديد</h3>
-    </div>
+    <h3 id="lic2-modal-ttl">📋 إضافة بند جديد</h3>
     <input type="hidden" id="lic2-edit-id">
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
       <div class="fg"><label>النوع *</label>
@@ -1380,7 +1371,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
 </div><!-- /overlay#m-lic2 -->
 
 <!-- ═══ USERS & PERMISSIONS ═══ -->
-<div class="pane" id="pane-users">
+<div class="pane" id="pane-users" style="padding:20px 24px;max-width:1440px;margin:0 auto">
   <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:14px;margin-bottom:20px">
     <div>
       <h2 style="font-size:22px;font-weight:800;color:#101828;margin-bottom:4px">إدارة المستخدمين والصلاحيات</h2>
@@ -1459,9 +1450,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
 <div class="overlay" id="m-audit">
   <div class="modal" style="max-width:640px">
     <datalist id="audit-known-places"></datalist>
-    <div style="background:linear-gradient(135deg,#0d1f3c,#003366);padding:18px 22px;margin:-26px -26px 18px;border-radius:14px 14px 0 0">
-      <h3 style="margin:0;color:#fff;font-size:15px">🔍 إضافة جولة تدقيق</h3>
-    </div>
+    <h3>🔍 إضافة جولة تدقيق</h3>
     <input type="hidden" id="audit-eid">
 
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
@@ -1512,10 +1501,8 @@ tr:hover td{background:rgba(0,194,255,.03)}
 <!-- Follow-up Visit Modal -->
 <div class="overlay" id="m-followup">
   <div class="modal" style="max-width:680px">
-    <div style="background:linear-gradient(135deg,#003366,#0066cc);padding:18px 22px;margin:-26px -26px 18px;border-radius:14px 14px 0 0">
-      <h3 style="margin:0;color:#fff;font-size:15px">↻ إضافة زيارة متابعة</h3>
-      <p style="margin:6px 0 0;color:rgba(255,255,255,.8);font-size:11px">لقياس التغيير مقارنةً بزيارة سابقة</p>
-    </div>
+    <h3 style="margin-bottom:4px">↻ إضافة زيارة متابعة</h3>
+    <p style="margin:0 0 18px;color:var(--text3);font-size:11px">لقياس التغيير مقارنةً بزيارة سابقة</p>
     <input type="hidden" id="followup-eid">
 
     <div class="fg">
@@ -1577,9 +1564,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
 <!-- Branch Manager: عرض التقرير + توقيع فقط -->
 <div class="overlay" id="m-manager-sign">
   <div class="modal" style="max-width:600px">
-    <div style="background:linear-gradient(135deg,#0d1f3c,#003366);padding:18px 22px;margin:-26px -26px 18px;border-radius:14px 14px 0 0">
-      <h3 style="margin:0;color:#fff;font-size:15px">📋 تقرير الزيارة</h3>
-    </div>
+    <h3>📋 تقرير الزيارة</h3>
     <input type="hidden" id="mgr-sign-audit-id">
     <div id="mgr-sign-report-body" style="margin-bottom:16px"></div>
     <div id="mgr-sign-pad-section">
@@ -1862,6 +1847,7 @@ function switchTab(id) {
   if (sbBtn) sbBtn.classList.add('active');
   const pane = document.getElementById('pane-'+id);
   if (pane) pane.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'instant' });
   // إغلاق القائمة الجانبية تلقائياً على الجوال بعد الاختيار
   toggleSidebar(false);
   // جلب تلقائي عند فتح ملفات المرضى
@@ -6235,10 +6221,8 @@ async function deleteUserAccount(id) {
 <!-- Patient File Report Modal -->
 <div class="overlay" id="m-patient-file">
   <div class="modal" style="max-width:560px">
-    <div style="background:linear-gradient(135deg,#0080FF,#10D97E);padding:20px;margin:-20px -20px 20px;border-radius:12px 12px 0 0">
-      <h3 style="margin:0;color:white;font-size:18px">📊 رفع تقرير ملفات المرضى</h3>
-      <p style="margin:6px 0 0;color:rgba(255,255,255,.8);font-size:12px">سجّل إحصائيات الفترة وارفع التقرير المفصل</p>
-    </div>
+    <h3 style="margin-bottom:4px">📊 رفع تقرير ملفات المرضى</h3>
+    <p style="margin:0 0 18px;color:var(--text3);font-size:12px">سجّل إحصائيات الفترة وارفع التقرير المفصل</p>
 
     <input type="hidden" id="pf-edit-id">
     
@@ -6273,6 +6257,14 @@ async function deleteUserAccount(id) {
       <button class="btn btn-danger" onclick="closeModal('m-patient-file')">إلغاء</button>
       <button class="btn btn-primary" onclick="savePatientFileReport()">💾 حفظ</button>
     </div>
+  </div>
+</div>
+
+<!-- Footer ثابت — يظهر أسفل كل صفحة -->
+<div id="app-footer-credit" style="padding:18px 24px;text-align:center;border-top:1px solid rgba(0,30,64,.08);background:var(--surface);margin-top:auto">
+  <div style="font-size:11px;color:#5b6472;line-height:1.8">
+    Built and Developed by <strong style="color:#43474f">Mr. Ibrahim Alluhaydi</strong><br>
+    تم بناء وتطوير النظام بواسطة مسؤول الجودة <strong style="color:#43474f">إبراهيم اللهيدي</strong>
   </div>
 </div>
 

@@ -50,10 +50,11 @@
   --bg:#f7f8fc; --surface:#ffffff; --surface2:#f4f5f9; --surface3:#eceef4;
   --accent:#0066cc; --accent2:#003366; --gold:#b7791f; --green:#1a8f5c;
   --red:#c0392b; --orange:#c2530f; --purple:#7c3aed;
-  --border:rgba(0,30,64,0.12); --text:#101828; --text2:#43474f; --text3:#6b7280;
+  --border:rgba(0,30,64,0.12); --text:#101828; --text2:#43474f; --text3:#5b6472;
   --glow:0 4px 16px rgba(0,30,64,0.08); --radius:14px; --radius-sm:8px;
 }
 *{margin:0;padding:0;box-sizing:border-box}
+html,body{overflow-x:hidden}
 body{background:var(--bg);color:var(--text);font-family:'Tajawal',sans-serif;min-height:100vh}
 ::-webkit-scrollbar{width:5px} ::-webkit-scrollbar-thumb{background:var(--accent2);border-radius:3px}
 
@@ -91,15 +92,27 @@ body{background:var(--bg);color:var(--text);font-family:'Tajawal',sans-serif;min
 .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
 @media(max-width:900px){.kpi-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:500px){.kpi-grid{grid-template-columns:1fr}}
+
+/* wide stat/kanban grids — responsive fallback for any fixed N-column row */
+.grid-5{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+.grid-6{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
+.grid-7{display:grid;grid-template-columns:repeat(7,1fr);gap:10px}
+#req-kanban-cols{grid-template-columns:repeat(3,1fr)}
+@media(max-width:1100px){.grid-6,.grid-7{grid-template-columns:repeat(4,1fr)} .grid-5{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:900px){#req-kanban-cols{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:700px){.grid-5,.grid-6,.grid-7{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:600px){#req-kanban-cols{grid-template-columns:1fr}}
+@media(max-width:500px){.grid-5,.grid-6,.grid-7{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:380px){.grid-5,.grid-6,.grid-7{grid-template-columns:1fr}}
 .kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
-  padding:18px;position:relative;overflow:hidden;transition:.2s}
+  padding:18px;position:relative;overflow:hidden;transition:.2s;box-shadow:0 2px 10px rgba(0,30,64,.06)}
 .kpi:hover{transform:translateY(-2px);box-shadow:var(--glow)}
 .kpi-lbl{font-size:11px;color:var(--text3);font-weight:600;margin-bottom:6px;letter-spacing:.5px}
 .kpi-val{font-size:30px;font-weight:900;line-height:1;margin-bottom:4px;font-family:'Cairo',sans-serif}
 .kpi.blue .kpi-val{color:var(--accent)} .kpi.gold .kpi-val{color:var(--gold)}
 .kpi.green .kpi-val{color:var(--green)} .kpi.red .kpi-val{color:var(--red)}
 .kpi-sub{font-size:11px;color:var(--text3);margin-top:4px}
-.pbar{height:6px;background:rgba(255,255,255,0.06);border-radius:3px;margin-top:10px;overflow:hidden}
+.pbar{height:6px;background:rgba(0,30,64,.08);border-radius:3px;margin-top:10px;overflow:hidden}
 .pfill{height:100%;border-radius:3px;transition:width 1s ease}
 .pfill.blue{background:linear-gradient(90deg,var(--accent2),var(--accent));box-shadow:0 0 6px rgba(0,194,255,.5)}
 .pfill.green{background:linear-gradient(90deg,#059669,var(--green));box-shadow:0 0 6px rgba(16,217,126,.5)}
@@ -108,7 +121,7 @@ body{background:var(--bg);color:var(--text);font-family:'Tajawal',sans-serif;min
 /* COUNTDOWN */
 .cd-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
 .cd-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
-  padding:18px;text-align:center}
+  padding:18px;text-align:center;box-shadow:0 2px 10px rgba(0,30,64,.06)}
 .cd-num{font-size:38px;font-weight:900;color:var(--accent);line-height:1;font-family:'Cairo',sans-serif}
 .cd-lbl{font-size:11px;color:var(--text3);margin-top:4px;font-weight:600}
 
@@ -119,7 +132,7 @@ body{background:var(--bg);color:var(--text);font-family:'Tajawal',sans-serif;min
 .sec-line{flex:1;height:1px;background:linear-gradient(90deg,var(--border),transparent)}
 
 /* TABLE CARD */
-.tcard{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:16px}
+.tcard{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:16px;box-shadow:0 2px 10px rgba(0,30,64,.06)}
 .tcard-hdr{padding:14px 18px;border-bottom:1px solid var(--border);background:linear-gradient(135deg,var(--surface2),var(--surface));
   display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
 .tcard-title{font-size:13px;font-weight:700;display:flex;align-items:center;gap:6px}
@@ -128,7 +141,7 @@ table{width:100%;border-collapse:separate;border-spacing:0;font-size:12px}
 th{padding:9px 14px;text-align:right;font-size:10px;color:var(--text3);font-weight:700;
   letter-spacing:.5px;background:var(--surface);border-bottom:1px solid var(--border)}
 .sticky-th{position:sticky;top:var(--topbar-h,60px);z-index:20}
-td{padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.04);color:var(--text2);vertical-align:middle}
+td{padding:10px 14px;border-bottom:1px solid rgba(0,30,64,.08);color:var(--text2);vertical-align:middle}
 tr:last-child td{border-bottom:none}
 tr:hover td{background:rgba(0,194,255,.03)}
 .td-main{color:var(--text);font-weight:600}
@@ -215,7 +228,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
 
 /* WORKFLOW */
 .wf-list{display:flex;flex-direction:column}
-.wf-step{display:flex;gap:14px;padding:14px;border-bottom:1px solid rgba(255,255,255,.04)}
+.wf-step{display:flex;gap:14px;padding:14px;border-bottom:1px solid rgba(0,30,64,.08)}
 .wf-step:last-child{border-bottom:none}
 .wf-num{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--accent2),var(--accent));
   display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;
@@ -258,7 +271,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
 #report-print-area{display:none}
 
 /* ═══ SIDEBAR الجديد (Stitch) ═══ */
-.sb-group-label{font-size:10px;color:#9aa1ac;font-weight:700;letter-spacing:.5px;margin:14px 10px 4px;text-transform:uppercase}
+.sb-group-label{font-size:10px;color:#5b6472;font-weight:700;letter-spacing:.5px;margin:14px 10px 4px;text-transform:uppercase}
 .sb-link{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:none;background:transparent;
   color:#43474f;font-family:'Tajawal',sans-serif;font-size:13px;font-weight:600;cursor:pointer;text-align:right;width:100%;transition:.15s}
 .sb-link .material-symbols-outlined{font-size:20px}
@@ -314,7 +327,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
       </div>
       <div id="login-error" style="display:none;background:#fef2f2;border:1px solid #fecaca;color:#991b1b;padding:9px 12px;border-radius:8px;font-size:12px;margin-bottom:14px"></div>
       <button id="login-btn" onclick="doLogin()" style="width:100%;padding:13px;background:linear-gradient(135deg,#001e40,#003366);color:#fff;border:none;border-radius:8px;font-family:Tajawal,sans-serif;font-size:14px;font-weight:800;cursor:pointer">تسجيل الدخول</button>
-      <div style="text-align:center;margin-top:18px;font-size:11px;color:#9aa1ac">🔒 بياناتك محمية — وصول مخصص لفريق العمل فقط</div>
+      <div style="text-align:center;margin-top:18px;font-size:11px;color:#5b6472">🔒 بياناتك محمية — وصول مخصص لفريق العمل فقط</div>
       <div style="text-align:center;margin-top:10px"><button onclick="showSettings()" style="background:none;border:none;color:#6b7280;font-size:11px;cursor:pointer;text-decoration:underline">⚙️ إعدادات الاتصال (للمشرف فقط)</button></div>
     </div>
   </div>
@@ -380,7 +393,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
   <!-- TOPBAR (جديد) -->
   <div class="app-topbar" style="position:sticky;top:0;z-index:100;background:#ffffff;border-bottom:1px solid rgba(0,30,64,.1);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
     <div style="display:flex;align-items:center;gap:10px">
-      <button id="sidebarToggleBtn" onclick="toggleSidebar()" style="display:none;background:none;border:none;color:#101828;cursor:pointer;padding:6px">
+      <button id="sidebarToggleBtn" onclick="toggleSidebar()" aria-label="فتح/إغلاق القائمة الجانبية" style="display:none;background:none;border:none;color:#101828;cursor:pointer;padding:6px">
         <span class="material-symbols-outlined">menu</span>
       </button>
       <div class="sb-item" style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text3)">
@@ -426,7 +439,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
     <h3 style="font-size:16px;font-weight:800;color:#101828">مؤشرات الأداء الرئيسية (الوزن النسبي)</h3>
     <span style="font-size:11px;color:#6b7280" id="donut-days-left">–</span>
   </div>
-  <div id="stitch-kpi-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px"></div>
+  <div id="stitch-kpi-grid" class="kpi-grid" style="margin-bottom:28px"></div>
 
   <!-- تتبع أهم البنود المعلّقة -->
   <div style="background:#ffffff;border:1px solid rgba(0,30,64,.1);border-radius:14px;overflow:hidden;box-shadow:0 2px 10px rgba(0,30,64,.06)">
@@ -522,7 +535,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
 
   <!-- ═══ عرض المشرف/المفتش الكامل ═══ -->
   <div id="audit-admin-view">
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px" id="audit-kpi-row"></div>
+    <div class="kpi-grid" style="gap:12px;margin-bottom:20px" id="audit-kpi-row"></div>
 
     <div class="tcard">
       <div class="tcard-hdr">
@@ -626,7 +639,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
 
   <!-- عرض Kanban -->
   <div id="req-kanban-view" style="display:none">
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px" id="req-kanban-cols"></div>
+    <div style="display:grid;gap:14px" id="req-kanban-cols"></div>
   </div>
 </div>
 
@@ -703,7 +716,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
     <button class="btn btn-primary" onclick="newAssign()" data-perm-tab="assignments">+ إضافة مهمة</button>
   </div>
 
-  <div id="assign-kpi-row" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px"></div>
+  <div id="assign-kpi-row" class="kpi-grid" style="gap:12px;margin-bottom:20px"></div>
 
   <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center">
     <input type="text" id="assign-search" placeholder="🔍 ابحث باسم المهمة أو المسؤول..." oninput="renderAssign()"
@@ -802,7 +815,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
 
 <div class="pane" id="pane-policies2">
   <!-- Stats row -->
-  <div class="kpi-grid" id="pol2-stats" style="grid-template-columns:repeat(6,1fr);margin-bottom:16px"></div>
+  <div class="grid-6" id="pol2-stats" style="margin-bottom:16px"></div>
 
   <!-- Section bars -->
   <div class="sec-hdr">
@@ -813,7 +826,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
     <button class="btn btn-primary" onclick="promptSyncFromSheet()" title="سحب من شيت السياسات">📥 سحب من الشيت</button>
     <button class="btn btn-gold" onclick="exportPoliciesCSV()">📥 CSV</button>
   </div>
-  <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:20px" id="pol2-sections"></div>
+  <div class="grid-5" style="margin-bottom:20px" id="pol2-sections"></div>
 
   <!-- Signatories -->
   <div class="sec-hdr">
@@ -821,7 +834,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
     <div class="sec-title">حالة التوقيعات</div>
     <div class="sec-line"></div>
   </div>
-  <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:10px;margin-bottom:20px" id="pol2-sigs"></div>
+  <div class="grid-7" style="margin-bottom:20px" id="pol2-sigs"></div>
 
   <!-- Table -->
   <div class="sec-hdr">
@@ -920,7 +933,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
   </div>
 
   <!-- Summary Cards -->
-  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px">
+  <div class="kpi-grid" style="gap:12px;margin-bottom:20px">
     <div style="background:linear-gradient(135deg,#0047AB,#0080FF);border-radius:12px;padding:18px;color:white;text-align:center">
       <div style="font-size:11px;opacity:.9;margin-bottom:4px">📊 إجمالي الملفات</div>
       <div style="font-size:34px;font-weight:900;font-family:Cairo,sans-serif" id="pf-total">0</div>
@@ -1050,7 +1063,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
 
   <div class="info-bar">🔗 البيانات من Google Sheets مباشرةً عبر Apps Script · تؤثر على لوحة الإنجاز الكلي (وزن 15%)</div>
 
-  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px">
+  <div class="kpi-grid" style="gap:12px;margin-bottom:20px">
     <div style="background:var(--surface);border:1px solid rgba(0,194,255,.2);border-radius:12px;padding:18px">
       <div style="font-size:11px;color:var(--text3);margin-bottom:4px">إجمالي الموظفين</div>
       <div style="font-size:34px;font-weight:900;color:var(--accent);font-family:Cairo,sans-serif" id="emp-total">–</div>
@@ -1066,7 +1079,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
     <div style="background:var(--surface);border:1px solid rgba(245,158,11,.2);border-radius:12px;padding:18px">
       <div style="font-size:11px;color:var(--text3);margin-bottom:4px">📊 متوسط الإنجاز الكلي</div>
       <div style="font-size:34px;font-weight:900;color:var(--gold);font-family:Cairo,sans-serif" id="emp-pct">–</div>
-      <div style="height:5px;background:rgba(255,255,255,.06);border-radius:3px;margin-top:8px;overflow:hidden">
+      <div style="height:5px;background:rgba(0,30,64,.08);border-radius:3px;margin-top:8px;overflow:hidden">
         <div id="emp-pct-bar" style="height:100%;width:0%;background:var(--gold);border-radius:3px;transition:width .8s"></div>
       </div>
     </div>
@@ -1161,7 +1174,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
 
 <!-- Footer ثابت — يظهر أسفل كل صفحة -->
 <div id="app-footer-credit" style="padding:18px 24px;text-align:center;border-top:1px solid rgba(0,30,64,.08);background:var(--surface);margin-top:auto">
-  <div style="font-size:11px;color:#9aa1ac;line-height:1.8">
+  <div style="font-size:11px;color:#5b6472;line-height:1.8">
     Built and Developed by <strong style="color:#43474f">Mr. Ibrahim Alluhaydi</strong><br>
     تم بناء وتطوير النظام بواسطة مسؤول الجودة <strong style="color:#43474f">إبراهيم اللهيدي</strong>
   </div>
@@ -1230,7 +1243,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
   </div>
 
   <!-- KPI row -->
-  <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:18px">
+  <div class="grid-5" style="margin-bottom:18px">
     <div style="background:var(--surface);border:1px solid rgba(220,38,38,.2);border-radius:11px;padding:14px;text-align:center">
       <div style="font-size:10px;color:var(--text3);margin-bottom:3px">📜 رخص</div>
       <div style="font-size:28px;font-weight:900;color:#EF4444;font-family:Cairo,sans-serif" id="lic2-n-lic">0</div>
@@ -1256,7 +1269,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
   <!-- progress bar -->
   <div style="background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:14px;margin-bottom:18px;display:flex;align-items:center;gap:14px">
     <div style="font-size:11px;color:var(--text3);white-space:nowrap">نسبة الإنجاز</div>
-    <div style="flex:1;height:10px;background:rgba(255,255,255,.06);border-radius:5px;overflow:hidden">
+    <div style="flex:1;height:10px;background:rgba(0,30,64,.08);border-radius:5px;overflow:hidden">
       <div id="lic2-pct-bar" style="height:100%;width:0%;background:linear-gradient(90deg,#DC2626,#EA580C);border-radius:5px;transition:width .8s"></div>
     </div>
     <div style="font-size:18px;font-weight:900;color:#EA580C;font-family:Cairo,sans-serif;min-width:44px;text-align:left" id="lic2-pct-num">0%</div>
@@ -1933,7 +1946,7 @@ function applyPermissionsToUI() {
   });
   var curUserEl = document.getElementById('sb-current-user');
   if (curUserEl && CURRENT_USER) {
-    curUserEl.innerHTML = '👤 <strong>' + CURRENT_USER.name + '</strong><br><span style="color:#9aa1ac">' + CURRENT_USER.role + '</span>';
+    curUserEl.innerHTML = '👤 <strong>' + CURRENT_USER.name + '</strong><br><span style="color:#5b6472">' + CURRENT_USER.role + '</span>';
   }
   // ⚠️ تصحيح أمني: إذا التبويب النشط حالياً غير مسموح لهذا المستخدم، حوّله فوراً لأول تبويب مسموح
   var activePane = document.querySelector('.pane.active');
@@ -2451,7 +2464,7 @@ function renderOverview() {
   // Summary table — مطابق للمحاور في لوحة الإنجاز
   const pBar2 = (p) => {
     const c = p>=80?'var(--green)':p>=40?'var(--gold)':'var(--red)';
-    return `<div style="display:flex;align-items:center;gap:6px"><div style="flex:1;height:5px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden"><div style="height:100%;width:${p}%;background:${c};border-radius:3px"></div></div><span style="font-size:10px;color:var(--text3);min-width:28px">${p}%</span></div>`;
+    return `<div style="display:flex;align-items:center;gap:6px"><div style="flex:1;height:5px;background:rgba(0,30,64,.08);border-radius:3px;overflow:hidden"><div style="height:100%;width:${p}%;background:${c};border-radius:3px"></div></div><span style="font-size:10px;color:var(--text3);min-width:28px">${p}%</span></div>`;
   };
 
   // استخدم نفس PILLARS من لوحة الإنجاز
@@ -2602,8 +2615,8 @@ function renderTeam() {
         <div style="font-size:10px;color:var(--text3);margin-top:2px">${t.proj||''}</div>
       </div>
       <div style="display:flex;flex-direction:column;gap:4px">
-        ${userCanEdit('team') ? `<button class="btn btn-ghost" style="padding:2px 7px;font-size:9px" onclick="editTeam('${t.id}')">✏️</button>
-        <button class="btn btn-danger" style="padding:2px 7px;font-size:9px" onclick="delTeam('${t.id}')">🗑️</button>` : ''}
+        ${userCanEdit('team') ? `<button class="btn btn-ghost" aria-label="تعديل" style="padding:2px 7px;font-size:9px" onclick="editTeam('${t.id}')">✏️</button>
+        <button class="btn btn-danger" aria-label="حذف" style="padding:2px 7px;font-size:9px" onclick="delTeam('${t.id}')">🗑️</button>` : ''}
       </div>
     </div>`).join('');
 }
@@ -3174,7 +3187,7 @@ function renderPolSectionBars() {
         <span style="font-size:12px;font-weight:700;color:${meta.color}">${meta.label}</span>
         <span style="font-size:11px;color:var(--text3)">${done}/${total}</span>
       </div>
-      <div style="height:6px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden;margin-bottom:6px">
+      <div style="height:6px;background:rgba(0,30,64,.08);border-radius:3px;overflow:hidden;margin-bottom:6px">
         <div style="height:100%;width:${pct}%;background:${meta.color};border-radius:3px"></div>
       </div>
       <div style="display:flex;gap:6px;flex-wrap:wrap">
@@ -3211,7 +3224,7 @@ function renderPolSignatories() {
       + '<div style="font-size:22px;font-weight:900;color:' + s.color + ';font-family:Cairo,sans-serif">' + signed + '</div>'
       + '<div style="font-size:10px;color:var(--text3);margin-bottom:2px">من ' + totalCount + ' سياسة</div>'
       + subLine
-      + '<div style="height:4px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden;margin-bottom:4px">'
+      + '<div style="height:4px;background:rgba(0,30,64,.08);border-radius:2px;overflow:hidden;margin-bottom:4px">'
       + '<div style="height:100%;width:' + pct + '%;background:' + s.color + ';border-radius:2px;transition:width .6s"></div></div>'
       + '<div style="font-size:10px;color:var(--text3)">' + pct + '%</div>'
       + '</div>';
@@ -3251,7 +3264,7 @@ function renderPolTable() {
     const sCls = statusCls2[p.contentReady] || 's-pend';
     const pct  = Number(p.pct) || 0;
     const pBar = `<div style="display:flex;align-items:center;gap:4px">
-      <div style="flex:1;height:5px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden">
+      <div style="flex:1;height:5px;background:rgba(0,30,64,.08);border-radius:2px;overflow:hidden">
         <div style="height:100%;width:${pct}%;background:${pct>=100?'var(--green)':pct>0?'var(--gold)':'var(--red)'};border-radius:2px"></div>
       </div><span style="font-size:10px;color:var(--text3);min-width:26px">${pct}%</span></div>`;
 
@@ -3477,7 +3490,7 @@ function renderProgressDashboard() {
           <div style="font-size:9px;color:var(--text3)">يساهم بـ ${contribution}%</div>
         </div>
       </div>
-      <div style="height:8px;background:rgba(255,255,255,.06);border-radius:4px;overflow:hidden">
+      <div style="height:8px;background:rgba(0,30,64,.08);border-radius:4px;overflow:hidden">
         <div style="height:100%;width:${pct}%;background:${p.color};border-radius:4px;transition:width .8s;box-shadow:0 0 8px ${p.color}66"></div>
       </div>
       <div style="font-size:10px;color:var(--text3);margin-top:6px">${alert} ${pct < 30 ? 'تأخير حرج' : pct < 60 ? 'يحتاج عمل' : pct < 90 ? 'تقدم جيد' : 'ممتاز'}</div>
@@ -4143,8 +4156,8 @@ function pfRender() {
       '<td style="text-align:center"><span style="font-weight:700;color:'+pctColor+'">'+pct+'%</span></td>'+
       '<td style="text-align:center">'+fileBtn+'</td>'+
       '<td style="text-align:center;display:flex;gap:4px;justify-content:center">'+
-        (userCanEdit('patient-files') ? '<button onclick="pfEdit(\''+p.id+'\')" style="padding:3px 8px;background:rgba(0,194,255,.08);border:1px solid rgba(0,194,255,.2);color:var(--accent);border-radius:5px;font-size:10px;cursor:pointer">✏️</button>'+
-        '<button onclick="pfDelete(\''+p.id+'\')" style="padding:3px 8px;background:rgba(255,71,87,.08);border:1px solid rgba(255,71,87,.2);color:var(--red);border-radius:5px;font-size:10px;cursor:pointer">🗑️</button>' : '—')+
+        (userCanEdit('patient-files') ? '<button onclick="pfEdit(\''+p.id+'\')" aria-label="تعديل" style="padding:3px 8px;background:rgba(0,194,255,.08);border:1px solid rgba(0,194,255,.2);color:var(--accent);border-radius:5px;font-size:10px;cursor:pointer">✏️</button>'+
+        '<button onclick="pfDelete(\''+p.id+'\')" aria-label="حذف" style="padding:3px 8px;background:rgba(255,71,87,.08);border:1px solid rgba(255,71,87,.2);color:var(--red);border-radius:5px;font-size:10px;cursor:pointer">🗑️</button>' : '—')+
       '</td>'+
     '</tr>';
   }).join('');
@@ -4314,7 +4327,7 @@ function renderEmpTable() {
         '<td style="color:var(--text2)">' + e.title + '</td>' +
         '<td><span style="font-size:10px;background:rgba(0,194,255,.08);color:var(--accent);padding:2px 8px;border-radius:10px;font-weight:700">' + e.dept + '</span></td>' +
         '<td style="text-align:center"><div style="display:flex;align-items:center;gap:6px;justify-content:center">' +
-        '<div style="width:60px;height:5px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden">' +
+        '<div style="width:60px;height:5px;background:rgba(0,30,64,.08);border-radius:3px;overflow:hidden">' +
         '<div style="height:100%;width:'+pc+'%;background:'+pc_color+';border-radius:3px"></div></div>' +
         '<span style="font-size:11px;font-weight:700;color:'+pc_color+'">'+pc+'%</span></div></td>' +
         '<td style="text-align:center"><span class="pill ' + st_cls + '">' + e.status + '</span></td>' +
@@ -4603,8 +4616,8 @@ function licRender() {
       '<td style="text-align:center"><span class="pill '+sc+'" style="font-size:10px">'+it.status+'</span></td>'+
       '<td style="text-align:center"><div style="display:flex;gap:4px;justify-content:center;align-items:center">'+
         linkBtn+
-        (userCanEdit('licenses') ? '<button onclick="licOpenModal(\''+it.id+'\')" style="padding:3px 8px;background:rgba(0,194,255,.08);border:1px solid rgba(0,194,255,.2);color:var(--accent);border-radius:5px;font-size:10px;cursor:pointer">✏️</button>'+
-        '<button onclick="licDelete(\''+it.id+'\')" style="padding:3px 8px;background:rgba(255,71,87,.08);border:1px solid rgba(255,71,87,.2);color:var(--red);border-radius:5px;font-size:10px;cursor:pointer">🗑️</button>' : '')+
+        (userCanEdit('licenses') ? '<button onclick="licOpenModal(\''+it.id+'\')" aria-label="تعديل" style="padding:3px 8px;background:rgba(0,194,255,.08);border:1px solid rgba(0,194,255,.2);color:var(--accent);border-radius:5px;font-size:10px;cursor:pointer">✏️</button>'+
+        '<button onclick="licDelete(\''+it.id+'\')" aria-label="حذف" style="padding:3px 8px;background:rgba(255,71,87,.08);border:1px solid rgba(255,71,87,.2);color:var(--red);border-radius:5px;font-size:10px;cursor:pointer">🗑️</button>' : '')+
       '</div></td>'+
     '</tr>';
   }).join('');

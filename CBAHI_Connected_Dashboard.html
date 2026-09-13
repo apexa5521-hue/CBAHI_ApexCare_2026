@@ -510,6 +510,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
     <div class="sec-icon" style="background:rgba(255,71,87,.1)">📋</div>
     <div class="sec-title">الشكاوى</div>
     <div class="sec-line"></div>
+    <button class="btn btn-ghost" onclick="openComplaintFollowUpModal()" data-perm-tab="complaints">🔄 متابعة / إغلاق شكوى</button>
     <button class="btn btn-primary" onclick="openComplaintModal()" data-perm-tab="complaints">+ إضافة</button>
   </div>
   <div class="info-bar">ℹ️ جميع التعديلات تُحفظ تلقائياً في Google Sheets وتظهر فوراً</div>
@@ -1665,6 +1666,42 @@ tr:hover td{background:rgba(0,194,255,.03)}
     <div class="modal-footer">
       <button class="btn btn-danger" onclick="closeModal('m-complaint')">إلغاء</button>
       <button class="btn btn-primary" onclick="saveComplaint()">💾 حفظ</button>
+    </div>
+  </div>
+</div>
+
+<!-- Complaint Follow-up / Close Modal -->
+<div class="overlay" id="m-complaint-followup">
+  <div class="modal" style="max-width:560px">
+    <h3>🔄 متابعة / إغلاق شكوى</h3>
+
+    <div class="fg">
+      <label>اختر الشكوى *</label>
+      <select id="cmpf-select" onchange="onComplaintFollowUpSelect()">
+        <option value="">— اختر شكوى —</option>
+      </select>
+    </div>
+
+    <div id="cmpf-body" style="display:none">
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:14px">
+        <div id="cmpf-summary" style="font-size:12px;color:var(--text2);margin-bottom:10px"></div>
+        <div style="font-size:11px;font-weight:700;color:var(--text3);margin-bottom:6px">سجل التحديثات</div>
+        <div id="cmpf-updates-list" style="font-size:12px"></div>
+      </div>
+
+      <div class="fg"><label>💬 إضافة تحديث جديد</label>
+        <textarea id="cmpf-new-update" rows="2" placeholder="مثال: تم التواصل مع القسم المعني وجاري المتابعة..."></textarea></div>
+
+      <div class="fg"><label>الحالة الحالية</label>
+        <select id="cmpf-status"><option>معلقة</option><option>قيد المعالجة</option><option>مغلقة</option></select></div>
+
+      <div class="modal-footer" style="justify-content:space-between">
+        <button class="btn btn-danger" onclick="closeModal('m-complaint-followup')">إغلاق النافذة</button>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-gold" onclick="closeComplaintNow()">✅ إغلاق الشكوى نهائياً</button>
+          <button class="btn btn-primary" onclick="addComplaintUpdate()">💾 حفظ التحديث</button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -2903,16 +2940,18 @@ function renderComplaints() {
   document.getElementById('cmp-cnt').textContent = DB.complaints.length;
   document.getElementById('cmp-closed').textContent = closed + ' مغلقة';
   document.getElementById('cmp-open').textContent = (DB.complaints.length-closed) + ' مفتوحة';
-  document.getElementById('cmp-tbody').innerHTML = DB.complaints.map((c,i)=>`
-    <tr><td class="num">${i+1}</td>
+  document.getElementById('cmp-tbody').innerHTML = DB.complaints.map((c,i)=>{
+    const upCount = complaintUpdatesOf(c).length;
+    return `<tr><td class="num">${i+1}</td>
     <td style="font-size:11px">${c.date_received||'–'}</td>
     <td><span class="badge badge-purple" style="font-size:9px">${c.type||''}</span></td>
-    <td class="td-main" style="max-width:220px">${c.description||''}</td>
+    <td class="td-main" style="max-width:220px">${c.description||''}${upCount?' <span class="badge badge-blue" style="font-size:9px" title="عدد التحديثات">🔄 '+upCount+'</span>':''}</td>
     <td style="font-size:11px">${c.department||'–'}</td>
     <td style="font-size:11px">${c.patient_status||'–'}</td>
     <td>${pill(c.status||'معلقة')}</td>
     <td style="font-size:11px">${c.resolved_date||'–'}</td>
-    <td>${actionBtns('editComplaint','delComplaint',c.id,'complaints')}</td></tr>`).join('');
+    <td>${actionBtns('editComplaint','delComplaint',c.id,'complaints')}</td></tr>`;
+  }).join('');
 }
 function openComplaintModal(c={}) {
   document.getElementById('cmp-eid').value = c.id||'';
@@ -2951,6 +2990,90 @@ async function saveComplaint() {
   renderAll(); closeModal('m-complaint');
   await apiCall(id?'update':'add','complaints',obj.id,obj);
   toast('✅ تم الحفظ في Google Sheets', 'success');
+}
+
+// ─── متابعة/إغلاق شكوى — سجل تحديثات عبر الزمن ────────────────────
+function complaintUpdatesOf(c) {
+  try { return c && c.updates ? JSON.parse(c.updates) : []; } catch(e) { return []; }
+}
+
+function openComplaintFollowUpModal() {
+  var select = document.getElementById('cmpf-select');
+  var list = (DB.complaints || []).slice().sort(function(a,b){ return (b.date_received||'').localeCompare(a.date_received||''); });
+  select.innerHTML = '<option value="">— اختر شكوى —</option>' + list.map(function(c) {
+    var label = (c.date_received||'—') + ' — ' + (c.type||'') + ' — ' + String(c.description||'').slice(0, 40);
+    return '<option value="'+c.id+'">'+label+'</option>';
+  }).join('');
+  document.getElementById('cmpf-body').style.display = 'none';
+  document.getElementById('cmpf-new-update').value = '';
+  openModal('m-complaint-followup');
+}
+
+function onComplaintFollowUpSelect() {
+  var id = document.getElementById('cmpf-select').value;
+  var body = document.getElementById('cmpf-body');
+  if (!id) { body.style.display = 'none'; return; }
+  var c = (DB.complaints || []).find(function(x){ return String(x.id) === String(id); });
+  if (!c) return;
+
+  document.getElementById('cmpf-summary').innerHTML =
+    '<strong>' + (c.type||'') + '</strong> — ' + (c.department||'—') + '<br>' +
+    (c.description||'') + '<br>' +
+    '<span style="color:var(--text3)">تاريخ الاستلام: ' + (c.date_received||'—') + '</span>';
+  document.getElementById('cmpf-status').value = c.status || 'معلقة';
+
+  var updates = complaintUpdatesOf(c);
+  var updatesList = document.getElementById('cmpf-updates-list');
+  updatesList.innerHTML = updates.length
+    ? updates.slice().reverse().map(function(u) {
+        return '<div style="padding:6px 0;border-bottom:1px solid var(--border)"><span style="color:var(--text3);font-size:11px">' + (u.date||'') + '</span> — ' + (u.note||'') + '</div>';
+      }).join('')
+    : '<div style="color:var(--text3);font-size:11px">لا توجد تحديثات مسجّلة بعد</div>';
+
+  body.style.display = 'block';
+}
+
+async function addComplaintUpdate() {
+  var id = document.getElementById('cmpf-select').value;
+  var note = document.getElementById('cmpf-new-update').value.trim();
+  var status = document.getElementById('cmpf-status').value;
+  if (!id) { toast('⚠️ اختر شكوى أولاً', 'error'); return; }
+  if (!note) { toast('⚠️ اكتب نص التحديث', 'error'); return; }
+
+  var idx = DB.complaints.findIndex(function(c){ return String(c.id) === String(id); });
+  if (idx === -1) return;
+  var updates = complaintUpdatesOf(DB.complaints[idx]);
+  updates.push({ date: new Date().toISOString().slice(0,10), note: note });
+  DB.complaints[idx].updates = JSON.stringify(updates);
+  DB.complaints[idx].status = status;
+
+  renderAll();
+  onComplaintFollowUpSelect(); // إعادة عرض السجل المحدَّث بنفس النافذة
+  document.getElementById('cmpf-new-update').value = '';
+
+  await apiCall('update', 'complaints', id, { id: id, updates: DB.complaints[idx].updates, status: status });
+  toast('✅ تم حفظ التحديث', 'success');
+}
+
+async function closeComplaintNow() {
+  var id = document.getElementById('cmpf-select').value;
+  if (!id) { toast('⚠️ اختر شكوى أولاً', 'error'); return; }
+  if (!confirm('تأكيد إغلاق هذي الشكوى نهائياً؟')) return;
+
+  var idx = DB.complaints.findIndex(function(c){ return String(c.id) === String(id); });
+  if (idx === -1) return;
+  var today = new Date().toISOString().slice(0,10);
+  var updates = complaintUpdatesOf(DB.complaints[idx]);
+  updates.push({ date: today, note: 'تم إغلاق الشكوى' });
+  DB.complaints[idx].updates = JSON.stringify(updates);
+  DB.complaints[idx].status = 'مغلقة';
+  DB.complaints[idx].resolved_date = today;
+
+  renderAll();
+  closeModal('m-complaint-followup');
+
+  await apiCall('update', 'complaints', id, { id: id, updates: DB.complaints[idx].updates, status: 'مغلقة', resolved_date: today });
+  toast('✅ تم إغلاق الشكوى', 'success');
 }
 
 // ═══════════════════════════════════════════════════════════════

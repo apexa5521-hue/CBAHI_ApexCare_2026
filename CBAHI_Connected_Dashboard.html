@@ -50,11 +50,10 @@
   --bg:#f7f8fc; --surface:#ffffff; --surface2:#f4f5f9; --surface3:#eceef4;
   --accent:#0066cc; --accent2:#003366; --gold:#b7791f; --green:#1a8f5c;
   --red:#c0392b; --orange:#c2530f; --purple:#7c3aed;
-  --border:rgba(0,30,64,0.12); --text:#101828; --text2:#43474f; --text3:#5b6472;
+  --border:rgba(0,30,64,0.12); --text:#101828; --text2:#43474f; --text3:#6b7280;
   --glow:0 4px 16px rgba(0,30,64,0.08); --radius:14px; --radius-sm:8px;
 }
 *{margin:0;padding:0;box-sizing:border-box}
-html,body{overflow-x:hidden}
 body{background:var(--bg);color:var(--text);font-family:'Tajawal',sans-serif;min-height:100vh}
 ::-webkit-scrollbar{width:5px} ::-webkit-scrollbar-thumb{background:var(--accent2);border-radius:3px}
 
@@ -86,34 +85,21 @@ body{background:var(--bg);color:var(--text);font-family:'Tajawal',sans-serif;min
   border-color:transparent;box-shadow:0 0 12px rgba(0,194,255,0.3)}
 
 .main{padding:20px 24px;max-width:1440px;margin:0 auto}
-.pane{display:none} .pane.active{display:block;animation:paneIn .35s ease}
-@keyframes paneIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.pane{display:none} .pane.active{display:block}
 
 /* KPI */
 .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
 @media(max-width:900px){.kpi-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:500px){.kpi-grid{grid-template-columns:1fr}}
-
-/* wide stat/kanban grids — responsive fallback for any fixed N-column row */
-.grid-5{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
-.grid-6{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
-.grid-7{display:grid;grid-template-columns:repeat(7,1fr);gap:10px}
-#req-kanban-cols{grid-template-columns:repeat(3,1fr)}
-@media(max-width:1100px){.grid-6,.grid-7{grid-template-columns:repeat(4,1fr)} .grid-5{grid-template-columns:repeat(3,1fr)}}
-@media(max-width:900px){#req-kanban-cols{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:700px){.grid-5,.grid-6,.grid-7{grid-template-columns:repeat(3,1fr)}}
-@media(max-width:600px){#req-kanban-cols{grid-template-columns:1fr}}
-@media(max-width:500px){.grid-5,.grid-6,.grid-7{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:380px){.grid-5,.grid-6,.grid-7{grid-template-columns:1fr}}
 .kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
-  padding:18px;position:relative;overflow:hidden;transition:.2s;box-shadow:0 2px 10px rgba(0,30,64,.06)}
+  padding:18px;position:relative;overflow:hidden;transition:.2s}
 .kpi:hover{transform:translateY(-2px);box-shadow:var(--glow)}
 .kpi-lbl{font-size:11px;color:var(--text3);font-weight:600;margin-bottom:6px;letter-spacing:.5px}
 .kpi-val{font-size:30px;font-weight:900;line-height:1;margin-bottom:4px;font-family:'Cairo',sans-serif}
 .kpi.blue .kpi-val{color:var(--accent)} .kpi.gold .kpi-val{color:var(--gold)}
 .kpi.green .kpi-val{color:var(--green)} .kpi.red .kpi-val{color:var(--red)}
 .kpi-sub{font-size:11px;color:var(--text3);margin-top:4px}
-.pbar{height:6px;background:rgba(0,30,64,.08);border-radius:3px;margin-top:10px;overflow:hidden}
+.pbar{height:6px;background:rgba(255,255,255,0.06);border-radius:3px;margin-top:10px;overflow:hidden}
 .pfill{height:100%;border-radius:3px;transition:width 1s ease}
 .pfill.blue{background:linear-gradient(90deg,var(--accent2),var(--accent));box-shadow:0 0 6px rgba(0,194,255,.5)}
 .pfill.green{background:linear-gradient(90deg,#059669,var(--green));box-shadow:0 0 6px rgba(16,217,126,.5)}
@@ -122,21 +108,9 @@ body{background:var(--bg);color:var(--text);font-family:'Tajawal',sans-serif;min
 /* COUNTDOWN */
 .cd-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
 .cd-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
-  padding:18px;text-align:center;box-shadow:0 2px 10px rgba(0,30,64,.06);transition:.2s}
-.cd-box:hover{transform:translateY(-2px);box-shadow:var(--glow)}
+  padding:18px;text-align:center}
 .cd-num{font-size:38px;font-weight:900;color:var(--accent);line-height:1;font-family:'Cairo',sans-serif}
 .cd-lbl{font-size:11px;color:var(--text3);margin-top:4px;font-weight:600}
-
-/* PAGE HERO — shared header style so every tab reads as one system */
-.page-hero{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px 28px;
-  margin-bottom:20px;box-shadow:0 2px 10px rgba(0,30,64,.06);display:flex;align-items:center;
-  justify-content:space-between;flex-wrap:wrap;gap:16px;transition:.2s}
-.page-hero:hover{box-shadow:0 6px 18px rgba(0,30,64,.09)}
-.page-hero-txt h2{margin:0 0 6px;font-size:20px;font-weight:900;color:var(--text);display:flex;align-items:center;gap:8px}
-.page-hero-txt p{margin:0;color:var(--text3);font-size:12px;line-height:1.6}
-.page-hero-icon{width:52px;height:52px;border-radius:12px;display:flex;align-items:center;justify-content:center;
-  font-size:24px;flex-shrink:0;color:#fff;box-shadow:0 4px 12px rgba(0,30,64,.15)}
-.page-hero-actions{display:flex;gap:8px;flex-wrap:wrap}
 
 /* SECTION */
 .sec-hdr{display:flex;align-items:center;gap:8px;margin:24px 0 14px}
@@ -145,7 +119,7 @@ body{background:var(--bg);color:var(--text);font-family:'Tajawal',sans-serif;min
 .sec-line{flex:1;height:1px;background:linear-gradient(90deg,var(--border),transparent)}
 
 /* TABLE CARD */
-.tcard{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:16px;box-shadow:0 2px 10px rgba(0,30,64,.06)}
+.tcard{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:16px}
 .tcard-hdr{padding:14px 18px;border-bottom:1px solid var(--border);background:linear-gradient(135deg,var(--surface2),var(--surface));
   display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
 .tcard-title{font-size:13px;font-weight:700;display:flex;align-items:center;gap:6px}
@@ -154,7 +128,7 @@ table{width:100%;border-collapse:separate;border-spacing:0;font-size:12px}
 th{padding:9px 14px;text-align:right;font-size:10px;color:var(--text3);font-weight:700;
   letter-spacing:.5px;background:var(--surface);border-bottom:1px solid var(--border)}
 .sticky-th{position:sticky;top:var(--topbar-h,60px);z-index:20}
-td{padding:10px 14px;border-bottom:1px solid rgba(0,30,64,.08);color:var(--text2);vertical-align:middle}
+td{padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.04);color:var(--text2);vertical-align:middle}
 tr:last-child td{border-bottom:none}
 tr:hover td{background:rgba(0,194,255,.03)}
 .td-main{color:var(--text);font-weight:600}
@@ -241,7 +215,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
 
 /* WORKFLOW */
 .wf-list{display:flex;flex-direction:column}
-.wf-step{display:flex;gap:14px;padding:14px;border-bottom:1px solid rgba(0,30,64,.08)}
+.wf-step{display:flex;gap:14px;padding:14px;border-bottom:1px solid rgba(255,255,255,.04)}
 .wf-step:last-child{border-bottom:none}
 .wf-num{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--accent2),var(--accent));
   display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;
@@ -284,9 +258,9 @@ tr:hover td{background:rgba(0,194,255,.03)}
 #report-print-area{display:none}
 
 /* ═══ SIDEBAR الجديد (Stitch) ═══ */
-.sb-group-label{font-size:10px;color:#5b6472;font-weight:700;letter-spacing:.5px;margin:14px 10px 4px;text-transform:uppercase}
+.sb-group-label{font-size:10px;color:#9aa1ac;font-weight:700;letter-spacing:.5px;margin:14px 10px 4px;text-transform:uppercase}
 .sb-link{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:none;background:transparent;
-  color:#43474f;font-family:'Tajawal',sans-serif;font-size:13px;font-weight:600;cursor:pointer;text-align:right;width:100%;transition:.2s}
+  color:#43474f;font-family:'Tajawal',sans-serif;font-size:13px;font-weight:600;cursor:pointer;text-align:right;width:100%;transition:.15s}
 .sb-link .material-symbols-outlined{font-size:20px}
 .sb-link:hover{background:#f4f5f9;color:#101828}
 .sb-link.active{background:linear-gradient(135deg,#e6f0ff,#d5e8e8);color:#001e40;font-weight:800;box-shadow:inset 3px 0 0 #006a6a}
@@ -304,7 +278,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
   display:flex;flex-direction:column;gap:10px;box-shadow:0 2px 10px rgba(0,30,64,.06);transition:.2s}
 .stitch-kpi-card:hover{box-shadow:0 8px 20px rgba(0,30,64,.1);transform:translateY(-2px)}
 .stitch-doc-filter{padding:6px 16px;border-radius:999px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid rgba(0,30,64,.15);
-  background:transparent;color:#43474f;font-family:'Tajawal',sans-serif;transition:.2s}
+  background:transparent;color:#43474f;font-family:'Tajawal',sans-serif;transition:.15s}
 .stitch-doc-filter.active{background:#001e40;color:#fff;border-color:transparent}
 .stitch-doc-filter:hover:not(.active){background:#f4f5f9}
 
@@ -340,7 +314,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
       </div>
       <div id="login-error" style="display:none;background:#fef2f2;border:1px solid #fecaca;color:#991b1b;padding:9px 12px;border-radius:8px;font-size:12px;margin-bottom:14px"></div>
       <button id="login-btn" onclick="doLogin()" style="width:100%;padding:13px;background:linear-gradient(135deg,#001e40,#003366);color:#fff;border:none;border-radius:8px;font-family:Tajawal,sans-serif;font-size:14px;font-weight:800;cursor:pointer">تسجيل الدخول</button>
-      <div style="text-align:center;margin-top:18px;font-size:11px;color:#5b6472">🔒 بياناتك محمية — وصول مخصص لفريق العمل فقط</div>
+      <div style="text-align:center;margin-top:18px;font-size:11px;color:#9aa1ac">🔒 بياناتك محمية — وصول مخصص لفريق العمل فقط</div>
       <div style="text-align:center;margin-top:10px"><button onclick="showSettings()" style="background:none;border:none;color:#6b7280;font-size:11px;cursor:pointer;text-decoration:underline">⚙️ إعدادات الاتصال (للمشرف فقط)</button></div>
     </div>
   </div>
@@ -373,6 +347,8 @@ tr:hover td{background:rgba(0,194,255,.03)}
 
   <div class="sb-group-label">الإدارة اليومية</div>
   <button class="sb-link" data-tab="observations" onclick="switchTab('observations')"><span class="material-symbols-outlined">visibility</span><span>الملاحظات</span></button>
+  <button class="sb-link" data-tab="complaints" onclick="switchTab('complaints')"><span class="material-symbols-outlined">report_problem</span><span>الشكاوى</span></button>
+  <button class="sb-link" data-tab="patient-experience" onclick="switchTab('patient-experience')"><span class="material-symbols-outlined">sentiment_satisfied</span><span>تجربة المريض</span></button>
   <button class="sb-link" data-tab="site-audits" onclick="switchTab('site-audits')"><span class="material-symbols-outlined">fact_check</span><span>جولات التدقيق</span></button>
   <button class="sb-link" data-tab="requirements" onclick="switchTab('requirements')"><span class="material-symbols-outlined">checklist</span><span>المتطلبات</span></button>
   <button class="sb-link" data-tab="team" onclick="switchTab('team')"><span class="material-symbols-outlined">group</span><span>الفريق</span></button>
@@ -406,7 +382,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
   <!-- TOPBAR (جديد) -->
   <div class="app-topbar" style="position:sticky;top:0;z-index:100;background:#ffffff;border-bottom:1px solid rgba(0,30,64,.1);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
     <div style="display:flex;align-items:center;gap:10px">
-      <button id="sidebarToggleBtn" onclick="toggleSidebar()" aria-label="فتح/إغلاق القائمة الجانبية" style="display:none;background:none;border:none;color:#101828;cursor:pointer;padding:6px">
+      <button id="sidebarToggleBtn" onclick="toggleSidebar()" style="display:none;background:none;border:none;color:#101828;cursor:pointer;padding:6px">
         <span class="material-symbols-outlined">menu</span>
       </button>
       <div class="sb-item" style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text3)">
@@ -452,7 +428,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
     <h3 style="font-size:16px;font-weight:800;color:#101828">مؤشرات الأداء الرئيسية (الوزن النسبي)</h3>
     <span style="font-size:11px;color:#6b7280" id="donut-days-left">–</span>
   </div>
-  <div id="stitch-kpi-grid" class="kpi-grid" style="margin-bottom:28px"></div>
+  <div id="stitch-kpi-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px"></div>
 
   <!-- تتبع أهم البنود المعلّقة -->
   <div style="background:#ffffff;border:1px solid rgba(0,30,64,.1);border-radius:14px;overflow:hidden;box-shadow:0 2px 10px rgba(0,30,64,.06)">
@@ -528,26 +504,70 @@ tr:hover td{background:rgba(0,194,255,.03)}
   </div>
 </div>
 
+<!-- ═══ COMPLAINTS (الشكاوى) ═══ -->
+<div class="pane" id="pane-complaints">
+  <div class="sec-hdr">
+    <div class="sec-icon" style="background:rgba(255,71,87,.1)">📋</div>
+    <div class="sec-title">الشكاوى</div>
+    <div class="sec-line"></div>
+    <button class="btn btn-primary" onclick="openComplaintModal()" data-perm-tab="complaints">+ إضافة</button>
+  </div>
+  <div class="info-bar">ℹ️ جميع التعديلات تُحفظ تلقائياً في Google Sheets وتظهر فوراً</div>
+  <div class="tcard">
+    <div class="tcard-hdr">
+      <div class="tcard-title">📋 الشكاوى <span class="badge badge-blue" id="cmp-cnt">0</span></div>
+      <div style="display:flex;gap:6px"><span class="badge badge-green" id="cmp-closed">0 مغلقة</span><span class="badge badge-red" id="cmp-open">0 مفتوحة</span></div>
+    </div>
+    <div class="tscroll">
+      <table><thead><tr><th class="num">#</th><th>تاريخ الاستلام</th><th>النوع</th><th>الوصف</th><th>القسم</th><th>حالة المريض</th><th>الحالة</th><th>تاريخ الحل</th><th>إجراء</th></tr></thead>
+      <tbody id="cmp-tbody"></tbody></table>
+    </div>
+    <button class="add-row" onclick="openComplaintModal()" data-perm-tab="complaints">+ إضافة شكوى</button>
+  </div>
+</div>
+
+<!-- ═══ PATIENT EXPERIENCE (تجربة المريض) ═══ -->
+<div class="pane" id="pane-patient-experience">
+  <div class="sec-hdr">
+    <div class="sec-icon" style="background:rgba(16,217,126,.1)">💬</div>
+    <div class="sec-title">تجربة المريض</div>
+    <div class="sec-line"></div>
+    <button class="btn btn-primary" onclick="openPxModal()" data-perm-tab="patient-experience">+ إضافة</button>
+  </div>
+  <div class="info-bar">ℹ️ جميع التعديلات تُحفظ تلقائياً في Google Sheets وتظهر فوراً</div>
+  <div class="tcard">
+    <div class="tcard-hdr">
+      <div class="tcard-title">💬 سجلات تجربة المريض <span class="badge badge-blue" id="px-cnt">0</span></div>
+    </div>
+    <div class="tscroll">
+      <table><thead><tr><th class="num">#</th><th>مرجع المريض</th><th>تاريخ الموعد</th><th>تاريخ التواصل</th><th>نوع التجربة</th><th>ملاحظات</th><th>إجراء</th></tr></thead>
+      <tbody id="px-tbody"></tbody></table>
+    </div>
+    <button class="add-row" onclick="openPxModal()" data-perm-tab="patient-experience">+ إضافة سجل</button>
+  </div>
+</div>
+
 <!-- ═══ SITE AUDITS (جولات التدقيق) ═══ -->
 <div class="pane" id="pane-site-audits">
-  <div class="page-hero">
-    <div style="display:flex;align-items:center;gap:16px">
-      <div class="page-hero-icon" style="background:linear-gradient(135deg,#0d1f3c,#003366)">🔍</div>
-      <div class="page-hero-txt">
-        <h2>جولات التدقيق الميداني</h2>
-        <p id="audit-header-subtitle">وثّق كل جولة بصور قبل/بعد، ملاحظات، توصية، وتوقيع المفتش ومدير الفرع</p>
-      </div>
+  <div style="background:linear-gradient(135deg,#0d1f3c,#003366);border-radius:14px;padding:22px 28px;margin-bottom:20px;
+    color:white;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+    <div>
+      <h2 style="margin:0 0 6px;font-size:20px;font-weight:900">🔍 جولات التدقيق الميداني</h2>
+      <p style="margin:0;opacity:.85;font-size:12px" id="audit-header-subtitle">وثّق كل جولة بصور قبل/بعد، ملاحظات، توصية، وتوقيع المفتش ومدير الفرع</p>
     </div>
-    <div class="page-hero-actions" data-perm-tab="site-audits">
-      <button class="btn btn-gold" onclick="generateAuditEscalationReport()">🖨️ تقرير تصعيد للإدارة</button>
-      <button class="btn btn-primary" onclick="openAuditModal()" data-perm-tab="site-audits">＋ زيارة جديدة</button>
-      <button class="btn btn-ghost" onclick="openFollowUpModal()" data-perm-tab="site-audits">↻ زيارة متابعة</button>
+    <div style="display:flex;gap:8px;flex-wrap:wrap" data-perm-tab="site-audits">
+      <button onclick="generateAuditEscalationReport()" style="background:rgba(255,124,42,.25);border:1px solid rgba(255,124,42,.5);color:#fff;
+        padding:10px 18px;border-radius:9px;font-family:Tajawal,sans-serif;font-size:13px;font-weight:800;cursor:pointer">🖨️ تقرير تصعيد للإدارة</button>
+      <button onclick="openAuditModal()" data-perm-tab="site-audits" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:#fff;
+        padding:10px 22px;border-radius:9px;font-family:Tajawal,sans-serif;font-size:13px;font-weight:800;cursor:pointer">＋ زيارة جديدة</button>
+      <button onclick="openFollowUpModal()" data-perm-tab="site-audits" style="background:rgba(0,194,255,.25);border:1px solid rgba(0,194,255,.5);color:#fff;
+        padding:10px 22px;border-radius:9px;font-family:Tajawal,sans-serif;font-size:13px;font-weight:800;cursor:pointer">↻ زيارة متابعة</button>
     </div>
   </div>
 
   <!-- ═══ عرض المشرف/المفتش الكامل ═══ -->
   <div id="audit-admin-view">
-    <div class="kpi-grid" style="gap:12px;margin-bottom:20px" id="audit-kpi-row"></div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px" id="audit-kpi-row"></div>
 
     <div class="tcard">
       <div class="tcard-hdr">
@@ -602,7 +622,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
         <svg viewBox="0 0 64 64" style="width:100%;height:100%;transform:rotate(-90deg)">
           <circle cx="32" cy="32" r="26" fill="none" stroke="#eceef4" stroke-width="7"></circle>
           <circle id="req-donut" cx="32" cy="32" r="26" fill="none" stroke="#7c3aed" stroke-width="7"
-            stroke-linecap="round" style="stroke-dasharray:163;stroke-dashoffset:163;transition:stroke-dashoffset 1s ease"></circle>
+            stroke-linecap="round" style="stroke-dasharray:163;stroke-dashoffset:163;transition:stroke-dashoffset .8s ease"></circle>
         </svg>
         <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#101828" id="req-donut-text">0%</div>
       </div>
@@ -651,7 +671,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
 
   <!-- عرض Kanban -->
   <div id="req-kanban-view" style="display:none">
-    <div style="display:grid;gap:14px" id="req-kanban-cols"></div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px" id="req-kanban-cols"></div>
   </div>
 </div>
 
@@ -728,7 +748,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
     <button class="btn btn-primary" onclick="newAssign()" data-perm-tab="assignments">+ إضافة مهمة</button>
   </div>
 
-  <div id="assign-kpi-row" class="kpi-grid" style="gap:12px;margin-bottom:20px"></div>
+  <div id="assign-kpi-row" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px"></div>
 
   <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center">
     <input type="text" id="assign-search" placeholder="🔍 ابحث باسم المهمة أو المسؤول..." oninput="renderAssign()"
@@ -776,15 +796,12 @@ tr:hover td{background:rgba(0,194,255,.03)}
 <div class="pane" id="pane-workflow">
 
   <!-- Header -->
-  <div class="page-hero">
-    <div style="display:flex;align-items:center;gap:16px">
-      <div class="page-hero-icon" style="background:linear-gradient(135deg,#7C3AED,#0080FF)">📁</div>
-      <div class="page-hero-txt">
-        <h2>المستندات</h2>
-        <p>أضف رابط مجلد المستندات أو سجّل مستنداتك يدوياً</p>
-      </div>
+  <div style="background:linear-gradient(135deg,#7C3AED,#0080FF);border-radius:12px;padding:24px;margin-bottom:20px;color:white;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+    <div>
+      <h2 style="margin:0 0 8px;font-size:24px;font-weight:900">📁 المستندات</h2>
+      <p style="margin:0;opacity:.9;font-size:13px">أضف رابط مجلد المستندات أو سجّل مستنداتك يدوياً</p>
     </div>
-    <button class="btn btn-primary" onclick="newWf()" data-perm-tab="workflow">＋ إضافة مستند</button>
+    <button onclick="newWf()" data-perm-tab="workflow" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:#fff;padding:10px 22px;border-radius:9px;font-family:Tajawal,sans-serif;font-size:13px;font-weight:800;cursor:pointer">＋ إضافة مستند</button>
   </div>
 
   <!-- Folder Link Input -->
@@ -830,7 +847,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
 
 <div class="pane" id="pane-policies2">
   <!-- Stats row -->
-  <div class="grid-6" id="pol2-stats" style="margin-bottom:16px"></div>
+  <div class="kpi-grid" id="pol2-stats" style="grid-template-columns:repeat(6,1fr);margin-bottom:16px"></div>
 
   <!-- Section bars -->
   <div class="sec-hdr">
@@ -841,7 +858,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
     <button class="btn btn-primary" onclick="promptSyncFromSheet()" title="سحب من شيت السياسات">📥 سحب من الشيت</button>
     <button class="btn btn-gold" onclick="exportPoliciesCSV()">📥 CSV</button>
   </div>
-  <div class="grid-5" style="margin-bottom:20px" id="pol2-sections"></div>
+  <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:20px" id="pol2-sections"></div>
 
   <!-- Signatories -->
   <div class="sec-hdr">
@@ -849,7 +866,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
     <div class="sec-title">حالة التوقيعات</div>
     <div class="sec-line"></div>
   </div>
-  <div class="grid-7" style="margin-bottom:20px" id="pol2-sigs"></div>
+  <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:10px;margin-bottom:20px" id="pol2-sigs"></div>
 
   <!-- Table -->
   <div class="sec-hdr">
@@ -933,26 +950,38 @@ tr:hover td{background:rgba(0,194,255,.03)}
 <div class="pane" id="pane-patient-files">
 
   <!-- Header -->
-  <div class="page-hero">
-    <div style="display:flex;align-items:center;gap:16px">
-      <div class="page-hero-icon" style="background:linear-gradient(135deg,#0047AB,#0080FF,#10D97E)">📂</div>
-      <div class="page-hero-txt">
-        <h2>ملفات المرضى</h2>
-        <p>ارفع تقرير التحليل اليومي وتتبّع نسبة اكتمال الملفات</p>
+  <div style="background:linear-gradient(135deg,#0047AB,#0080FF,#10D97E);border-radius:14px;padding:22px 28px;margin-bottom:20px;color:white;position:relative;overflow:hidden">
+    <div style="position:absolute;left:-20px;top:-20px;width:120px;height:120px;background:rgba(255,255,255,.05);border-radius:50%"></div>
+    <div style="position:relative;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+      <div>
+        <h2 style="margin:0 0 4px;font-size:20px;font-weight:900">📂 ملفات المرضى</h2>
+        <p style="margin:0;opacity:.85;font-size:12px">ارفع تقرير التحليل اليومي وتتبّع نسبة اكتمال الملفات</p>
       </div>
-    </div>
-    <div class="page-hero-actions">
-      <button class="btn btn-primary" onclick="openModal('m-patient-file')" data-perm-tab="patient-files">＋ إضافة تقرير</button>
-      <button class="btn btn-ghost" onclick="pfFetchFromSheets()">🔄 مزامنة</button>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button onclick="openModal('m-patient-file')" data-perm-tab="patient-files" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:#fff;padding:10px 22px;border-radius:9px;font-family:Tajawal,sans-serif;font-size:13px;font-weight:800;cursor:pointer">＋ إضافة تقرير</button>
+        <button onclick="pfFetchFromSheets()" style="background:rgba(16,217,126,.2);border:1px solid rgba(16,217,126,.4);color:#10D97E;padding:10px 18px;border-radius:9px;font-family:Tajawal,sans-serif;font-size:13px;font-weight:800;cursor:pointer">🔄 مزامنة</button>
+      </div>
     </div>
   </div>
 
   <!-- Summary Cards -->
-  <div class="kpi-grid" style="gap:12px;margin-bottom:20px">
-    <div class="kpi blue"><div class="kpi-lbl">📊 إجمالي الملفات</div><div class="kpi-val" id="pf-total">0</div></div>
-    <div class="kpi green"><div class="kpi-lbl">✅ المكتملة</div><div class="kpi-val" id="pf-complete">0</div></div>
-    <div class="kpi red"><div class="kpi-lbl">⚠️ الناقصة</div><div class="kpi-val" id="pf-incomplete">0</div></div>
-    <div class="kpi blue"><div class="kpi-lbl">📈 نسبة الاكتمال</div><div class="kpi-val" id="pf-pct">0%</div></div>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px">
+    <div style="background:linear-gradient(135deg,#0047AB,#0080FF);border-radius:12px;padding:18px;color:white;text-align:center">
+      <div style="font-size:11px;opacity:.9;margin-bottom:4px">📊 إجمالي الملفات</div>
+      <div style="font-size:34px;font-weight:900;font-family:Cairo,sans-serif" id="pf-total">0</div>
+    </div>
+    <div style="background:linear-gradient(135deg,#10D97E,#0D9488);border-radius:12px;padding:18px;color:white;text-align:center">
+      <div style="font-size:11px;opacity:.9;margin-bottom:4px">✅ المكتملة</div>
+      <div style="font-size:34px;font-weight:900;font-family:Cairo,sans-serif" id="pf-complete">0</div>
+    </div>
+    <div style="background:linear-gradient(135deg,#F97316,#EF4444);border-radius:12px;padding:18px;color:white;text-align:center">
+      <div style="font-size:11px;opacity:.9;margin-bottom:4px">⚠️ الناقصة</div>
+      <div style="font-size:34px;font-weight:900;font-family:Cairo,sans-serif" id="pf-incomplete">0</div>
+    </div>
+    <div style="background:var(--surface);border:1px solid rgba(0,194,255,.2);border-radius:12px;padding:18px;text-align:center">
+      <div style="font-size:11px;color:var(--text3);margin-bottom:4px">📈 نسبة الاكتمال</div>
+      <div style="font-size:34px;font-weight:900;font-family:Cairo,sans-serif;color:var(--accent)" id="pf-pct">0%</div>
+    </div>
   </div>
 
   <!-- Upload Box -->
@@ -1066,7 +1095,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
 
   <div class="info-bar">🔗 البيانات من Google Sheets مباشرةً عبر Apps Script · تؤثر على لوحة الإنجاز الكلي (وزن 15%)</div>
 
-  <div class="kpi-grid" style="gap:12px;margin-bottom:20px">
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px">
     <div style="background:var(--surface);border:1px solid rgba(0,194,255,.2);border-radius:12px;padding:18px">
       <div style="font-size:11px;color:var(--text3);margin-bottom:4px">إجمالي الموظفين</div>
       <div style="font-size:34px;font-weight:900;color:var(--accent);font-family:Cairo,sans-serif" id="emp-total">–</div>
@@ -1082,7 +1111,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
     <div style="background:var(--surface);border:1px solid rgba(245,158,11,.2);border-radius:12px;padding:18px">
       <div style="font-size:11px;color:var(--text3);margin-bottom:4px">📊 متوسط الإنجاز الكلي</div>
       <div style="font-size:34px;font-weight:900;color:var(--gold);font-family:Cairo,sans-serif" id="emp-pct">–</div>
-      <div style="height:5px;background:rgba(0,30,64,.08);border-radius:3px;margin-top:8px;overflow:hidden">
+      <div style="height:5px;background:rgba(255,255,255,.06);border-radius:3px;margin-top:8px;overflow:hidden">
         <div id="emp-pct-bar" style="height:100%;width:0%;background:var(--gold);border-radius:3px;transition:width .8s"></div>
       </div>
     </div>
@@ -1175,6 +1204,14 @@ tr:hover td{background:rgba(0,194,255,.03)}
 
 </div><!-- /.main -->
 
+<!-- Footer ثابت — يظهر أسفل كل صفحة -->
+<div id="app-footer-credit" style="padding:18px 24px;text-align:center;border-top:1px solid rgba(0,30,64,.08);background:var(--surface);margin-top:auto">
+  <div style="font-size:11px;color:#9aa1ac;line-height:1.8">
+    Built and Developed by <strong style="color:#43474f">Mr. Ibrahim Alluhaydi</strong><br>
+    تم بناء وتطوير النظام بواسطة مسؤول الجودة <strong style="color:#43474f">إبراهيم اللهيدي</strong>
+  </div>
+</div>
+
 <!-- Extras Modal — رخص / عقود / مستندات / موظفين -->
 <div class="overlay" id="m-extras">
   <div class="modal" style="max-width:600px">
@@ -1206,18 +1243,20 @@ tr:hover td{background:rgba(0,194,255,.03)}
 
 
 <!-- ═══ LICENSES & CONTRACTS ═══ -->
-<div class="pane" id="pane-licenses" style="padding:20px 24px;max-width:1440px;margin:0 auto">
+<div class="pane" id="pane-licenses">
 
   <!-- Header -->
-  <div class="page-hero" style="margin-bottom:18px">
-    <div style="display:flex;align-items:center;gap:16px">
-      <div class="page-hero-icon" style="background:linear-gradient(135deg,#7C2D12,#DC2626,#EA580C)">📋</div>
-      <div class="page-hero-txt">
-        <h2>الرخص والعقود والاتفاقيات</h2>
-        <p>سجّل كل بند مع تاريخ سريانه — تؤثر على لوحة الإنجاز الكلي (وزن 5%)</p>
+  <div style="background:linear-gradient(135deg,#7C2D12,#DC2626,#EA580C);border-radius:14px;padding:22px 28px;margin-bottom:18px;color:white;position:relative;overflow:hidden">
+    <div style="position:absolute;right:-30px;top:-30px;width:130px;height:130px;background:rgba(255,255,255,.05);border-radius:50%"></div>
+    <div style="position:relative;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+      <div>
+        <h2 style="margin:0 0 5px;font-size:20px;font-weight:900">📋 الرخص والعقود والاتفاقيات</h2>
+        <p style="margin:0;opacity:.85;font-size:12px">سجّل كل بند مع تاريخ سريانه — تؤثر على لوحة الإنجاز الكلي (وزن 5%)</p>
       </div>
+      <button onclick="licOpenModal()" data-perm-tab="licenses" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:#fff;padding:10px 22px;border-radius:9px;font-family:Tajawal,sans-serif;font-size:13px;font-weight:800;cursor:pointer">
+        ＋ إضافة بند
+      </button>
     </div>
-    <button class="btn btn-primary" onclick="licOpenModal()" data-perm-tab="licenses">＋ إضافة بند</button>
   </div>
 
   <!-- Drive link -->
@@ -1236,7 +1275,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
   </div>
 
   <!-- KPI row -->
-  <div class="grid-5" style="margin-bottom:18px">
+  <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:18px">
     <div style="background:var(--surface);border:1px solid rgba(220,38,38,.2);border-radius:11px;padding:14px;text-align:center">
       <div style="font-size:10px;color:var(--text3);margin-bottom:3px">📜 رخص</div>
       <div style="font-size:28px;font-weight:900;color:#EF4444;font-family:Cairo,sans-serif" id="lic2-n-lic">0</div>
@@ -1262,7 +1301,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
   <!-- progress bar -->
   <div style="background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:14px;margin-bottom:18px;display:flex;align-items:center;gap:14px">
     <div style="font-size:11px;color:var(--text3);white-space:nowrap">نسبة الإنجاز</div>
-    <div style="flex:1;height:10px;background:rgba(0,30,64,.08);border-radius:5px;overflow:hidden">
+    <div style="flex:1;height:10px;background:rgba(255,255,255,.06);border-radius:5px;overflow:hidden">
       <div id="lic2-pct-bar" style="height:100%;width:0%;background:linear-gradient(90deg,#DC2626,#EA580C);border-radius:5px;transition:width .8s"></div>
     </div>
     <div style="font-size:18px;font-weight:900;color:#EA580C;font-family:Cairo,sans-serif;min-width:44px;text-align:left" id="lic2-pct-num">0%</div>
@@ -1331,7 +1370,9 @@ tr:hover td{background:rgba(0,194,255,.03)}
 <!-- ── LICENSE MODAL ── -->
 <div class="overlay" id="m-lic2">
   <div class="modal" style="max-width:520px">
-    <h3 id="lic2-modal-ttl">📋 إضافة بند جديد</h3>
+    <div style="background:linear-gradient(135deg,#7C2D12,#DC2626,#EA580C);padding:18px 22px;margin:-26px -26px 18px;border-radius:14px 14px 0 0">
+      <h3 style="margin:0;color:#fff;font-size:15px" id="lic2-modal-ttl">📋 إضافة بند جديد</h3>
+    </div>
     <input type="hidden" id="lic2-edit-id">
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
       <div class="fg"><label>النوع *</label>
@@ -1371,7 +1412,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
 </div><!-- /overlay#m-lic2 -->
 
 <!-- ═══ USERS & PERMISSIONS ═══ -->
-<div class="pane" id="pane-users" style="padding:20px 24px;max-width:1440px;margin:0 auto">
+<div class="pane" id="pane-users">
   <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:14px;margin-bottom:20px">
     <div>
       <h2 style="font-size:22px;font-weight:800;color:#101828;margin-bottom:4px">إدارة المستخدمين والصلاحيات</h2>
@@ -1405,7 +1446,7 @@ tr:hover td{background:rgba(0,194,255,.03)}
     <div class="fg"><label id="user-dept-label">القسم</label><input type="text" id="user-dept" placeholder="مثال: التمريض، الجودة..."></div>
     <div class="fg"><label>الدور *</label>
       <select id="user-role" onchange="onUserRoleChange()">
-        <option>مشرف</option><option>مدير الجودة</option><option>رئيس قسم</option><option selected>موظف</option><option>مدير فرع</option>
+        <option>مشرف</option><option>مدير الجودة</option><option>رئيس قسم</option><option selected>موظف</option><option>مدير فرع</option><option>منسق الشكاوى وتجربة المريض</option>
       </select>
       <div id="user-role-hint" style="display:none;font-size:11px;color:var(--accent);margin-top:5px;background:rgba(0,102,204,.06);padding:8px 10px;border-radius:6px">
         ℹ️ دور "مدير فرع" يشوف بس تبويب "جولات التدقيق"، وبس تقارير فرعه (اكتب اسم الفرع بالضبط بخانة "القسم" أعلاه: بريدة أو عنيزة)، وما يقدر يعدّل — بس يوقّع على التقرير.
@@ -1450,7 +1491,9 @@ tr:hover td{background:rgba(0,194,255,.03)}
 <div class="overlay" id="m-audit">
   <div class="modal" style="max-width:640px">
     <datalist id="audit-known-places"></datalist>
-    <h3>🔍 إضافة جولة تدقيق</h3>
+    <div style="background:linear-gradient(135deg,#0d1f3c,#003366);padding:18px 22px;margin:-26px -26px 18px;border-radius:14px 14px 0 0">
+      <h3 style="margin:0;color:#fff;font-size:15px">🔍 إضافة جولة تدقيق</h3>
+    </div>
     <input type="hidden" id="audit-eid">
 
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
@@ -1501,8 +1544,10 @@ tr:hover td{background:rgba(0,194,255,.03)}
 <!-- Follow-up Visit Modal -->
 <div class="overlay" id="m-followup">
   <div class="modal" style="max-width:680px">
-    <h3 style="margin-bottom:4px">↻ إضافة زيارة متابعة</h3>
-    <p style="margin:0 0 18px;color:var(--text3);font-size:11px">لقياس التغيير مقارنةً بزيارة سابقة</p>
+    <div style="background:linear-gradient(135deg,#003366,#0066cc);padding:18px 22px;margin:-26px -26px 18px;border-radius:14px 14px 0 0">
+      <h3 style="margin:0;color:#fff;font-size:15px">↻ إضافة زيارة متابعة</h3>
+      <p style="margin:6px 0 0;color:rgba(255,255,255,.8);font-size:11px">لقياس التغيير مقارنةً بزيارة سابقة</p>
+    </div>
     <input type="hidden" id="followup-eid">
 
     <div class="fg">
@@ -1564,7 +1609,9 @@ tr:hover td{background:rgba(0,194,255,.03)}
 <!-- Branch Manager: عرض التقرير + توقيع فقط -->
 <div class="overlay" id="m-manager-sign">
   <div class="modal" style="max-width:600px">
-    <h3>📋 تقرير الزيارة</h3>
+    <div style="background:linear-gradient(135deg,#0d1f3c,#003366);padding:18px 22px;margin:-26px -26px 18px;border-radius:14px 14px 0 0">
+      <h3 style="margin:0;color:#fff;font-size:15px">📋 تقرير الزيارة</h3>
+    </div>
     <input type="hidden" id="mgr-sign-audit-id">
     <div id="mgr-sign-report-body" style="margin-bottom:16px"></div>
     <div id="mgr-sign-pad-section">
@@ -1598,6 +1645,43 @@ tr:hover td{background:rgba(0,194,255,.03)}
     <div class="modal-footer">
       <button class="btn btn-danger" onclick="closeModal('m-obs')">إلغاء</button>
       <button class="btn btn-primary" onclick="saveObs()">💾 حفظ</button>
+    </div>
+  </div>
+</div>
+
+<!-- Complaint Modal -->
+<div class="overlay" id="m-complaint">
+  <div class="modal">
+    <h3>📋 <span id="m-cmp-title">إضافة شكوى</span></h3>
+    <input type="hidden" id="cmp-eid">
+    <div class="fg"><label>تاريخ الاستلام</label><input type="date" id="cmp-date-received"></div>
+    <div class="fg"><label>نوع الشكوى</label><select id="cmp-type"><option>طبية</option><option>إدارية</option><option>مالية</option><option>أخرى</option></select></div>
+    <div class="fg"><label>وصف الشكوى</label><textarea id="cmp-description" rows="3" placeholder="تفاصيل الشكوى..."></textarea></div>
+    <div class="fg"><label>القسم</label><input type="text" id="cmp-department" placeholder="القسم المعني"></div>
+    <div class="fg"><label>حالة المريض</label><input type="text" id="cmp-patient-status" placeholder="مثال: متابع، غادر..."></div>
+    <div class="fg"><label>الحالة</label><select id="cmp-status"><option>معلقة</option><option>قيد المعالجة</option><option>مغلقة</option></select></div>
+    <div class="fg"><label>تاريخ الحل</label><input type="date" id="cmp-resolved-date"></div>
+    <div class="fg"><label>ملاحظات</label><textarea id="cmp-notes" rows="2" placeholder="أي ملاحظات إضافية..."></textarea></div>
+    <div class="modal-footer">
+      <button class="btn btn-danger" onclick="closeModal('m-complaint')">إلغاء</button>
+      <button class="btn btn-primary" onclick="saveComplaint()">💾 حفظ</button>
+    </div>
+  </div>
+</div>
+
+<!-- Patient Experience Modal -->
+<div class="overlay" id="m-px">
+  <div class="modal">
+    <h3>💬 <span id="m-px-title">إضافة سجل تجربة مريض</span></h3>
+    <input type="hidden" id="px-eid">
+    <div class="fg"><label>مرجع المريض</label><input type="text" id="px-patient-ref" placeholder="رقم الملف أو المرجع"></div>
+    <div class="fg"><label>تاريخ الموعد</label><input type="date" id="px-appointment-date"></div>
+    <div class="fg"><label>تاريخ التواصل</label><input type="date" id="px-contact-date"></div>
+    <div class="fg"><label>نوع التجربة</label><select id="px-experience-type"><option>إيجابية</option><option>سلبية</option><option>محايدة</option></select></div>
+    <div class="fg"><label>ملاحظات</label><textarea id="px-notes" rows="3" placeholder="تفاصيل التجربة..."></textarea></div>
+    <div class="modal-footer">
+      <button class="btn btn-danger" onclick="closeModal('m-px')">إلغاء</button>
+      <button class="btn btn-primary" onclick="savePx()">💾 حفظ</button>
     </div>
   </div>
 </div>
@@ -1847,7 +1931,6 @@ function switchTab(id) {
   if (sbBtn) sbBtn.classList.add('active');
   const pane = document.getElementById('pane-'+id);
   if (pane) pane.classList.add('active');
-  window.scrollTo({ top: 0, behavior: 'instant' });
   // إغلاق القائمة الجانبية تلقائياً على الجوال بعد الاختيار
   toggleSidebar(false);
   // جلب تلقائي عند فتح ملفات المرضى
@@ -1905,7 +1988,8 @@ var ROLE_PERMISSIONS = {
   'رئيس قسم':    { view:['overview','observations','site-audits','requirements','team','locations','lectures','assignments','workflow','patient-files','policies2'],
                     edit:['observations','site-audits','requirements','team','locations','lectures','assignments'], manageUsers:false },
   'موظف':        { view:['overview','observations','site-audits','lectures','assignments'], edit:['observations','site-audits'], manageUsers:false },
-  'مدير فرع':    { view:['site-audits'], edit:[], manageUsers:false, restrictedAuditsView:true }
+  'مدير فرع':    { view:['site-audits','complaints','patient-experience'], edit:[], manageUsers:false, restrictedAuditsView:true },
+  'منسق الشكاوى وتجربة المريض': { view:['complaints','patient-experience','site-audits'], edit:['complaints','patient-experience'], manageUsers:false }
 };
 function rolePerm() { return (CURRENT_USER && ROLE_PERMISSIONS[CURRENT_USER.role]) || ROLE_PERMISSIONS['موظف']; }
 function isBranchManager() { return !!(CURRENT_USER && rolePerm().restrictedAuditsView); }
@@ -1932,7 +2016,7 @@ function applyPermissionsToUI() {
   });
   var curUserEl = document.getElementById('sb-current-user');
   if (curUserEl && CURRENT_USER) {
-    curUserEl.innerHTML = '👤 <strong>' + CURRENT_USER.name + '</strong><br><span style="color:#5b6472">' + CURRENT_USER.role + '</span>';
+    curUserEl.innerHTML = '👤 <strong>' + CURRENT_USER.name + '</strong><br><span style="color:#9aa1ac">' + CURRENT_USER.role + '</span>';
   }
   // ⚠️ تصحيح أمني: إذا التبويب النشط حالياً غير مسموح لهذا المستخدم، حوّله فوراً لأول تبويب مسموح
   var activePane = document.querySelector('.pane.active');
@@ -2019,7 +2103,7 @@ let DB = {
   observations:[], requirements:[], team:[],
   locations:[], tmpChanges:[], lectures:[],
   assignments:[], policies:[], workflow:[],
-  siteAudits:[],
+  siteAudits:[], complaints:[], patientExperience:[],
   dashboard: null
 };
 let isSyncing = false;
@@ -2179,7 +2263,7 @@ async function syncAll() {
     const d = await gasGet('getData');
     if (d.error) throw new Error(d.error);
     ['observations','requirements','team','locations','tmpChanges',
-     'lectures','assignments','policies','workflow','siteAudits','dashboard']
+     'lectures','assignments','policies','workflow','siteAudits','complaints','patientExperience','dashboard']
       .forEach(k => { if (d[k]) DB[k] = d[k]; });
     renderAll();
     setSyncStatus('ok');
@@ -2357,9 +2441,9 @@ function updateCD() {
 
 // ─── Status pill ─────────────────────────────────────────────
 const statusCls = {
-  'مكتمل':'s-done','محلولة':'s-done','مكتملة':'s-done','موقع كامل':'s-done','نعم':'s-done',
-  'جارٍ':'s-prog','جارية':'s-prog','موقع جزئياً':'s-warn',
-  'معلق':'s-pend','معلقة':'s-pend','لم تبدأ':'s-crit','لم يوقع':'s-crit','لا':'s-crit'
+  'مكتمل':'s-done','محلولة':'s-done','مكتملة':'s-done','موقع كامل':'s-done','نعم':'s-done','مغلقة':'s-done','إيجابية':'s-done',
+  'جارٍ':'s-prog','جارية':'s-prog','موقع جزئياً':'s-warn','قيد المعالجة':'s-prog','محايدة':'s-prog',
+  'معلق':'s-pend','معلقة':'s-pend','لم تبدأ':'s-crit','لم يوقع':'s-crit','لا':'s-crit','سلبية':'s-crit'
 };
 function pill(txt){ return `<span class="pill ${statusCls[txt]||'s-pend'}">${txt}</span>`; }
 function priPill(p){ const m={'عالية':'s-crit','متوسطة':'s-warn','منخفضة':'s-pend'}; return `<span class="pill ${m[p]||'s-pend'}">${p}</span>`; }
@@ -2386,6 +2470,8 @@ const signatories = [
 function renderAll() {
   try { renderOverview(); } catch(e) { console.warn('renderOverview error:', e); }
   try { renderObs(); } catch(e) { console.warn('renderObs error:', e); }
+  try { renderComplaints(); } catch(e) { console.warn('renderComplaints error:', e); }
+  try { renderPx(); } catch(e) { console.warn('renderPx error:', e); }
   try { renderReq(); } catch(e) { console.warn('renderReq error:', e); }
   try { renderTeam(); } catch(e) { console.warn('renderTeam error:', e); }
   try { renderLoc(); } catch(e) { console.warn('renderLoc error:', e); }
@@ -2450,7 +2536,7 @@ function renderOverview() {
   // Summary table — مطابق للمحاور في لوحة الإنجاز
   const pBar2 = (p) => {
     const c = p>=80?'var(--green)':p>=40?'var(--gold)':'var(--red)';
-    return `<div style="display:flex;align-items:center;gap:6px"><div style="flex:1;height:5px;background:rgba(0,30,64,.08);border-radius:3px;overflow:hidden"><div style="height:100%;width:${p}%;background:${c};border-radius:3px"></div></div><span style="font-size:10px;color:var(--text3);min-width:28px">${p}%</span></div>`;
+    return `<div style="display:flex;align-items:center;gap:6px"><div style="flex:1;height:5px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden"><div style="height:100%;width:${p}%;background:${c};border-radius:3px"></div></div><span style="font-size:10px;color:var(--text3);min-width:28px">${p}%</span></div>`;
   };
 
   // استخدم نفس PILLARS من لوحة الإنجاز
@@ -2601,8 +2687,8 @@ function renderTeam() {
         <div style="font-size:10px;color:var(--text3);margin-top:2px">${t.proj||''}</div>
       </div>
       <div style="display:flex;flex-direction:column;gap:4px">
-        ${userCanEdit('team') ? `<button class="btn btn-ghost" aria-label="تعديل" style="padding:2px 7px;font-size:9px" onclick="editTeam('${t.id}')">✏️</button>
-        <button class="btn btn-danger" aria-label="حذف" style="padding:2px 7px;font-size:9px" onclick="delTeam('${t.id}')">🗑️</button>` : ''}
+        ${userCanEdit('team') ? `<button class="btn btn-ghost" style="padding:2px 7px;font-size:9px" onclick="editTeam('${t.id}')">✏️</button>
+        <button class="btn btn-danger" style="padding:2px 7px;font-size:9px" onclick="delTeam('${t.id}')">🗑️</button>` : ''}
       </div>
     </div>`).join('');
 }
@@ -2806,6 +2892,111 @@ async function saveObs() {
   renderAll(); closeModal('m-obs');
   await apiCall(id?'update':'add','observations',obj.id,obj);
  
+  toast('✅ تم الحفظ في Google Sheets', 'success');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CRUD — Complaints (الشكاوى)
+// ═══════════════════════════════════════════════════════════════
+function renderComplaints() {
+  const closed = DB.complaints.filter(c=>c.status==='مغلقة').length;
+  document.getElementById('cmp-cnt').textContent = DB.complaints.length;
+  document.getElementById('cmp-closed').textContent = closed + ' مغلقة';
+  document.getElementById('cmp-open').textContent = (DB.complaints.length-closed) + ' مفتوحة';
+  document.getElementById('cmp-tbody').innerHTML = DB.complaints.map((c,i)=>`
+    <tr><td class="num">${i+1}</td>
+    <td style="font-size:11px">${c.date_received||'–'}</td>
+    <td><span class="badge badge-purple" style="font-size:9px">${c.type||''}</span></td>
+    <td class="td-main" style="max-width:220px">${c.description||''}</td>
+    <td style="font-size:11px">${c.department||'–'}</td>
+    <td style="font-size:11px">${c.patient_status||'–'}</td>
+    <td>${pill(c.status||'معلقة')}</td>
+    <td style="font-size:11px">${c.resolved_date||'–'}</td>
+    <td>${actionBtns('editComplaint','delComplaint',c.id,'complaints')}</td></tr>`).join('');
+}
+function openComplaintModal(c={}) {
+  document.getElementById('cmp-eid').value = c.id||'';
+  document.getElementById('m-cmp-title').textContent = c.id ? 'تعديل شكوى' : 'إضافة شكوى';
+  document.getElementById('cmp-date-received').value  = c.date_received||'';
+  document.getElementById('cmp-type').value            = c.type||'طبية';
+  document.getElementById('cmp-description').value     = c.description||'';
+  document.getElementById('cmp-department').value      = c.department||'';
+  document.getElementById('cmp-patient-status').value  = c.patient_status||'';
+  document.getElementById('cmp-status').value          = c.status||'معلقة';
+  document.getElementById('cmp-resolved-date').value   = c.resolved_date||'';
+  document.getElementById('cmp-notes').value           = c.notes||'';
+  openModal('m-complaint');
+}
+function editComplaint(id){ openComplaintModal(DB.complaints.find(c=>String(c.id)===String(id))||{}); }
+async function delComplaint(id) {
+  if(!confirm('حذف هذي الشكوى؟')) return;
+  DB.complaints = DB.complaints.filter(c=>String(c.id)!==String(id));
+  renderAll();
+  await apiCall('delete','complaints',id);
+  toast('🗑️ تم الحذف', 'info');
+}
+async function saveComplaint() {
+  const id = document.getElementById('cmp-eid').value;
+  const obj = { id:id||String(Date.now()),
+    date_received:document.getElementById('cmp-date-received').value,
+    type:document.getElementById('cmp-type').value,
+    description:document.getElementById('cmp-description').value,
+    department:document.getElementById('cmp-department').value,
+    patient_status:document.getElementById('cmp-patient-status').value,
+    status:document.getElementById('cmp-status').value,
+    resolved_date:document.getElementById('cmp-resolved-date').value,
+    notes:document.getElementById('cmp-notes').value };
+  if(id) { const idx=DB.complaints.findIndex(c=>String(c.id)===id); DB.complaints[idx]={...DB.complaints[idx],...obj}; }
+  else DB.complaints.push(obj);
+  renderAll(); closeModal('m-complaint');
+  await apiCall(id?'update':'add','complaints',obj.id,obj);
+  toast('✅ تم الحفظ في Google Sheets', 'success');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CRUD — Patient Experience (تجربة المريض)
+// ═══════════════════════════════════════════════════════════════
+function renderPx() {
+  document.getElementById('px-cnt').textContent = DB.patientExperience.length;
+  document.getElementById('px-tbody').innerHTML = DB.patientExperience.map((p,i)=>`
+    <tr><td class="num">${i+1}</td>
+    <td class="td-main">${p.patient_ref||''}</td>
+    <td style="font-size:11px">${p.appointment_date||'–'}</td>
+    <td style="font-size:11px">${p.contact_date||'–'}</td>
+    <td>${pill(p.experience_type||'محايدة')}</td>
+    <td style="font-size:11px;max-width:220px">${p.notes||'–'}</td>
+    <td>${actionBtns('editPx','delPx',p.id,'patient-experience')}</td></tr>`).join('');
+}
+function openPxModal(p={}) {
+  document.getElementById('px-eid').value = p.id||'';
+  document.getElementById('m-px-title').textContent = p.id ? 'تعديل سجل تجربة مريض' : 'إضافة سجل تجربة مريض';
+  document.getElementById('px-patient-ref').value      = p.patient_ref||'';
+  document.getElementById('px-appointment-date').value = p.appointment_date||'';
+  document.getElementById('px-contact-date').value     = p.contact_date||'';
+  document.getElementById('px-experience-type').value  = p.experience_type||'محايدة';
+  document.getElementById('px-notes').value            = p.notes||'';
+  openModal('m-px');
+}
+function editPx(id){ openPxModal(DB.patientExperience.find(p=>String(p.id)===String(id))||{}); }
+async function delPx(id) {
+  if(!confirm('حذف هذا السجل؟')) return;
+  DB.patientExperience = DB.patientExperience.filter(p=>String(p.id)!==String(id));
+  renderAll();
+  await apiCall('delete','patientExperience',id);
+  toast('🗑️ تم الحذف', 'info');
+}
+async function savePx() {
+  const id = document.getElementById('px-eid').value;
+  const obj = { id:id||String(Date.now()),
+    patient_ref:document.getElementById('px-patient-ref').value,
+    appointment_date:document.getElementById('px-appointment-date').value,
+    contact_date:document.getElementById('px-contact-date').value,
+    experience_type:document.getElementById('px-experience-type').value,
+    notes:document.getElementById('px-notes').value };
+  if(id) { const idx=DB.patientExperience.findIndex(p=>String(p.id)===id); DB.patientExperience[idx]={...DB.patientExperience[idx],...obj}; }
+  else DB.patientExperience.push(obj);
+  renderAll(); closeModal('m-px');
+  await apiCall(id?'update':'add','patientExperience',obj.id,obj);
   toast('✅ تم الحفظ في Google Sheets', 'success');
 }
 
@@ -3173,7 +3364,7 @@ function renderPolSectionBars() {
         <span style="font-size:12px;font-weight:700;color:${meta.color}">${meta.label}</span>
         <span style="font-size:11px;color:var(--text3)">${done}/${total}</span>
       </div>
-      <div style="height:6px;background:rgba(0,30,64,.08);border-radius:3px;overflow:hidden;margin-bottom:6px">
+      <div style="height:6px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden;margin-bottom:6px">
         <div style="height:100%;width:${pct}%;background:${meta.color};border-radius:3px"></div>
       </div>
       <div style="display:flex;gap:6px;flex-wrap:wrap">
@@ -3210,7 +3401,7 @@ function renderPolSignatories() {
       + '<div style="font-size:22px;font-weight:900;color:' + s.color + ';font-family:Cairo,sans-serif">' + signed + '</div>'
       + '<div style="font-size:10px;color:var(--text3);margin-bottom:2px">من ' + totalCount + ' سياسة</div>'
       + subLine
-      + '<div style="height:4px;background:rgba(0,30,64,.08);border-radius:2px;overflow:hidden;margin-bottom:4px">'
+      + '<div style="height:4px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden;margin-bottom:4px">'
       + '<div style="height:100%;width:' + pct + '%;background:' + s.color + ';border-radius:2px;transition:width .6s"></div></div>'
       + '<div style="font-size:10px;color:var(--text3)">' + pct + '%</div>'
       + '</div>';
@@ -3250,7 +3441,7 @@ function renderPolTable() {
     const sCls = statusCls2[p.contentReady] || 's-pend';
     const pct  = Number(p.pct) || 0;
     const pBar = `<div style="display:flex;align-items:center;gap:4px">
-      <div style="flex:1;height:5px;background:rgba(0,30,64,.08);border-radius:2px;overflow:hidden">
+      <div style="flex:1;height:5px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden">
         <div style="height:100%;width:${pct}%;background:${pct>=100?'var(--green)':pct>0?'var(--gold)':'var(--red)'};border-radius:2px"></div>
       </div><span style="font-size:10px;color:var(--text3);min-width:26px">${pct}%</span></div>`;
 
@@ -3476,7 +3667,7 @@ function renderProgressDashboard() {
           <div style="font-size:9px;color:var(--text3)">يساهم بـ ${contribution}%</div>
         </div>
       </div>
-      <div style="height:8px;background:rgba(0,30,64,.08);border-radius:4px;overflow:hidden">
+      <div style="height:8px;background:rgba(255,255,255,.06);border-radius:4px;overflow:hidden">
         <div style="height:100%;width:${pct}%;background:${p.color};border-radius:4px;transition:width .8s;box-shadow:0 0 8px ${p.color}66"></div>
       </div>
       <div style="font-size:10px;color:var(--text3);margin-top:6px">${alert} ${pct < 30 ? 'تأخير حرج' : pct < 60 ? 'يحتاج عمل' : pct < 90 ? 'تقدم جيد' : 'ممتاز'}</div>
@@ -4142,8 +4333,8 @@ function pfRender() {
       '<td style="text-align:center"><span style="font-weight:700;color:'+pctColor+'">'+pct+'%</span></td>'+
       '<td style="text-align:center">'+fileBtn+'</td>'+
       '<td style="text-align:center;display:flex;gap:4px;justify-content:center">'+
-        (userCanEdit('patient-files') ? '<button onclick="pfEdit(\''+p.id+'\')" aria-label="تعديل" style="padding:3px 8px;background:rgba(0,194,255,.08);border:1px solid rgba(0,194,255,.2);color:var(--accent);border-radius:5px;font-size:10px;cursor:pointer">✏️</button>'+
-        '<button onclick="pfDelete(\''+p.id+'\')" aria-label="حذف" style="padding:3px 8px;background:rgba(255,71,87,.08);border:1px solid rgba(255,71,87,.2);color:var(--red);border-radius:5px;font-size:10px;cursor:pointer">🗑️</button>' : '—')+
+        (userCanEdit('patient-files') ? '<button onclick="pfEdit(\''+p.id+'\')" style="padding:3px 8px;background:rgba(0,194,255,.08);border:1px solid rgba(0,194,255,.2);color:var(--accent);border-radius:5px;font-size:10px;cursor:pointer">✏️</button>'+
+        '<button onclick="pfDelete(\''+p.id+'\')" style="padding:3px 8px;background:rgba(255,71,87,.08);border:1px solid rgba(255,71,87,.2);color:var(--red);border-radius:5px;font-size:10px;cursor:pointer">🗑️</button>' : '—')+
       '</td>'+
     '</tr>';
   }).join('');
@@ -4313,7 +4504,7 @@ function renderEmpTable() {
         '<td style="color:var(--text2)">' + e.title + '</td>' +
         '<td><span style="font-size:10px;background:rgba(0,194,255,.08);color:var(--accent);padding:2px 8px;border-radius:10px;font-weight:700">' + e.dept + '</span></td>' +
         '<td style="text-align:center"><div style="display:flex;align-items:center;gap:6px;justify-content:center">' +
-        '<div style="width:60px;height:5px;background:rgba(0,30,64,.08);border-radius:3px;overflow:hidden">' +
+        '<div style="width:60px;height:5px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden">' +
         '<div style="height:100%;width:'+pc+'%;background:'+pc_color+';border-radius:3px"></div></div>' +
         '<span style="font-size:11px;font-weight:700;color:'+pc_color+'">'+pc+'%</span></div></td>' +
         '<td style="text-align:center"><span class="pill ' + st_cls + '">' + e.status + '</span></td>' +
@@ -4602,8 +4793,8 @@ function licRender() {
       '<td style="text-align:center"><span class="pill '+sc+'" style="font-size:10px">'+it.status+'</span></td>'+
       '<td style="text-align:center"><div style="display:flex;gap:4px;justify-content:center;align-items:center">'+
         linkBtn+
-        (userCanEdit('licenses') ? '<button onclick="licOpenModal(\''+it.id+'\')" aria-label="تعديل" style="padding:3px 8px;background:rgba(0,194,255,.08);border:1px solid rgba(0,194,255,.2);color:var(--accent);border-radius:5px;font-size:10px;cursor:pointer">✏️</button>'+
-        '<button onclick="licDelete(\''+it.id+'\')" aria-label="حذف" style="padding:3px 8px;background:rgba(255,71,87,.08);border:1px solid rgba(255,71,87,.2);color:var(--red);border-radius:5px;font-size:10px;cursor:pointer">🗑️</button>' : '')+
+        (userCanEdit('licenses') ? '<button onclick="licOpenModal(\''+it.id+'\')" style="padding:3px 8px;background:rgba(0,194,255,.08);border:1px solid rgba(0,194,255,.2);color:var(--accent);border-radius:5px;font-size:10px;cursor:pointer">✏️</button>'+
+        '<button onclick="licDelete(\''+it.id+'\')" style="padding:3px 8px;background:rgba(255,71,87,.08);border:1px solid rgba(255,71,87,.2);color:var(--red);border-radius:5px;font-size:10px;cursor:pointer">🗑️</button>' : '')+
       '</div></td>'+
     '</tr>';
   }).join('');
@@ -6221,8 +6412,10 @@ async function deleteUserAccount(id) {
 <!-- Patient File Report Modal -->
 <div class="overlay" id="m-patient-file">
   <div class="modal" style="max-width:560px">
-    <h3 style="margin-bottom:4px">📊 رفع تقرير ملفات المرضى</h3>
-    <p style="margin:0 0 18px;color:var(--text3);font-size:12px">سجّل إحصائيات الفترة وارفع التقرير المفصل</p>
+    <div style="background:linear-gradient(135deg,#0080FF,#10D97E);padding:20px;margin:-20px -20px 20px;border-radius:12px 12px 0 0">
+      <h3 style="margin:0;color:white;font-size:18px">📊 رفع تقرير ملفات المرضى</h3>
+      <p style="margin:6px 0 0;color:rgba(255,255,255,.8);font-size:12px">سجّل إحصائيات الفترة وارفع التقرير المفصل</p>
+    </div>
 
     <input type="hidden" id="pf-edit-id">
     
@@ -6257,14 +6450,6 @@ async function deleteUserAccount(id) {
       <button class="btn btn-danger" onclick="closeModal('m-patient-file')">إلغاء</button>
       <button class="btn btn-primary" onclick="savePatientFileReport()">💾 حفظ</button>
     </div>
-  </div>
-</div>
-
-<!-- Footer ثابت — يظهر أسفل كل صفحة -->
-<div id="app-footer-credit" style="padding:18px 24px;text-align:center;border-top:1px solid rgba(0,30,64,.08);background:var(--surface);margin-top:auto">
-  <div style="font-size:11px;color:#5b6472;line-height:1.8">
-    Built and Developed by <strong style="color:#43474f">Mr. Ibrahim Alluhaydi</strong><br>
-    تم بناء وتطوير النظام بواسطة مسؤول الجودة <strong style="color:#43474f">إبراهيم اللهيدي</strong>
   </div>
 </div>
 

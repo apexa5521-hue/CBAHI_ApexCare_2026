@@ -2945,7 +2945,7 @@ function renderComplaints() {
     return `<tr><td class="num">${i+1}</td>
     <td style="font-size:11px">${c.date_received||'–'}</td>
     <td><span class="badge badge-purple" style="font-size:9px">${c.type||''}</span></td>
-    <td class="td-main" style="max-width:220px">${c.description||''}${upCount?' <span class="badge badge-blue" style="font-size:9px" title="عدد التحديثات">🔄 '+upCount+'</span>':''}</td>
+    <td class="td-main" style="max-width:220px">${c.description||''}${upCount?' <span class="badge badge-blue" style="font-size:9px;cursor:pointer" title="اضغط لعرض سجل التحديثات" onclick="viewComplaintUpdates(\''+c.id+'\')">🔄 '+upCount+'</span>':''}</td>
     <td style="font-size:11px">${c.department||'–'}</td>
     <td style="font-size:11px">${c.patient_status||'–'}</td>
     <td>${pill(c.status||'معلقة')}</td>
@@ -3007,6 +3007,13 @@ function openComplaintFollowUpModal() {
   document.getElementById('cmpf-body').style.display = 'none';
   document.getElementById('cmpf-new-update').value = '';
   openModal('m-complaint-followup');
+}
+
+// فتح نافذة المتابعة مباشرة على شكوى محددة (من ضغط شارة عدد التحديثات بالجدول)
+function viewComplaintUpdates(id) {
+  openComplaintFollowUpModal();
+  document.getElementById('cmpf-select').value = id;
+  onComplaintFollowUpSelect();
 }
 
 function onComplaintFollowUpSelect() {

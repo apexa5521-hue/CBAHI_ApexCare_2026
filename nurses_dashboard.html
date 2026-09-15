@@ -544,8 +544,8 @@ canvas{max-height:260px;}
 </div>
 
 <script>
-// ══ USERS ══
-const USERS={
+// ══ USERS — محلي كـ fallback فقط إذا فشل الـ API ══
+const LOCAL_USERS={
   'ibrahim':  {pw:'apex@quality', label:'مدير الجودة',     branches:['BURIDAH','ONIZAH']},
   'director': {pw:'apex@exec',    label:'المدير التنفيذي', branches:['BURIDAH','ONIZAH']},
   'nursing':  {pw:'apex@nursing', label:'رئيسة التمريض',  branches:['BURIDAH','ONIZAH']},
@@ -614,21 +614,45 @@ function isToolText(txt){
 function doLogin(){
   const u=document.getElementById('u-user').value.trim().toLowerCase();
   const p=document.getElementById('u-pass').value;
-  const usr=USERS[u];
   const err=document.getElementById('login-err');
-  if(usr&&usr.pw===p){
-    currentUser={...usr,key:u};
-    err.style.display='none';
-    document.getElementById('login-screen').style.display='none';
-    document.getElementById('hdr').style.display='flex';
-    document.getElementById('app').style.display='block';
-    document.getElementById('role-lbl').textContent=usr.label;
-    document.getElementById('u-pass').value='';
-    initDash();
-  }else{
-    err.style.display='block';
-    document.getElementById('u-pass').value='';
-  }
+  const btn=document.querySelector('.login-btn');
+
+  if(!u||!p){err.style.display='block';err.textContent='⚠️ أدخل اسم المستخدم وكلمة المرور';return;}
+
+  btn.textContent='جاري التحقق...';btn.disabled=true;
+
+  // تحقق من الشيت أولاً
+  fetch(`${API}?action=login&u=${encodeURIComponent(u)}&p=${encodeURIComponent(p)}`)
+    .then(r=>r.json())
+    .then(data=>{
+      btn.textContent='دخول';btn.disabled=false;
+      if(data.success){
+        loginSuccess({label:data.label, branches:data.branches, key:u});
+      } else {
+        // fallback للبيانات المحلية
+        const local=LOCAL_USERS[u];
+        if(local&&local.pw===p) loginSuccess({label:local.label,branches:local.branches,key:u});
+        else { err.style.display='block';err.textContent='⚠️ اسم المستخدم أو كلمة المرور غير صحيحة';document.getElementById('u-pass').value=''; }
+      }
+    })
+    .catch(()=>{
+      btn.textContent='دخول';btn.disabled=false;
+      // fallback محلي عند فشل الـ API
+      const local=LOCAL_USERS[u];
+      if(local&&local.pw===p) loginSuccess({label:local.label,branches:local.branches,key:u});
+      else { err.style.display='block';err.textContent='⚠️ اسم المستخدم أو كلمة المرور غير صحيحة';document.getElementById('u-pass').value=''; }
+    });
+}
+
+function loginSuccess(usr){
+  currentUser=usr;
+  document.getElementById('login-err').style.display='none';
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('hdr').style.display='flex';
+  document.getElementById('app').style.display='block';
+  document.getElementById('role-lbl').textContent=usr.label;
+  document.getElementById('u-pass').value='';
+  initDash();
 }
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&document.getElementById('login-screen').style.display!=='none')doLogin();});
 function doLogout(){

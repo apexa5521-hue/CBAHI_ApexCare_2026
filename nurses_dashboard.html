@@ -322,6 +322,7 @@ canvas{max-height:260px;}
     <button class="mode-btn" onclick="setMode('all',this)">الكل</button>
   </div>
   <div class="spacer"></div>
+  <button class="theme-btn" onclick="printCurrentTab()" title="تصدير تقرير نظيف للطباعة">🖨</button>
   <button class="theme-btn" onclick="toggleTheme()" title="تبديل الوضع">🌙</button>
   <div class="role-badge" id="role-lbl"></div>
   <button class="logout-btn" onclick="doLogout()">خروج ↩</button>
@@ -608,6 +609,113 @@ function isToolText(txt){
   return !neg.some(x=>t.includes(x));
 }
 
+// ══ التقارير المطبوعة — نظيفة، بدون رموز تعبيرية، دقيقة ══
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function buildReportTable(headers,rows){
+  return `<table><thead><tr>${headers.map(h=>`<th>${esc(h)}</th>`).join('')}</tr></thead>
+    <tbody>${rows.map(r=>`<tr>${r.map(c=>`<td>${esc(c)}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+}
+function reportForActiveTab(){
+  const activeEl=document.querySelector('.tab-panel.active');
+  const tabId=activeEl?activeEl.id.replace('tab-',''):'overview';
+
+  switch(tabId){
+    case 'table': {
+      const rows=nurses.map(n=>[n.name,n.branch,mode==='week'?(n.weekStatus||'—'):(n.enteredThisWeek?'في الوقت':'لم تدخل'),n.onTime,n.late,n.absent,n.weeks,n.commitPct+'%',n.toolsPct+'%',n.qualityPct+'%',n.lastEntry||'—']);
+      return {title:'قائمة الممرضات', tableHtml:buildReportTable(['الممرضة','الفرع','الحالة','في الوقت','متأخر','غياب','أسابيع','الالتزام','الأدوات','الجودة الكلية','آخر إدخال'],rows)};
+    }
+    case 'heatmap': {
+      const table=document.querySelector('#heatmap-wrap table');
+      return {title:'خريطة الحضور — آخر 12 أسبوع', tableHtml: table ? table.outerHTML : '<p>لا توجد بيانات</p>'};
+    }
+    case 'control': {
+      const chartTitle=document.getElementById('cc-title')?document.getElementById('cc-title').textContent:'';
+      let body='<p>لا يوجد سجل كافٍ بعد</p>';
+      if(ccChart) body=`<img src="${ccChart.toBase64Image()}" style="max-width:100%;margin:16px 0;border:1px solid #ddd">`;
+      return {title:'مراقبة الأداء عبر الزمن — '+chartTitle, tableHtml:body};
+    }
+    case 'absent': {
+      const isAbsentNow=n=>mode==='week'?n.weekStatus==='لم تدخل':!n.enteredThisWeek;
+      const rows=nurses.filter(isAbsentNow).sort((a,b)=>b.absent-a.absent)
+        .map(n=>[n.name,n.branch,n.lastEntry||'—',n.absent,n.qualityPct+'%']);
+      return {title:'الممرضات غير الملتزمات', tableHtml: rows.length?buildReportTable(['الممرضة','الفرع','آخر إدخال','أسابيع غياب','الجودة الكلية'],rows):'<p>جميع الممرضات ملتزمات</p>'};
+    }
+    case 'tools': {
+      const rows=nurses.filter(n=>n.missingTools&&isToolText(n.missingDesc)).map(n=>[n.name,n.branch,n.missingDesc||'—']);
+      return {title:'الأدوات الناقصة', tableHtml: rows.length?buildReportTable(['الممرضة','الفرع','التفاصيل'],rows):'<p>لا توجد أدوات ناقصة مسجلة</p>'};
+    }
+    case 'drugs': {
+      const rows=nurses.filter(n=>n.expDate).map(n=>{const d=daysDiff(n.expDate);return [n.name,n.branch,n.expDate,d!==null?d+' يوم':'—'];});
+      return {title:'الأدوية — تواريخ الانتهاء', tableHtml: rows.length?buildReportTable(['الممرضة','الفرع','تاريخ الانتهاء','المتبقي'],rows):'<p>لا توجد بيانات أدوية مسجلة</p>'};
+    }
+    case 'cards': {
+      const rows=nurses.filter(n=>n.hasCard!==undefined).map(n=>[n.name,n.branch,n.hasCard?'موجودة':'غير موجودة']);
+      return {title:'بطاقات الموظفين', tableHtml: rows.length?buildReportTable(['الممرضة','الفرع','حالة البطاقة'],rows):'<p>لا توجد بيانات بطاقات مسجلة</p>'};
+    }
+    case 'issues': {
+      const rows=nurses.filter(n=>n.notes&&n.notes.trim().length>3&&isToolText(n.notes)).map(n=>[n.name,n.branch,n.notes]);
+      return {title:'مشاكل الأسبوع', tableHtml: rows.length?buildReportTable(['الممرضة','الفرع','الملاحظة'],rows):'<p>لا توجد مشاكل مسجلة</p>'};
+    }
+    case 'branches': {
+      const branches=['BURIDAH','ONIZAH'];
+      const rows=branches.map(b=>{
+        const list=nurses.filter(n=>n.branch===b);
+        const avgQ=list.length?Math.round(list.reduce((s,n)=>s+n.qualityPct,0)/list.length):0;
+        const entered=list.filter(n=>mode==='week'?n.weekStatus!=='لم تدخل':n.enteredThisWeek).length;
+        return [b,list.length,entered,avgQ+'%'];
+      });
+      return {title:'مقارنة الفروع', tableHtml:buildReportTable(['الفرع','عدد الممرضات','أدخلن','متوسط الجودة'],rows)};
+    }
+    case 'alerts': {
+      const rows=[];
+      nurses.forEach(n=>{
+        if(n.absent>=4)rows.push([n.name,n.branch,'غياب مرتفع',n.absent+' أسبوع']);
+        else if(n.absent>=2)rows.push([n.name,n.branch,'غياب متوسط',n.absent+' أسبوع']);
+        if(n.missingTools&&isToolText(n.missingDesc))rows.push([n.name,n.branch,'أدوات ناقصة',n.missingDesc||'—']);
+      });
+      return {title:'التنبيهات', tableHtml: rows.length?buildReportTable(['الممرضة','الفرع','نوع التنبيه','التفاصيل'],rows):'<p>لا توجد تنبيهات حالياً</p>'};
+    }
+    default: { // overview
+      const rows=nurses.map(n=>[n.name,n.branch,mode==='week'?(n.weekStatus||'—'):(n.enteredThisWeek?'في الوقت':'لم تدخل'),n.qualityPct+'%',n.lastEntry||'—']);
+      return {title:'نظرة عامة', tableHtml:buildReportTable(['الممرضة','الفرع','الحالة','الجودة الكلية','آخر إدخال'],rows)};
+    }
+  }
+}
+function printCurrentTab(){
+  const {title,tableHtml}=reportForActiveTab();
+  const sat=document.getElementById('week-date').value;
+  const modeLbl=mode==='week'?`أسبوع ${sat}`:'كل الفترة (تراكمي)';
+  const today=new Date().toLocaleDateString('ar-SA');
+  const w=window.open('','_blank');
+  if(!w){alert('الرجاء السماح للنوافذ المنبثقة لعرض التقرير');return;}
+  w.document.write(`<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="utf-8">
+  <title>${esc(title)} — ApexCare</title>
+  <style>
+    *{box-sizing:border-box}
+    body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;padding:36px;color:#1a1a1a;line-height:1.7;max-width:1000px;margin:0 auto}
+    .hdr{border-bottom:2px solid #1a237e;padding-bottom:12px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:flex-end}
+    .hdr h1{font-size:20px;margin:0;color:#1a237e}
+    .hdr .sub{font-size:12px;color:#666;margin-top:4px}
+    .meta{font-size:12px;color:#555;text-align:left}
+    table{width:100%;border-collapse:collapse;margin:16px 0;font-size:12.5px}
+    th,td{border:1px solid #ccc;padding:7px 10px;text-align:right}
+    th{background:#f2f3f7;font-weight:600;color:#1a237e}
+    tr:nth-child(even) td{background:#fafafa}
+    .foot{margin-top:28px;font-size:10.5px;color:#999;border-top:1px solid #eee;padding-top:10px}
+    @media print{ @page{margin:14mm} body{padding:0} }
+  </style></head>
+  <body>
+    <div class="hdr">
+      <div><h1>${esc(title)}</h1><div class="sub">عيادات أبكس كير — عنيزة وبريدة</div></div>
+      <div class="meta">${esc(modeLbl)}<br>تاريخ الإصدار: ${esc(today)}</div>
+    </div>
+    ${tableHtml}
+    <div class="foot">نظام مراقبة الممرضات — ApexCare</div>
+  </body></html>`);
+  w.document.close();
+  w.onload=()=>{ w.focus(); w.print(); };
+}
+
 // ══ LOGIN ══
 function doLogin(){
   const u=document.getElementById('u-user').value.trim().toLowerCase();
@@ -683,7 +791,7 @@ function setMode(m,btn){
   mode=m;
   document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
-  renderAll();
+  if(mode==='week'){ loadWeekOnlyData(); } else { renderAll(); }
 }
 
 // ══ INIT ══
@@ -703,9 +811,28 @@ function loadData(){
     const branches=currentUser.branches;
     nurses=(data.nurses||[]).filter(n=>branches.includes(n.branch));
     if(!nurses.length)nurses=SAMPLE.filter(n=>branches.includes(n.branch));
-    renderAll();
+    if(mode==='week'){ loadWeekOnlyData(); } else { renderAll(); }
   }).catch(()=>{
     nurses=SAMPLE.filter(n=>currentUser.branches.includes(n.branch));
+    if(mode==='week'){ loadWeekOnlyData(); } else { renderAll(); }
+  });
+}
+
+// جلب بيانات الأسبوع المحدد بدقة (بدون تراكم) ودمجها في nurses[]
+function loadWeekOnlyData(){
+  const sat=document.getElementById('week-date').value;
+  fetch(`${API}?action=weekonly&date=${sat}`).then(r=>r.json()).then(data=>{
+    const byName={};
+    (data.nurses||[]).forEach(n=>byName[n.name]=n);
+    nurses.forEach(n=>{
+      const w=byName[n.name];
+      n.weekStatus =w?w.status:'لم تدخل';
+      n.weekToolsOk=w?w.toolsOk:null;
+      n.weekToolsNote=w?w.toolsNote:'';
+    });
+    renderAll();
+  }).catch(()=>{
+    nurses.forEach(n=>{ n.weekStatus=n.enteredThisWeek?'في الوقت':'لم تدخل'; n.weekToolsOk=null; n.weekToolsNote=''; });
     renderAll();
   });
 }
@@ -722,6 +849,26 @@ function renderAll(){
 // ══ KPIs ══
 function renderKPIs(){
   const sat=document.getElementById('week-date').value;
+  if(mode==='week'){
+    const entered=nurses.filter(n=>n.weekStatus&&n.weekStatus!=='لم تدخل').length;
+    const onTime =nurses.filter(n=>n.weekStatus==='في الوقت').length;
+    const late   =nurses.filter(n=>n.weekStatus==='متأخر').length;
+    const toolsIssues=nurses.filter(n=>n.weekToolsOk===false).length;
+    document.getElementById('kpi-grid').innerHTML=[
+      {val:nurses.length,        lbl:'إجمالي الممرضات',        c:'var(--blue)',  },
+      {val:entered,              lbl:'أدخلن هذا الأسبوع',      c:'var(--green)', },
+      {val:nurses.length-entered,lbl:'لم يُدخلن هذا الأسبوع',  c:'var(--red)',   },
+      {val:onTime,               lbl:'في الوقت هذا الأسبوع',   c:'var(--green)', },
+      {val:late,                 lbl:'متأخرات هذا الأسبوع',    c:'var(--yellow)',},
+      {val:toolsIssues,          lbl:'أدوات ناقصة هذا الأسبوع',c:'var(--orange)',},
+    ].map(k=>`
+      <div class="kpi">
+        <div class="kpi-accent" style="background:${k.c}"></div>
+        <div class="kpi-val" style="color:${k.c}">${k.val}</div>
+        <div class="kpi-lbl">${k.lbl}</div>
+      </div>`).join('');
+    return;
+  }
   const entered=nurses.filter(n=>n.enteredThisWeek||n.lastEntry===sat).length;
   const avgQ=nurses.length?Math.round(nurses.reduce((s,n)=>s+n.qualityPct,0)/nurses.length):0;
   const tools=nurses.filter(n=>n.missingTools).length;
@@ -748,6 +895,30 @@ function renderKPIs(){
 // ══ OVERVIEW ══
 function renderOverview(){
   const sat=document.getElementById('week-date').value;
+  if(mode==='week'){
+    const onTimeList=nurses.filter(n=>n.weekStatus==='في الوقت').sort((a,b)=>a.name.localeCompare(b.name,'ar'));
+    document.getElementById('top-list').innerHTML=onTimeList.length?onTimeList.slice(0,5).map((n,i)=>`
+      <div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border)">
+        <span style="color:var(--muted);font-size:10px;min-width:14px">${i+1}</span>
+        <span style="flex:1;font-size:12px;cursor:pointer" onclick="openProfile('${n.name}')">${n.name}</span>
+        <span style="font-size:12px;font-weight:700;color:var(--green)">في الوقت</span>
+      </div>`).join(''):'<div style="color:var(--muted);font-size:11px;padding:16px;text-align:center">لا يوجد إدخالات في الوقت بعد لهذا الأسبوع</div>';
+    const needFollow=nurses.filter(n=>n.weekStatus==='متأخر'||n.weekStatus==='لم تدخل');
+    document.getElementById('bottom-list').innerHTML=needFollow.length?needFollow.slice(0,5).map(n=>`
+      <div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border)">
+        <span style="flex:1;font-size:12px;cursor:pointer" onclick="openProfile('${n.name}')">${n.name}</span>
+        <span style="font-size:12px;font-weight:700;color:${n.weekStatus==='لم تدخل'?'var(--red)':'var(--yellow)'}">${n.weekStatus}</span>
+      </div>`).join(''):'<div style="color:var(--muted);font-size:11px;padding:16px;text-align:center">الجميع في الوقت هذا الأسبوع</div>';
+    const notEntered=nurses.filter(n=>n.weekStatus==='لم تدخل');
+    document.getElementById('not-entered-list').innerHTML=notEntered.length?`
+      <div class="tbl-wrap"><table><thead><tr><th>الممرضة</th><th>الفرع</th><th>آخر إدخال</th><th>ملاحظة</th></tr></thead><tbody>
+      ${notEntered.map(n=>`<tr onclick="openProfile('${n.name}')" style="cursor:pointer">
+        <td>${n.name}</td><td>${n.branch}</td>
+        <td style="color:var(--muted);font-size:11px">${n.lastEntry||'—'}</td>
+        <td><span class="badge b-warn">تحقق — هل مسكت عيادة؟</span></td>
+      </tr>`).join('')}</tbody></table></div>`:'<div class="empty"><div class="ei">✅</div>جميع الممرضات أدخلن هذا الأسبوع</div>';
+    return;
+  }
   const sorted=[...nurses].sort((a,b)=>b.qualityPct-a.qualityPct);
   document.getElementById('top-list').innerHTML=sorted.slice(0,5).map((n,i)=>`
     <div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border)">
@@ -776,13 +947,21 @@ function renderOverview(){
 let tblSearch='';
 function renderTable(){
   let rows=nurses;
-  if(tblFilter==='ok')rows=rows.filter(n=>n.enteredThisWeek);
-  if(tblFilter==='absent')rows=rows.filter(n=>!n.enteredThisWeek);
+  const isAbsentNow=n=>mode==='week'?n.weekStatus==='لم تدخل':!n.enteredThisWeek;
+  if(tblFilter==='ok')rows=rows.filter(n=>!isAbsentNow(n));
+  if(tblFilter==='absent')rows=rows.filter(n=>isAbsentNow(n));
   if(tblFilter==='BURIDAH')rows=rows.filter(n=>n.branch==='BURIDAH');
   if(tblFilter==='ONIZAH')rows=rows.filter(n=>n.branch==='ONIZAH');
   if(tblSearch)rows=rows.filter(n=>n.name.toLowerCase().includes(tblSearch.toLowerCase()));
   document.getElementById('nurses-tbody').innerHTML=rows.map(n=>{
-    const st=n.enteredThisWeek?'<span class="badge b-ok">✅ في الوقت</span>':'<span class="badge b-absent">❌ لم يُدخل</span>';
+    let st;
+    if(mode==='week'){
+      const map={'في الوقت':['b-ok','✅ في الوقت'],'مبكر':['b-ok','✅ مبكر'],'متأخر':['b-warn','🟡 متأخر'],'لم تدخل':['b-absent','❌ لم تدخل']};
+      const [cls,label]=map[n.weekStatus]||['b-absent','❌ لم تدخل'];
+      st=`<span class="badge ${cls}">${label}</span>`;
+    }else{
+      st=n.enteredThisWeek?'<span class="badge b-ok">✅ في الوقت</span>':'<span class="badge b-absent">❌ لم يُدخل</span>';
+    }
     return `<tr onclick="openProfile('${n.name}')">
       <td><strong>${n.name}</strong></td>
       <td><span style="font-size:10px;color:var(--muted)">${n.branch}</span></td>
@@ -902,7 +1081,8 @@ function drawControlChart(data,lbl){
 // ══ ABSENT ══
 function renderAbsent(){
   const sat=document.getElementById('week-date').value;
-  const absent=nurses.filter(n=>!n.enteredThisWeek&&n.lastEntry!==sat).sort((a,b)=>b.absent-a.absent);
+  const isAbsentNow=n=>mode==='week'?n.weekStatus==='لم تدخل':(!n.enteredThisWeek&&n.lastEntry!==sat);
+  const absent=nurses.filter(isAbsentNow).sort((a,b)=>b.absent-a.absent);
   document.getElementById('absent-tbody').innerHTML=absent.length?absent.map(n=>{
     const absPct=n.weeks?Math.round((n.absent/n.weeks)*100):0;
     return `<tr onclick="openProfile('${n.name}')">

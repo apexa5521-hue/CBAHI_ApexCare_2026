@@ -395,10 +395,8 @@ canvas{max-height:260px;}
     <div class="sec-hdr">
       <div class="sec-title">خريطة الحضور الأسبوعي (آخر 12 أسبوع)</div>
       <div style="display:flex;gap:12px;font-size:10px;color:var(--muted)">
-        <span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:var(--border);margin-left:4px;vertical-align:middle"></span>لا يوجد</span>
-        <span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#FF475730;margin-left:4px;vertical-align:middle"></span>ضعيف</span>
-        <span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#FFB80030;margin-left:4px;vertical-align:middle"></span>متوسط</span>
-        <span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#00C89650;margin-left:4px;vertical-align:middle"></span>جيد</span>
+        <span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:var(--border);margin-left:4px;vertical-align:middle"></span>لم تدخل</span>
+        <span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#00C89650;margin-left:4px;vertical-align:middle"></span>دخلت</span>
       </div>
     </div>
     <div style="overflow-x:auto"><div id="heatmap-wrap"></div></div>
@@ -799,21 +797,30 @@ function renderTable(){
 function setTblFilter(f,btn){tblFilter=f;document.querySelectorAll('#tbl-chips .chip').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderTable();}
 function filterTable(q){tblSearch=q;renderTable();}
 
-// ══ HEATMAP ══
+// ══ HEATMAP — بيانات حقيقية من action=heatmap (حضور/عدم حضور فقط) ══
 function renderHeatmap(){
-  const weeks=[];
-  const today=new Date(),wd=today.getDay();
-  const off=wd>=6?wd-6:wd+1;
-  for(let i=11;i>=0;i--){const d=new Date(today);d.setDate(d.getDate()-off-i*7);weeks.push(d.toISOString().split('T')[0]);}
-  const labels=weeks.map(w=>w.slice(5));
-  let html=`<table class="heatmap"><thead><tr><th></th>${labels.map(l=>`<th>${l}</th>`).join('')}</tr></thead><tbody>`;
-  nurses.forEach(n=>{
-    html+=`<tr><td class="nm" onclick="openProfile('${n.name}')" style="cursor:pointer">${n.name}</td>`;
-    weeks.forEach(()=>{const v=Math.random()>.15?Math.floor(Math.random()*51+50):0;html+=`<td class="${qClass(v)}" data-tip="${v?v+'%':'لا يوجد'}">${v||'—'}</td>`;});
-    html+=`</tr>`;
+  const wrap=document.getElementById('heatmap-wrap');
+  wrap.innerHTML='<div class="empty" style="padding:24px"><div class="ei">⏳</div>جاري التحميل...</div>';
+  fetch(`${API}?action=heatmap`).then(r=>r.json()).then(data=>{
+    const weeks=data.weeks||[];
+    const nameSet=new Set(nurses.map(n=>n.name));
+    const rows=(data.rows||[]).filter(row=>nameSet.has(row.name));
+    if(!weeks.length||!rows.length){
+      wrap.innerHTML='<div class="empty"><div class="ei">📭</div>لا توجد بيانات حضور بعد</div>';
+      return;
+    }
+    const labels=weeks.map(w=>w.slice(5));
+    let html=`<table class="heatmap"><thead><tr><th></th>${labels.map(l=>`<th>${l}</th>`).join('')}</tr></thead><tbody>`;
+    rows.forEach(row=>{
+      html+=`<tr><td class="nm" onclick="openProfile('${row.name}')" style="cursor:pointer">${row.name}</td>`;
+      row.weeks.forEach(v=>{html+=`<td class="${v?'hm-100':'hm-0'}" data-tip="${v?'دخلت':'لم تدخل'}">${v?'✓':'—'}</td>`;});
+      html+=`</tr>`;
+    });
+    html+=`</tbody></table>`;
+    wrap.innerHTML=html;
+  }).catch(()=>{
+    wrap.innerHTML='<div class="empty"><div class="ei">⚠️</div>تعذر تحميل خريطة الحضور</div>';
   });
-  html+=`</tbody></table>`;
-  document.getElementById('heatmap-wrap').innerHTML=html;
 }
 
 // ══ CONTROL CHART ══
@@ -833,12 +840,31 @@ function renderControlChart(){
   const sel=document.getElementById('cc-nurse').value;
   const lbl=ccMetric==='quality'?'الجودة الكلية':ccMetric==='commit'?'الالتزام':'الأدوات';
   document.getElementById('cc-title').textContent=`${lbl} — ${sel==='__avg__'?'المتوسط العام':sel}`;
-  const weeks=12,labels=[];
-  const today=new Date(),wd=today.getDay(),off=wd>=6?wd-6:wd+1;
-  for(let i=weeks-1;i>=0;i--){const d=new Date(today);d.setDate(d.getDate()-off-i*7);labels.push(d.toISOString().split('T')[0].slice(5));}
-  const vals=labels.map(()=>Math.round(Math.random()*30+65));
+  fetch(`${API}?action=history&nurse=${encodeURIComponent(sel)}`)
+    .then(r=>r.json())
+    .then(data=>drawControlChart(data,lbl))
+    .catch(()=>drawControlChart({weeks:[],commit:[],tools:[],quality:[]},lbl));
+}
+function drawControlChart(data,lbl){
+  const weeks=data.weeks||[];
+  const seriesByMetric={quality:data.quality||[],commit:data.commit||[],tools:data.tools||[]};
+  const vals=seriesByMetric[ccMetric]||[];
+  const statsBox=document.getElementById('cc-stats');
+
+  if(weeks.length<2||vals.length<2){
+    if(ccChart){ccChart.destroy();ccChart=null;}
+    document.getElementById('cc-chart').getContext('2d').clearRect(0,0,9999,9999);
+    statsBox.innerHTML=`<div class="one-col" style="grid-column:1/-1"><div class="empty"><div class="ei">📊</div>
+      لا يوجد سجل تاريخي كافٍ بعد لهذا العنصر — يبدأ التجميع تلقائياً أسبوعياً مع تشغيل updateQuality6040
+    </div></div>`;
+    return;
+  }
+
+  const labels=weeks.map(w=>w.slice(5));
   const avg=Math.round(vals.reduce((s,v)=>s+v,0)/vals.length);
-  const ucl=Math.min(100,avg+10),lcl=Math.max(0,avg-10);
+  const variance=vals.reduce((s,v)=>s+Math.pow(v-avg,2),0)/vals.length;
+  const std=Math.sqrt(variance);
+  const ucl=Math.min(100,Math.round(avg+2*std)),lcl=Math.max(0,Math.round(avg-2*std));
   const textColor=isDark?'#7A90A8':'#64748B';
   const gridColor=isDark?'#243B55':'#DDE3ED';
   if(ccChart){ccChart.destroy();}

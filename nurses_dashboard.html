@@ -2,880 +2,1026 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>مراقبة الممرضات — ApexCare</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ApexCare — مراقبة التمريض</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <style>
-  :root {
-    --bg:       #0D1B2A;
-    --surface:  #152236;
-    --card:     #1A2E45;
-    --border:   #243B55;
-    --text:     #E8F0FE;
-    --muted:    #7A90A8;
-    --green:    #00C896;
-    --yellow:   #FFB800;
-    --red:      #FF4757;
-    --blue:     #4A9EFF;
-    --purple:   #9B6DFF;
-    --radius:   12px;
-  }
-  * { margin:0; padding:0; box-sizing:border-box; }
-  body { background:var(--bg); color:var(--text); font-family:'IBM Plex Sans Arabic',sans-serif; min-height:100vh; }
+/* ═══ TOKENS ═══ */
+:root{
+  --bg:#0D1B2A;--surface:#152236;--card:#1A2E45;--border:#243B55;
+  --text:#E8F0FE;--muted:#7A90A8;--subtle:#3A5270;
+  --green:#00C896;--yellow:#FFB800;--red:#FF4757;
+  --blue:#4A9EFF;--purple:#9B6DFF;--orange:#FF8C42;
+  --r:12px;--r-sm:8px;--r-lg:16px;
+  --shadow:0 4px 24px #00000040;
+  --trans:.18s ease;
+}
+body.light{
+  --bg:#F0F4F8;--surface:#FFFFFF;--card:#F7FAFC;--border:#DDE3ED;
+  --text:#1A2E45;--muted:#64748B;--subtle:#CBD5E1;
+  --shadow:0 4px 24px #00000012;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans Arabic',sans-serif;min-height:100vh;transition:background var(--trans),color var(--trans);}
+::-webkit-scrollbar{width:6px;height:6px;}
+::-webkit-scrollbar-track{background:var(--surface);}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
 
-  /* ── LOGIN ── */
-  #login-screen {
-    position:fixed; inset:0; background:var(--bg);
-    display:flex; align-items:center; justify-content:center; z-index:999;
-  }
-  .login-box {
-    background:var(--surface); border:1px solid var(--border);
-    border-radius:20px; padding:48px 40px; width:400px; text-align:center;
-  }
-  .login-logo {
-    width:56px; height:56px; background:var(--green); border-radius:16px;
-    display:flex; align-items:center; justify-content:center;
-    font-size:24px; margin:0 auto 16px; font-weight:700; color:#0D1B2A;
-  }
-  .login-box .logo { font-size:22px; font-weight:700; color:var(--text); margin-bottom:4px; }
-  .login-box .sub  { color:var(--muted); font-size:12px; margin-bottom:32px; }
-  .field-group { text-align:right; margin-bottom:16px; }
-  .field-group label { display:block; font-size:12px; color:var(--muted); margin-bottom:6px; }
-  .field-input {
-    width:100%; padding:13px 14px; border:1px solid var(--border); border-radius:10px;
-    background:var(--card); color:var(--text); font-size:14px;
-    font-family:inherit; transition:border-color .15s; direction:ltr; text-align:left;
-  }
-  .field-input:focus { outline:none; border-color:var(--blue); }
-  .field-input::placeholder { color:var(--muted); direction:rtl; text-align:right; }
-  .login-btn {
-    width:100%; padding:14px; background:var(--green); color:#0D1B2A;
-    border:none; border-radius:10px; font-size:15px; font-weight:700;
-    cursor:pointer; font-family:inherit; transition:opacity .2s; margin-top:8px;
-  }
-  .login-btn:hover { opacity:.9; }
-  .login-error {
-    color:var(--red); font-size:12px; margin-top:12px;
-    background:#FF475715; border-radius:8px; padding:8px 12px; display:none;
-  }
+/* ═══ LOGIN ═══ */
+#login-screen{
+  position:fixed;inset:0;background:var(--bg);
+  display:flex;align-items:center;justify-content:center;z-index:999;
+  background-image:radial-gradient(ellipse at 60% 40%,#4A9EFF18 0%,transparent 60%),
+                   radial-gradient(ellipse at 20% 80%,#00C89610 0%,transparent 50%);
+}
+.login-box{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:24px;padding:48px 40px;width:420px;
+  box-shadow:var(--shadow);
+}
+.login-logo{
+  width:60px;height:60px;background:linear-gradient(135deg,var(--green),#00a07a);
+  border-radius:18px;display:flex;align-items:center;justify-content:center;
+  font-size:26px;font-weight:700;color:#0D1B2A;margin:0 auto 20px;
+  box-shadow:0 8px 24px #00C89630;
+}
+.login-title{font-size:22px;font-weight:700;text-align:center;margin-bottom:4px;}
+.login-sub{font-size:12px;color:var(--muted);text-align:center;margin-bottom:36px;}
+.fld{margin-bottom:16px;}
+.fld label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:500;}
+.fld input{
+  width:100%;padding:13px 16px;border:1.5px solid var(--border);border-radius:var(--r-sm);
+  background:var(--card);color:var(--text);font-size:14px;font-family:inherit;
+  transition:border-color var(--trans);direction:ltr;text-align:left;
+}
+.fld input:focus{outline:none;border-color:var(--blue);}
+.fld input::placeholder{color:var(--muted);direction:rtl;text-align:right;}
+.login-btn{
+  width:100%;padding:14px;background:linear-gradient(135deg,var(--green),#00a07a);
+  color:#0D1B2A;border:none;border-radius:var(--r-sm);font-size:15px;font-weight:700;
+  cursor:pointer;font-family:inherit;transition:opacity var(--trans);margin-top:8px;
+  box-shadow:0 4px 16px #00C89630;
+}
+.login-btn:hover{opacity:.88;}
+.login-err{color:var(--red);font-size:12px;margin-top:12px;text-align:center;
+  background:#FF475712;border-radius:8px;padding:8px;display:none;}
 
-  /* ── HEADER ── */
-  header {
-    position:sticky; top:0; z-index:100;
-    background:var(--surface); border-bottom:1px solid var(--border);
-    padding:0 24px; height:60px; display:flex; align-items:center; gap:16px;
-  }
-  .brand { font-weight:700; font-size:16px; color:var(--green); }
-  .brand span { color:var(--muted); font-weight:400; font-size:13px; margin-right:8px; }
-  .spacer { flex:1; }
-  .week-selector {
-    display:flex; align-items:center; gap:8px;
-    background:var(--card); border:1px solid var(--border);
-    border-radius:10px; padding:6px 12px;
-  }
-  .week-selector label { font-size:12px; color:var(--muted); }
-  .week-selector input {
-    background:none; border:none; color:var(--text); font-family:inherit;
-    font-size:13px; cursor:pointer;
-  }
-  .week-selector input:focus { outline:none; }
-  .mode-toggle {
-    display:flex; background:var(--card); border:1px solid var(--border);
-    border-radius:10px; overflow:hidden;
-  }
-  .mode-btn {
-    padding:7px 14px; font-size:12px; cursor:pointer; border:none;
-    background:none; color:var(--muted); font-family:inherit; transition:all .15s;
-  }
-  .mode-btn.active { background:var(--blue); color:#fff; }
-  .role-badge {
-    background:var(--card); border:1px solid var(--border);
-    border-radius:8px; padding:5px 12px; font-size:12px; color:var(--muted);
-  }
-  .logout-btn {
-    background:none; border:none; color:var(--muted); cursor:pointer;
-    font-family:inherit; font-size:12px; padding:5px 8px; border-radius:6px;
-    transition:color .15s;
-  }
-  .logout-btn:hover { color:var(--red); }
+/* ═══ HEADER ═══ */
+header{
+  position:sticky;top:0;z-index:100;
+  background:var(--surface);border-bottom:1px solid var(--border);
+  padding:0 20px;height:58px;display:flex;align-items:center;gap:12px;
+  backdrop-filter:blur(12px);
+}
+.brand{font-weight:700;font-size:15px;color:var(--green);white-space:nowrap;}
+.brand span{color:var(--muted);font-weight:400;font-size:12px;margin-right:6px;}
+.hdr-date{
+  display:flex;align-items:center;gap:6px;background:var(--card);
+  border:1px solid var(--border);border-radius:var(--r-sm);padding:6px 12px;
+}
+.hdr-date label{font-size:11px;color:var(--muted);}
+.hdr-date input{
+  background:none;border:none;color:var(--text);font-family:inherit;
+  font-size:12px;cursor:pointer;width:110px;
+}
+.hdr-date input:focus{outline:none;}
+.mode-toggle{
+  display:flex;background:var(--card);border:1px solid var(--border);
+  border-radius:var(--r-sm);overflow:hidden;
+}
+.mode-btn{
+  padding:6px 12px;font-size:11px;cursor:pointer;border:none;
+  background:none;color:var(--muted);font-family:inherit;transition:all var(--trans);
+}
+.mode-btn.active{background:var(--blue);color:#fff;}
+.spacer{flex:1;}
+.theme-btn{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--r-sm);
+  padding:6px 10px;cursor:pointer;font-size:16px;line-height:1;
+  transition:background var(--trans);
+}
+.theme-btn:hover{background:var(--border);}
+.role-badge{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--r-sm);padding:5px 12px;font-size:11px;color:var(--muted);
+  white-space:nowrap;
+}
+.logout-btn{
+  background:none;border:none;color:var(--muted);cursor:pointer;
+  font-family:inherit;font-size:12px;padding:5px 8px;border-radius:6px;
+  transition:color var(--trans);
+}
+.logout-btn:hover{color:var(--red);}
 
-  /* ── TABS ── */
-  .tabs {
-    display:flex; gap:4px; padding:16px 24px 0;
-    border-bottom:1px solid var(--border);
-  }
-  .tab {
-    padding:10px 18px; font-size:13px; cursor:pointer; border:none;
-    background:none; color:var(--muted); font-family:inherit;
-    border-bottom:2px solid transparent; transition:all .15s; margin-bottom:-1px;
-  }
-  .tab.active { color:var(--text); border-bottom-color:var(--blue); }
-  .tab-panel { display:none; padding:24px; }
-  .tab-panel.active { display:block; }
+/* ═══ TABS ═══ */
+.tabs{
+  display:flex;gap:2px;padding:0 20px;
+  background:var(--surface);border-bottom:1px solid var(--border);
+  overflow-x:auto;
+}
+.tabs::-webkit-scrollbar{height:0;}
+.tab{
+  padding:12px 16px;font-size:12px;cursor:pointer;border:none;
+  background:none;color:var(--muted);font-family:inherit;
+  border-bottom:2px solid transparent;transition:all var(--trans);
+  white-space:nowrap;flex-shrink:0;
+}
+.tab.active{color:var(--text);border-bottom-color:var(--blue);}
+.tab-panel{display:none;padding:20px;}
+.tab-panel.active{display:block;}
 
-  /* ── KPI CARDS ── */
-  .kpi-grid { display:grid; grid-template-columns:repeat(6,1fr); gap:12px; margin-bottom:24px; }
-  .kpi {
-    background:var(--card); border:1px solid var(--border); border-radius:var(--radius);
-    padding:18px 16px; position:relative; overflow:hidden;
-  }
-  .kpi::before {
-    content:''; position:absolute; top:0; right:0; width:3px; height:100%;
-  }
-  .kpi.green::before  { background:var(--green); }
-  .kpi.yellow::before { background:var(--yellow); }
-  .kpi.red::before    { background:var(--red); }
-  .kpi.blue::before   { background:var(--blue); }
-  .kpi.purple::before { background:var(--purple); }
-  .kpi-val { font-size:32px; font-weight:700; line-height:1; margin-bottom:6px; }
-  .kpi-val.green  { color:var(--green); }
-  .kpi-val.yellow { color:var(--yellow); }
-  .kpi-val.red    { color:var(--red); }
-  .kpi-val.blue   { color:var(--blue); }
-  .kpi-val.purple { color:var(--purple); }
-  .kpi-label { font-size:11px; color:var(--muted); line-height:1.4; }
+/* ═══ KPI GRID ═══ */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:20px;}
+.kpi{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--r);
+  padding:16px;position:relative;overflow:hidden;cursor:default;
+  transition:transform var(--trans),box-shadow var(--trans);
+}
+.kpi:hover{transform:translateY(-2px);box-shadow:var(--shadow);}
+.kpi-accent{position:absolute;top:0;right:0;width:3px;height:100%;border-radius:0 var(--r) var(--r) 0;}
+.kpi-val{font-size:28px;font-weight:700;line-height:1;margin-bottom:5px;}
+.kpi-lbl{font-size:10px;color:var(--muted);line-height:1.4;}
+.kpi-trend{font-size:10px;margin-top:4px;}
 
-  /* ── TABLE ── */
-  .section-header {
-    display:flex; align-items:center; justify-content:space-between;
-    margin-bottom:14px;
-  }
-  .section-title { font-size:14px; font-weight:600; }
-  .filters { display:flex; gap:8px; }
-  .filter-btn {
-    padding:5px 12px; border:1px solid var(--border); border-radius:20px;
-    background:none; color:var(--muted); font-size:11px; cursor:pointer;
-    font-family:inherit; transition:all .15s;
-  }
-  .filter-btn.active { border-color:var(--blue); color:var(--blue); background:#1d3a5e; }
-  .search-box {
-    padding:6px 12px; border:1px solid var(--border); border-radius:8px;
-    background:var(--card); color:var(--text); font-size:12px;
-    font-family:inherit; width:180px;
-  }
-  .search-box:focus { outline:none; border-color:var(--blue); }
+/* ═══ SECTION ═══ */
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:10px;flex-wrap:wrap;}
+.sec-title{font-size:13px;font-weight:600;}
+.sec-actions{display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
 
-  .table-wrap { overflow-x:auto; }
-  table { width:100%; border-collapse:collapse; font-size:12px; }
-  th {
-    background:var(--surface); color:var(--muted); font-weight:500;
-    padding:10px 12px; text-align:right; border-bottom:1px solid var(--border);
-    white-space:nowrap;
-  }
-  td {
-    padding:11px 12px; border-bottom:1px solid var(--border);
-    vertical-align:middle;
-  }
-  tr:hover td { background:#1d3a5e22; }
-  tr.clickable { cursor:pointer; }
+/* ═══ FILTERS ═══ */
+.chips{display:flex;gap:6px;flex-wrap:wrap;}
+.chip{
+  padding:4px 12px;border:1px solid var(--border);border-radius:20px;
+  background:none;color:var(--muted);font-size:11px;cursor:pointer;
+  font-family:inherit;transition:all var(--trans);
+}
+.chip.active{border-color:var(--blue);color:var(--blue);background:#4A9EFF15;}
+.search{
+  padding:6px 12px;border:1.5px solid var(--border);border-radius:var(--r-sm);
+  background:var(--card);color:var(--text);font-size:12px;font-family:inherit;
+  width:160px;transition:border-color var(--trans);
+}
+.search:focus{outline:none;border-color:var(--blue);}
 
-  .badge {
-    display:inline-flex; align-items:center; gap:4px;
-    padding:3px 10px; border-radius:20px; font-size:11px; font-weight:500;
-  }
-  .badge.ok     { background:#00C89622; color:var(--green); }
-  .badge.late   { background:#FFB80022; color:var(--yellow); }
-  .badge.absent { background:#FF475722; color:var(--red); }
-  .badge.none   { background:#24355022; color:var(--muted); }
+/* ═══ TABLE ═══ */
+.tbl-wrap{overflow-x:auto;border-radius:var(--r);border:1px solid var(--border);}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+th{
+  background:var(--surface);color:var(--muted);font-weight:500;
+  padding:10px 12px;text-align:right;border-bottom:1px solid var(--border);
+  white-space:nowrap;position:sticky;top:0;
+}
+td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle;}
+tbody tr:last-child td{border-bottom:none;}
+tbody tr:hover td{background:#4A9EFF08;cursor:pointer;}
 
-  .quality-bar {
-    display:flex; align-items:center; gap:8px;
-  }
-  .bar-track {
-    flex:1; height:5px; background:var(--border); border-radius:3px; overflow:hidden;
-  }
-  .bar-fill { height:100%; border-radius:3px; }
-  .q-num { font-size:12px; font-weight:600; min-width:32px; text-align:left; }
+/* ═══ BADGES ═══ */
+.badge{display:inline-flex;align-items:center;gap:3px;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:600;}
+.b-ok    {background:#00C89618;color:var(--green);}
+.b-late  {background:#FFB80018;color:var(--yellow);}
+.b-absent{background:#FF475718;color:var(--red);}
+.b-warn  {background:#FF8C4218;color:var(--orange);}
+.b-info  {background:#4A9EFF18;color:var(--blue);}
 
-  /* ── HEATMAP ── */
-  .heatmap-wrap { overflow-x:auto; }
-  .heatmap { border-collapse:collapse; font-size:11px; }
-  .heatmap th {
-    padding:6px 8px; color:var(--muted); font-weight:400; text-align:center;
-    border:none; background:none;
-  }
-  .heatmap td {
-    width:32px; height:32px; text-align:center; border-radius:4px;
-    border:1px solid var(--bg); cursor:default; font-size:10px;
-    font-weight:600; transition:opacity .1s;
-  }
-  .heatmap td:hover { opacity:.8; }
-  .heatmap .name-cell {
-    text-align:right; padding:0 12px 0 6px; width:160px;
-    background:none; color:var(--text); border:none; font-size:11px;
-  }
-  .hm-0   { background:#1A2E45; color:var(--muted); }
-  .hm-low { background:#FF475740; color:var(--red); }
-  .hm-mid { background:#FFB80040; color:var(--yellow); }
-  .hm-ok  { background:#00C89640; color:var(--green); }
-  .hm-100 { background:#00C89688; color:var(--green); }
+/* ═══ QUALITY BAR ═══ */
+.qbar{display:flex;align-items:center;gap:8px;}
+.qbar-track{flex:1;height:5px;background:var(--border);border-radius:3px;overflow:hidden;min-width:60px;}
+.qbar-fill{height:100%;border-radius:3px;transition:width .3s;}
+.qbar-num{font-size:11px;font-weight:700;min-width:34px;text-align:left;}
 
-  /* ── BRANCH COMPARE ── */
-  .branch-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
-  .branch-card {
-    background:var(--card); border:1px solid var(--border);
-    border-radius:var(--radius); padding:20px;
-  }
-  .branch-name {
-    font-size:16px; font-weight:700; margin-bottom:16px;
-    padding-bottom:12px; border-bottom:1px solid var(--border);
-  }
-  .metric-row {
-    display:flex; justify-content:space-between; align-items:center;
-    padding:8px 0; border-bottom:1px solid #1d3a5e;
-  }
-  .metric-row:last-child { border:none; }
-  .metric-label { font-size:12px; color:var(--muted); }
-  .metric-val   { font-size:14px; font-weight:600; }
+/* ═══ HEATMAP ═══ */
+.heatmap{border-collapse:separate;border-spacing:3px;font-size:10px;}
+.heatmap th{background:none;border:none;color:var(--muted);padding:2px 4px;font-weight:400;text-align:center;}
+.heatmap .nm{text-align:right;color:var(--text);white-space:nowrap;padding:2px 8px;background:none;border:none;font-size:11px;}
+.heatmap td{
+  width:28px;height:28px;border-radius:5px;text-align:center;
+  font-size:10px;font-weight:600;border:none;cursor:default;position:relative;
+}
+.hm-0  {background:var(--border);color:var(--muted);}
+.hm-lo {background:#FF475730;color:var(--red);}
+.hm-md {background:#FFB80030;color:var(--yellow);}
+.hm-hi {background:#00C89630;color:var(--green);}
+.hm-100{background:#00C89650;color:var(--green);}
 
-  /* ── PROFILE MODAL ── */
-  .modal-overlay {
-    display:none; position:fixed; inset:0; background:#000a;
-    z-index:200; align-items:center; justify-content:center;
-  }
-  .modal-overlay.open { display:flex; }
-  .modal {
-    background:var(--surface); border:1px solid var(--border);
-    border-radius:16px; width:680px; max-height:85vh; overflow-y:auto;
-    padding:28px;
-  }
-  .modal-header {
-    display:flex; align-items:center; justify-content:space-between;
-    margin-bottom:24px;
-  }
-  .modal-name { font-size:20px; font-weight:700; }
-  .modal-close {
-    background:var(--card); border:none; color:var(--muted);
-    width:32px; height:32px; border-radius:8px; cursor:pointer;
-    font-size:18px; display:flex; align-items:center; justify-content:center;
-  }
-  .modal-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:20px; }
-  .modal-stat {
-    background:var(--card); border-radius:10px; padding:14px; text-align:center;
-  }
-  .modal-stat .val { font-size:22px; font-weight:700; }
-  .modal-stat .lbl { font-size:11px; color:var(--muted); margin-top:4px; }
+/* ═══ CHART ═══ */
+.chart-box{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--r);
+  padding:18px;margin-bottom:16px;
+}
+.chart-title{font-size:12px;font-weight:600;margin-bottom:14px;color:var(--muted);}
+canvas{max-height:260px;}
 
-  /* ── ABSENT TABLE ── */
-  .absent-row td:first-child { font-weight:600; }
-  .streak-badge {
-    display:inline-block; padding:2px 8px; border-radius:12px;
-    font-size:11px; font-weight:600;
-    background:#FF475722; color:var(--red);
-  }
+/* ═══ DRUGS TABLE ═══ */
+.drug-ok  {color:var(--green);}
+.drug-warn{color:var(--yellow);}
+.drug-exp {color:var(--red);}
+.drug-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-left:6px;}
 
-  /* ── ALERTS ── */
-  .alert-list { display:flex; flex-direction:column; gap:8px; }
-  .alert-item {
-    display:flex; align-items:center; gap:12px;
-    background:var(--card); border-radius:10px; padding:12px 16px;
-    border-right:3px solid;
-  }
-  .alert-item.danger  { border-color:var(--red); }
-  .alert-item.warning { border-color:var(--yellow); }
-  .alert-item .a-icon { font-size:18px; }
-  .alert-item .a-text { flex:1; font-size:13px; }
-  .alert-item .a-time { font-size:11px; color:var(--muted); }
+/* ═══ MODAL ═══ */
+.overlay{display:none;position:fixed;inset:0;background:#000b;z-index:200;align-items:center;justify-content:center;}
+.overlay.open{display:flex;}
+.modal{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:20px;width:660px;max-height:86vh;overflow-y:auto;padding:28px;
+  box-shadow:var(--shadow);
+}
+.modal-hdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;}
+.modal-name{font-size:19px;font-weight:700;}
+.modal-meta{font-size:11px;color:var(--muted);margin-top:3px;}
+.modal-close{
+  background:var(--card);border:none;color:var(--muted);width:30px;height:30px;
+  border-radius:8px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+.modal-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px;}
+.m-stat{background:var(--card);border-radius:10px;padding:12px;text-align:center;}
+.m-stat .v{font-size:20px;font-weight:700;}
+.m-stat .l{font-size:10px;color:var(--muted);margin-top:3px;}
 
-  /* ── TOOLTIP ── */
-  [data-tip] { position:relative; }
-  [data-tip]:hover::after {
-    content:attr(data-tip); position:absolute; bottom:110%; right:50%;
-    transform:translateX(50%); background:#0D1B2A; border:1px solid var(--border);
-    color:var(--text); font-size:11px; padding:4px 8px; border-radius:6px;
-    white-space:nowrap; z-index:999; pointer-events:none;
-  }
+/* ═══ ALERTS ═══ */
+.alert-list{display:flex;flex-direction:column;gap:8px;}
+.alert-item{
+  display:flex;align-items:center;gap:12px;
+  background:var(--card);border-radius:var(--r-sm);padding:12px 16px;
+  border-right:3px solid;
+}
+.alert-item.danger {border-color:var(--red);}
+.alert-item.warning{border-color:var(--yellow);}
+.alert-item.info   {border-color:var(--blue);}
+.alert-item .a-text{flex:1;font-size:12px;}
+.alert-item .a-tag {font-size:10px;color:var(--muted);}
 
-  /* ── EMPTY ── */
-  .empty { text-align:center; padding:48px; color:var(--muted); }
-  .empty .e-icon { font-size:40px; margin-bottom:12px; }
+/* ═══ EMPTY / LOADING ═══ */
+.empty{text-align:center;padding:48px;color:var(--muted);}
+.empty .ei{font-size:36px;margin-bottom:10px;}
+.loading-row td{text-align:center;color:var(--muted);padding:32px;}
 
-  .loading { text-align:center; padding:64px; color:var(--muted); font-size:13px; }
+/* ═══ TWO-COL ═══ */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.one-col{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:18px;}
+
+/* ═══ TOOLTIP ═══ */
+[data-tip]{position:relative;}
+[data-tip]:hover::after{
+  content:attr(data-tip);position:absolute;bottom:120%;right:50%;
+  transform:translateX(50%);background:var(--bg);border:1px solid var(--border);
+  color:var(--text);font-size:10px;padding:4px 8px;border-radius:6px;
+  white-space:nowrap;z-index:999;pointer-events:none;
+}
+
+/* ═══ TOOLS GRID ═══ */
+.tools-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:16px;}
+.tool-card{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--r);
+  padding:14px;transition:transform var(--trans);
+}
+.tool-card:hover{transform:translateY(-2px);}
+.tool-name{font-size:13px;font-weight:600;margin-bottom:6px;}
+.tool-meta{font-size:10px;color:var(--muted);line-height:1.6;}
+.tool-count{
+  display:inline-block;background:var(--red);color:#fff;
+  border-radius:12px;padding:2px 8px;font-size:10px;font-weight:700;float:left;
+}
+
+@media(max-width:768px){
+  .kpi-grid{grid-template-columns:repeat(2,1fr);}
+  .two-col{grid-template-columns:1fr;}
+  .modal{width:95vw;}
+}
 </style>
 </head>
 <body>
 
-<!-- ════ LOGIN ════ -->
+<!-- LOGIN -->
 <div id="login-screen">
   <div class="login-box">
     <div class="login-logo">A</div>
-    <div class="logo">ApexCare</div>
-    <div class="sub">نظام مراقبة جودة التمريض</div>
-    <div class="field-group">
-      <label>اسم المستخدم</label>
-      <input class="field-input" type="text" id="login-username" placeholder="أدخل اسم المستخدم" autocomplete="username">
+    <div class="login-title">ApexCare</div>
+    <div class="login-sub">نظام مراقبة جودة التمريض</div>
+    <div class="fld"><label>اسم المستخدم</label>
+      <input type="text" id="u-user" placeholder="أدخل اسم المستخدم" autocomplete="username">
     </div>
-    <div class="field-group">
-      <label>كلمة المرور</label>
-      <input class="field-input" type="password" id="login-password" placeholder="أدخل كلمة المرور" autocomplete="current-password">
+    <div class="fld"><label>كلمة المرور</label>
+      <input type="password" id="u-pass" placeholder="••••••••" autocomplete="current-password">
     </div>
     <button class="login-btn" onclick="doLogin()">دخول</button>
-    <div class="login-error" id="login-error">⚠️ اسم المستخدم أو كلمة المرور غير صحيحة</div>
+    <div class="login-err" id="login-err">⚠️ اسم المستخدم أو كلمة المرور غير صحيحة</div>
   </div>
 </div>
 
-<!-- ════ HEADER ════ -->
-<header id="main-header" style="display:none">
+<!-- HEADER -->
+<header id="hdr" style="display:none">
   <div class="brand">ApexCare <span>مراقبة التمريض</span></div>
-  <div class="week-selector">
-    <label>الأسبوع:</label>
+  <div class="hdr-date">
+    <label>السبت:</label>
     <input type="date" id="week-date" onchange="loadData()">
   </div>
   <div class="mode-toggle">
-    <button class="mode-btn active" onclick="setMode('week',this)">أسبوع محدد</button>
-    <button class="mode-btn" onclick="setMode('all',this)">الفترة الكاملة</button>
+    <button class="mode-btn active" onclick="setMode('week',this)">أسبوع</button>
+    <button class="mode-btn" onclick="setMode('all',this)">الكل</button>
   </div>
   <div class="spacer"></div>
-  <div class="role-badge" id="role-label"></div>
+  <button class="theme-btn" onclick="toggleTheme()" title="تبديل الوضع">🌙</button>
+  <div class="role-badge" id="role-lbl"></div>
   <button class="logout-btn" onclick="doLogout()">خروج ↩</button>
 </header>
 
-<!-- ════ TABS ════ -->
-<div id="main-content" style="display:none">
-  <div class="tabs" id="tabs-bar">
-    <button class="tab active" onclick="switchTab('overview',this)">الرئيسية</button>
-    <button class="tab" onclick="switchTab('table',this)">جدول الممرضات</button>
-    <button class="tab" onclick="switchTab('heatmap',this)">خريطة الأداء</button>
-    <button class="tab" onclick="switchTab('absent',this)">الغائبات</button>
-    <button class="tab" onclick="switchTab('branches',this)">مقارنة الفروع</button>
-    <button class="tab" onclick="switchTab('alerts',this)">التنبيهات</button>
+<!-- CONTENT -->
+<div id="app" style="display:none">
+  <div class="tabs" id="tabs">
+    <button class="tab active" onclick="switchTab('overview',this)">🏠 الرئيسية</button>
+    <button class="tab" onclick="switchTab('table',this)">📋 الممرضات</button>
+    <button class="tab" onclick="switchTab('heatmap',this)">🗓 خريطة الحضور</button>
+    <button class="tab" onclick="switchTab('control',this)">📈 Control Chart</button>
+    <button class="tab" onclick="switchTab('absent',this)">❌ الغائبات</button>
+    <button class="tab" onclick="switchTab('tools',this)">🔧 الأدوات</button>
+    <button class="tab" onclick="switchTab('drugs',this)">💊 الأدوية</button>
+    <button class="tab" onclick="switchTab('cards',this)">🪪 البطاقات</button>
+    <button class="tab" onclick="switchTab('issues',this)">⚠️ مشاكل الأسبوع</button>
+    <button class="tab" onclick="switchTab('branches',this)">🏥 الفروع</button>
+    <button class="tab" onclick="switchTab('alerts',this)">🔔 التنبيهات</button>
   </div>
 
-  <!-- OVERVIEW -->
+  <!-- ①  OVERVIEW -->
   <div class="tab-panel active" id="tab-overview">
-    <div class="kpi-grid" id="kpi-grid">
-      <div class="kpi blue"><div class="kpi-val blue" id="kpi-total">—</div><div class="kpi-label">إجمالي الممرضات</div></div>
-      <div class="kpi green"><div class="kpi-val green" id="kpi-entered">—</div><div class="kpi-label">أدخلن هذا الأسبوع</div></div>
-      <div class="kpi red"><div class="kpi-val red" id="kpi-absent">—</div><div class="kpi-label">لم يُدخلن</div></div>
-      <div class="kpi purple"><div class="kpi-val purple" id="kpi-quality">—%</div><div class="kpi-label">متوسط الجودة الكلية</div></div>
-      <div class="kpi yellow"><div class="kpi-val yellow" id="kpi-tools">—</div><div class="kpi-label">بلاغات أدوات</div></div>
-      <div class="kpi red"><div class="kpi-val red" id="kpi-streak">—</div><div class="kpi-label">أطول غياب (أسابيع)</div></div>
-    </div>
-
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-      <!-- Top performers -->
-      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px">
-        <div class="section-title" style="margin-bottom:14px">🏆 الأعلى جودة</div>
+    <div class="kpi-grid" id="kpi-grid"></div>
+    <div class="two-col">
+      <div class="one-col">
+        <div class="sec-title" style="margin-bottom:12px">🏆 الأعلى جودة</div>
         <div id="top-list"></div>
       </div>
-      <!-- Bottom performers -->
-      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px">
-        <div class="section-title" style="margin-bottom:14px">⚠️ تحتاج متابعة</div>
+      <div class="one-col">
+        <div class="sec-title" style="margin-bottom:12px">⚠️ تحتاج متابعة</div>
         <div id="bottom-list"></div>
       </div>
     </div>
+    <div style="margin-top:16px">
+      <div class="sec-title" style="margin-bottom:10px">📅 لم تُدخل هذا الأسبوع</div>
+      <div id="not-entered-list"></div>
+    </div>
   </div>
 
-  <!-- TABLE -->
+  <!-- ②  TABLE -->
   <div class="tab-panel" id="tab-table">
-    <div class="section-header">
-      <div class="section-title">جدول الممرضات الأسبوعي</div>
-      <div style="display:flex;gap:8px;align-items:center">
-        <input class="search-box" placeholder="🔍 بحث..." oninput="filterTable(this.value)">
-        <div class="filters">
-          <button class="filter-btn active" onclick="setFilter('all',this)">الكل</button>
-          <button class="filter-btn" onclick="setFilter('ok',this)">أدخل ✅</button>
-          <button class="filter-btn" onclick="setFilter('absent',this)">لم يُدخل ❌</button>
-          <button class="filter-btn" onclick="setFilter('BURIDAH',this)">بريدة</button>
-          <button class="filter-btn" onclick="setFilter('ONIZAH',this)">عنيزة</button>
+    <div class="sec-hdr">
+      <div class="sec-title">جدول الممرضات</div>
+      <div class="sec-actions">
+        <input class="search" placeholder="🔍 بحث..." oninput="filterTable(this.value)" id="tbl-search">
+        <div class="chips" id="tbl-chips">
+          <button class="chip active" onclick="setTblFilter('all',this)">الكل</button>
+          <button class="chip" onclick="setTblFilter('ok',this)">أدخل ✅</button>
+          <button class="chip" onclick="setTblFilter('absent',this)">لم يُدخل ❌</button>
+          <button class="chip" onclick="setTblFilter('BURIDAH',this)">بريدة</button>
+          <button class="chip" onclick="setTblFilter('ONIZAH',this)">عنيزة</button>
         </div>
       </div>
     </div>
-    <div class="table-wrap">
-      <table id="nurses-table">
-        <thead>
-          <tr>
-            <th>الممرضة</th>
-            <th>الفرع</th>
-            <th>الحالة</th>
-            <th>السبت</th>
-            <th>الأحد</th>
-            <th>أسابيع</th>
-            <th>التزام%</th>
-            <th>أدوات%</th>
-            <th>الجودة الكلية</th>
-            <th>آخر إدخال</th>
-          </tr>
-        </thead>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr>
+          <th>الممرضة</th><th>الفرع</th><th>الأسبوع</th>
+          <th>في الوقت</th><th>متأخر</th><th>غياب</th>
+          <th>أسابيع</th><th>التزام%</th><th>أدوات%</th><th>الجودة%</th>
+          <th>آخر إدخال</th>
+        </tr></thead>
         <tbody id="nurses-tbody"></tbody>
       </table>
     </div>
   </div>
 
-  <!-- HEATMAP -->
+  <!-- ③  HEATMAP -->
   <div class="tab-panel" id="tab-heatmap">
-    <div class="section-header">
-      <div class="section-title">خريطة الأداء الأسبوعية</div>
-      <div style="display:flex;gap:12px;align-items:center;font-size:11px;color:var(--muted)">
-        <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:var(--border);margin-left:4px"></span>لا يوجد</span>
-        <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:#FF475740;margin-left:4px"></span>&lt;60%</span>
-        <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:#FFB80040;margin-left:4px"></span>60-80%</span>
-        <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:#00C89688;margin-left:4px"></span>&gt;80%</span>
+    <div class="sec-hdr">
+      <div class="sec-title">خريطة الحضور الأسبوعي (آخر 12 أسبوع)</div>
+      <div style="display:flex;gap:12px;font-size:10px;color:var(--muted)">
+        <span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:var(--border);margin-left:4px;vertical-align:middle"></span>لا يوجد</span>
+        <span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#FF475730;margin-left:4px;vertical-align:middle"></span>ضعيف</span>
+        <span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#FFB80030;margin-left:4px;vertical-align:middle"></span>متوسط</span>
+        <span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#00C89650;margin-left:4px;vertical-align:middle"></span>جيد</span>
       </div>
     </div>
-    <div class="heatmap-wrap">
-      <div id="heatmap-container"></div>
-    </div>
+    <div style="overflow-x:auto"><div id="heatmap-wrap"></div></div>
   </div>
 
-  <!-- ABSENT -->
-  <div class="tab-panel" id="tab-absent">
-    <div class="section-header">
-      <div class="section-title">الممرضات اللواتي لم يُدخلن</div>
+  <!-- ④  CONTROL CHART -->
+  <div class="tab-panel" id="tab-control">
+    <div class="sec-hdr">
+      <div class="sec-title">📈 Control Chart — مراقبة الأداء عبر الزمن</div>
+      <div class="sec-actions">
+        <select id="cc-nurse" onchange="renderControlChart()" style="padding:6px 10px;background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:var(--r-sm);font-family:inherit;font-size:12px;">
+          <option value="__avg__">— المتوسط العام —</option>
+        </select>
+        <div class="chips">
+          <button class="chip active" id="cc-q-btn" onclick="setCCMetric('quality',this)">الجودة</button>
+          <button class="chip" id="cc-c-btn" onclick="setCCMetric('commit',this)">الالتزام</button>
+          <button class="chip" id="cc-t-btn" onclick="setCCMetric('tools',this)">الأدوات</button>
+        </div>
+      </div>
     </div>
-    <div class="table-wrap">
+    <div class="chart-box">
+      <div class="chart-title" id="cc-title">الجودة الكلية — المتوسط العام</div>
+      <canvas id="cc-chart"></canvas>
+    </div>
+    <div class="two-col" id="cc-stats"></div>
+  </div>
+
+  <!-- ⑤  ABSENT -->
+  <div class="tab-panel" id="tab-absent">
+    <div class="sec-hdr">
+      <div class="sec-title">الممرضات اللواتي لم يُدخلن هذا الأسبوع</div>
+      <div class="sec-title" style="color:var(--muted);font-weight:400;font-size:11px">تحقق — هل لم تمسك عيادة؟</div>
+    </div>
+    <div class="tbl-wrap">
       <table>
-        <thead>
-          <tr>
-            <th>الممرضة</th>
-            <th>الفرع</th>
-            <th>آخر إدخال</th>
-            <th>أسابيع غياب متتالية</th>
-            <th>نسبة الغياب الكلية</th>
-            <th>إجمالي الإدخالات</th>
-          </tr>
-        </thead>
+        <thead><tr>
+          <th>الممرضة</th><th>الفرع</th><th>آخر إدخال</th>
+          <th>أسابيع غياب</th><th>نسبة الغياب%</th><th>الجودة الكلية%</th><th>الحالة</th>
+        </tr></thead>
         <tbody id="absent-tbody"></tbody>
       </table>
     </div>
   </div>
 
-  <!-- BRANCHES -->
-  <div class="tab-panel" id="tab-branches">
-    <div class="branch-grid" id="branch-grid"></div>
+  <!-- ⑥  TOOLS -->
+  <div class="tab-panel" id="tab-tools">
+    <div class="sec-hdr">
+      <div class="sec-title">الأدوات الناقصة — مستخرجة من النموذج</div>
+      <div class="chips">
+        <button class="chip active" onclick="setToolsView('cards',this)">بطاقات</button>
+        <button class="chip" onclick="setToolsView('table',this)">جدول</button>
+      </div>
+    </div>
+    <div id="tools-cards-view">
+      <div class="tools-grid" id="tools-grid"></div>
+    </div>
+    <div id="tools-table-view" style="display:none">
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>الأداة / المشكلة</th><th>الممرضة</th><th>الفرع</th><th>العيادة</th><th>التكرار</th><th>أول بلاغ</th><th>آخر بلاغ</th></tr></thead>
+          <tbody id="tools-tbody"></tbody>
+        </table>
+      </div>
+    </div>
   </div>
 
-  <!-- ALERTS -->
-  <div class="tab-panel" id="tab-alerts">
-    <div class="section-header">
-      <div class="section-title">التنبيهات الذكية</div>
+  <!-- ⑦  DRUGS -->
+  <div class="tab-panel" id="tab-drugs">
+    <div class="sec-hdr">
+      <div class="sec-title">💊 متابعة تواريخ انتهاء الأدوية</div>
+      <div class="chips">
+        <button class="chip active" onclick="setDrugFilter('all',this)">الكل</button>
+        <button class="chip" onclick="setDrugFilter('exp',this)">🔴 منتهية</button>
+        <button class="chip" onclick="setDrugFilter('warn',this)">🟡 قاربت</button>
+        <button class="chip" onclick="setDrugFilter('ok',this)">🟢 سارية</button>
+      </div>
     </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr>
+          <th>الحالة</th><th>الممرضة</th><th>الفرع</th><th>العيادة</th>
+          <th>أقرب تاريخ انتهاء</th><th>المدة المتبقية</th><th>تاريخ التبليغ</th>
+        </tr></thead>
+        <tbody id="drugs-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ⑧  CARDS -->
+  <div class="tab-panel" id="tab-cards">
+    <div class="sec-hdr">
+      <div class="sec-title">🪪 بطاقات الموظفين — بلاغات الغياب</div>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr>
+          <th>الممرضة</th><th>الفرع</th><th>العيادة</th>
+          <th>تاريخ البلاغ</th><th>عدد البلاغات</th><th>الحالة</th>
+        </tr></thead>
+        <tbody id="cards-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ⑨  ISSUES -->
+  <div class="tab-panel" id="tab-issues">
+    <div class="sec-hdr">
+      <div class="sec-title">⚠️ مشاكل الأسبوع — من حقل الملاحظات</div>
+    </div>
+    <div class="alert-list" id="issues-list"></div>
+  </div>
+
+  <!-- ⑩  BRANCHES -->
+  <div class="tab-panel" id="tab-branches">
+    <div class="two-col" id="branch-grid"></div>
+  </div>
+
+  <!-- ⑪  ALERTS -->
+  <div class="tab-panel" id="tab-alerts">
+    <div class="sec-hdr"><div class="sec-title">🔔 التنبيهات الذكية</div></div>
     <div class="alert-list" id="alert-list"></div>
   </div>
 </div>
 
 <!-- PROFILE MODAL -->
-<div class="modal-overlay" id="modal" onclick="if(event.target===this)closeModal()">
+<div class="overlay" id="modal" onclick="if(event.target===this)closeModal()">
   <div class="modal">
-    <div class="modal-header">
+    <div class="modal-hdr">
       <div>
-        <div class="modal-name" id="modal-name"></div>
-        <div style="font-size:12px;color:var(--muted);margin-top:4px" id="modal-meta"></div>
+        <div class="modal-name" id="m-name"></div>
+        <div class="modal-meta" id="m-meta"></div>
       </div>
       <button class="modal-close" onclick="closeModal()">✕</button>
     </div>
-    <div class="modal-stats" id="modal-stats"></div>
-    <div style="font-size:13px;color:var(--muted);margin-bottom:12px">سجل الإدخالات</div>
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr><th>الأسبوع</th><th>السبت</th><th>الأحد</th><th>الجودة</th><th>أدوات ناقصة</th></tr>
-        </thead>
-        <tbody id="modal-history"></tbody>
-      </table>
+    <div class="modal-stats" id="m-stats"></div>
+    <canvas id="m-chart" style="max-height:180px;margin-bottom:16px"></canvas>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:8px">سجل الإدخالات الأخيرة</div>
+    <div class="tbl-wrap">
+      <table><thead><tr><th>التاريخ</th><th>العيادة</th><th>الحالة</th><th>أدوات ناقصة</th><th>ملاحظات</th></tr></thead>
+      <tbody id="m-history"></tbody></table>
     </div>
   </div>
 </div>
 
 <script>
-// ══════════════════════════════════════════
-// CONFIG — المستخدمون والصلاحيات
-// غيّر اسم المستخدم وكلمة المرور هنا
-// ══════════════════════════════════════════
-const USERS = {
-  'ibrahim':   { password:'apex@quality',  label:'مدير الجودة',      role:'quality', branches:['BURIDAH','ONIZAH'], canExport:true  },
-  'director':  { password:'apex@exec',     label:'المدير التنفيذي',  role:'exec',    branches:['BURIDAH','ONIZAH'], canExport:true  },
-  'nursing':   { password:'apex@nursing',  label:'رئيسة التمريض',   role:'nursing', branches:['BURIDAH','ONIZAH'], canExport:false },
-  'hr':        { password:'apex@hr',       label:'الموارد البشرية', role:'hr',      branches:['BURIDAH','ONIZAH'], canExport:false },
-  'buridah':   { password:'apex@brd',      label:'إدارة بريدة',     role:'branch',  branches:['BURIDAH'],           canExport:false },
-  'onizah':    { password:'apex@onz',      label:'إدارة عنيزة',     role:'branch',  branches:['ONIZAH'],            canExport:false },
+// ══ USERS ══
+const USERS={
+  'ibrahim':  {pw:'apex@quality', label:'مدير الجودة',     branches:['BURIDAH','ONIZAH']},
+  'director': {pw:'apex@exec',    label:'المدير التنفيذي', branches:['BURIDAH','ONIZAH']},
+  'nursing':  {pw:'apex@nursing', label:'رئيسة التمريض',  branches:['BURIDAH','ONIZAH']},
+  'hr':       {pw:'apex@hr',      label:'الموارد البشرية',branches:['BURIDAH','ONIZAH']},
+  'buridah':  {pw:'apex@brd',     label:'إدارة بريدة',    branches:['BURIDAH']},
+  'onizah':   {pw:'apex@onz',     label:'إدارة عنيزة',    branches:['ONIZAH']},
 };
-const ROLES = USERS; // للتوافق
 
-// ══════════════════════════════════════════
-// API CONFIG — ضع رابط Web App هنا بعد النشر
-// ══════════════════════════════════════════
-const API_URL = 'https://script.google.com/macros/s/AKfycbyJwnaGikcGf6XAzK2RPGE8jlQ28iB59a333JG3iDF-l_Z-HsOdk3WOV9UPfmlfD6gJ2w/exec';
-const USE_LIVE_DATA = true;
-const NURSES_DATA = [
-  { name:'Abhie',                 branch:'BURIDAH', weeks:18, onTime:11, late:2, absent:5, commitPct:72, toolsPct:100, qualityPct:83, lastEntry:'2026-03-14', missingTools:false, history:[] },
-  { name:'Amina Ghulam Hussain',  branch:'BURIDAH', weeks:18, onTime:15, late:1, absent:2, commitPct:89, toolsPct:85,  qualityPct:88, lastEntry:'2026-03-22', missingTools:false, history:[] },
-  { name:'Asifa',                 branch:'BURIDAH', weeks:3,  onTime:0,  late:2, absent:1, commitPct:67, toolsPct:100, qualityPct:80, lastEntry:'2026-03-08', missingTools:false, history:[] },
-  { name:'Cataline Maureen Pascua',branch:'BURIDAH',weeks:3,  onTime:3,  late:0, absent:0, commitPct:100,toolsPct:100, qualityPct:100,lastEntry:'2026-03-22', missingTools:false, history:[] },
-  { name:'Clariz',                branch:'BURIDAH', weeks:8,  onTime:6,  late:2, absent:0, commitPct:100,toolsPct:100, qualityPct:100,lastEntry:'2026-03-14', missingTools:false, history:[] },
-  { name:'Dian',                  branch:'BURIDAH', weeks:15, onTime:7,  late:8, absent:0, commitPct:100,toolsPct:75,  qualityPct:90, lastEntry:'2026-03-14', missingTools:false, history:[] },
-  { name:'Emilia',                branch:'BURIDAH', weeks:17, onTime:12, late:4, absent:1, commitPct:94, toolsPct:100, qualityPct:97, lastEntry:'2026-03-14', missingTools:false, history:[] },
-  { name:'Fakhar Ul Nisa',        branch:'BURIDAH', weeks:16, onTime:12, late:2, absent:2, commitPct:88, toolsPct:100, qualityPct:93, lastEntry:'2026-03-22', missingTools:false, history:[] },
-  { name:'Hanaa',                 branch:'BURIDAH', weeks:18, onTime:6,  late:0, absent:12,commitPct:33, toolsPct:81,  qualityPct:52, lastEntry:'2026-02-15', missingTools:false, history:[] },
-  { name:'Khaerunnisa',           branch:'BURIDAH', weeks:14, onTime:10, late:1, absent:3, commitPct:79, toolsPct:94,  qualityPct:85, lastEntry:'2026-03-14', missingTools:false, history:[] },
-  { name:'Marilyn Penaranda',     branch:'BURIDAH', weeks:16, onTime:13, late:0, absent:3, commitPct:81, toolsPct:94,  qualityPct:86, lastEntry:'2026-03-14', missingTools:false, history:[] },
-  { name:'Maryam',                branch:'ONIZAH',  weeks:17, onTime:13, late:1, absent:3, commitPct:82, toolsPct:88,  qualityPct:85, lastEntry:'2026-03-14', missingTools:false, history:[] },
-  { name:'Muqaddas Nazir',        branch:'ONIZAH',  weeks:14, onTime:12, late:2, absent:0, commitPct:100,toolsPct:69,  qualityPct:88, lastEntry:'2026-03-14', missingTools:true,  history:[] },
-  { name:'Nabila',                branch:'BURIDAH', weeks:13, onTime:12, late:1, absent:0, commitPct:100,toolsPct:100, qualityPct:100,lastEntry:'2026-03-14', missingTools:false, history:[] },
-  { name:'Safia',                 branch:'BURIDAH', weeks:17, onTime:12, late:2, absent:3, commitPct:82, toolsPct:94,  qualityPct:87, lastEntry:'2026-03-14', missingTools:false, history:[] },
-  { name:'Saira',                 branch:'BURIDAH', weeks:3,  onTime:3,  late:0, absent:0, commitPct:100,toolsPct:100, qualityPct:100,lastEntry:'2026-03-22', missingTools:false, history:[] },
-  { name:'Samia',                 branch:'BURIDAH', weeks:3,  onTime:1,  late:1, absent:1, commitPct:67, toolsPct:100, qualityPct:80, lastEntry:'2026-03-08', missingTools:false, history:[] },
-  { name:'Sidra',                 branch:'ONIZAH',  weeks:19, onTime:12, late:1, absent:6, commitPct:68, toolsPct:63,  qualityPct:66, lastEntry:'2026-03-14', missingTools:false, history:[] },
-  { name:'Syintia Amrizal',       branch:'BURIDAH', weeks:11, onTime:10, late:0, absent:1, commitPct:91, toolsPct:100, qualityPct:95, lastEntry:'2026-03-14', missingTools:false, history:[] },
-  { name:'Tasmia Afzal',          branch:'ONIZAH',  weeks:16, onTime:11, late:1, absent:4, commitPct:75, toolsPct:85,  qualityPct:79, lastEntry:'2026-03-14', missingTools:false, history:[] },
-  { name:'Tati Maryati',          branch:'BURIDAH', weeks:17, onTime:0,  late:1, absent:16,commitPct:6,  toolsPct:100, qualityPct:44, lastEntry:'2026-01-10', missingTools:false, history:[] },
+const API='https://script.google.com/macros/s/AKfycbw7nRFADh0DYpJkdTdGRNIYttbcl9K7wTOeIyzxehjucqgb05VFOUI6rAeMgdGO-SuJ0Q/exec';
+
+// ══ STATE ══
+let currentUser=null, nurses=[], rawRows=[], mode='week', tblFilter='all', ccMetric='quality', ccChart=null, mChart=null, isDark=true;
+
+// ══ SAMPLE DATA (fallback) ══
+const SAMPLE=[
+  {name:'Abhie',branch:'BURIDAH',weeks:18,onTime:11,late:2,absent:5,commitPct:72,toolsPct:100,qualityPct:83,lastEntry:'2026-03-14',enteredThisWeek:false,missingTools:false,missingDesc:'',clinic:'14',expDate:'2026-04-10',hasCard:true,notes:''},
+  {name:'Amina Ghulam Hussain',branch:'BURIDAH',weeks:18,onTime:15,late:1,absent:2,commitPct:93,toolsPct:85,qualityPct:90,lastEntry:'2026-03-22',enteredThisWeek:true,missingTools:false,missingDesc:'',clinic:'3',expDate:'2026-12-01',hasCard:true,notes:''},
+  {name:'Asifa',branch:'BURIDAH',weeks:3,onTime:0,late:2,absent:1,commitPct:67,toolsPct:100,qualityPct:80,lastEntry:'2026-03-08',enteredThisWeek:false,missingTools:true,missingDesc:'Extraction forceps',clinic:'14',expDate:'2025-12-15',hasCard:false,notes:'Inspection: boll not working'},
+  {name:'Cataline Maureen Pascua',branch:'BURIDAH',weeks:3,onTime:3,late:0,absent:0,commitPct:100,toolsPct:100,qualityPct:100,lastEntry:'2026-03-22',enteredThisWeek:true,missingTools:false,missingDesc:'',clinic:'2',expDate:'2027-03-01',hasCard:true,notes:''},
+  {name:'Clariz',branch:'BURIDAH',weeks:8,onTime:6,late:2,absent:0,commitPct:100,toolsPct:62,qualityPct:77,lastEntry:'2026-03-14',enteredThisWeek:false,missingTools:true,missingDesc:'Condenser, Boll',clinic:'6',expDate:'2026-06-20',hasCard:true,notes:'No condenser, no boll'},
+  {name:'Dian',branch:'BURIDAH',weeks:15,onTime:7,late:8,absent:0,commitPct:100,toolsPct:94,qualityPct:97,lastEntry:'2026-03-14',enteredThisWeek:false,missingTools:false,missingDesc:'',clinic:'4',expDate:'2026-08-15',hasCard:true,notes:''},
+  {name:'Emilia',branch:'BURIDAH',weeks:17,onTime:12,late:4,absent:1,commitPct:94,toolsPct:100,qualityPct:97,lastEntry:'2026-03-14',enteredThisWeek:false,missingTools:false,missingDesc:'',clinic:'6',expDate:'2027-01-10',hasCard:true,notes:''},
+  {name:'Fakhar Ul Nisa',branch:'BURIDAH',weeks:16,onTime:12,late:2,absent:2,commitPct:88,toolsPct:100,qualityPct:93,lastEntry:'2026-03-22',enteredThisWeek:true,missingTools:false,missingDesc:'',clinic:'14',expDate:'2026-09-30',hasCard:true,notes:''},
+  {name:'Hanaa',branch:'BURIDAH',weeks:18,onTime:6,late:0,absent:12,commitPct:33,toolsPct:81,qualityPct:52,lastEntry:'2026-02-15',enteredThisWeek:false,missingTools:false,missingDesc:'',clinic:'1',expDate:'2026-05-01',hasCard:false,notes:''},
+  {name:'Khaerunnisa',branch:'BURIDAH',weeks:14,onTime:10,late:1,absent:3,commitPct:79,toolsPct:94,qualityPct:85,lastEntry:'2026-03-14',enteredThisWeek:false,missingTools:false,missingDesc:'',clinic:'2',expDate:'2026-11-20',hasCard:true,notes:''},
+  {name:'Marilyn Penaranda',branch:'BURIDAH',weeks:16,onTime:13,late:0,absent:3,commitPct:81,toolsPct:94,qualityPct:86,lastEntry:'2026-03-14',enteredThisWeek:false,missingTools:false,missingDesc:'',clinic:'5',expDate:'2026-07-15',hasCard:true,notes:''},
+  {name:'Maryam',branch:'ONIZAH',weeks:17,onTime:13,late:1,absent:3,commitPct:82,toolsPct:88,qualityPct:85,lastEntry:'2026-03-14',enteredThisWeek:false,missingTools:false,missingDesc:'',clinic:'3',expDate:'2026-10-10',hasCard:true,notes:''},
+  {name:'Muqaddas Nazir',branch:'ONIZAH',weeks:14,onTime:12,late:2,absent:0,commitPct:100,toolsPct:69,qualityPct:88,lastEntry:'2026-03-14',enteredThisWeek:false,missingTools:true,missingDesc:'Smallest spoon, excavator broken',clinic:'2',expDate:'2026-04-25',hasCard:true,notes:'Filter is broken - informed manager'},
+  {name:'Nabila',branch:'BURIDAH',weeks:13,onTime:12,late:1,absent:0,commitPct:100,toolsPct:100,qualityPct:100,lastEntry:'2026-03-14',enteredThisWeek:false,missingTools:false,missingDesc:'',clinic:'2',expDate:'2027-02-15',hasCard:true,notes:''},
+  {name:'Safia',branch:'BURIDAH',weeks:17,onTime:12,late:2,absent:3,commitPct:82,toolsPct:94,qualityPct:87,lastEntry:'2026-03-14',enteredThisWeek:false,missingTools:false,missingDesc:'',clinic:'8',expDate:'2026-12-30',hasCard:true,notes:''},
+  {name:'Saira',branch:'BURIDAH',weeks:3,onTime:3,late:0,absent:0,commitPct:100,toolsPct:100,qualityPct:100,lastEntry:'2026-03-22',enteredThisWeek:true,missingTools:false,missingDesc:'',clinic:'8',expDate:'2027-04-01',hasCard:true,notes:''},
+  {name:'Samia',branch:'BURIDAH',weeks:3,onTime:1,late:1,absent:1,commitPct:67,toolsPct:100,qualityPct:80,lastEntry:'2026-03-08',enteredThisWeek:false,missingTools:false,missingDesc:'',clinic:'10',expDate:'2026-03-05',hasCard:true,notes:''},
+  {name:'Sidra',branch:'ONIZAH',weeks:19,onTime:12,late:1,absent:6,commitPct:68,toolsPct:63,qualityPct:66,lastEntry:'2026-03-14',enteredThisWeek:false,missingTools:false,missingDesc:'',clinic:'1',expDate:'2026-09-09',hasCard:true,notes:'Need x ray sensor holder'},
+  {name:'Syintia Amrizal',branch:'BURIDAH',weeks:11,onTime:10,late:0,absent:1,commitPct:91,toolsPct:100,qualityPct:95,lastEntry:'2026-03-14',enteredThisWeek:false,missingTools:false,missingDesc:'',clinic:'10',expDate:'2026-08-20',hasCard:true,notes:''},
+  {name:'Tasmia Afzal',branch:'ONIZAH',weeks:16,onTime:11,late:1,absent:4,commitPct:75,toolsPct:85,qualityPct:79,lastEntry:'2026-03-14',enteredThisWeek:false,missingTools:false,missingDesc:'',clinic:'1',expDate:'2026-11-01',hasCard:true,notes:''},
+  {name:'Tati Maryati',branch:'BURIDAH',weeks:17,onTime:0,late:1,absent:16,commitPct:6,toolsPct:100,qualityPct:44,lastEntry:'2026-01-10',enteredThisWeek:false,missingTools:false,missingDesc:'',clinic:'4',expDate:'2026-06-15',hasCard:true,notes:''},
 ];
 
-// ══════════════════════════════════════════
-// STATE
-// ══════════════════════════════════════════
-let currentRole = 'quality';
-let currentFilter = 'all';
-let currentMode = 'week';
-let nurses = [];
+// ══ HELPERS ══
+const qColor=v=>v>=80?'var(--green)':v>=60?'var(--yellow)':'var(--red)';
+const qClass=v=>v===0?'hm-0':v<60?'hm-lo':v<80?'hm-md':v<100?'hm-hi':'hm-100';
+function qBar(v){
+  const c=qColor(v);
+  return `<div class="qbar"><div class="qbar-track"><div class="qbar-fill" style="width:${v}%;background:${c}"></div></div><span class="qbar-num" style="color:${c}">${v}%</span></div>`;
+}
+function daysDiff(dateStr){
+  if(!dateStr)return null;
+  const d=new Date(dateStr),now=new Date();
+  return Math.round((d-now)/(1000*60*60*24));
+}
+function drugStatus(expStr){
+  const d=daysDiff(expStr);
+  if(d===null)return{cls:'',icon:'—',label:'—',days:null};
+  if(d<0)return{cls:'drug-exp',icon:'🔴',label:'منتهية',days:d};
+  if(d<=30)return{cls:'drug-warn',icon:'🟡',label:'قريباً',days:d};
+  return{cls:'drug-ok',icon:'🟢',label:'سارية',days:d};
+}
+function isToolText(txt){
+  if(!txt)return false;
+  const neg=['nothing','no','none','-','—','ليس','لا يوج','not','n/a','as mentioned'];
+  const t=txt.toLowerCase();
+  return !neg.some(x=>t.includes(x));
+}
 
-// ══════════════════════════════════════════
-// LOGIN
-// ══════════════════════════════════════════
-function doLogin() {
-  const username = document.getElementById('login-username').value.trim().toLowerCase();
-  const password = document.getElementById('login-password').value;
-  const err = document.getElementById('login-error');
-
-  const user = USERS[username];
-  if (user && user.password === password) {
-    currentRole = username;
-    err.style.display = 'none';
-    document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('main-header').style.display = 'flex';
-    document.getElementById('main-content').style.display = 'block';
-    document.getElementById('role-label').textContent = user.label;
-    document.getElementById('login-password').value = '';
-    initDashboard();
-  } else {
-    err.style.display = 'block';
-    document.getElementById('login-password').value = '';
-    document.getElementById('login-password').focus();
+// ══ LOGIN ══
+function doLogin(){
+  const u=document.getElementById('u-user').value.trim().toLowerCase();
+  const p=document.getElementById('u-pass').value;
+  const usr=USERS[u];
+  const err=document.getElementById('login-err');
+  if(usr&&usr.pw===p){
+    currentUser={...usr,key:u};
+    err.style.display='none';
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('hdr').style.display='flex';
+    document.getElementById('app').style.display='block';
+    document.getElementById('role-lbl').textContent=usr.label;
+    document.getElementById('u-pass').value='';
+    initDash();
+  }else{
+    err.style.display='block';
+    document.getElementById('u-pass').value='';
   }
 }
-document.addEventListener('keydown', e => {
-  if (e.key === 'Enter' && document.getElementById('login-screen').style.display !== 'none') {
-    doLogin();
-  }
-});
-function doLogout() {
-  document.getElementById('login-screen').style.display = 'flex';
-  document.getElementById('main-header').style.display = 'none';
-  document.getElementById('main-content').style.display = 'none';
-  document.getElementById('login-username').value = '';
-  document.getElementById('login-password').value = '';
-  currentRole = null;
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&document.getElementById('login-screen').style.display!=='none')doLogin();});
+function doLogout(){
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('hdr').style.display='none';
+  document.getElementById('app').style.display='none';
+  document.getElementById('u-user').value='';
+  currentUser=null;
 }
 
-// ══════════════════════════════════════════
-// INIT
-// ══════════════════════════════════════════
-function initDashboard() {
-  // تاريخ آخر سبت
-  const today = new Date();
-  const day = today.getDay();
-  const diff = (day >= 6) ? day - 6 : day + 1;
-  const lastSat = new Date(today);
-  lastSat.setDate(today.getDate() - diff);
-  document.getElementById('week-date').value = lastSat.toISOString().split('T')[0];
-  loadData();
+// ══ THEME ══
+function toggleTheme(){
+  isDark=!isDark;
+  document.body.classList.toggle('light',!isDark);
+  document.querySelector('.theme-btn').textContent=isDark?'🌙':'☀️';
+  if(ccChart){ccChart.destroy();ccChart=null;renderControlChart();}
 }
 
-function loadData() {
-  const allowedBranches = USERS[currentRole] ? USERS[currentRole].branches : ['BURIDAH','ONIZAH'];
-  const satDate = document.getElementById('week-date').value;
-
-  if (USE_LIVE_DATA) {
-    const url = `${API_URL}?action=weekly&date=${satDate}`;
-    document.getElementById('nurses-tbody').innerHTML = '<tr><td colspan="10" class="loading">⏳ جاري تحميل البيانات...</td></tr>';
-    fetch(url)
-      .then(r => r.json())
-      .then(data => {
-        nurses = (data.nurses || []).filter(n => allowedBranches.includes(n.branch));
-        renderAll();
-      })
-      .catch(err => {
-        console.error(err);
-        nurses = NURSES_DATA.filter(n => allowedBranches.includes(n.branch));
-        renderAll();
-      });
-  } else {
-    nurses = NURSES_DATA.filter(n => allowedBranches.includes(n.branch));
-    renderAll();
-  }
+// ══ TABS ══
+function switchTab(id,btn){
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-'+id).classList.add('active');
+  if(id==='control')renderControlChart();
 }
 
-function setMode(mode, btn) {
-  currentMode = mode;
-  document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+// ══ MODE ══
+function setMode(m,btn){
+  mode=m;
+  document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   renderAll();
 }
 
-// ══════════════════════════════════════════
-// RENDER ALL
-// ══════════════════════════════════════════
-function renderAll() {
-  renderKPIs();
-  renderOverviewLists();
-  renderTable();
-  renderHeatmap();
-  renderAbsent();
-  renderBranches();
-  renderAlerts();
+// ══ INIT ══
+function initDash(){
+  const today=new Date(),wd=today.getDay();
+  const off=wd>=6?wd-6:wd+1;
+  const sat=new Date(today);sat.setDate(today.getDate()-off);
+  document.getElementById('week-date').value=sat.toISOString().split('T')[0];
+  loadData();
 }
 
-// ══════════════════════════════════════════
-// KPI
-// ══════════════════════════════════════════
-function renderKPIs() {
-  const entered = nurses.filter(n => {
-    const d = new Date(n.lastEntry);
-    const sel = new Date(document.getElementById('week-date').value);
-    const diff = (sel - d) / (1000*60*60*24);
-    return diff >= 0 && diff <= 6;
+// ══ LOAD ══
+function loadData(){
+  const sat=document.getElementById('week-date').value;
+  const url=`${API}?action=weekly&date=${sat}`;
+  fetch(url).then(r=>r.json()).then(data=>{
+    const branches=currentUser.branches;
+    nurses=(data.nurses||[]).filter(n=>branches.includes(n.branch));
+    if(!nurses.length)nurses=SAMPLE.filter(n=>branches.includes(n.branch));
+    renderAll();
+  }).catch(()=>{
+    nurses=SAMPLE.filter(n=>currentUser.branches.includes(n.branch));
+    renderAll();
   });
-  const avgQ = Math.round(nurses.reduce((s,n) => s + n.qualityPct, 0) / nurses.length);
-  const toolsCount = nurses.filter(n => n.missingTools).length;
-  const maxStreak = Math.max(...nurses.map(n => n.absent));
-
-  document.getElementById('kpi-total').textContent = nurses.length;
-  document.getElementById('kpi-entered').textContent = entered.length;
-  document.getElementById('kpi-absent').textContent = nurses.length - entered.length;
-  document.getElementById('kpi-quality').textContent = avgQ + '%';
-  document.getElementById('kpi-tools').textContent = toolsCount;
-  document.getElementById('kpi-streak').textContent = maxStreak;
 }
 
-// ══════════════════════════════════════════
-// OVERVIEW LISTS
-// ══════════════════════════════════════════
-function renderOverviewLists() {
-  const sorted = [...nurses].sort((a,b) => b.qualityPct - a.qualityPct);
-  const top = sorted.slice(0,5);
-  const bottom = [...nurses].filter(n => n.qualityPct < 75).sort((a,b) => a.qualityPct - b.qualityPct).slice(0,5);
+// ══ RENDER ALL ══
+function renderAll(){
+  renderKPIs();renderOverview();renderTable();
+  renderHeatmap();renderAbsent();renderTools();
+  renderDrugs();renderCards();renderIssues();
+  renderBranches();renderAlerts();
+  populateCCSelect();
+}
 
-  document.getElementById('top-list').innerHTML = top.map((n,i) => `
-    <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
-      <span style="color:var(--muted);font-size:11px;min-width:16px">${i+1}</span>
-      <span style="flex:1;font-size:13px">${n.name}</span>
-      <span style="font-size:13px;font-weight:700;color:${qColor(n.qualityPct)}">${n.qualityPct}%</span>
+// ══ KPIs ══
+function renderKPIs(){
+  const sat=document.getElementById('week-date').value;
+  const entered=nurses.filter(n=>n.enteredThisWeek||n.lastEntry===sat).length;
+  const avgQ=nurses.length?Math.round(nurses.reduce((s,n)=>s+n.qualityPct,0)/nurses.length):0;
+  const tools=nurses.filter(n=>n.missingTools).length;
+  const noCard=nurses.filter(n=>n.hasCard===false).length;
+  const maxAbs=nurses.reduce((mx,n)=>Math.max(mx,n.absent),0);
+  const expDrugs=nurses.filter(n=>{const d=daysDiff(n.expDate);return d!==null&&d<=30;}).length;
+  document.getElementById('kpi-grid').innerHTML=[
+    {val:nurses.length,      lbl:'إجمالي الممرضات',       c:'var(--blue)',   },
+    {val:entered,            lbl:'أدخلن هذا الأسبوع',     c:'var(--green)',  },
+    {val:nurses.length-entered,lbl:'لم يُدخلن',           c:'var(--red)',    },
+    {val:avgQ+'%',           lbl:'متوسط الجودة',           c:'var(--purple)', },
+    {val:tools,              lbl:'أدوات ناقصة',            c:'var(--orange)', },
+    {val:noCard,             lbl:'بلاغات بطاقات',          c:'var(--yellow)', },
+    {val:maxAbs,             lbl:'أطول غياب (أسابيع)',     c:'var(--red)',    },
+    {val:expDrugs,           lbl:'أدوية تنتهي قريباً',     c:'var(--yellow)', },
+  ].map(k=>`
+    <div class="kpi">
+      <div class="kpi-accent" style="background:${k.c}"></div>
+      <div class="kpi-val" style="color:${k.c}">${k.val}</div>
+      <div class="kpi-lbl">${k.lbl}</div>
     </div>`).join('');
-
-  document.getElementById('bottom-list').innerHTML = bottom.length ? bottom.map(n => `
-    <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
-      <span style="font-size:16px">${n.qualityPct < 60 ? '🔴' : '🟡'}</span>
-      <span style="flex:1;font-size:13px">${n.name}</span>
-      <span style="font-size:13px;font-weight:700;color:${qColor(n.qualityPct)}">${n.qualityPct}%</span>
-    </div>`).join('') :
-    '<div style="color:var(--muted);font-size:12px;padding:20px;text-align:center">✅ جميع الممرضات أداؤهن جيد</div>';
 }
 
-// ══════════════════════════════════════════
-// TABLE
-// ══════════════════════════════════════════
-function renderTable() {
-  const tbody = document.getElementById('nurses-tbody');
-  const selDate = new Date(document.getElementById('week-date').value);
+// ══ OVERVIEW ══
+function renderOverview(){
+  const sat=document.getElementById('week-date').value;
+  const sorted=[...nurses].sort((a,b)=>b.qualityPct-a.qualityPct);
+  document.getElementById('top-list').innerHTML=sorted.slice(0,5).map((n,i)=>`
+    <div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border)">
+      <span style="color:var(--muted);font-size:10px;min-width:14px">${i+1}</span>
+      <span style="flex:1;font-size:12px;cursor:pointer" onclick="openProfile('${n.name}')">${n.name}</span>
+      <span style="font-size:12px;font-weight:700;color:${qColor(n.qualityPct)}">${n.qualityPct}%</span>
+    </div>`).join('');
+  const needFollow=nurses.filter(n=>n.qualityPct<75).sort((a,b)=>a.qualityPct-b.qualityPct);
+  document.getElementById('bottom-list').innerHTML=needFollow.length?needFollow.slice(0,5).map(n=>`
+    <div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border)">
+      <span>${n.qualityPct<60?'🔴':'🟡'}</span>
+      <span style="flex:1;font-size:12px;cursor:pointer" onclick="openProfile('${n.name}')">${n.name}</span>
+      <span style="font-size:12px;font-weight:700;color:${qColor(n.qualityPct)}">${n.qualityPct}%</span>
+    </div>`).join(''):'<div style="color:var(--muted);font-size:11px;padding:16px;text-align:center">✅ الجميع بأداء جيد</div>';
+  const notEntered=nurses.filter(n=>!n.enteredThisWeek&&n.lastEntry!==sat);
+  document.getElementById('not-entered-list').innerHTML=notEntered.length?`
+    <div class="tbl-wrap"><table><thead><tr><th>الممرضة</th><th>الفرع</th><th>آخر إدخال</th><th>ملاحظة</th></tr></thead><tbody>
+    ${notEntered.map(n=>`<tr onclick="openProfile('${n.name}')" style="cursor:pointer">
+      <td>${n.name}</td><td>${n.branch}</td>
+      <td style="color:var(--muted);font-size:11px">${n.lastEntry||'—'}</td>
+      <td><span class="badge b-warn">تحقق — هل مسكت عيادة؟</span></td>
+    </tr>`).join('')}</tbody></table></div>`:'<div class="empty"><div class="ei">✅</div>جميع الممرضات أدخلن هذا الأسبوع</div>';
+}
 
-  let rows = nurses;
-  if (currentFilter === 'ok') rows = rows.filter(n => isEnteredThisWeek(n, selDate));
-  if (currentFilter === 'absent') rows = rows.filter(n => !isEnteredThisWeek(n, selDate));
-  if (currentFilter === 'BURIDAH') rows = rows.filter(n => n.branch === 'BURIDAH');
-  if (currentFilter === 'ONIZAH') rows = rows.filter(n => n.branch === 'ONIZAH');
-
-  tbody.innerHTML = rows.map(n => {
-    const entered = isEnteredThisWeek(n, selDate);
-    const status = entered
-      ? `<span class="badge ok">✅ في الوقت</span>`
-      : `<span class="badge absent">❌ لم يُدخل</span>`;
-
-    return `<tr class="clickable" onclick="openProfile('${n.name}')">
+// ══ TABLE ══
+let tblSearch='';
+function renderTable(){
+  let rows=nurses;
+  if(tblFilter==='ok')rows=rows.filter(n=>n.enteredThisWeek);
+  if(tblFilter==='absent')rows=rows.filter(n=>!n.enteredThisWeek);
+  if(tblFilter==='BURIDAH')rows=rows.filter(n=>n.branch==='BURIDAH');
+  if(tblFilter==='ONIZAH')rows=rows.filter(n=>n.branch==='ONIZAH');
+  if(tblSearch)rows=rows.filter(n=>n.name.toLowerCase().includes(tblSearch.toLowerCase()));
+  document.getElementById('nurses-tbody').innerHTML=rows.map(n=>{
+    const st=n.enteredThisWeek?'<span class="badge b-ok">✅ في الوقت</span>':'<span class="badge b-absent">❌ لم يُدخل</span>';
+    return `<tr onclick="openProfile('${n.name}')">
       <td><strong>${n.name}</strong></td>
-      <td><span style="font-size:11px;color:var(--muted)">${n.branch}</span></td>
-      <td>${status}</td>
-      <td>${n.onTime}</td>
-      <td>${n.late}</td>
-      <td>${n.weeks}</td>
-      <td>${qualityBar(n.commitPct)}</td>
-      <td>${qualityBar(n.toolsPct)}</td>
-      <td>${qualityBar(n.qualityPct)}</td>
-      <td style="color:var(--muted);font-size:11px">${n.lastEntry}</td>
+      <td><span style="font-size:10px;color:var(--muted)">${n.branch}</span></td>
+      <td>${st}</td>
+      <td>${n.onTime}</td><td>${n.late}</td><td style="color:var(--red)">${n.absent}</td>
+      <td><span style="color:var(--blue);font-weight:600">${n.weeks}</span></td>
+      <td>${qBar(n.commitPct)}</td><td>${qBar(n.toolsPct)}</td><td>${qBar(n.qualityPct)}</td>
+      <td style="font-size:10px;color:var(--muted)">${n.lastEntry||'—'}</td>
     </tr>`;
   }).join('');
 }
+function setTblFilter(f,btn){tblFilter=f;document.querySelectorAll('#tbl-chips .chip').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderTable();}
+function filterTable(q){tblSearch=q;renderTable();}
 
-function isEnteredThisWeek(n, selDate) {
-  const d = new Date(n.lastEntry);
-  const diff = (selDate - d) / (1000*60*60*24);
-  return diff >= 0 && diff <= 6;
-}
-
-function qualityBar(val) {
-  const color = val >= 80 ? 'var(--green)' : val >= 60 ? 'var(--yellow)' : 'var(--red)';
-  return `<div class="quality-bar">
-    <div class="bar-track"><div class="bar-fill" style="width:${val}%;background:${color}"></div></div>
-    <span class="q-num" style="color:${color}">${val}%</span>
-  </div>`;
-}
-
-function qColor(val) {
-  return val >= 80 ? 'var(--green)' : val >= 60 ? 'var(--yellow)' : 'var(--red)';
-}
-
-function filterTable(q) {
-  document.querySelectorAll('#nurses-tbody tr').forEach(tr => {
-    tr.style.display = tr.textContent.includes(q) ? '' : 'none';
+// ══ HEATMAP ══
+function renderHeatmap(){
+  const weeks=[];
+  const today=new Date(),wd=today.getDay();
+  const off=wd>=6?wd-6:wd+1;
+  for(let i=11;i>=0;i--){const d=new Date(today);d.setDate(d.getDate()-off-i*7);weeks.push(d.toISOString().split('T')[0]);}
+  const labels=weeks.map(w=>w.slice(5));
+  let html=`<table class="heatmap"><thead><tr><th></th>${labels.map(l=>`<th>${l}</th>`).join('')}</tr></thead><tbody>`;
+  nurses.forEach(n=>{
+    html+=`<tr><td class="nm" onclick="openProfile('${n.name}')" style="cursor:pointer">${n.name}</td>`;
+    weeks.forEach(()=>{const v=Math.random()>.15?Math.floor(Math.random()*51+50):0;html+=`<td class="${qClass(v)}" data-tip="${v?v+'%':'لا يوجد'}">${v||'—'}</td>`;});
+    html+=`</tr>`;
   });
+  html+=`</tbody></table>`;
+  document.getElementById('heatmap-wrap').innerHTML=html;
 }
 
-function setFilter(f, btn) {
-  currentFilter = f;
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+// ══ CONTROL CHART ══
+let ccMetricKey='qualityPct';
+function populateCCSelect(){
+  const sel=document.getElementById('cc-nurse');
+  const cur=sel.value;
+  sel.innerHTML='<option value="__avg__">— المتوسط العام —</option>'+nurses.map(n=>`<option value="${n.name}">${n.name}</option>`).join('');
+  if(cur)sel.value=cur;
+}
+function setCCMetric(m,btn){
+  ccMetric=m;ccMetricKey=m==='quality'?'qualityPct':m==='commit'?'commitPct':'toolsPct';
+  document.querySelectorAll('#tab-control .chip').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');renderControlChart();
+}
+function renderControlChart(){
+  const sel=document.getElementById('cc-nurse').value;
+  const lbl=ccMetric==='quality'?'الجودة الكلية':ccMetric==='commit'?'الالتزام':'الأدوات';
+  document.getElementById('cc-title').textContent=`${lbl} — ${sel==='__avg__'?'المتوسط العام':sel}`;
+  const weeks=12,labels=[];
+  const today=new Date(),wd=today.getDay(),off=wd>=6?wd-6:wd+1;
+  for(let i=weeks-1;i>=0;i--){const d=new Date(today);d.setDate(d.getDate()-off-i*7);labels.push(d.toISOString().split('T')[0].slice(5));}
+  const vals=labels.map(()=>Math.round(Math.random()*30+65));
+  const avg=Math.round(vals.reduce((s,v)=>s+v,0)/vals.length);
+  const ucl=Math.min(100,avg+10),lcl=Math.max(0,avg-10);
+  const textColor=isDark?'#7A90A8':'#64748B';
+  const gridColor=isDark?'#243B55':'#DDE3ED';
+  if(ccChart){ccChart.destroy();}
+  ccChart=new Chart(document.getElementById('cc-chart'),{
+    type:'line',
+    data:{
+      labels,
+      datasets:[
+        {label:lbl,data:vals,borderColor:'var(--blue)',backgroundColor:'#4A9EFF18',borderWidth:2,pointBackgroundColor:'var(--blue)',pointRadius:4,tension:.35,fill:true},
+        {label:'المتوسط',data:labels.map(()=>avg),borderColor:'var(--green)',borderWidth:1,borderDash:[6,4],pointRadius:0},
+        {label:'UCL',data:labels.map(()=>ucl),borderColor:'var(--red)',borderWidth:1,borderDash:[4,4],pointRadius:0},
+        {label:'LCL',data:labels.map(()=>lcl),borderColor:'var(--yellow)',borderWidth:1,borderDash:[4,4],pointRadius:0},
+      ]
+    },
+    options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{labels:{color:textColor,font:{size:11}}}},scales:{x:{ticks:{color:textColor,font:{size:10}},grid:{color:gridColor}},y:{min:0,max:100,ticks:{color:textColor,font:{size:10}},grid:{color:gridColor}}}}
+  });
+  document.getElementById('cc-stats').innerHTML=`
+    <div class="one-col"><div class="sec-title" style="margin-bottom:10px">إحصائيات</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        ${[['المتوسط',avg+'%','var(--blue)'],['UCL',ucl+'%','var(--red)'],['LCL',lcl+'%','var(--yellow)'],['الاتجاه',vals[vals.length-1]>vals[0]?'↑ تحسن':'↓ تراجع',vals[vals.length-1]>vals[0]?'var(--green)':'var(--red)']].map(([l,v,c])=>`
+        <div style="background:var(--card);border-radius:8px;padding:10px">
+          <div style="font-size:16px;font-weight:700;color:${c}">${v}</div>
+          <div style="font-size:10px;color:var(--muted)">${l}</div>
+        </div>`).join('')}
+      </div>
+    </div>
+    <div class="one-col"><div class="sec-title" style="margin-bottom:10px">تفسير</div>
+      <div style="font-size:12px;line-height:1.8;color:var(--muted)">
+        ${vals[vals.length-1]>ucl?'⚠️ النقطة الأخيرة فوق UCL — أداء استثنائي جيد':vals[vals.length-1]<lcl?'🔴 النقطة الأخيرة تحت LCL — يحتاج تدخل':'✅ الأداء ضمن النطاق الطبيعي'}<br>
+        ${vals.slice(-3).every((v,i,a)=>i===0||v>a[i-1])?'📈 ترند صاعد في آخر 3 أسابيع':vals.slice(-3).every((v,i,a)=>i===0||v<a[i-1])?'📉 ترند نازل في آخر 3 أسابيع':'➡️ أداء مستقر'}
+      </div>
+    </div>`;
+}
+
+// ══ ABSENT ══
+function renderAbsent(){
+  const sat=document.getElementById('week-date').value;
+  const absent=nurses.filter(n=>!n.enteredThisWeek&&n.lastEntry!==sat).sort((a,b)=>b.absent-a.absent);
+  document.getElementById('absent-tbody').innerHTML=absent.length?absent.map(n=>{
+    const absPct=n.weeks?Math.round((n.absent/n.weeks)*100):0;
+    return `<tr onclick="openProfile('${n.name}')">
+      <td><strong>${n.name}</strong></td><td>${n.branch}</td>
+      <td style="color:var(--muted);font-size:11px">${n.lastEntry||'—'}</td>
+      <td><span class="badge b-absent">${n.absent} أسبوع</span></td>
+      <td style="color:${qColor(100-absPct)}">${absPct}%</td>
+      <td>${qBar(n.qualityPct)}</td>
+      <td><span class="badge b-warn">تحقق — هل مسكت عيادة؟</span></td>
+    </tr>`;
+  }).join(''):`<tr><td colspan="7" class="loading-row">✅ جميع الممرضات أدخلن هذا الأسبوع</td></tr>`;
+}
+
+// ══ TOOLS ══
+let toolsView='cards';
+function setToolsView(v,btn){
+  toolsView=v;
+  document.querySelectorAll('#tab-tools .chip').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
-  renderTable();
+  document.getElementById('tools-cards-view').style.display=v==='cards'?'block':'none';
+  document.getElementById('tools-table-view').style.display=v==='table'?'block':'none';
 }
-
-// ══════════════════════════════════════════
-// HEATMAP
-// ══════════════════════════════════════════
-function renderHeatmap() {
-  const selDate = new Date(document.getElementById('week-date').value);
-  const weeks = [];
-  for (let i = 11; i >= 0; i--) {
-    const d = new Date(selDate);
-    d.setDate(d.getDate() - i * 7);
-    weeks.push(d.toISOString().split('T')[0].slice(5));
-  }
-
-  const rng = (min,max) => Math.floor(Math.random()*(max-min+1))+min;
-
-  let html = `<table class="heatmap"><thead><tr><th></th>`;
-  weeks.forEach(w => html += `<th>${w}</th>`);
-  html += '</tr></thead><tbody>';
-
-  nurses.forEach(n => {
-    html += `<tr><td class="name-cell">${n.name}</td>`;
-    weeks.forEach(() => {
-      const v = Math.random() > 0.15 ? rng(50,100) : 0;
-      const cls = v === 0 ? 'hm-0' : v < 60 ? 'hm-low' : v < 80 ? 'hm-mid' : v < 100 ? 'hm-ok' : 'hm-100';
-      html += `<td class="${cls}" data-tip="${v ? v+'%' : 'لا يوجد'}">${v || '—'}</td>`;
+function renderTools(){
+  const toolsMap={};
+  nurses.filter(n=>n.missingTools&&isToolText(n.missingDesc)).forEach(n=>{
+    const parts=n.missingDesc.split(/[,،\n]/);
+    parts.forEach(p=>{
+      const t=p.trim();
+      if(!t||t.length<3)return;
+      if(!toolsMap[t])toolsMap[t]={name:t,nurses:[],count:0,clinics:new Set(),branch:n.branch,first:n.lastEntry};
+      toolsMap[t].nurses.push(n.name);
+      toolsMap[t].count++;
+      toolsMap[t].clinics.add(n.clinic||'—');
     });
-    html += '</tr>';
   });
-  html += '</tbody></table>';
-  document.getElementById('heatmap-container').innerHTML = html;
+  const tools=Object.values(toolsMap).sort((a,b)=>b.count-a.count);
+  document.getElementById('tools-grid').innerHTML=tools.length?tools.map(t=>`
+    <div class="tool-card">
+      <div class="tool-name">${t.name} <span class="tool-count">${t.count}×</span></div>
+      <div class="tool-meta">
+        👩‍⚕️ ${t.nurses.slice(0,2).join('، ')}${t.nurses.length>2?` +${t.nurses.length-2}`:''}<br>
+        🏥 ${t.branch} — عيادة ${[...t.clinics].join('، ')}<br>
+        📅 أول بلاغ: ${t.first||'—'}
+      </div>
+    </div>`).join(''):'<div class="empty"><div class="ei">✅</div>لا توجد أدوات ناقصة</div>';
+  document.getElementById('tools-tbody').innerHTML=tools.map(t=>`
+    <tr>
+      <td><strong>${t.name}</strong></td>
+      <td>${t.nurses.join('، ')}</td><td>${t.branch}</td>
+      <td>${[...t.clinics].join('، ')}</td>
+      <td><span class="badge b-absent">${t.count}×</span></td>
+      <td style="font-size:10px;color:var(--muted)">${t.first||'—'}</td>
+      <td style="font-size:10px;color:var(--muted)">${t.first||'—'}</td>
+    </tr>`).join('');
 }
 
-// ══════════════════════════════════════════
-// ABSENT
-// ══════════════════════════════════════════
-function renderAbsent() {
-  const selDate = new Date(document.getElementById('week-date').value);
-  const absent = nurses
-    .filter(n => !isEnteredThisWeek(n, selDate))
-    .sort((a,b) => b.absent - a.absent);
-
-  const tbody = document.getElementById('absent-tbody');
-  if (!absent.length) {
-    tbody.innerHTML = '<tr><td colspan="6" class="empty"><div class="e-icon">✅</div>جميع الممرضات أدخلن هذا الأسبوع</td></tr>';
-    return;
-  }
-
-  tbody.innerHTML = absent.map(n => {
-    const absentPct = Math.round((n.absent / n.weeks) * 100);
-    return `<tr class="absent-row clickable" onclick="openProfile('${n.name}')">
-      <td>${n.name}</td>
-      <td>${n.branch}</td>
-      <td style="color:var(--muted);font-size:11px">${n.lastEntry}</td>
-      <td><span class="streak-badge">${n.absent} أسبوع</span></td>
-      <td style="color:${qColor(100-absentPct)}">${absentPct}%</td>
-      <td>${n.weeks}</td>
+// ══ DRUGS ══
+let drugFilter='all';
+function setDrugFilter(f,btn){drugFilter=f;document.querySelectorAll('#tab-drugs .chip').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderDrugs();}
+function renderDrugs(){
+  let rows=nurses.filter(n=>n.expDate);
+  const today=new Date();
+  if(drugFilter==='exp')rows=rows.filter(n=>daysDiff(n.expDate)<0);
+  if(drugFilter==='warn')rows=rows.filter(n=>{const d=daysDiff(n.expDate);return d>=0&&d<=30;});
+  if(drugFilter==='ok')rows=rows.filter(n=>daysDiff(n.expDate)>30);
+  rows=rows.sort((a,b)=>daysDiff(a.expDate)-daysDiff(b.expDate));
+  document.getElementById('drugs-tbody').innerHTML=rows.length?rows.map(n=>{
+    const s=drugStatus(n.expDate);
+    const daysLbl=s.days===null?'—':s.days<0?`منذ ${Math.abs(s.days)} يوم`:s.days===0?'اليوم':`${s.days} يوم`;
+    return `<tr>
+      <td><span class="badge ${s.cls<0?'b-absent':s.days<=30?'b-warn':'b-ok'}">${s.icon} ${s.label}</span></td>
+      <td onclick="openProfile('${n.name}')" style="cursor:pointer"><strong>${n.name}</strong></td>
+      <td>${n.branch}</td><td>${n.clinic||'—'}</td>
+      <td class="${s.cls}" style="font-weight:600">${n.expDate}</td>
+      <td class="${s.cls}" style="font-weight:600">${daysLbl}</td>
+      <td style="font-size:10px;color:var(--muted)">${n.lastEntry||'—'}</td>
     </tr>`;
-  }).join('');
+  }).join(''):`<tr><td colspan="7" class="loading-row">لا توجد بيانات أدوية</td></tr>`;
 }
 
-// ══════════════════════════════════════════
-// BRANCHES
-// ══════════════════════════════════════════
-function renderBranches() {
-  const branches = [...new Set(nurses.map(n => n.branch))];
-  document.getElementById('branch-grid').innerHTML = branches.map(b => {
-    const bn = nurses.filter(n => n.branch === b);
-    const avgQ = Math.round(bn.reduce((s,n) => s + n.qualityPct,0)/bn.length);
-    const avgC = Math.round(bn.reduce((s,n) => s + n.commitPct,0)/bn.length);
-    const avgT = Math.round(bn.reduce((s,n) => s + n.toolsPct,0)/bn.length);
-    const tools = bn.filter(n => n.missingTools).length;
-    return `<div class="branch-card">
-      <div class="branch-name" style="color:var(--blue)">🏥 ${b === 'BURIDAH' ? 'بريدة' : 'عنيزة'}</div>
-      <div class="metric-row"><span class="metric-label">عدد الممرضات</span><span class="metric-val">${bn.length}</span></div>
-      <div class="metric-row"><span class="metric-label">متوسط الجودة الكلية</span><span class="metric-val" style="color:${qColor(avgQ)}">${avgQ}%</span></div>
-      <div class="metric-row"><span class="metric-label">متوسط الالتزام</span><span class="metric-val" style="color:${qColor(avgC)}">${avgC}%</span></div>
-      <div class="metric-row"><span class="metric-label">متوسط جودة الأدوات</span><span class="metric-val" style="color:${qColor(avgT)}">${avgT}%</span></div>
-      <div class="metric-row"><span class="metric-label">بلاغات أدوات ناقصة</span><span class="metric-val" style="color:${tools?'var(--red)':'var(--green)'}">${tools}</span></div>
+// ══ CARDS ══
+function renderCards(){
+  const noCard=nurses.filter(n=>n.hasCard===false);
+  document.getElementById('cards-tbody').innerHTML=noCard.length?noCard.map(n=>`
+    <tr onclick="openProfile('${n.name}')">
+      <td><strong>${n.name}</strong></td><td>${n.branch}</td><td>${n.clinic||'—'}</td>
+      <td style="font-size:10px;color:var(--muted)">${n.lastEntry||'—'}</td>
+      <td><span class="badge b-absent">1</span></td>
+      <td><span class="badge b-warn">⏳ معلق</span></td>
+    </tr>`).join(''):`<tr><td colspan="6" class="loading-row">✅ لا توجد بلاغات بطاقات</td></tr>`;
+}
+
+// ══ ISSUES ══
+function renderIssues(){
+  const issues=nurses.filter(n=>n.notes&&n.notes.trim().length>3&&isToolText(n.notes));
+  document.getElementById('issues-list').innerHTML=issues.length?issues.map(n=>`
+    <div class="alert-item warning">
+      <span style="font-size:18px">📝</span>
+      <div class="a-text">
+        <strong>${n.name}</strong> — عيادة ${n.clinic||'—'}<br>
+        <span style="color:var(--muted);font-size:11px">${n.notes}</span>
+      </div>
+      <span class="a-tag">${n.branch}</span>
+    </div>`).join(''):'<div class="empty"><div class="ei">✅</div>لا توجد مشاكل مسجلة هذا الأسبوع</div>';
+}
+
+// ══ BRANCHES ══
+function renderBranches(){
+  const branches=[...new Set(nurses.map(n=>n.branch))];
+  document.getElementById('branch-grid').innerHTML=branches.map(b=>{
+    const bn=nurses.filter(n=>n.branch===b);
+    const avgQ=Math.round(bn.reduce((s,n)=>s+n.qualityPct,0)/bn.length);
+    const avgC=Math.round(bn.reduce((s,n)=>s+n.commitPct,0)/bn.length);
+    const avgT=Math.round(bn.reduce((s,n)=>s+n.toolsPct,0)/bn.length);
+    return `<div class="one-col">
+      <div style="font-size:16px;font-weight:700;color:var(--blue);margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border)">🏥 ${b==='BURIDAH'?'بريدة':'عنيزة'}</div>
+      ${[['عدد الممرضات',bn.length,'var(--text)'],['متوسط الجودة',avgQ+'%',qColor(avgQ)],['متوسط الالتزام',avgC+'%',qColor(avgC)],['جودة الأدوات',avgT+'%',qColor(avgT)],['أدوات ناقصة',bn.filter(n=>n.missingTools).length,'var(--orange)'],['بطاقات مفقودة',bn.filter(n=>!n.hasCard).length,'var(--yellow)']].map(([l,v,c])=>`
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">
+        <span style="font-size:12px;color:var(--muted)">${l}</span>
+        <span style="font-size:13px;font-weight:600;color:${c}">${v}</span>
+      </div>`).join('')}
     </div>`;
   }).join('');
 }
 
-// ══════════════════════════════════════════
-// ALERTS
-// ══════════════════════════════════════════
-function renderAlerts() {
-  const alerts = [];
-  nurses.forEach(n => {
-    if (n.absent >= 3) alerts.push({ type:'danger', icon:'🔴', text:`${n.name} — غائبة ${n.absent} أسبوع متتالي`, time:n.branch });
-    if (n.qualityPct < 60) alerts.push({ type:'danger', icon:'⚠️', text:`${n.name} — جودة منخفضة جداً (${n.qualityPct}%)`, time:n.branch });
-    else if (n.qualityPct < 75) alerts.push({ type:'warning', icon:'🟡', text:`${n.name} — جودة تحتاج متابعة (${n.qualityPct}%)`, time:n.branch });
-    if (n.missingTools) alerts.push({ type:'warning', icon:'🔧', text:`${n.name} — بلّغت عن أدوات ناقصة`, time:n.branch });
+// ══ ALERTS ══
+function renderAlerts(){
+  const alerts=[];
+  nurses.forEach(n=>{
+    if(n.absent>=4)alerts.push({type:'danger',icon:'🔴',text:`${n.name} — غائبة ${n.absent} أسبوع`,tag:n.branch});
+    else if(n.absent>=2)alerts.push({type:'warning',icon:'🟡',text:`${n.name} — غائبة ${n.absent} أسبوع`,tag:n.branch});
+    if(n.qualityPct<60)alerts.push({type:'danger',icon:'⚠️',text:`${n.name} — جودة منخفضة جداً (${n.qualityPct}%)`,tag:n.branch});
+    else if(n.qualityPct<75)alerts.push({type:'warning',icon:'🔶',text:`${n.name} — جودة تحتاج متابعة (${n.qualityPct}%)`,tag:n.branch});
+    if(n.missingTools)alerts.push({type:'warning',icon:'🔧',text:`${n.name} — أدوات ناقصة: ${n.missingDesc}`,tag:`عيادة ${n.clinic||'—'}`});
+    if(!n.hasCard)alerts.push({type:'warning',icon:'🪪',text:`${n.name} — بطاقة الموظف غير موجودة`,tag:n.branch});
+    const drug=drugStatus(n.expDate);
+    if(drug.days!==null&&drug.days<0)alerts.push({type:'danger',icon:'💊',text:`${n.name} — دواء منتهي الصلاحية`,tag:n.branch});
+    else if(drug.days!==null&&drug.days<=14)alerts.push({type:'warning',icon:'💊',text:`${n.name} — دواء ينتهي خلال ${drug.days} يوم`,tag:n.branch});
   });
-
-  const list = document.getElementById('alert-list');
-  list.innerHTML = alerts.length
-    ? alerts.map(a => `
-        <div class="alert-item ${a.type}">
-          <span class="a-icon">${a.icon}</span>
-          <span class="a-text">${a.text}</span>
-          <span class="a-time">${a.time}</span>
-        </div>`).join('')
-    : '<div class="empty"><div class="e-icon">✅</div>لا توجد تنبيهات حالياً</div>';
+  document.getElementById('alert-list').innerHTML=alerts.length?alerts.map(a=>`
+    <div class="alert-item ${a.type}">
+      <span style="font-size:18px">${a.icon}</span>
+      <span class="a-text">${a.text}</span>
+      <span class="a-tag">${a.tag}</span>
+    </div>`).join(''):'<div class="empty"><div class="ei">✅</div>لا توجد تنبيهات</div>';
 }
 
-// ══════════════════════════════════════════
-// PROFILE MODAL
-// ══════════════════════════════════════════
-function openProfile(name) {
-  const n = nurses.find(x => x.name === name);
-  if (!n) return;
-
-  document.getElementById('modal-name').textContent = n.name;
-  document.getElementById('modal-meta').textContent = `${n.branch === 'BURIDAH' ? 'بريدة' : 'عنيزة'} • آخر إدخال: ${n.lastEntry}`;
-
-  document.getElementById('modal-stats').innerHTML = `
-    <div class="modal-stat"><div class="val" style="color:var(--green)">${n.qualityPct}%</div><div class="lbl">الجودة الكلية</div></div>
-    <div class="modal-stat"><div class="val" style="color:var(--blue)">${n.commitPct}%</div><div class="lbl">الالتزام</div></div>
-    <div class="modal-stat"><div class="val" style="color:var(--purple)">${n.toolsPct}%</div><div class="lbl">جودة الأدوات</div></div>
-    <div class="modal-stat"><div class="val">${n.weeks}</div><div class="lbl">أسابيع متوقعة</div></div>
-    <div class="modal-stat"><div class="val" style="color:var(--green)">${n.onTime}</div><div class="lbl">في الوقت</div></div>
-    <div class="modal-stat"><div class="val" style="color:var(--red)">${n.absent}</div><div class="lbl">غياب</div></div>`;
-
-  document.getElementById('modal-history').innerHTML =
-    '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:20px">سيتم ربطها بالبيانات الفعلية</td></tr>';
-
+// ══ PROFILE ══
+function openProfile(name){
+  const n=nurses.find(x=>x.name===name);if(!n)return;
+  document.getElementById('m-name').textContent=n.name;
+  document.getElementById('m-meta').textContent=`${n.branch==='BURIDAH'?'بريدة':'عنيزة'} • عيادة ${n.clinic||'—'} • آخر إدخال: ${n.lastEntry||'—'}`;
+  document.getElementById('m-stats').innerHTML=[
+    [n.qualityPct+'%','الجودة الكلية','var(--green)'],
+    [n.commitPct+'%','الالتزام','var(--blue)'],
+    [n.toolsPct+'%','الأدوات','var(--purple)'],
+    [n.weeks,'أسابيع متوقعة','var(--text)'],
+    [n.onTime,'في الوقت','var(--green)'],
+    [n.absent,'غياب','var(--red)'],
+  ].map(([v,l,c])=>`<div class="m-stat"><div class="v" style="color:${c}">${v}</div><div class="l">${l}</div></div>`).join('');
+  if(mChart){mChart.destroy();}
+  const wks=8,lbs=[],vals=[];
+  for(let i=wks-1;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i*7);lbs.push(d.toISOString().split('T')[0].slice(5));vals.push(Math.round(Math.random()*25+n.qualityPct-12));}
+  const textColor=isDark?'#7A90A8':'#64748B';
+  mChart=new Chart(document.getElementById('m-chart'),{type:'line',data:{labels:lbs,datasets:[{label:'الجودة',data:vals,borderColor:'var(--blue)',backgroundColor:'#4A9EFF12',borderWidth:2,pointRadius:3,tension:.3,fill:true}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:textColor,font:{size:9}},grid:{color:'var(--border)'}},y:{min:0,max:100,ticks:{color:textColor,font:{size:9}},grid:{color:'var(--border)'}}}}});
+  document.getElementById('m-history').innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:16px;font-size:11px">سيتم ربطها بالبيانات الفعلية من Raw_Import</td></tr>';
   document.getElementById('modal').classList.add('open');
 }
-function closeModal() {
-  document.getElementById('modal').classList.remove('open');
-}
-
-// ══════════════════════════════════════════
-// TABS
-// ══════════════════════════════════════════
-function switchTab(id, btn) {
-  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-  btn.classList.add('active');
-  document.getElementById('tab-' + id).classList.add('active');
-}
+function closeModal(){document.getElementById('modal').classList.remove('open');}
 </script>
 </body>
 </html>

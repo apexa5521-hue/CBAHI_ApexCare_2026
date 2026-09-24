@@ -1,2200 +1,1257 @@
 <!DOCTYPE html>
-<html>
+<html lang="ar" dir="rtl">
 <head>
-  <base target="_top">
-  <meta charset="utf-8">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ApexCare — مراقبة التمريض</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <style>
-  :root {
-    --primary: #0f6e56;
-    --primary-dark: #085041;
-    --accent: #185fa5;
-    --danger: #a32d2d;
-    --warning: #854f0b;
-    --bg: #f6f5f1;
-    --bg-alt: #f0efe9;
-    --card: #ffffff;
-    --border: #d3d1c7;
-    --text: #2c2c2a;
-    --text-muted: #5f5e5a;
+/* ═══ TOKENS ═══ */
+:root{
+  --bg:#0D1B2A;--surface:#152236;--card:#1A2E45;--border:#243B55;
+  --text:#E8F0FE;--muted:#7A90A8;--subtle:#3A5270;
+  --green:#00C896;--yellow:#FFB800;--red:#FF4757;
+  --blue:#4A9EFF;--purple:#9B6DFF;--orange:#FF8C42;
+  --r:12px;--r-sm:8px;--r-lg:16px;
+  --shadow:0 4px 24px #00000040;
+  --trans:.18s ease;
+}
+body.light{
+  --bg:#F0F4F8;--surface:#FFFFFF;--card:#F7FAFC;--border:#DDE3ED;
+  --text:#1A2E45;--muted:#64748B;--subtle:#CBD5E1;
+  --shadow:0 4px 24px #00000012;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans Arabic',sans-serif;min-height:100vh;transition:background var(--trans),color var(--trans);}
+::-webkit-scrollbar{width:6px;height:6px;}
+::-webkit-scrollbar-track{background:var(--surface);}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
 
-    --status-new-bg: #e6f1fb;    --status-new-text: #0c447c;
-    --status-progress-bg: #faeeda; --status-progress-text: var(--warning);
-    --status-sent-bg: #eeedfe;   --status-sent-text: #3c3489;
-    --status-received-bg: #eaf3de; --status-received-text: #27500a;
+/* ═══ LOGIN ═══ */
+#login-screen{
+  position:fixed;inset:0;background:var(--bg);
+  display:flex;align-items:center;justify-content:center;z-index:999;
+  background-image:radial-gradient(ellipse at 60% 40%,#4A9EFF18 0%,transparent 60%),
+                   radial-gradient(ellipse at 20% 80%,#00C89610 0%,transparent 50%);
+}
+.login-box{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:24px;padding:48px 40px;width:420px;
+  box-shadow:var(--shadow);
+}
+.login-logo{
+  width:60px;height:60px;background:linear-gradient(135deg,var(--green),#00a07a);
+  border-radius:18px;display:flex;align-items:center;justify-content:center;
+  font-size:26px;font-weight:700;color:#0D1B2A;margin:0 auto 20px;
+  box-shadow:0 8px 24px #00C89630;
+}
+.login-title{font-size:22px;font-weight:700;text-align:center;margin-bottom:4px;}
+.login-sub{font-size:12px;color:var(--muted);text-align:center;margin-bottom:36px;}
+.fld{margin-bottom:16px;}
+.fld label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:500;}
+.fld input{
+  width:100%;padding:13px 16px;border:1.5px solid var(--border);border-radius:var(--r-sm);
+  background:var(--card);color:var(--text);font-size:14px;font-family:inherit;
+  transition:border-color var(--trans);direction:ltr;text-align:left;
+}
+.fld input:focus{outline:none;border-color:var(--blue);}
+.fld input::placeholder{color:var(--muted);direction:rtl;text-align:right;}
+.login-btn{
+  width:100%;padding:14px;background:linear-gradient(135deg,var(--green),#00a07a);
+  color:#0D1B2A;border:none;border-radius:var(--r-sm);font-size:15px;font-weight:700;
+  cursor:pointer;font-family:inherit;transition:opacity var(--trans);margin-top:8px;
+  box-shadow:0 4px 16px #00C89630;
+}
+.login-btn:hover{opacity:.88;}
+.login-err{color:var(--red);font-size:12px;margin-top:12px;text-align:center;
+  background:#FF475712;border-radius:8px;padding:8px;display:none;}
 
-    --fs-xl: 20px; --fs-lg: 17px; --fs-md: 14px; --fs-sm: 13px; --fs-xs: 12px;
-    --radius-sm: 6px; --radius-md: 10px; --radius-pill: 20px;
-  }
-  * { box-sizing: border-box; }
-  body {
-    font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    margin: 0;
-    padding: 20px 20px 60px;
-  }
-  .card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    padding: 20px;
-    margin-bottom: 16px;
-    max-width: 960px;
-    margin-left: auto;
-    margin-right: auto;
-  }
-  h1, h2, h3 { margin-top: 0; font-weight: 600; }
-  h1 { font-size: var(--fs-xl); color: var(--primary-dark); }
-  h2 { font-size: var(--fs-lg); }
-  h3 { font-size: var(--fs-md); color: var(--text-muted); }
-  label { display: block; margin: 10px 0 4px; font-size: var(--fs-md); color: var(--text-muted); }
-  input, select, textarea {
-    width: 100%;
-    padding: 9px 10px;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    font-size: var(--fs-md);
-    background: var(--card);
-    font-family: inherit;
-  }
-  input:focus, select:focus, textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
-  button {
-    cursor: pointer;
-    border: none;
-    border-radius: var(--radius-sm);
-    padding: 10px 16px;
-    font-size: var(--fs-md);
-    font-weight: 600;
-    margin-top: 10px;
-    margin-inline-end: 8px;
-    transition: filter .15s, opacity .15s;
-    font-family: inherit;
-  }
-  button:hover { filter: brightness(0.92); }
-  button:active { filter: brightness(0.85); }
-  button:disabled { opacity: 0.5; cursor: not-allowed; filter: none; }
-  .btn-primary { background: var(--primary); color: #fff; }
-  .btn-secondary { background: #eee; color: var(--text); }
-  .btn-danger { background: var(--danger); color: #fff; }
-  .btn-accent { background: var(--accent); color: #fff; }
-  .btn-icon { background: transparent; color: var(--text-muted); padding: 6px 10px; margin-top: 0; font-size: var(--fs-md); }
-  .btn-icon:hover { background: var(--bg-alt); filter: none; }
-  table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: var(--fs-sm); }
-  th, td { padding: 8px; border-bottom: 1px solid var(--border); text-align: start; }
-  th { background: var(--bg-alt); font-weight: 600; }
-  .badge { padding: 3px 10px; border-radius: var(--radius-pill); font-size: var(--fs-xs); font-weight: 600; }
-  .badge-new { background: var(--status-new-bg); color: var(--status-new-text); }
-  .badge-progress { background: var(--status-progress-bg); color: var(--status-progress-text); }
-  .badge-sent { background: var(--status-sent-bg); color: var(--status-sent-text); }
-  .badge-received { background: var(--status-received-bg); color: var(--status-received-text); }
-  .badge-vendor    { background: #fff3e0; color: #6d3a00; }
-  .badge-review    { background: #f3e5f5; color: #4a148c; }
-  .badge-rejected  { background: #fde8e8; color: #8b1a1a; }
-  .kpi-timeline { display:flex; gap:0; flex-wrap:wrap; margin:10px 0; }
-  .kpi-step { flex:1; min-width:100px; padding:8px 6px; text-align:center; border-inline-end:1px solid var(--border); font-size:var(--fs-xs); }
-  .kpi-step:last-child { border:none; }
-  .kpi-step .kpi-hrs { font-size:16px; font-weight:700; color:var(--primary-dark); }
-  .kpi-step .kpi-hrs.late { color:var(--danger); }
-  .kpi-step .kpi-lbl { color:var(--text-muted); margin-top:2px; }
-  /* Live Search */
-  .search-wrap { position:relative; }
-  .search-dropdown { position:absolute; top:100%; inset-inline-start:0; inset-inline-end:0; background:var(--card);
-    border:1px solid var(--border); border-top:none; border-radius:0 0 var(--radius-sm) var(--radius-sm);
-    z-index:40; max-height:240px; overflow-y:auto; box-shadow:0 4px 12px rgba(0,0,0,.1); }
-  .search-item { padding:10px 14px; cursor:pointer; font-size:var(--fs-sm); border-bottom:1px solid var(--border); }
-  .search-item:hover, .search-item.active { background:var(--bg-alt); }
-  .search-item .si-name { font-weight:600; }
-  .search-item .si-meta { color:var(--text-muted); font-size:var(--fs-xs); margin-top:2px; }
-  /* بكج الطبيب */
-  .profile-tag { display:inline-flex; align-items:center; gap:6px; background:var(--bg-alt);
-    border:1px solid var(--border); border-radius:var(--radius-pill); padding:4px 10px;
-    font-size:var(--fs-sm); margin:3px; cursor:pointer; transition:background .15s; }
-  .profile-tag:hover { background:#e0ede9; }
-  .profile-tag .pt-qty { font-weight:700; color:var(--primary-dark); }
-  /* ملاحظات الصنف */
-  .item-note-list { padding:4px 0; }
-  .item-note { background:var(--bg-alt); border-radius:4px; padding:4px 8px; margin-bottom:4px; font-size:var(--fs-xs); }
-  .item-note .note-meta { color:var(--text-muted); }
-  .rejection-box { background:#fde8e8; border-inline-start:3px solid var(--danger); padding:8px 12px; border-radius:var(--radius-sm); font-size:var(--fs-sm); margin-top:8px; }
-  .topbar { max-width: 960px; margin: 0 auto 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
-  .topbar .who { font-size: var(--fs-sm); color: var(--text-muted); }
-  .item-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
-  .item-row input.itemName { flex: 3; }
-  .item-row input.itemQty { flex: 1; }
-  .hidden { display: none !important; }
-  .filters { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
-  .filters > div { flex: 1; min-width: 140px; }
-  #sigPad { border: 1px dashed var(--border); border-radius: var(--radius-sm); width: 100%; height: 150px; touch-action: none; }
-  .error { color: var(--danger); font-size: var(--fs-sm); margin-top: 6px; }
-  .alert-bar { border-radius: var(--radius-sm); padding: 10px 14px; margin-bottom: 8px; display:flex; align-items:center; gap:10px; font-size:var(--fs-sm); font-weight:500; }
-  .alert-bar.danger  { background:#fde8e8; color:#8b1a1a; border-inline-start:4px solid var(--danger); }
-  .alert-bar.warning { background:#faeeda; color:#7a4500; border-inline-start:4px solid #e69a00; }
-  .alert-bar.info    { background:#e6f1fb; color:#0c447c; border-inline-start:4px solid var(--accent); }
-  .alert-bar .icon   { font-size:18px; flex-shrink:0; }
-  #alertsContainer   { max-width:960px; margin:0 auto 12px; }
-  /* مؤشرات تحميل */
-  .loading { opacity:.5; pointer-events:none; }
-  .spinner { display:inline-block; width:14px; height:14px; border:2px solid currentColor; border-top-color:transparent; border-radius:50%; animation:spin .7s linear infinite; vertical-align:middle; margin-inline-end:6px; }
-  @keyframes spin { to { transform:rotate(360deg); } }
-  .toast { position:fixed; bottom:24px; inset-inline-end:24px; background:#2c2c2a; color:#fff; padding:10px 18px; border-radius:var(--radius-sm); font-size:var(--fs-sm); z-index:99; opacity:0; transform:translateY(10px); transition:all .25s; pointer-events:none; }
-  .toast.show { opacity:1; transform:translateY(0); }
-  .req-block { border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 10px; display:flex; flex-direction: column; gap:6px; }
-  .req-block-top { display:flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap:6px; }
+/* ═══ HEADER ═══ */
+header{
+  position:sticky;top:0;z-index:100;
+  background:var(--surface);border-bottom:1px solid var(--border);
+  padding:0 20px;height:58px;display:flex;align-items:center;gap:12px;
+  backdrop-filter:blur(12px);
+}
+.brand{font-weight:700;font-size:15px;color:var(--green);white-space:nowrap;}
+.brand span{color:var(--muted);font-weight:400;font-size:12px;margin-right:6px;}
+.hdr-date{
+  display:flex;align-items:center;gap:6px;background:var(--card);
+  border:1px solid var(--border);border-radius:var(--r-sm);padding:6px 12px;
+}
+.hdr-date label{font-size:11px;color:var(--muted);}
+.hdr-date input{
+  background:none;border:none;color:var(--text);font-family:inherit;
+  font-size:12px;cursor:pointer;width:110px;
+}
+.hdr-date input:focus{outline:none;}
+.mode-toggle{
+  display:flex;background:var(--card);border:1px solid var(--border);
+  border-radius:var(--r-sm);overflow:hidden;
+}
+.mode-btn{
+  padding:6px 12px;font-size:11px;cursor:pointer;border:none;
+  background:none;color:var(--muted);font-family:inherit;transition:all var(--trans);
+}
+.mode-btn.active{background:var(--blue);color:#fff;}
+.spacer{flex:1;}
+.theme-btn{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--r-sm);
+  padding:6px 10px;cursor:pointer;font-size:16px;line-height:1;
+  transition:background var(--trans);
+}
+.theme-btn:hover{background:var(--border);}
+.role-badge{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--r-sm);padding:5px 12px;font-size:11px;color:var(--muted);
+  white-space:nowrap;
+}
+.logout-btn{
+  background:none;border:none;color:var(--muted);cursor:pointer;
+  font-family:inherit;font-size:12px;padding:5px 8px;border-radius:6px;
+  transition:color var(--trans);
+}
+.logout-btn:hover{color:var(--red);}
 
-  .lang-toggle { position: fixed; top: 14px; inset-inline-end: 14px; z-index: 60; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-pill); padding: 6px 14px; font-size: var(--fs-sm); margin: 0; color: var(--text); }
+/* ═══ TABS ═══ */
+.tabs{
+  display:flex;gap:2px;padding:0 20px;
+  background:var(--surface);border-bottom:1px solid var(--border);
+  overflow-x:auto;
+}
+.tabs::-webkit-scrollbar{height:0;}
+.tab{
+  padding:12px 16px;font-size:12px;cursor:pointer;border:none;
+  background:none;color:var(--muted);font-family:inherit;
+  border-bottom:2px solid transparent;transition:all var(--trans);
+  white-space:nowrap;flex-shrink:0;
+}
+.tab.active{color:var(--text);border-bottom-color:var(--blue);}
+.tab-panel{display:none;padding:20px;}
+.tab-panel.active{display:block;}
 
-  .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin: 12px 0; }
-  .kpi-card { background: var(--bg-alt); border-radius: var(--radius-sm); padding: 14px; text-align: center; }
-  .kpi-card .num { font-size: 24px; font-weight: 700; color: var(--primary-dark); }
-  .kpi-card .lbl { font-size: var(--fs-xs); color: var(--text-muted); margin-top: 4px; }
+/* ═══ KPI GRID ═══ */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:20px;}
+.kpi{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--r);
+  padding:16px;position:relative;overflow:hidden;cursor:default;
+  transition:transform var(--trans),box-shadow var(--trans);
+}
+.kpi:hover{transform:translateY(-2px);box-shadow:var(--shadow);}
+.kpi-accent{position:absolute;top:0;right:0;width:3px;height:100%;border-radius:0 var(--r) var(--r) 0;}
+.kpi-val{font-size:28px;font-weight:700;line-height:1;margin-bottom:5px;}
+.kpi-lbl{font-size:10px;color:var(--muted);line-height:1.4;}
+.kpi-trend{font-size:10px;margin-top:4px;}
 
-  .notice-box { border-inline-start: 3px solid var(--accent); background: var(--bg-alt); padding: 8px 12px; border-radius: 6px; margin-bottom: 8px; font-size: var(--fs-sm); }
-  .notice-box .meta { color: var(--text-muted); font-size: var(--fs-xs); margin-top: 2px; }
+/* ═══ SECTION ═══ */
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:10px;flex-wrap:wrap;}
+.sec-title{font-size:13px;font-weight:600;}
+.sec-actions{display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
 
-  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.35); z-index: 70; }
-  .comment-modal { position: fixed; top: 8%; left: 50%; transform: translateX(-50%); width: 90%; max-width: 520px; z-index: 71; box-shadow: 0 4px 24px rgba(0,0,0,.2); max-height: 82vh; display: flex; flex-direction: column; }
-  .comment-list { overflow-y: auto; flex: 1; margin: 10px 0; max-height: 320px; }
-  .comment-msg { background: var(--bg-alt); border-radius: 8px; padding: 8px 10px; margin-bottom: 8px; font-size: var(--fs-sm); }
-  .comment-msg .meta { font-size: var(--fs-xs); color: var(--text-muted); margin-bottom: 2px; }
-  .comment-input-row { display: flex; gap: 8px; }
-  .comment-input-row textarea { flex: 1; resize: none; height: 44px; }
+/* ═══ FILTERS ═══ */
+.chips{display:flex;gap:6px;flex-wrap:wrap;}
+.chip{
+  padding:4px 12px;border:1px solid var(--border);border-radius:20px;
+  background:none;color:var(--muted);font-size:11px;cursor:pointer;
+  font-family:inherit;transition:all var(--trans);
+}
+.chip.active{border-color:var(--blue);color:var(--blue);background:#4A9EFF15;}
+.search{
+  padding:6px 12px;border:1.5px solid var(--border);border-radius:var(--r-sm);
+  background:var(--card);color:var(--text);font-size:12px;font-family:inherit;
+  width:160px;transition:border-color var(--trans);
+}
+.search:focus{outline:none;border-color:var(--blue);}
+
+/* ═══ TABLE ═══ */
+.tbl-wrap{overflow-x:auto;border-radius:var(--r);border:1px solid var(--border);}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+th{
+  background:var(--surface);color:var(--muted);font-weight:500;
+  padding:10px 12px;text-align:right;border-bottom:1px solid var(--border);
+  white-space:nowrap;position:sticky;top:0;
+}
+td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle;}
+tbody tr:last-child td{border-bottom:none;}
+tbody tr:hover td{background:#4A9EFF08;cursor:pointer;}
+
+/* ═══ BADGES ═══ */
+.badge{display:inline-flex;align-items:center;gap:3px;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:600;}
+.b-ok    {background:#00C89618;color:var(--green);}
+.b-late  {background:#FFB80018;color:var(--yellow);}
+.b-absent{background:#FF475718;color:var(--red);}
+.b-warn  {background:#FF8C4218;color:var(--orange);}
+.b-info  {background:#4A9EFF18;color:var(--blue);}
+
+/* ═══ QUALITY BAR ═══ */
+.qbar{display:flex;align-items:center;gap:8px;}
+.qbar-track{flex:1;height:5px;background:var(--border);border-radius:3px;overflow:hidden;min-width:60px;}
+.qbar-fill{height:100%;border-radius:3px;transition:width .3s;}
+.qbar-num{font-size:11px;font-weight:700;min-width:34px;text-align:left;}
+
+/* ═══ HEATMAP ═══ */
+.heatmap{border-collapse:separate;border-spacing:3px;font-size:10px;}
+.heatmap th{background:none;border:none;color:var(--muted);padding:2px 4px;font-weight:400;text-align:center;}
+.heatmap .nm{text-align:right;color:var(--text);white-space:nowrap;padding:2px 8px;background:none;border:none;font-size:11px;}
+.heatmap td{
+  width:28px;height:28px;border-radius:5px;text-align:center;
+  font-size:10px;font-weight:600;border:none;cursor:default;position:relative;
+}
+.hm-0  {background:var(--border);color:var(--muted);}
+.hm-lo {background:#FF475730;color:var(--red);}
+.hm-md {background:#FFB80030;color:var(--yellow);}
+.hm-hi {background:#00C89630;color:var(--green);}
+.hm-100{background:#00C89650;color:var(--green);}
+
+/* ═══ CHART ═══ */
+.chart-box{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--r);
+  padding:18px;margin-bottom:16px;
+}
+.chart-title{font-size:12px;font-weight:600;margin-bottom:14px;color:var(--muted);}
+canvas{max-height:260px;}
+
+/* ═══ DRUGS TABLE ═══ */
+.drug-ok  {color:var(--green);}
+.drug-warn{color:var(--yellow);}
+.drug-exp {color:var(--red);}
+.drug-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-left:6px;}
+
+/* ═══ MODAL ═══ */
+.overlay{display:none;position:fixed;inset:0;background:#000b;z-index:200;align-items:center;justify-content:center;}
+.overlay.open{display:flex;}
+.modal{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:20px;width:660px;max-height:86vh;overflow-y:auto;padding:28px;
+  box-shadow:var(--shadow);
+}
+.modal-hdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;}
+.modal-name{font-size:19px;font-weight:700;}
+.modal-meta{font-size:11px;color:var(--muted);margin-top:3px;}
+.modal-close{
+  background:var(--card);border:none;color:var(--muted);width:30px;height:30px;
+  border-radius:8px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+.modal-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px;}
+.m-stat{background:var(--card);border-radius:10px;padding:12px;text-align:center;}
+.m-stat .v{font-size:20px;font-weight:700;}
+.m-stat .l{font-size:10px;color:var(--muted);margin-top:3px;}
+
+/* ═══ ALERTS ═══ */
+.alert-list{display:flex;flex-direction:column;gap:8px;}
+.alert-item{
+  display:flex;align-items:center;gap:12px;
+  background:var(--card);border-radius:var(--r-sm);padding:12px 16px;
+  border-right:3px solid;
+}
+.alert-item.danger {border-color:var(--red);}
+.alert-item.warning{border-color:var(--yellow);}
+.alert-item.info   {border-color:var(--blue);}
+.alert-item .a-text{flex:1;font-size:12px;}
+.alert-item .a-tag {font-size:10px;color:var(--muted);}
+
+/* ═══ EMPTY / LOADING ═══ */
+.empty{text-align:center;padding:48px;color:var(--muted);}
+.empty .ei{font-size:36px;margin-bottom:10px;}
+.loading-row td{text-align:center;color:var(--muted);padding:32px;}
+
+/* ═══ TWO-COL ═══ */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.one-col{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:18px;}
+
+/* ═══ TOOLTIP ═══ */
+[data-tip]{position:relative;}
+[data-tip]:hover::after{
+  content:attr(data-tip);position:absolute;bottom:120%;right:50%;
+  transform:translateX(50%);background:var(--bg);border:1px solid var(--border);
+  color:var(--text);font-size:10px;padding:4px 8px;border-radius:6px;
+  white-space:nowrap;z-index:999;pointer-events:none;
+}
+
+/* ═══ TOOLS GRID ═══ */
+.tools-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:16px;}
+.tool-card{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--r);
+  padding:14px;transition:transform var(--trans);
+}
+.tool-card:hover{transform:translateY(-2px);}
+.tool-name{font-size:13px;font-weight:600;margin-bottom:6px;}
+.tool-meta{font-size:10px;color:var(--muted);line-height:1.6;}
+.tool-count{
+  display:inline-block;background:var(--red);color:#fff;
+  border-radius:12px;padding:2px 8px;font-size:10px;font-weight:700;float:left;
+}
+
+@media(max-width:768px){
+  .kpi-grid{grid-template-columns:repeat(2,1fr);}
+  .two-col{grid-template-columns:1fr;}
+  .modal{width:95vw;}
+}
 </style>
-<!-- Chart.js يُحمَّل ديناميكياً عند الحاجة -->
 </head>
-<body dir="rtl">
-<div id="alertsContainer"></div>
-<div id="toast" class="toast"></div>
-<button class="lang-toggle" id="langToggleBtn" onclick="toggleLang()">English</button>
+<body>
 
-<div id="app">
-
-<div id="loginSection" class="card" style="max-width:380px; margin-top:60px;">
-  <div style="text-align:center;margin-bottom:16px;"><div style="font-size:22px;font-weight:700;color:var(--primary-dark);">SupplyFlow</div><div style="font-size:var(--fs-xs);color:var(--text-muted);margin-top:2px;">ApexCare Clinics</div></div><h1 data-i18n="login_title">تسجيل الدخول</h1>
-  <label data-i18n="login_name_label">الاسم</label>
-  <input id="loginName" type="text" data-i18n-ph="login_name_ph" placeholder="اكتب اسمك">
-  <label data-i18n="login_pass_label">الرقم السري</label>
-  <input id="loginPass" type="password" data-i18n-ph="login_pass_ph" placeholder="الرقم السري">
-  <div id="loginError" class="error hidden" data-i18n="login_error">الاسم أو الرقم السري غير صحيح</div>
-  <button class="btn-primary" onclick="doLogin()" data-i18n="login_btn">دخول</button>
-</div>
-
-<!-- ============== الممرضة ============== -->
-<div id="nurseSection" class="hidden">
-  <div class="topbar">
-    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-      <button class="btn-secondary" onclick="showNurseTab('create')" data-i18n="nurse_tab_create">طلب جديد</button>
-      <button class="btn-secondary" onclick="showNurseTab('mine')" data-i18n="nurse_tab_myreq">طلباتي</button>
-      <button onclick="syncNow()" class="btn-secondary syncBtn" style="margin:0;padding:6px 14px;font-size:var(--fs-sm);">🔄 مزامنة</button>
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">A</div>
+    <div class="login-title">ApexCare</div>
+    <div class="login-sub">نظام مراقبة جودة التمريض</div>
+    <div class="fld"><label>اسم المستخدم</label>
+      <input type="text" id="u-user" placeholder="أدخل اسم المستخدم" autocomplete="username">
     </div>
-    <div class="who"><span data-i18n="nurse_hello">مرحباً</span> <span id="nurseNameLbl"></span> · <a href="#" onclick="logout()" data-i18n="logout">خروج</a></div>
-  </div>
-
-  <div id="nurseNoticesBox" class="card hidden"></div>
-
-  <div id="nurseCreateTab" class="card">
-    <h2 data-i18n="nurse_create_title">إنشاء طلب مستلزمات</h2>
-
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:4px;">
-      <div>
-        <label data-i18n="clinic_label">العيادة</label>
-        <select id="reqClinic" onchange="loadDoctorsForClinic()"></select>
-      </div>
-      <div>
-        <label data-i18n="doctor_label">الطبيب</label>
-        <select id="reqDoctor" onchange="loadDoctorProfile()"></select>
-      </div>
+    <div class="fld"><label>كلمة المرور</label>
+      <input type="password" id="u-pass" placeholder="••••••••" autocomplete="current-password">
     </div>
-    <label data-i18n="type_label">نوع الطلب</label>
-    <select id="reqType" style="max-width:200px;">
-      <option value="شهري" data-i18n="type_monthly">شهري</option>
-      <option value="طارئ" data-i18n="type_emergency">طارئ</option>
-    </select>
-
-    <!-- بكج الطبيب -->
-    <div id="doctorProfileWrap" class="hidden" style="margin-top:14px;padding:10px;background:var(--bg-alt);border-radius:var(--radius-sm);">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-        <span style="font-size:var(--fs-sm);font-weight:600;">📋 البكج المعتاد للطبيب — اضغط لإضافة</span>
-        <button class="btn-secondary" style="margin:0;padding:4px 10px;font-size:var(--fs-xs);" onclick="addAllProfile()">إضافة الكل</button>
-      </div>
-      <div id="doctorProfileTags"></div>
-    </div>
-
-    <h3 style="margin-top:16px;" data-i18n="items_title">الأصناف المحددة</h3>
-
-    <!-- بحث ذكي -->
-    <div class="search-wrap" style="margin-bottom:10px;">
-      <input type="text" id="itemSearchInput" placeholder="🔍 ابحث عن صنف وأضفه..." oninput="onItemSearch(this.value)" onkeydown="onItemSearchKey(event)" autocomplete="off">
-      <div id="itemSearchDropdown" class="search-dropdown hidden"></div>
-    </div>
-
-    <div id="itemRows"></div>
-
-    <div id="createError" class="error hidden" data-i18n="create_error">يرجى تعبئة كل الحقول وإضافة صنف واحد على الأقل</div>
-    <div style="margin-top:12px;">
-      <button class="btn-primary" id="submitRequestBtn" onclick="submitRequest()" data-i18n="submit_request_btn">إرسال الطلب للتموين</button>
-    </div>
-  </div>
-
-  <div id="nurseMineTab" class="card hidden">
-    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
-      <h2 style="margin:0;" data-i18n="my_requests_title">طلباتي</h2>
-      <input type="text" id="nurseSearch" data-i18n-ph="nurse_search_ph" placeholder="🔍 بحث..." style="width:220px;" oninput="filterMyRequests()">
-    </div>
-    <div id="myRequestsList" style="margin-top:12px;"></div>
-  </div>
-
-  <!-- تفاصيل طلب -->
-  <div id="requestDetailModal" class="card hidden" style="position:fixed;top:4%;left:50%;transform:translateX(-50%);width:94%;max-width:600px;z-index:55;box-shadow:0 4px 24px rgba(0,0,0,.2);max-height:88vh;overflow-y:auto;">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-      <h2 style="margin:0;" id="detailReqTitle">تفاصيل الطلب</h2>
-      <button class="btn-secondary" style="margin:0;" onclick="closeDetail()">✕ إغلاق</button>
-    </div>
-    <div id="detailMeta" style="font-size:var(--fs-sm);color:var(--text-muted);margin-bottom:12px;line-height:1.8;"></div>
-    <h3>الأصناف</h3>
-    <table><thead><tr><th>الصنف</th><th>مطلوب</th><th>معتمد</th><th>مستلم</th></tr></thead>
-      <tbody id="detailItemsBody"></tbody></table>
-    <h3 style="margin-top:16px;">ملاحظات الطلب</h3>
-    <div id="detailComments"></div>
-    <div id="detailKPI" class="hidden" style="margin-top:12px;">
-      <h3>مؤشرات الأداء — زمن كل مرحلة (بالساعات)</h3>
-      <div class="kpi-timeline" id="detailKPITimeline"></div>
-    </div>
-    <div id="detailReceiptWrap" class="hidden" style="margin-top:12px;">
-      <a id="detailReceiptLink" href="#" target="_blank" class="btn-primary" style="display:inline-block;text-decoration:none;">📄 عرض صورة الطلب</a>
-    </div>
-  </div>
-  <div id="detailOverlay" class="modal-overlay hidden" onclick="closeDetail()"></div>
-
-  <div id="receiveModal" class="card hidden" style="position:fixed; top:5%; left:50%; transform:translateX(-50%); width:90%; max-width:500px; z-index:50; box-shadow:0 4px 20px rgba(0,0,0,.15);">
-    <h2><span data-i18n="confirm_receive_title">تأكيد استلام الطلب</span> <span id="recvReqId"></span></h2>
-    <table>
-      <thead><tr><th data-i18n="th_item">الصنف</th><th data-i18n="th_sent_qty">الكمية المرسلة</th><th data-i18n="th_received_qty">الكمية المستلمة فعلياً</th></tr></thead>
-      <tbody id="recvItemsBody"></tbody>
-    </table>
-    <label data-i18n="receiver_name_label">اسم المستلم</label>
-    <input id="recvName" type="text">
-    <label data-i18n="signature_label">التوقيع (اختياري - ارسم بالفأرة أو اللمس)</label>
-    <canvas id="sigPad" width="460" height="150"></canvas>
-    <button class="btn-secondary" onclick="clearSig()" data-i18n="clear_sig_btn">مسح التوقيع</button>
-    <div id="recvError" class="error hidden"></div>
-    <div>
-      <button class="btn-primary" onclick="confirmReceive()" data-i18n="confirm_receive_btn">تأكيد الاستلام</button>
-      <button class="btn-secondary" onclick="closeReceiveModal()" data-i18n="cancel_btn">إلغاء</button>
-    </div>
+    <button class="login-btn" onclick="doLogin()">دخول</button>
+    <div class="login-err" id="login-err">⚠️ اسم المستخدم أو كلمة المرور غير صحيحة</div>
   </div>
 </div>
 
-<!-- ============== التموين ============== -->
-<div id="procurementSection" class="hidden">
-  <div class="topbar">
-    <div style="display:flex;align-items:center;gap:8px;">
-      <h1 style="margin:0;" data-i18n="procurement_title">لوحة التموين</h1>
-      <button onclick="syncNow()" class="btn-secondary" style="margin:0;padding:6px 14px;font-size:var(--fs-sm);">🔄 مزامنة</button>
-    </div>
-    <div class="who"><span data-i18n="nurse_hello">مرحباً</span> <span id="procNameLbl"></span> · <a href="#" onclick="logout()" data-i18n="logout">خروج</a></div>
+<!-- HEADER -->
+<header id="hdr" style="display:none">
+  <div class="brand">ApexCare <span>مراقبة التمريض</span></div>
+  <div class="hdr-date">
+    <label>السبت:</label>
+    <input type="date" id="week-date" onchange="loadData()">
+  </div>
+  <div class="mode-toggle">
+    <button class="mode-btn active" onclick="setMode('week',this)">أسبوع</button>
+    <button class="mode-btn" onclick="setMode('all',this)">الكل</button>
+  </div>
+  <div class="spacer"></div>
+  <button class="theme-btn" onclick="printCurrentTab()" title="تصدير تقرير نظيف للطباعة">🖨</button>
+  <button class="theme-btn" onclick="toggleTheme()" title="تبديل الوضع">🌙</button>
+  <div class="role-badge" id="role-lbl"></div>
+  <button class="logout-btn" onclick="doLogout()">خروج ↩</button>
+</header>
+
+<!-- CONTENT -->
+<div id="app" style="display:none">
+  <div class="tabs" id="tabs">
+    <button class="tab active" onclick="switchTab('overview',this)">🏠 الرئيسية</button>
+    <button class="tab" onclick="switchTab('table',this)">📋 الممرضات</button>
+    <button class="tab" onclick="switchTab('heatmap',this)">🗓 خريطة الحضور</button>
+    <button class="tab" onclick="switchTab('control',this)">📈 Control Chart</button>
+    <button class="tab" onclick="switchTab('absent',this)">❌ الغائبات</button>
+    <button class="tab" onclick="switchTab('tools',this)">🔧 الأدوات</button>
+    <button class="tab" onclick="switchTab('drugs',this)">💊 الأدوية</button>
+    <button class="tab" onclick="switchTab('cards',this)">🪪 البطاقات</button>
+    <button class="tab" onclick="switchTab('issues',this)">⚠️ مشاكل الأسبوع</button>
+    <button class="tab" onclick="switchTab('branches',this)">🏥 الفروع</button>
+    <button class="tab" onclick="switchTab('alerts',this)">🔔 التنبيهات</button>
   </div>
 
-  <div id="procNoticesBox" class="card hidden"></div>
-
-  <div class="card">
-    <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center;">
-      <input type="text" id="procSearch" data-i18n-ph="proc_search_ph" placeholder="🔍 بحث برقم الطلب، العيادة، الطبيب، الحالة..." style="flex:1;" oninput="searchOrFilter()">
-      <button class="btn-secondary" style="margin:0;white-space:nowrap;" onclick="clearSearch()">مسح</button>
-    </div>
-    <div class="filters">
-      <div><label data-i18n="status_label">الحالة</label>
-        <select id="procFilterStatus" onchange="loadProcurementRequests()">
-          <option value="" data-i18n="all_option">الكل</option>
-          <option value="جديد" data-i18n="status_new">جديد</option>
-          <option value="قيد التجهيز" data-i18n="status_progress">قيد التجهيز</option>
-          <option value="تم الإرسال" data-i18n="status_sent">تم الإرسال</option>
-          <option value="تم الاستلام" data-i18n="status_received">تم الاستلام</option>
-        </select>
+  <!-- ①  OVERVIEW -->
+  <div class="tab-panel active" id="tab-overview">
+    <div class="kpi-grid" id="kpi-grid"></div>
+    <div class="two-col">
+      <div class="one-col">
+        <div class="sec-title" style="margin-bottom:12px">🏆 الأعلى جودة</div>
+        <div id="top-list"></div>
       </div>
-      <div><label data-i18n="clinic_label">العيادة</label><select id="procFilterClinic" onchange="loadProcurementRequests()"></select></div>
-      <div><label data-i18n="month_label">الشهر</label><input type="month" id="procFilterMonth" onchange="loadProcurementRequests()"></div>
-    </div>
-    <div>
-      <button class="btn-secondary" onclick="bulkAction('قيد التجهيز', this)" data-i18n="bulk_progress_btn">قيد التجهيز</button>
-      <button class="btn-secondary" onclick="bulkAction('بانتظار المندوب', this)">🚚 بانتظار المندوب</button>
-      <button class="btn-secondary" onclick="bulkAction('استلم المندوب', this)">✅ استلم المندوب</button>
-      <button class="btn-accent" onclick="bulkAction('تم الإرسال', this)" data-i18n="bulk_sent_btn">تم الإرسال</button>
-      <button class="btn-accent" onclick="bulkAction('مراجعة الطبيب', this)">👨‍⚕️ إرسال لمراجعة الطبيب</button>
-    </div>
-    <div id="procRequestsList"></div>
-  </div>
-</div>
-
-<!-- ============== الجودة / الإدارة التنفيذية ============== -->
-<div id="dashboardSection" class="hidden">
-  <div class="topbar">
-    <div>
-      <h1 style="margin:0;display:inline;" data-i18n="dashboard_title">لوحة الإدارة</h1>
-      <button class="btn-secondary" style="margin-right:12px;" onclick="switchToUsers()" data-i18n="users_title">إدارة المستخدمين</button>
-    </div>
-    <div class="who"><span data-i18n="nurse_hello">مرحباً</span> <span id="dashNameLbl"></span> · <a href="#" onclick="logout()" data-i18n="logout">خروج</a></div>
-  </div>
-
-  <div class="card">
-    <label data-i18n="month_label">الشهر</label>
-    <input type="month" id="dashMonth" onchange="loadDashboard()">
-    <div class="kpi-grid" id="kpiGrid"></div>
-  </div>
-
-  <div class="card">
-    <h3 data-i18n="trend_title">اتجاه متوسط زمن التنفيذ (آخر 6 أشهر)</h3>
-    <canvas id="trendChart" height="90"></canvas>
-  </div>
-
-  <div class="card">
-    <h3 data-i18n="clinic_chart_title">متوسط ساعات التنفيذ حسب العيادة (الشهر المحدد)</h3>
-    <canvas id="clinicChart" height="90"></canvas>
-  </div>
-
-  <div class="card">
-    <h3 data-i18n="top_items_title">الأصناف الأكثر طلباً (تقريبي بدل دوران المخزون الفعلي - النظام لا يتتبع كميات المستودع)</h3>
-    <table><thead><tr><th data-i18n="th_item">الصنف</th><th data-i18n="th_qty">الكمية الإجمالية</th></tr></thead>
-      <tbody id="topItemsBody"></tbody></table>
-  </div>
-
-  <div class="card">
-    <h3 data-i18n="clinic_avg_title">متوسط الوقت (بالساعات) بين رفع الطلب وإرساله - حسب العيادة</h3>
-    <table><thead><tr><th data-i18n="th_clinic">العيادة</th><th data-i18n="th_avg_hours">متوسط الساعات</th><th data-i18n="th_count">عدد الطلبات</th></tr></thead>
-      <tbody id="qAveragesBody"></tbody></table>
-    <h3 style="margin-top:16px;" data-i18n="details_title">تفاصيل كل طلب</h3>
-    <table><thead><tr><th data-i18n="th_request_id">رقم الطلب</th><th data-i18n="th_clinic">العيادة</th><th data-i18n="th_doctor">الطبيب</th><th data-i18n="th_type">النوع</th><th data-i18n="th_hours">الساعات</th></tr></thead>
-      <tbody id="qRowsBody"></tbody></table>
-  </div>
-
-  <div class="card">
-    <h3 data-i18n="notices_compose_title">إرسال ملاحظة</h3>
-    <label data-i18n="notice_target_label">الجهة</label>
-    <select id="noticeTarget">
-      <option value="تموين" data-i18n="target_procurement">التموين</option>
-      <option value="ممرضة" data-i18n="target_nursing">التمريض</option>
-      <option value="الكل" data-i18n="target_all">الكل</option>
-    </select>
-    <textarea id="noticeMsg" rows="2" data-i18n-ph="notice_msg_ph" placeholder="اكتب الملاحظة..."></textarea>
-    <button class="btn-primary" onclick="sendNotice()" data-i18n="send_notice_btn">إرسال</button>
-  </div>
-
-  <div class="card">
-    <h3 data-i18n="recent_comments_title">آخر الملاحظات على الطلبات</h3>
-    <div id="recentCommentsBox"></div>
-  </div>
-</div>
-
-</div>
-
-<!-- ============== شات الملاحظات لكل طلب ============== -->
-<!-- ============== الطبيب ============== -->
-<div id="doctorSection" class="hidden">
-  <div class="topbar">
-    <div style="display:flex;align-items:center;gap:10px;">
-      <h1 style="margin:0;">لوحة الطبيب</h1>
-      <button onclick="syncNow()" class="btn-secondary syncBtn" style="margin:0;padding:6px 12px;font-size:var(--fs-sm);">🔄 مزامنة</button>
-    </div>
-    <div class="who">مرحباً <span id="doctorNameLbl"></span> · <a href="#" onclick="logout()">خروج</a></div>
-  </div>
-
-  <!-- داشبورد الطبيب -->
-  <div class="kpi-grid" id="doctorKPIGrid" style="max-width:960px;margin:0 auto 16px;"></div>
-
-  <!-- قائمة الطلبات -->
-  <div class="card">
-    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
-      <h2 style="margin:0;">الطلبات</h2>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <select id="doctorFilterStatus" onchange="loadDoctorRequests()" style="min-width:160px;">
-          <option value="">كل الحالات</option>
-          <option value="تم الإرسال">تم الإرسال</option>
-          <option value="مراجعة الطبيب">مراجعة الطبيب</option>
-          <option value="تم الاستلام">تم الاستلام</option>
-          <option value="مرفوض">مرفوض</option>
-        </select>
-        <input type="month" id="doctorFilterMonth" onchange="loadDoctorRequests()" style="min-width:150px;">
+      <div class="one-col">
+        <div class="sec-title" style="margin-bottom:12px">⚠️ تحتاج متابعة</div>
+        <div id="bottom-list"></div>
       </div>
     </div>
-
-    <!-- قائمة منسدلة بالطلبات -->
-    <div style="margin-bottom:14px;">
-      <label style="font-size:var(--fs-sm);color:var(--text-muted);">اختر طلباً للمراجعة</label>
-      <select id="doctorRequestSelect" onchange="onDoctorSelectRequest(this.value)" style="width:100%;">
-        <option value="">— اختر طلب —</option>
-      </select>
+    <div style="margin-top:16px">
+      <div class="sec-title" style="margin-bottom:10px">📅 لم تُدخل هذا الأسبوع</div>
+      <div id="not-entered-list"></div>
     </div>
+  </div>
 
-    <!-- تفاصيل الطلب المختار -->
-    <div id="doctorRequestDetail" class="hidden">
-      <div id="doctorDetailMeta" style="font-size:var(--fs-sm);color:var(--text-muted);margin-bottom:10px;line-height:1.8;"></div>
-      <table>
-        <thead><tr><th>الصنف</th><th>الاسم التجاري</th><th>النوع</th><th>الكمية</th><th>السعر</th><th>ملاحظة</th></tr></thead>
-        <tbody id="doctorDetailItems"></tbody>
-      </table>
-      <div id="doctorDetailTotal" style="text-align:end;font-weight:700;margin-top:8px;font-size:var(--fs-sm);color:var(--primary-dark);"></div>
-      <div id="doctorReviewActions" class="hidden" style="margin-top:14px;padding:12px;background:var(--bg-alt);border-radius:var(--radius-sm);">
-        <label>ملاحظة عامة أو سبب الرفض</label>
-        <textarea id="doctorReviewReason" rows="2" placeholder="اختياري للاعتماد، إلزامي للرفض..."></textarea>
-        <div id="doctorReviewError" class="error hidden"></div>
-        <div style="margin-top:8px;">
-          <button class="btn-primary" onclick="submitDoctorReview('اعتمد')">✅ اعتماد الطلب</button>
-          <button class="btn-danger" onclick="submitDoctorReview('رفض')">❌ رفض الطلب</button>
+  <!-- ②  TABLE -->
+  <div class="tab-panel" id="tab-table">
+    <div class="sec-hdr">
+      <div class="sec-title">جدول الممرضات</div>
+      <div class="sec-actions">
+        <input class="search" placeholder="🔍 بحث..." oninput="filterTable(this.value)" id="tbl-search">
+        <div class="chips" id="tbl-chips">
+          <button class="chip active" onclick="setTblFilter('all',this)">الكل</button>
+          <button class="chip" onclick="setTblFilter('ok',this)">أدخل ✅</button>
+          <button class="chip" onclick="setTblFilter('absent',this)">لم يُدخل ❌</button>
+          <button class="chip" onclick="setTblFilter('BURIDAH',this)">بريدة</button>
+          <button class="chip" onclick="setTblFilter('ONIZAH',this)">عنيزة</button>
         </div>
       </div>
-      <div id="doctorRejectionBox" class="rejection-box hidden"></div>
     </div>
-
-    <!-- قائمة كل الطلبات -->
-    <div id="doctorRequestsList" style="margin-top:14px;"></div>
-  </div>
-</div>
-
-<!-- مودال مراجعة الطبيب -->
-<div id="reviewOverlay" class="modal-overlay hidden" onclick="closeReview()"></div>
-<div id="reviewModal" class="card hidden" style="position:fixed;top:4%;left:50%;transform:translateX(-50%);width:94%;max-width:580px;z-index:71;box-shadow:0 4px 24px rgba(0,0,0,.2);max-height:88vh;overflow-y:auto;">
-  <h2 id="reviewReqTitle">مراجعة الطلب</h2>
-  <table id="reviewItemsTable">
-    <thead><tr><th>الصنف</th><th>الكمية</th><th>ملاحظة</th></tr></thead>
-    <tbody id="reviewItemsBody"></tbody>
-  </table>
-  <div style="margin-top:16px;">
-    <label>سبب الرفض (إلزامي عند الرفض)</label>
-    <textarea id="reviewReason" rows="2" placeholder="اكتب سبب الرفض أو أي ملاحظة عامة..."></textarea>
-  </div>
-  <div id="reviewError" class="error hidden"></div>
-  <div style="margin-top:12px;">
-    <button class="btn-primary" onclick="submitReview('اعتمد')">✅ اعتماد الطلب</button>
-    <button class="btn-danger" onclick="submitReview('رفض')">❌ رفض الطلب</button>
-    <button class="btn-secondary" onclick="closeReview()">إلغاء</button>
-  </div>
-</div>
-
-<!-- ============== إدارة المستخدمين (تنفيذي فقط) ============== -->
-<div id="usersSection" class="hidden">
-  <div class="topbar">
-    <div style="display:flex;align-items:center;gap:10px;">
-      <h1 style="margin:0;" data-i18n="users_title">إدارة المستخدمين</h1>
-      <button class="btn-secondary" style="margin:0;" onclick="switchToDashboard()" data-i18n="dashboard_title">لوحة الإدارة</button>
-    </div>
-    <div class="who"><span id="usersNameLbl"></span> · <a href="#" onclick="logout()" data-i18n="logout">خروج</a></div>
-  </div>
-
-  <div class="card">
-    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
-      <h2 style="margin:0;" data-i18n="users_list_title">قائمة المستخدمين</h2>
-      <button class="btn-primary" onclick="openUserModal()" data-i18n="add_user_btn">+ مستخدم جديد</button>
-    </div>
-    <div id="usersTableWrap" style="margin-top:12px;overflow-x:auto;">
+    <div class="tbl-wrap">
       <table>
         <thead><tr>
-          <th data-i18n="th_name">الاسم</th>
-          <th data-i18n="th_role">الدور</th>
-          <th data-i18n="th_clinic">العيادة</th>
-          <th data-i18n="th_email">البريد</th>
-          <th></th>
+          <th>الممرضة</th><th>الفرع</th><th>الأسبوع</th>
+          <th>في الوقت</th><th>متأخر</th><th>غياب</th>
+          <th>أسابيع</th><th>التزام%</th><th>أدوات%</th><th>الجودة%</th>
+          <th>آخر إدخال</th>
         </tr></thead>
-        <tbody id="usersTableBody"></tbody>
+        <tbody id="nurses-tbody"></tbody>
       </table>
     </div>
   </div>
 
-  <div class="card">
-    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
-      <h2 style="margin:0;">الأدوار والشاشات</h2>
-      <button class="btn-primary" onclick="openRoleModal()">+ دور جديد</button>
+  <!-- ③  HEATMAP -->
+  <div class="tab-panel" id="tab-heatmap">
+    <div class="sec-hdr">
+      <div class="sec-title">خريطة الحضور الأسبوعي (آخر 12 أسبوع)</div>
+      <div style="display:flex;gap:12px;font-size:10px;color:var(--muted)">
+        <span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:var(--border);margin-left:4px;vertical-align:middle"></span>لم تدخل</span>
+        <span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#00C89650;margin-left:4px;vertical-align:middle"></span>دخلت</span>
+      </div>
     </div>
-    <p style="font-size:var(--fs-sm);color:var(--text-muted);margin:6px 0 10px;">كل دور مرتبط بشاشة — يحدد أين يذهب المستخدم بعد الدخول.</p>
-    <table>
-      <thead><tr><th>الدور</th><th>الشاشة</th><th></th></tr></thead>
-      <tbody id="rolesTableBody"></tbody>
-    </table>
+    <div style="overflow-x:auto"><div id="heatmap-wrap"></div></div>
+  </div>
+
+  <!-- ④  CONTROL CHART -->
+  <div class="tab-panel" id="tab-control">
+    <div class="sec-hdr">
+      <div class="sec-title">📈 Control Chart — مراقبة الأداء عبر الزمن</div>
+      <div class="sec-actions">
+        <select id="cc-nurse" onchange="renderControlChart()" style="padding:6px 10px;background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:var(--r-sm);font-family:inherit;font-size:12px;">
+          <option value="__avg__">— المتوسط العام —</option>
+        </select>
+        <div class="chips">
+          <button class="chip active" id="cc-q-btn" onclick="setCCMetric('quality',this)">الجودة</button>
+          <button class="chip" id="cc-c-btn" onclick="setCCMetric('commit',this)">الالتزام</button>
+          <button class="chip" id="cc-t-btn" onclick="setCCMetric('tools',this)">الأدوات</button>
+        </div>
+      </div>
+    </div>
+    <div class="chart-box">
+      <div class="chart-title" id="cc-title">الجودة الكلية — المتوسط العام</div>
+      <canvas id="cc-chart"></canvas>
+    </div>
+    <div class="two-col" id="cc-stats"></div>
+  </div>
+
+  <!-- ⑤  ABSENT -->
+  <div class="tab-panel" id="tab-absent">
+    <div class="sec-hdr">
+      <div class="sec-title">الممرضات اللواتي لم يُدخلن هذا الأسبوع</div>
+      <div class="sec-title" style="color:var(--muted);font-weight:400;font-size:11px">تحقق — هل لم تمسك عيادة؟</div>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr>
+          <th>الممرضة</th><th>الفرع</th><th>آخر إدخال</th>
+          <th>أسابيع غياب</th><th>نسبة الغياب%</th><th>الجودة الكلية%</th><th>الحالة</th>
+        </tr></thead>
+        <tbody id="absent-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ⑥  TOOLS -->
+  <div class="tab-panel" id="tab-tools">
+    <div class="sec-hdr">
+      <div class="sec-title">الأدوات الناقصة — مستخرجة من النموذج</div>
+      <div class="chips">
+        <button class="chip active" onclick="setToolsView('cards',this)">بطاقات</button>
+        <button class="chip" onclick="setToolsView('table',this)">جدول</button>
+      </div>
+    </div>
+    <div id="tools-cards-view">
+      <div class="tools-grid" id="tools-grid"></div>
+    </div>
+    <div id="tools-table-view" style="display:none">
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>الأداة / المشكلة</th><th>الممرضة</th><th>الفرع</th><th>العيادة</th><th>التكرار</th><th>أول بلاغ</th><th>آخر بلاغ</th></tr></thead>
+          <tbody id="tools-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ⑦  DRUGS -->
+  <div class="tab-panel" id="tab-drugs">
+    <div class="sec-hdr">
+      <div class="sec-title">💊 متابعة تواريخ انتهاء الأدوية</div>
+      <div class="chips">
+        <button class="chip active" onclick="setDrugFilter('all',this)">الكل</button>
+        <button class="chip" onclick="setDrugFilter('exp',this)">🔴 منتهية</button>
+        <button class="chip" onclick="setDrugFilter('warn',this)">🟡 قاربت</button>
+        <button class="chip" onclick="setDrugFilter('ok',this)">🟢 سارية</button>
+      </div>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr>
+          <th>الحالة</th><th>الممرضة</th><th>الفرع</th><th>العيادة</th>
+          <th>أقرب تاريخ انتهاء</th><th>المدة المتبقية</th><th>تاريخ التبليغ</th>
+        </tr></thead>
+        <tbody id="drugs-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ⑧  CARDS -->
+  <div class="tab-panel" id="tab-cards">
+    <div class="sec-hdr">
+      <div class="sec-title">🪪 بطاقات الموظفين — بلاغات الغياب</div>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr>
+          <th>الممرضة</th><th>الفرع</th><th>العيادة</th>
+          <th>تاريخ البلاغ</th><th>عدد البلاغات</th><th>الحالة</th>
+        </tr></thead>
+        <tbody id="cards-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ⑨  ISSUES -->
+  <div class="tab-panel" id="tab-issues">
+    <div class="sec-hdr">
+      <div class="sec-title">⚠️ مشاكل الأسبوع — من حقل الملاحظات</div>
+    </div>
+    <div class="alert-list" id="issues-list"></div>
+  </div>
+
+  <!-- ⑩  BRANCHES -->
+  <div class="tab-panel" id="tab-branches">
+    <div class="two-col" id="branch-grid"></div>
+  </div>
+
+  <!-- ⑪  ALERTS -->
+  <div class="tab-panel" id="tab-alerts">
+    <div class="sec-hdr"><div class="sec-title">🔔 التنبيهات الذكية</div></div>
+    <div class="alert-list" id="alert-list"></div>
   </div>
 </div>
 
-<!-- مودال إنشاء/تعديل مستخدم -->
-<div id="userModalOverlay" class="modal-overlay hidden" onclick="closeUserModal()"></div>
-<div id="userModal" class="card hidden" style="position:fixed;top:8%;left:50%;transform:translateX(-50%);width:90%;max-width:460px;z-index:71;box-shadow:0 4px 24px rgba(0,0,0,.2);">
-  <h2 id="userModalTitle">مستخدم جديد</h2>
-
-  <label data-i18n="login_name_label">الاسم</label>
-  <input id="uName" type="text" data-i18n-ph="login_name_ph" placeholder="اكتب الاسم">
-
-  <label data-i18n="login_pass_label">الرقم السري</label>
-  <input id="uPass" type="text" placeholder="سيبقى كما هو لو تركته فارغاً عند التعديل">
-
-  <label data-i18n="th_role">الدور</label>
-  <select id="uRole" onchange="toggleClinicField()">
-    <option value="">جاري التحميل...</option>
-  </select>
-
-  <div id="uClinicWrap">
-    <label data-i18n="clinic_label">العيادة</label>
-    <select id="uClinic"></select>
-  </div>
-
-  <label data-i18n="th_email">البريد الإلكتروني</label>
-  <input id="uEmail" type="email" placeholder="اختياري — للإشعارات">
-
-  <div id="userModalError" class="error hidden"></div>
-
-  <div>
-    <button class="btn-primary" id="userModalSaveBtn" onclick="saveUser()" data-i18n="save_btn">حفظ</button>
-    <button class="btn-secondary" onclick="closeUserModal()" data-i18n="cancel_btn">إلغاء</button>
-    <button class="btn-danger hidden" id="userDeleteBtn" onclick="confirmDeleteUser()" data-i18n="delete_btn" style="float:inline-end;">حذف</button>
+<!-- PROFILE MODAL -->
+<div class="overlay" id="modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div>
+        <div class="modal-name" id="m-name"></div>
+        <div class="modal-meta" id="m-meta"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-stats" id="m-stats"></div>
+    <canvas id="m-chart" style="max-height:180px;margin-bottom:16px"></canvas>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:8px">سجل الإدخالات الأخيرة</div>
+    <div class="tbl-wrap">
+      <table><thead><tr><th>التاريخ</th><th>العيادة</th><th>الحالة</th><th>أدوات ناقصة</th><th>ملاحظات</th></tr></thead>
+      <tbody id="m-history"></tbody></table>
+    </div>
   </div>
 </div>
 
-<!-- مودال الأدوار -->
-<div id="roleModalOverlay" class="modal-overlay hidden" onclick="closeRoleModal()"></div>
-<div id="roleModal" class="card hidden" style="position:fixed;top:15%;left:50%;transform:translateX(-50%);width:90%;max-width:380px;z-index:72;box-shadow:0 4px 24px rgba(0,0,0,.2);">
-  <h2>إعداد دور</h2>
-  <label>اسم الدور</label>
-  <input id="rName" type="text" placeholder="مثال: ممرضة، مشرف...">
-  <label>الشاشة بعد الدخول</label>
-  <select id="rScreen">
-    <option value="nurse">ممرضة — شاشة الطلبات</option>
-    <option value="procurement">تموين — لوحة التموين</option>
-    <option value="doctor">طبيب — مراجعة الطلبات</option>
-    <option value="dashboard">لوحة الإدارة</option>
-  </select>
-  <div id="roleModalError" class="error hidden"></div>
-  <div>
-    <button class="btn-primary" onclick="saveRole()">حفظ</button>
-    <button class="btn-secondary" onclick="closeRoleModal()">إلغاء</button>
-    <button class="btn-danger hidden" id="roleDeleteBtn" onclick="confirmDeleteRole()" style="float:inline-end;">حذف</button>
-  </div>
-</div>
-
-<div id="commentOverlay" class="modal-overlay hidden" onclick="closeComments()"></div>
-<div id="commentModal" class="card comment-modal hidden">
-  <h2><span data-i18n="comments_title">ملاحظات الطلب</span> <span id="commentReqId"></span></h2>
-  <div class="comment-list" id="commentList"></div>
-  <div class="comment-input-row">
-    <textarea id="commentInput" data-i18n-ph="comment_ph" placeholder="اكتب ملاحظة... مثلاً: ناقص صنف، الكمية غير مطابقة"></textarea>
-    <button class="btn-primary" onclick="sendComment()" data-i18n="send_btn">إرسال</button>
-  </div>
-  <button class="btn-secondary" onclick="closeComments()" data-i18n="close_btn">إغلاق</button>
-</div>
 <script>
-/* ================= الترجمة (عربي / إنجليزي) ================= */
-/* ================= اتصال الباك-إند =================
-   إذا الصفحة مفتوحة من رابط Apps Script نفسه (/exec) فـ google.script.run موجود
-   تلقائياً ونستخدمه كما هو. وإذا كانت مستضافة بمكان ثاني (GitHub Pages) نستخدم
-   بديلاً يتصل بنفس الباك-إند عبر fetch() بنفس شكل الاستدعاء، فلا يحتاج باقي
-   الكود أي تعديل. */
-(function () {
-  if (typeof google !== 'undefined' && google.script && google.script.run) return;
-
-  /* ▼▼▼ رابط الـ Web App — يُعدَّل مرة واحدة هنا فقط من قِبل مسؤول النظام ▼▼▼ */
-  const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyXjW137-lGaIzBwypqX57ckK2VIZuz8VuAqJNJyEsWAk857OnAMOJ-Py6xngB1j_8D/exec';
-  /* ▲▲▲ لا شيء آخر يحتاج تعديلاً ▲▲▲ */
-
-  function callBackend(fn, args, onSuccess, onFailure) {
-    fetch(APPS_SCRIPT_URL, {
-      method: 'POST',
-      // نص عادي حتى لا يطلب المتصفح OPTIONS مسبقاً (تفادي CORS)
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ fn: fn, args: args })
-    })
-      .then(function (r) { return r.text(); })
-      .then(function (text) {
-        let res;
-        try { res = JSON.parse(text); }
-        catch (e) { throw new Error('الخادم رجّع صفحة بدل بيانات. تأكد أن النشر: Execute as = Me، Who has access = Anyone.'); }
-        if (res.ok) { onSuccess && onSuccess(res.data); }
-        else { throw new Error(res.error || 'خطأ غير معروف من الخادم'); }
-      })
-      .catch(function (err) {
-        console.error('[Backend]', fn, err);
-        onFailure && onFailure(err);
-      });
-  }
-
-  function makeRunner() {
-    const holder = { _s: null, _f: null };
-    const proxy = new Proxy(holder, {
-      get: function (target, prop) {
-        if (prop === 'withSuccessHandler') return function (cb) { target._s = cb; return proxy; };
-        if (prop === 'withFailureHandler') return function (cb) { target._f = cb; return proxy; };
-        if (typeof prop !== 'string') return undefined;
-        return function () {
-          callBackend(prop, Array.prototype.slice.call(arguments), target._s, target._f);
-        };
-      }
-    });
-    return proxy;
-  }
-
-  window.google = { script: { run: makeRunner() } };
-})();
-
-
-
-let LANG = 'ar';
-const I18N = {
-  ar: {
-    login_title:'تسجيل الدخول', login_name_label:'الاسم', login_pass_label:'الرقم السري',
-    login_error:'الاسم أو الرقم السري غير صحيح', login_btn:'دخول',
-    login_name_ph:'اكتب اسمك', login_pass_ph:'الرقم السري',
-    nurse_tab_create:'طلب جديد', nurse_tab_myreq:'طلباتي', nurse_hello:'مرحباً', logout:'خروج',
-    nurse_create_title:'إنشاء طلب مستلزمات', clinic_label:'العيادة', doctor_label:'الطبيب',
-    type_label:'نوع الطلب', type_monthly:'شهري', type_emergency:'طارئ',
-    items_title:'الأصناف', item_name_ph:'اكتب اسم الصنف أو اختر من القائمة',
-    nurse_search_ph:'🔍 بحث...',
-    proc_search_ph:'🔍 بحث برقم الطلب، العيادة، الطبيب، الحالة...',
-    add_item_row_btn:'+ إضافة صنف',
-    create_error:'يرجى تعبئة كل الحقول وإضافة صنف واحد على الأقل',
-    submit_request_btn:'إرسال الطلب للتموين',
-    my_requests_title:'طلباتي', receive_btn:'استلام وتوقيع', comment_btn:'💬 ملاحظات',
-    no_requests_yet:'لا توجد طلبات بعد',
-    confirm_receive_title:'تأكيد استلام الطلب', th_item:'الصنف', th_sent_qty:'الكمية المرسلة',
-    th_received_qty:'الكمية المستلمة فعلياً', receiver_name_label:'اسم المستلم',
-    signature_label:'التوقيع (اختياري - ارسم بالفأرة أو اللمس)', clear_sig_btn:'مسح التوقيع',
-    confirm_receive_btn:'تأكيد الاستلام', cancel_btn:'إلغاء', recv_name_required:'اسم المستلم إلزامي',
-    procurement_title:'لوحة التموين', status_label:'الحالة', all_option:'الكل',
-    status_new:'جديد', status_progress:'قيد التجهيز', status_sent:'تم الإرسال', status_received:'تم الاستلام',
-    month_label:'الشهر', bulk_progress_btn:'اعتماد المحدد: قيد التجهيز', bulk_sent_btn:'اعتماد المحدد: تم الإرسال',
-    no_matching_requests:'لا توجد طلبات مطابقة', view_items_btn:'عرض/اعتماد الأصناف',
-    th_requested:'المطلوب', th_approved:'المعتمد', select_one_request:'اختر طلب واحد على الأقل',
-    dashboard_title:'لوحة الإدارة',
-    users_title:'إدارة المستخدمين', users_list_title:'قائمة المستخدمين',
-    add_user_btn:'+ مستخدم جديد', save_btn:'حفظ', delete_btn:'حذف',
-    th_name:'الاسم', th_role:'الدور', th_email:'البريد',
-    edit_btn:'تعديل', confirm_delete_user:'هل تريد حذف هذا المستخدم؟',
-    trend_title:'اتجاه متوسط زمن التنفيذ (آخر 6 أشهر)',
-    clinic_chart_title:'متوسط ساعات التنفيذ حسب العيادة (الشهر المحدد)',
-    kpi_total:'إجمالي الطلبات', kpi_avg_hours:'متوسط ساعات التنفيذ',
-    top_items_title:'الأصناف الأكثر طلباً (تقريبي بدل دوران المخزون الفعلي - النظام لا يتتبع كميات المستودع)',
-    th_qty:'الكمية الإجمالية',
-    clinic_avg_title:'متوسط الوقت (بالساعات) بين رفع الطلب وإرساله - حسب العيادة',
-    th_clinic:'العيادة', th_avg_hours:'متوسط الساعات', th_count:'عدد الطلبات',
-    details_title:'تفاصيل كل طلب', th_request_id:'رقم الطلب', th_doctor:'الطبيب', th_type:'النوع', th_hours:'الساعات',
-    notices_compose_title:'إرسال ملاحظة', notice_target_label:'الجهة',
-    target_procurement:'التموين', target_nursing:'التمريض', target_all:'الكل',
-    notice_msg_ph:'اكتب الملاحظة...', send_notice_btn:'إرسال',
-    recent_comments_title:'آخر الملاحظات على الطلبات',
-    comments_title:'ملاحظات الطلب', comment_ph:'اكتب ملاحظة... مثلاً: ناقص صنف، الكمية غير مطابقة',
-    send_btn:'إرسال', close_btn:'إغلاق', no_comments_yet:'لا توجد ملاحظات بعد',
-    notices_from_mgmt:'تنبيهات من الإدارة'
-  },
-  en: {
-    login_title:'Login', login_name_label:'Name', login_pass_label:'Password',
-    login_error:'Incorrect name or password', login_btn:'Log in',
-    login_name_ph:'Enter your name', login_pass_ph:'Password',
-    nurse_tab_create:'New Request', nurse_tab_myreq:'My Requests', nurse_hello:'Hello', logout:'Log out',
-    nurse_create_title:'Create Supply Request', clinic_label:'Clinic', doctor_label:'Doctor',
-    type_label:'Request Type', type_monthly:'Monthly', type_emergency:'Emergency',
-    items_title:'Items', item_name_ph:'Type or pick an item',
-    nurse_search_ph:'🔍 Search...',
-    proc_search_ph:'🔍 Search by request ID, clinic, doctor, status...',
-    add_item_row_btn:'+ Add item',
-    create_error:'Please fill all fields and add at least one item',
-    submit_request_btn:'Send request to procurement',
-    my_requests_title:'My Requests', receive_btn:'Receive & sign', comment_btn:'💬 Notes',
-    no_requests_yet:'No requests yet',
-    confirm_receive_title:'Confirm receipt of request', th_item:'Item', th_sent_qty:'Sent qty',
-    th_received_qty:'Actually received', receiver_name_label:'Receiver name',
-    signature_label:'Signature (optional - draw with mouse/touch)', clear_sig_btn:'Clear signature',
-    confirm_receive_btn:'Confirm receipt', cancel_btn:'Cancel', recv_name_required:'Receiver name is required',
-    procurement_title:'Procurement Dashboard', status_label:'Status', all_option:'All',
-    status_new:'New', status_progress:'In Progress', status_sent:'Sent', status_received:'Received',
-    month_label:'Month', bulk_progress_btn:'Approve selected: In progress', bulk_sent_btn:'Approve selected: Sent',
-    no_matching_requests:'No matching requests', view_items_btn:'View / approve items',
-    th_requested:'Requested', th_approved:'Approved', select_one_request:'Select at least one request',
-    dashboard_title:'Management Dashboard',
-    users_title:'User Management', users_list_title:'Users',
-    add_user_btn:'+ New user', save_btn:'Save', delete_btn:'Delete',
-    th_name:'Name', th_role:'Role', th_email:'Email',
-    edit_btn:'Edit', confirm_delete_user:'Delete this user?',
-    trend_title:'Avg fulfillment time trend (last 6 months)',
-    clinic_chart_title:'Avg fulfillment hours by clinic (selected month)',
-    kpi_total:'Total requests', kpi_avg_hours:'Avg fulfillment (hrs)',
-    top_items_title:'Most requested items (proxy for turnover - actual warehouse stock is not tracked)',
-    th_qty:'Total qty',
-    clinic_avg_title:'Avg hours between submission and dispatch - by clinic',
-    th_clinic:'Clinic', th_avg_hours:'Avg hours', th_count:'Requests',
-    details_title:'Request details', th_request_id:'Request ID', th_doctor:'Doctor', th_type:'Type', th_hours:'Hours',
-    notices_compose_title:'Send a note', notice_target_label:'Send to',
-    target_procurement:'Procurement', target_nursing:'Nursing', target_all:'Everyone',
-    notice_msg_ph:'Write your note...', send_notice_btn:'Send',
-    recent_comments_title:'Recent request notes',
-    comments_title:'Request notes', comment_ph:'Write a note... e.g. item missing, quantity mismatch',
-    send_btn:'Send', close_btn:'Close', no_comments_yet:'No notes yet',
-    notices_from_mgmt:'Notices from management'
-  }
+// ══ USERS — محلي كـ fallback فقط إذا فشل الـ API ══
+const LOCAL_USERS={
+  'ibrahim':  {pw:'apex@quality', label:'مدير الجودة',     branches:['BURIDAH','ONIZAH']},
+  'director': {pw:'apex@exec',    label:'المدير التنفيذي', branches:['BURIDAH','ONIZAH']},
+  'nursing':  {pw:'apex@nursing', label:'رئيسة التمريض',  branches:['BURIDAH','ONIZAH']},
+  'hr':       {pw:'apex@hr',      label:'الموارد البشرية',branches:['BURIDAH','ONIZAH']},
+  'buridah':  {pw:'apex@brd',     label:'إدارة بريدة',    branches:['BURIDAH']},
+  'onizah':   {pw:'apex@onz',     label:'إدارة عنيزة',    branches:['ONIZAH']},
 };
-function t(key) { return (I18N[LANG] && I18N[LANG][key]) || key; }
 
-function toggleLang() {
-  LANG = LANG === 'ar' ? 'en' : 'ar';
-  applyLang();
+const API='https://script.google.com/macros/s/AKfycbw7nRFADh0DYpJkdTdGRNIYttbcl9K7wTOeIyzxehjucqgb05VFOUI6rAeMgdGO-SuJ0Q/exec';
+
+// ══ STATE ══
+let currentUser=null, nurses=[], rawRows=[], mode='week', tblFilter='all', ccMetric='quality', ccChart=null, mChart=null, isDark=true;
+
+// ══ SAMPLE DATA (fallback) ══
+const SAMPLE=[
+  {name:'Abhie',branch:'BURIDAH',weeks:18,onTime:11,late:2,absent:5,commitPct:72,toolsPct:100,qualityPct:83,lastEntry:'2026-03-14',enteredThisWeek:false,missingTools:false,missingDesc:'',clinic:'14',expDate:'2026-04-10',hasCard:true,notes:''},
+  {name:'Amina Ghulam Hussain',branch:'BURIDAH',weeks:18,onTime:15,late:1,absent:2,commitPct:93,toolsPct:85,qualityPct:90,lastEntry:'2026-03-22',enteredThisWeek:true,missingTools:false,missingDesc:'',clinic:'3',expDate:'2026-12-01',hasCard:true,notes:''},
+  {name:'Asifa',branch:'BURIDAH',weeks:3,onTime:0,late:2,absent:1,commitPct:67,toolsPct:100,qualityPct:80,lastEntry:'2026-03-08',enteredThisWeek:false,missingTools:true,missingDesc:'Extraction forceps',clinic:'14',expDate:'2025-12-15',hasCard:false,notes:'Inspection: boll not working'},
+  {name:'Cataline Maureen Pascua',branch:'BURIDAH',weeks:3,onTime:3,late:0,absent:0,commitPct:100,toolsPct:100,qualityPct:100,lastEntry:'2026-03-22',enteredThisWeek:true,missingTools:false,missingDesc:'',clinic:'2',expDate:'2027-03-01',hasCard:true,notes:''},
+  {name:'Clariz',branch:'BURIDAH',weeks:8,onTime:6,late:2,absent:0,commitPct:100,toolsPct:62,qualityPct:77,lastEntry:'2026-03-14',enteredThisWeek:false,missingTools:true,missingDesc:'Condenser, Boll',clinic:'6',expDate:'2026-06-20',hasCard:true,notes:'No condenser, no boll'},
+  {name:'Dian',branch:'BURIDAH',weeks:15,onTime:7,late:8,absent:0,commitPct:100,toolsPct:94,qualityPct:97,lastEntry:'2026-03-14',enteredThisWeek:false,missingTools:false,missingDesc:'',clinic:'4',expDate:'2026-08-15',hasCard:true,notes:''},
+  {name:'Emilia',branch:'BURIDAH',weeks:17,onTime:12,late:4,absent:1,commitPct:94,toolsPct:100,qualityPct:97,lastEntry:'2026-03-14',enteredThisWeek:false,missingTools:false,missingDesc:'',clinic:'6',expDate:'2027-01-10',hasCard:true,notes:''},
+  {name:'Fakhar Ul Nisa',branch:'BURIDAH',weeks:16,onTime:12,late:2,absent:2,commitPct:88,toolsPct:100,qualityPct:93,lastEntry:'2026-03-22',enteredThisWeek:true,missingTools:false,missingDesc:'',clinic:'14',expDate:'2026-09-30',hasCard:true,notes:''},
+  {name:'Hanaa',branch:'BURIDAH',weeks:18,onTime:6,late:0,absent:12,commitPct:33,toolsPct:81,qualityPct:52,lastEntry:'2026-02-15',enteredThisWeek:false,missingTools:false,missingDesc:'',clinic:'1',expDate:'2026-05-01',hasCard:false,notes:''},
+  {name:'Khaerunnisa',branch:'BURIDAH',weeks:14,onTime:10,late:1,absent:3,commitPct:79,toolsPct:94,qualityPct:85,lastEntry:'2026-03-14',enteredThisWeek:false,missingTools:false,missingDesc:'',clinic:'2',expDate:'2026-11-20',hasCard:true,notes:''},
+  {name:'Marilyn Penaranda',branch:'BURIDAH',weeks:16,onTime:13,late:0,absent:3,commitPct:81,toolsPct:94,qualityPct:86,lastEntry:'2026-03-14',enteredThisWeek:false,missingTools:false,missingDesc:'',clinic:'5',expDate:'2026-07-15',hasCard:true,notes:''},
+  {name:'Maryam',branch:'ONIZAH',weeks:17,onTime:13,late:1,absent:3,commitPct:82,toolsPct:88,qualityPct:85,lastEntry:'2026-03-14',enteredThisWeek:false,missingTools:false,missingDesc:'',clinic:'3',expDate:'2026-10-10',hasCard:true,notes:''},
+  {name:'Muqaddas Nazir',branch:'ONIZAH',weeks:14,onTime:12,late:2,absent:0,commitPct:100,toolsPct:69,qualityPct:88,lastEntry:'2026-03-14',enteredThisWeek:false,missingTools:true,missingDesc:'Smallest spoon, excavator broken',clinic:'2',expDate:'2026-04-25',hasCard:true,notes:'Filter is broken - informed manager'},
+  {name:'Nabila',branch:'BURIDAH',weeks:13,onTime:12,late:1,absent:0,commitPct:100,toolsPct:100,qualityPct:100,lastEntry:'2026-03-14',enteredThisWeek:false,missingTools:false,missingDesc:'',clinic:'2',expDate:'2027-02-15',hasCard:true,notes:''},
+  {name:'Safia',branch:'BURIDAH',weeks:17,onTime:12,late:2,absent:3,commitPct:82,toolsPct:94,qualityPct:87,lastEntry:'2026-03-14',enteredThisWeek:false,missingTools:false,missingDesc:'',clinic:'8',expDate:'2026-12-30',hasCard:true,notes:''},
+  {name:'Saira',branch:'BURIDAH',weeks:3,onTime:3,late:0,absent:0,commitPct:100,toolsPct:100,qualityPct:100,lastEntry:'2026-03-22',enteredThisWeek:true,missingTools:false,missingDesc:'',clinic:'8',expDate:'2027-04-01',hasCard:true,notes:''},
+  {name:'Samia',branch:'BURIDAH',weeks:3,onTime:1,late:1,absent:1,commitPct:67,toolsPct:100,qualityPct:80,lastEntry:'2026-03-08',enteredThisWeek:false,missingTools:false,missingDesc:'',clinic:'10',expDate:'2026-03-05',hasCard:true,notes:''},
+  {name:'Sidra',branch:'ONIZAH',weeks:19,onTime:12,late:1,absent:6,commitPct:68,toolsPct:63,qualityPct:66,lastEntry:'2026-03-14',enteredThisWeek:false,missingTools:false,missingDesc:'',clinic:'1',expDate:'2026-09-09',hasCard:true,notes:'Need x ray sensor holder'},
+  {name:'Syintia Amrizal',branch:'BURIDAH',weeks:11,onTime:10,late:0,absent:1,commitPct:91,toolsPct:100,qualityPct:95,lastEntry:'2026-03-14',enteredThisWeek:false,missingTools:false,missingDesc:'',clinic:'10',expDate:'2026-08-20',hasCard:true,notes:''},
+  {name:'Tasmia Afzal',branch:'ONIZAH',weeks:16,onTime:11,late:1,absent:4,commitPct:75,toolsPct:85,qualityPct:79,lastEntry:'2026-03-14',enteredThisWeek:false,missingTools:false,missingDesc:'',clinic:'1',expDate:'2026-11-01',hasCard:true,notes:''},
+  {name:'Tati Maryati',branch:'BURIDAH',weeks:17,onTime:0,late:1,absent:16,commitPct:6,toolsPct:100,qualityPct:44,lastEntry:'2026-01-10',enteredThisWeek:false,missingTools:false,missingDesc:'',clinic:'4',expDate:'2026-06-15',hasCard:true,notes:''},
+];
+
+// ══ HELPERS ══
+const qColor=v=>v>=80?'var(--green)':v>=60?'var(--yellow)':'var(--red)';
+const qClass=v=>v===0?'hm-0':v<60?'hm-lo':v<80?'hm-md':v<100?'hm-hi':'hm-100';
+function qBar(v){
+  const c=qColor(v);
+  return `<div class="qbar"><div class="qbar-track"><div class="qbar-fill" style="width:${v}%;background:${c}"></div></div><span class="qbar-num" style="color:${c}">${v}%</span></div>`;
+}
+function daysDiff(dateStr){
+  if(!dateStr)return null;
+  const d=new Date(dateStr),now=new Date();
+  return Math.round((d-now)/(1000*60*60*24));
+}
+function drugStatus(expStr){
+  const d=daysDiff(expStr);
+  if(d===null)return{cls:'',icon:'—',label:'—',days:null};
+  if(d<0)return{cls:'drug-exp',icon:'🔴',label:'منتهية',days:d};
+  if(d<=30)return{cls:'drug-warn',icon:'🟡',label:'قريباً',days:d};
+  return{cls:'drug-ok',icon:'🟢',label:'سارية',days:d};
+}
+function isToolText(txt){
+  if(!txt)return false;
+  const neg=['nothing','no','none','-','—','ليس','لا يوج','not','n/a','as mentioned'];
+  const t=txt.toLowerCase();
+  return !neg.some(x=>t.includes(x));
 }
 
-function applyLang() {
-  document.documentElement.lang = LANG;
-  document.body.dir = LANG === 'ar' ? 'rtl' : 'ltr';
-  document.getElementById('langToggleBtn').textContent = LANG === 'ar' ? 'English' : 'عربي';
-  document.querySelectorAll('[data-i18n]').forEach(function (el) { el.textContent = t(el.dataset.i18n); });
-  document.querySelectorAll('[data-i18n-ph]').forEach(function (el) { el.placeholder = t(el.dataset.i18nPh); });
-  // تحديث حقول الأصناف الديناميكية
-  document.querySelectorAll('.itemName').forEach(function(el){ el.placeholder = t('item_name_ph'); });
-  // إعادة رسم أي قوائم ديناميكية مفتوحة حالياً حتى تتحدث لغتها
-  if (CURRENT_USER) {
-    if (CURRENT_USER.role === 'ممرضة') { loadMyRequests(); loadNurseNotices(); }
-    if (CURRENT_USER.role === 'تموين') { loadProcurementRequests(); loadProcNotices(); }
-    if (CURRENT_USER.role === 'جودة' || CURRENT_USER.role === 'تنفيذي') loadDashboard();
+// ══ التقارير المطبوعة — نظيفة، بدون رموز تعبيرية، دقيقة ══
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function buildReportTable(headers,rows){
+  return `<table><thead><tr>${headers.map(h=>`<th>${esc(h)}</th>`).join('')}</tr></thead>
+    <tbody>${rows.map(r=>`<tr>${r.map(c=>`<td>${esc(c)}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+}
+function reportForActiveTab(){
+  const activeEl=document.querySelector('.tab-panel.active');
+  const tabId=activeEl?activeEl.id.replace('tab-',''):'overview';
+
+  switch(tabId){
+    case 'table': {
+      const rows=nurses.map(n=>[n.name,n.branch,mode==='week'?(n.weekStatus||'—'):(n.enteredThisWeek?'في الوقت':'لم تدخل'),n.onTime,n.late,n.absent,n.weeks,n.commitPct+'%',n.toolsPct+'%',n.qualityPct+'%',n.lastEntry||'—']);
+      return {title:'قائمة الممرضات', tableHtml:buildReportTable(['الممرضة','الفرع','الحالة','في الوقت','متأخر','غياب','أسابيع','الالتزام','الأدوات','الجودة الكلية','آخر إدخال'],rows)};
+    }
+    case 'heatmap': {
+      const table=document.querySelector('#heatmap-wrap table');
+      return {title:'خريطة الحضور — آخر 12 أسبوع', tableHtml: table ? table.outerHTML : '<p>لا توجد بيانات</p>'};
+    }
+    case 'control': {
+      const chartTitle=document.getElementById('cc-title')?document.getElementById('cc-title').textContent:'';
+      let body='<p>لا يوجد سجل كافٍ بعد</p>';
+      if(ccChart) body=`<img src="${ccChart.toBase64Image()}" style="max-width:100%;margin:16px 0;border:1px solid #ddd">`;
+      return {title:'مراقبة الأداء عبر الزمن — '+chartTitle, tableHtml:body};
+    }
+    case 'absent': {
+      const isAbsentNow=n=>mode==='week'?n.weekStatus==='لم تدخل':!n.enteredThisWeek;
+      const rows=nurses.filter(isAbsentNow).sort((a,b)=>b.absent-a.absent)
+        .map(n=>[n.name,n.branch,n.lastEntry||'—',n.absent,n.qualityPct+'%']);
+      return {title:'الممرضات غير الملتزمات', tableHtml: rows.length?buildReportTable(['الممرضة','الفرع','آخر إدخال','أسابيع غياب','الجودة الكلية'],rows):'<p>جميع الممرضات ملتزمات</p>'};
+    }
+    case 'tools': {
+      const rows=nurses.filter(n=>n.missingTools&&isToolText(n.missingDesc)).map(n=>[n.name,n.branch,n.missingDesc||'—']);
+      return {title:'الأدوات الناقصة', tableHtml: rows.length?buildReportTable(['الممرضة','الفرع','التفاصيل'],rows):'<p>لا توجد أدوات ناقصة مسجلة</p>'};
+    }
+    case 'drugs': {
+      const rows=nurses.filter(n=>n.expDate).map(n=>{const d=daysDiff(n.expDate);return [n.name,n.branch,n.expDate,d!==null?d+' يوم':'—'];});
+      return {title:'الأدوية — تواريخ الانتهاء', tableHtml: rows.length?buildReportTable(['الممرضة','الفرع','تاريخ الانتهاء','المتبقي'],rows):'<p>لا توجد بيانات أدوية مسجلة</p>'};
+    }
+    case 'cards': {
+      const rows=nurses.filter(n=>n.hasCard!==undefined).map(n=>[n.name,n.branch,n.hasCard?'موجودة':'غير موجودة']);
+      return {title:'بطاقات الموظفين', tableHtml: rows.length?buildReportTable(['الممرضة','الفرع','حالة البطاقة'],rows):'<p>لا توجد بيانات بطاقات مسجلة</p>'};
+    }
+    case 'issues': {
+      const rows=nurses.filter(n=>n.notes&&n.notes.trim().length>3&&isToolText(n.notes)).map(n=>[n.name,n.branch,n.notes]);
+      return {title:'مشاكل الأسبوع', tableHtml: rows.length?buildReportTable(['الممرضة','الفرع','الملاحظة'],rows):'<p>لا توجد مشاكل مسجلة</p>'};
+    }
+    case 'branches': {
+      const branches=['BURIDAH','ONIZAH'];
+      const rows=branches.map(b=>{
+        const list=nurses.filter(n=>n.branch===b);
+        const avgQ=list.length?Math.round(list.reduce((s,n)=>s+n.qualityPct,0)/list.length):0;
+        const entered=list.filter(n=>mode==='week'?n.weekStatus!=='لم تدخل':n.enteredThisWeek).length;
+        return [b,list.length,entered,avgQ+'%'];
+      });
+      return {title:'مقارنة الفروع', tableHtml:buildReportTable(['الفرع','عدد الممرضات','أدخلن','متوسط الجودة'],rows)};
+    }
+    case 'alerts': {
+      const rows=[];
+      nurses.forEach(n=>{
+        if(n.absent>=4)rows.push([n.name,n.branch,'غياب مرتفع',n.absent+' أسبوع']);
+        else if(n.absent>=2)rows.push([n.name,n.branch,'غياب متوسط',n.absent+' أسبوع']);
+        if(n.missingTools&&isToolText(n.missingDesc))rows.push([n.name,n.branch,'أدوات ناقصة',n.missingDesc||'—']);
+      });
+      return {title:'التنبيهات', tableHtml: rows.length?buildReportTable(['الممرضة','الفرع','نوع التنبيه','التفاصيل'],rows):'<p>لا توجد تنبيهات حالياً</p>'};
+    }
+    default: { // overview
+      const rows=nurses.map(n=>[n.name,n.branch,mode==='week'?(n.weekStatus||'—'):(n.enteredThisWeek?'في الوقت':'لم تدخل'),n.qualityPct+'%',n.lastEntry||'—']);
+      return {title:'نظرة عامة', tableHtml:buildReportTable(['الممرضة','الفرع','الحالة','الجودة الكلية','آخر إدخال'],rows)};
+    }
   }
 }
-
-function statusLabel(s) {
-  const MAP = { 'جديد':t('status_new'), 'قيد التجهيز':t('status_progress'),
-    'بانتظار المندوب':(LANG==='ar'?'بانتظار المندوب':'Awaiting Vendor'),
-    'استلم المندوب':(LANG==='ar'?'استلم المندوب':'Vendor Received'),
-    'تم الإرسال':t('status_sent'), 'مراجعة الطبيب':(LANG==='ar'?'مراجعة الطبيب':'Doctor Review'),
-    'تم الاستلام':t('status_received'), 'مرفوض':(LANG==='ar'?'مرفوض':'Rejected') };
-  return MAP[s] || s;
+function printCurrentTab(){
+  const {title,tableHtml}=reportForActiveTab();
+  const sat=document.getElementById('week-date').value;
+  const modeLbl=mode==='week'?`أسبوع ${sat}`:'كل الفترة (تراكمي)';
+  const today=new Date().toLocaleDateString('ar-SA');
+  const w=window.open('','_blank');
+  if(!w){alert('الرجاء السماح للنوافذ المنبثقة لعرض التقرير');return;}
+  w.document.write(`<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="utf-8">
+  <title>${esc(title)} — ApexCare</title>
+  <style>
+    *{box-sizing:border-box}
+    body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;padding:36px;color:#1a1a1a;line-height:1.7;max-width:1000px;margin:0 auto}
+    .hdr{border-bottom:2px solid #1a237e;padding-bottom:12px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:flex-end}
+    .hdr h1{font-size:20px;margin:0;color:#1a237e}
+    .hdr .sub{font-size:12px;color:#666;margin-top:4px}
+    .meta{font-size:12px;color:#555;text-align:left}
+    table{width:100%;border-collapse:collapse;margin:16px 0;font-size:12.5px}
+    th,td{border:1px solid #ccc;padding:7px 10px;text-align:right}
+    th{background:#f2f3f7;font-weight:600;color:#1a237e}
+    tr:nth-child(even) td{background:#fafafa}
+    .foot{margin-top:28px;font-size:10.5px;color:#999;border-top:1px solid #eee;padding-top:10px}
+    @media print{ @page{margin:14mm} body{padding:0} }
+  </style></head>
+  <body>
+    <div class="hdr">
+      <div><h1>${esc(title)}</h1><div class="sub">عيادات أبكس كير — عنيزة وبريدة</div></div>
+      <div class="meta">${esc(modeLbl)}<br>تاريخ الإصدار: ${esc(today)}</div>
+    </div>
+    ${tableHtml}
+    <div class="foot">نظام مراقبة الممرضات — ApexCare</div>
+  </body></html>`);
+  w.document.close();
+  w.onload=()=>{ w.focus(); w.print(); };
 }
-function typeLabel(ty) { return ty === 'شهري' ? t('type_monthly') : (ty === 'طارئ' ? t('type_emergency') : ty); }
-function statusBadgeClass(status) {
-  return { 'جديد':'badge-new', 'قيد التجهيز':'badge-progress',
-    'بانتظار المندوب':'badge-vendor', 'استلم المندوب':'badge-progress',
-    'تم الإرسال':'badge-sent', 'مراجعة الطبيب':'badge-review',
-    'تم الاستلام':'badge-received', 'مرفوض':'badge-rejected' }[status] || 'badge-new';
-}
 
-/* ================= الحالة العامة ================= */
-let CURRENT_USER = null;
-let ITEMS_CATALOG = [];
-let CLINICS = [];
-let ROLES = [];           // قائمة الأدوار المجلوبة من الشيت
-let SYNC_TIMER = null;    // مؤقت المزامنة التلقائية
-let PREFETCH_DONE = false;// هل جُلبت البيانات الأولية مسبقاً
-let SIG_CTX, SIG_DRAWING = false, SIG_HAS_INK = false;
-let CURRENT_RECEIVE_ID = null;
-let CURRENT_COMMENT_REQ = null;
+// ══ LOGIN ══
+function doLogin(){
+  const u=document.getElementById('u-user').value.trim().toLowerCase();
+  const p=document.getElementById('u-pass').value;
+  const err=document.getElementById('login-err');
+  const btn=document.querySelector('.login-btn');
 
-/* ================= تحميل مسبق ================= */
-// يبدأ جلب البيانات الثقيلة فور فتح الصفحة بدون انتظار تسجيل الدخول
-function prefetch() {
-  if (PREFETCH_DONE) return;
-  google.script.run
-    .withSuccessHandler(function (cfg) {
-      CLINICS       = cfg.clinics  || [];
-      ITEMS_CATALOG = cfg.catalog  || [];
-      ROLES         = cfg.roles    || [];
-      PREFETCH_DONE = true;
-      refreshItemsDatalist();
+  if(!u||!p){err.style.display='block';err.textContent='⚠️ أدخل اسم المستخدم وكلمة المرور';return;}
+
+  btn.textContent='جاري التحقق...';btn.disabled=true;
+
+  // تحقق من الشيت أولاً
+  fetch(`${API}?action=login&u=${encodeURIComponent(u)}&p=${encodeURIComponent(p)}`)
+    .then(r=>r.json())
+    .then(data=>{
+      btn.textContent='دخول';btn.disabled=false;
+      if(data.success){
+        loginSuccess({label:data.label, branches:data.branches, key:u});
+      } else {
+        // fallback للبيانات المحلية
+        const local=LOCAL_USERS[u];
+        if(local&&local.pw===p) loginSuccess({label:local.label,branches:local.branches,key:u});
+        else { err.style.display='block';err.textContent='⚠️ اسم المستخدم أو كلمة المرور غير صحيحة';document.getElementById('u-pass').value=''; }
+      }
     })
-    .withFailureHandler(function () { /* صامت — سيُعاد الجلب عند الدخول */ })
-    .getAppConfig();
-}
-prefetch();
-
-/* ================= Toast + أزرار ================= */
-
-let _toastTimer = null;
-function toast(msg, ms) {
-  ms = ms || 2500;
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.classList.add('show');
-  clearTimeout(_toastTimer);
-  _toastTimer = setTimeout(function(){ el.classList.remove('show'); }, ms);
+    .catch(()=>{
+      btn.textContent='دخول';btn.disabled=false;
+      // fallback محلي عند فشل الـ API
+      const local=LOCAL_USERS[u];
+      if(local&&local.pw===p) loginSuccess({label:local.label,branches:local.branches,key:u});
+      else { err.style.display='block';err.textContent='⚠️ اسم المستخدم أو كلمة المرور غير صحيحة';document.getElementById('u-pass').value=''; }
+    });
 }
 
-function btnBusy(btn, msg) {
-  if (!btn) return;
-  btn._origText = btn.textContent;
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span>' + (msg || '');
+function loginSuccess(usr){
+  currentUser=usr;
+  document.getElementById('login-err').style.display='none';
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('hdr').style.display='flex';
+  document.getElementById('app').style.display='block';
+  document.getElementById('role-lbl').textContent=usr.label;
+  document.getElementById('u-pass').value='';
+  initDash();
 }
-function btnFree(btn) {
-  if (!btn) return;
-  btn.disabled = false;
-  btn.textContent = btn._origText || btn.textContent;
-}
-
-/* ================= إشعارات الدخول ================= */
-
-function loadLoginAlerts() {
-  google.script.run
-    .withSuccessHandler(function(alerts) {
-      const el = document.getElementById('alertsContainer');
-      if (!alerts || !alerts.length) { el.innerHTML = ''; return; }
-      el.innerHTML = alerts.map(function(a) {
-        return '<div class="alert-bar ' + a.type + '">' +
-               '<span class="icon">' + a.icon + '</span>' +
-               '<span>' + a.msg + '</span></div>';
-      }).join('');
-    })
-    .withFailureHandler(function(){})
-    .getLoginAlerts(CURRENT_USER.role, CURRENT_USER.name);
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&document.getElementById('login-screen').style.display!=='none')doLogin();});
+function doLogout(){
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('hdr').style.display='none';
+  document.getElementById('app').style.display='none';
+  document.getElementById('u-user').value='';
+  currentUser=null;
 }
 
-/* ================= تسجيل الدخول ================= */
-
-function showLoginError(msg) {
-  const el = document.getElementById('loginError');
-  el.textContent = msg;
-  el.classList.remove('hidden');
+// ══ THEME ══
+function toggleTheme(){
+  isDark=!isDark;
+  document.body.classList.toggle('light',!isDark);
+  document.querySelector('.theme-btn').textContent=isDark?'🌙':'☀️';
+  if(ccChart){ccChart.destroy();ccChart=null;renderControlChart();}
 }
 
-function doLogin() {
-  const name = document.getElementById('loginName').value.trim();
-  const pass = document.getElementById('loginPass').value;
-  const el = document.getElementById('loginError');
-  el.classList.add('hidden');
-  if (!name || !pass) { showLoginError('اكتب الاسم والرقم السري'); return; }
-
-  google.script.run
-    .withSuccessHandler(function (res) {
-      if (!res || !res.success) { showLoginError(t('login_error')); return; }
-      CURRENT_USER = res;
-      afterLogin();
-    })
-    .withFailureHandler(function (err) {
-      showLoginError('تعذّر الاتصال بالخادم: ' + String((err && err.message) || err));
-    })
-    .checkLogin(name, pass);
+// ══ TABS ══
+function switchTab(id,btn){
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-'+id).classList.add('active');
+  if(id==='control')renderControlChart();
 }
 
-
-function logout() { window.location.reload(); }
-
-function afterLogin() {
-  document.getElementById('loginSection').classList.add('hidden');
-
-  function routeUser() {
-    var screen = 'dashboard';
-    var userRole = String(CURRENT_USER.role || '').trim();
-    var matched = ROLES.find(function (r) { return String(r.name || '').trim() === userRole; });
-    if (matched) screen = String(matched.screen || '').trim();
-    else console.warn('[routeUser] لم يُطابَق دور "' + userRole + '" مع أي دور في تبويب Roles — سيُوجَّه للوحة الإدارة');
-    if (screen === 'nurse')            initNurseView();
-    else if (screen === 'procurement') initProcurementView();
-    else if (screen === 'doctor')      initDoctorView();
-    else                               initDashboardView();
-    startAutoSync();
-  }
-
-  if (PREFETCH_DONE) {
-    // البيانات جاهزة — دخول فوري بلا انتظار
-    routeUser();
-  } else {
-    google.script.run
-      .withSuccessHandler(function (cfg) {
-        CLINICS       = cfg.clinics  || [];
-        ITEMS_CATALOG = cfg.catalog  || [];
-        ROLES         = cfg.roles    || [];
-        PREFETCH_DONE = true;
-        refreshItemsDatalist();
-        routeUser();
-        loadLoginAlerts();
-      })
-      .withFailureHandler(function (e) {
-        // fallback: توجيه بالأدوار الثابتة
-        if (CURRENT_USER.role === 'ممرضة') initNurseView();
-        else if (CURRENT_USER.role === 'تموين') initProcurementView();
-        else initDashboardView();
-        startAutoSync();
-        loadLoginAlerts();
-      })
-      .getAppConfig();
-  }
+// ══ MODE ══
+function setMode(m,btn){
+  mode=m;
+  document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  if(mode==='week'){ loadWeekOnlyData(); } else { renderAll(); }
 }
 
-function refreshItemsDatalist() {
-  // البحث الآن عبر Live Search — لا حاجة لـ datalist
+// ══ INIT ══
+function initDash(){
+  const today=new Date(),wd=today.getDay();
+  const off=wd>=6?wd-6:wd+1;
+  const sat=new Date(today);sat.setDate(today.getDate()-off);
+  document.getElementById('week-date').value=sat.toISOString().split('T')[0];
+  loadData();
 }
 
-/* ================= الممرضة: إنشاء طلب ================= */
-
-function initNurseView() {
-  document.getElementById('nurseSection').classList.remove('hidden');
-  document.getElementById('nurseNameLbl').textContent = CURRENT_USER.name;
-  const clinicSel = document.getElementById('reqClinic');
-  clinicSel.innerHTML = '';
-  const userClinics = CURRENT_USER.clinic ? CURRENT_USER.clinic.split(',').map(function (s) { return s.trim(); }) : CLINICS.map(function (c) { return c.name; });
-  CLINICS.filter(function (c) { return userClinics.indexOf(c.name) !== -1; }).forEach(function (c) {
-    const o = document.createElement('option'); o.value = c.name; o.textContent = c.name; clinicSel.appendChild(o);
+// ══ LOAD ══
+function loadData(){
+  const sat=document.getElementById('week-date').value;
+  const url=`${API}?action=weekly&date=${sat}`;
+  fetch(url).then(r=>r.json()).then(data=>{
+    const branches=currentUser.branches;
+    nurses=(data.nurses||[]).filter(n=>branches.includes(n.branch));
+    if(!nurses.length)nurses=SAMPLE.filter(n=>branches.includes(n.branch));
+    if(mode==='week'){ loadWeekOnlyData(); } else { renderAll(); }
+  }).catch(()=>{
+    nurses=SAMPLE.filter(n=>currentUser.branches.includes(n.branch));
+    if(mode==='week'){ loadWeekOnlyData(); } else { renderAll(); }
   });
-  loadDoctorsForClinic();
-  document.getElementById('itemRows').innerHTML = '';
-  addItemRow();
-  loadNurseNotices();
-  showNurseTab('create');
 }
 
-function showNurseTab(tab) {
-  document.getElementById('nurseCreateTab').classList.toggle('hidden', tab !== 'create');
-  document.getElementById('nurseMineTab').classList.toggle('hidden', tab !== 'mine');
-  if (tab === 'mine') loadMyRequests();
+// جلب بيانات الأسبوع المحدد بدقة (بدون تراكم) ودمجها في nurses[]
+function loadWeekOnlyData(){
+  const sat=document.getElementById('week-date').value;
+  fetch(`${API}?action=weekonly&date=${sat}`).then(r=>r.json()).then(data=>{
+    const byName={};
+    (data.nurses||[]).forEach(n=>byName[n.name]=n);
+    nurses.forEach(n=>{
+      const w=byName[n.name];
+      n.weekStatus =w?w.status:'لم تدخل';
+      n.weekToolsOk=w?w.toolsOk:null;
+      n.weekToolsNote=w?w.toolsNote:'';
+    });
+    renderAll();
+  }).catch(()=>{
+    nurses.forEach(n=>{ n.weekStatus=n.enteredThisWeek?'في الوقت':'لم تدخل'; n.weekToolsOk=null; n.weekToolsNote=''; });
+    renderAll();
+  });
 }
 
-function loadDoctorsForClinic() {
-  const clinic = document.getElementById('reqClinic').value;
-  google.script.run.withSuccessHandler(function (doctors) {
-    const sel = document.getElementById('reqDoctor');
-    sel.innerHTML = '';
-    if (doctors.length === 0) {
-      const o = document.createElement('option');
-      o.value = ''; o.textContent = '— لا يوجد أطباء لهذا التخصص —'; sel.appendChild(o);
+// ══ RENDER ALL ══
+function renderAll(){
+  renderKPIs();renderOverview();renderTable();
+  renderHeatmap();renderAbsent();renderTools();
+  renderDrugs();renderCards();renderIssues();
+  renderBranches();renderAlerts();
+  populateCCSelect();
+}
+
+// ══ KPIs ══
+function renderKPIs(){
+  const sat=document.getElementById('week-date').value;
+  if(mode==='week'){
+    const entered=nurses.filter(n=>n.weekStatus&&n.weekStatus!=='لم تدخل').length;
+    const onTime =nurses.filter(n=>n.weekStatus==='في الوقت').length;
+    const late   =nurses.filter(n=>n.weekStatus==='متأخر').length;
+    const toolsIssues=nurses.filter(n=>n.weekToolsOk===false).length;
+    document.getElementById('kpi-grid').innerHTML=[
+      {val:nurses.length,        lbl:'إجمالي الممرضات',        c:'var(--blue)',  },
+      {val:entered,              lbl:'أدخلن هذا الأسبوع',      c:'var(--green)', },
+      {val:nurses.length-entered,lbl:'لم يُدخلن هذا الأسبوع',  c:'var(--red)',   },
+      {val:onTime,               lbl:'في الوقت هذا الأسبوع',   c:'var(--green)', },
+      {val:late,                 lbl:'متأخرات هذا الأسبوع',    c:'var(--yellow)',},
+      {val:toolsIssues,          lbl:'أدوات ناقصة هذا الأسبوع',c:'var(--orange)',},
+    ].map(k=>`
+      <div class="kpi">
+        <div class="kpi-accent" style="background:${k.c}"></div>
+        <div class="kpi-val" style="color:${k.c}">${k.val}</div>
+        <div class="kpi-lbl">${k.lbl}</div>
+      </div>`).join('');
+    return;
+  }
+  const entered=nurses.filter(n=>n.enteredThisWeek||n.lastEntry===sat).length;
+  const avgQ=nurses.length?Math.round(nurses.reduce((s,n)=>s+n.qualityPct,0)/nurses.length):0;
+  const tools=nurses.filter(n=>n.missingTools).length;
+  const noCard=nurses.filter(n=>n.hasCard===false).length;
+  const maxAbs=nurses.reduce((mx,n)=>Math.max(mx,n.absent),0);
+  const expDrugs=nurses.filter(n=>{const d=daysDiff(n.expDate);return d!==null&&d<=30;}).length;
+  document.getElementById('kpi-grid').innerHTML=[
+    {val:nurses.length,      lbl:'إجمالي الممرضات',       c:'var(--blue)',   },
+    {val:entered,            lbl:'أدخلن هذا الأسبوع',     c:'var(--green)',  },
+    {val:nurses.length-entered,lbl:'لم يُدخلن',           c:'var(--red)',    },
+    {val:avgQ+'%',           lbl:'متوسط الجودة',           c:'var(--purple)', },
+    {val:tools,              lbl:'أدوات ناقصة',            c:'var(--orange)', },
+    {val:noCard,             lbl:'بلاغات بطاقات',          c:'var(--yellow)', },
+    {val:maxAbs,             lbl:'أطول غياب (أسابيع)',     c:'var(--red)',    },
+    {val:expDrugs,           lbl:'أدوية تنتهي قريباً',     c:'var(--yellow)', },
+  ].map(k=>`
+    <div class="kpi">
+      <div class="kpi-accent" style="background:${k.c}"></div>
+      <div class="kpi-val" style="color:${k.c}">${k.val}</div>
+      <div class="kpi-lbl">${k.lbl}</div>
+    </div>`).join('');
+}
+
+// ══ OVERVIEW ══
+function renderOverview(){
+  const sat=document.getElementById('week-date').value;
+  if(mode==='week'){
+    const onTimeList=nurses.filter(n=>n.weekStatus==='في الوقت').sort((a,b)=>a.name.localeCompare(b.name,'ar'));
+    document.getElementById('top-list').innerHTML=onTimeList.length?onTimeList.slice(0,5).map((n,i)=>`
+      <div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border)">
+        <span style="color:var(--muted);font-size:10px;min-width:14px">${i+1}</span>
+        <span style="flex:1;font-size:12px;cursor:pointer" onclick="openProfile('${n.name}')">${n.name}</span>
+        <span style="font-size:12px;font-weight:700;color:var(--green)">في الوقت</span>
+      </div>`).join(''):'<div style="color:var(--muted);font-size:11px;padding:16px;text-align:center">لا يوجد إدخالات في الوقت بعد لهذا الأسبوع</div>';
+    const needFollow=nurses.filter(n=>n.weekStatus==='متأخر'||n.weekStatus==='لم تدخل');
+    document.getElementById('bottom-list').innerHTML=needFollow.length?needFollow.slice(0,5).map(n=>`
+      <div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border)">
+        <span style="flex:1;font-size:12px;cursor:pointer" onclick="openProfile('${n.name}')">${n.name}</span>
+        <span style="font-size:12px;font-weight:700;color:${n.weekStatus==='لم تدخل'?'var(--red)':'var(--yellow)'}">${n.weekStatus}</span>
+      </div>`).join(''):'<div style="color:var(--muted);font-size:11px;padding:16px;text-align:center">الجميع في الوقت هذا الأسبوع</div>';
+    const notEntered=nurses.filter(n=>n.weekStatus==='لم تدخل');
+    document.getElementById('not-entered-list').innerHTML=notEntered.length?`
+      <div class="tbl-wrap"><table><thead><tr><th>الممرضة</th><th>الفرع</th><th>آخر إدخال</th><th>ملاحظة</th></tr></thead><tbody>
+      ${notEntered.map(n=>`<tr onclick="openProfile('${n.name}')" style="cursor:pointer">
+        <td>${n.name}</td><td>${n.branch}</td>
+        <td style="color:var(--muted);font-size:11px">${n.lastEntry||'—'}</td>
+        <td><span class="badge b-warn">تحقق — هل مسكت عيادة؟</span></td>
+      </tr>`).join('')}</tbody></table></div>`:'<div class="empty"><div class="ei">✅</div>جميع الممرضات أدخلن هذا الأسبوع</div>';
+    return;
+  }
+  const sorted=[...nurses].sort((a,b)=>b.qualityPct-a.qualityPct);
+  document.getElementById('top-list').innerHTML=sorted.slice(0,5).map((n,i)=>`
+    <div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border)">
+      <span style="color:var(--muted);font-size:10px;min-width:14px">${i+1}</span>
+      <span style="flex:1;font-size:12px;cursor:pointer" onclick="openProfile('${n.name}')">${n.name}</span>
+      <span style="font-size:12px;font-weight:700;color:${qColor(n.qualityPct)}">${n.qualityPct}%</span>
+    </div>`).join('');
+  const needFollow=nurses.filter(n=>n.qualityPct<75).sort((a,b)=>a.qualityPct-b.qualityPct);
+  document.getElementById('bottom-list').innerHTML=needFollow.length?needFollow.slice(0,5).map(n=>`
+    <div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border)">
+      <span>${n.qualityPct<60?'🔴':'🟡'}</span>
+      <span style="flex:1;font-size:12px;cursor:pointer" onclick="openProfile('${n.name}')">${n.name}</span>
+      <span style="font-size:12px;font-weight:700;color:${qColor(n.qualityPct)}">${n.qualityPct}%</span>
+    </div>`).join(''):'<div style="color:var(--muted);font-size:11px;padding:16px;text-align:center">✅ الجميع بأداء جيد</div>';
+  const notEntered=nurses.filter(n=>!n.enteredThisWeek&&n.lastEntry!==sat);
+  document.getElementById('not-entered-list').innerHTML=notEntered.length?`
+    <div class="tbl-wrap"><table><thead><tr><th>الممرضة</th><th>الفرع</th><th>آخر إدخال</th><th>ملاحظة</th></tr></thead><tbody>
+    ${notEntered.map(n=>`<tr onclick="openProfile('${n.name}')" style="cursor:pointer">
+      <td>${n.name}</td><td>${n.branch}</td>
+      <td style="color:var(--muted);font-size:11px">${n.lastEntry||'—'}</td>
+      <td><span class="badge b-warn">تحقق — هل مسكت عيادة؟</span></td>
+    </tr>`).join('')}</tbody></table></div>`:'<div class="empty"><div class="ei">✅</div>جميع الممرضات أدخلن هذا الأسبوع</div>';
+}
+
+// ══ TABLE ══
+let tblSearch='';
+function renderTable(){
+  let rows=nurses;
+  const isAbsentNow=n=>mode==='week'?n.weekStatus==='لم تدخل':!n.enteredThisWeek;
+  if(tblFilter==='ok')rows=rows.filter(n=>!isAbsentNow(n));
+  if(tblFilter==='absent')rows=rows.filter(n=>isAbsentNow(n));
+  if(tblFilter==='BURIDAH')rows=rows.filter(n=>n.branch==='BURIDAH');
+  if(tblFilter==='ONIZAH')rows=rows.filter(n=>n.branch==='ONIZAH');
+  if(tblSearch)rows=rows.filter(n=>n.name.toLowerCase().includes(tblSearch.toLowerCase()));
+  document.getElementById('nurses-tbody').innerHTML=rows.map(n=>{
+    let st;
+    if(mode==='week'){
+      const map={'في الوقت':['b-ok','✅ في الوقت'],'متأخر':['b-warn','🟡 متأخر'],'لم تدخل':['b-absent','❌ لم تدخل']};
+      const [cls,label]=map[n.weekStatus]||['b-absent','❌ لم تدخل'];
+      st=`<span class="badge ${cls}">${label}</span>`;
+    }else{
+      st=n.enteredThisWeek?'<span class="badge b-ok">✅ في الوقت</span>':'<span class="badge b-absent">❌ لم يُدخل</span>';
+    }
+    return `<tr onclick="openProfile('${n.name}')">
+      <td><strong>${n.name}</strong></td>
+      <td><span style="font-size:10px;color:var(--muted)">${n.branch}</span></td>
+      <td>${st}</td>
+      <td>${n.onTime}</td><td>${n.late}</td><td style="color:var(--red)">${n.absent}</td>
+      <td><span style="color:var(--blue);font-weight:600">${n.weeks}</span></td>
+      <td>${qBar(n.commitPct)}</td><td>${qBar(n.toolsPct)}</td><td>${qBar(n.qualityPct)}</td>
+      <td style="font-size:10px;color:var(--muted)">${n.lastEntry||'—'}</td>
+    </tr>`;
+  }).join('');
+}
+function setTblFilter(f,btn){tblFilter=f;document.querySelectorAll('#tbl-chips .chip').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderTable();}
+function filterTable(q){tblSearch=q;renderTable();}
+
+// ══ HEATMAP — بيانات حقيقية من action=heatmap (حضور/عدم حضور فقط) ══
+function renderHeatmap(){
+  const wrap=document.getElementById('heatmap-wrap');
+  wrap.innerHTML='<div class="empty" style="padding:24px"><div class="ei">⏳</div>جاري التحميل...</div>';
+  fetch(`${API}?action=heatmap`).then(r=>r.json()).then(data=>{
+    const weeks=data.weeks||[];
+    const nameSet=new Set(nurses.map(n=>n.name));
+    const rows=(data.rows||[]).filter(row=>nameSet.has(row.name));
+    if(!weeks.length||!rows.length){
+      wrap.innerHTML='<div class="empty"><div class="ei">📭</div>لا توجد بيانات حضور بعد</div>';
       return;
     }
-    doctors.forEach(function (d) {
-      const o = document.createElement('option');
-      o.value = d.name;
-      o.textContent = d.name + (d.subspecialty ? ' — ' + d.subspecialty : '');
-      sel.appendChild(o);
+    const labels=weeks.map(w=>w.slice(5));
+    let html=`<table class="heatmap"><thead><tr><th></th>${labels.map(l=>`<th>${l}</th>`).join('')}</tr></thead><tbody>`;
+    rows.forEach(row=>{
+      html+=`<tr><td class="nm" onclick="openProfile('${row.name}')" style="cursor:pointer">${row.name}</td>`;
+      row.weeks.forEach(v=>{html+=`<td class="${v?'hm-100':'hm-0'}" data-tip="${v?'دخلت':'لم تدخل'}">${v?'✓':'—'}</td>`;});
+      html+=`</tr>`;
     });
-  }).getDoctors(clinic);
+    html+=`</tbody></table>`;
+    wrap.innerHTML=html;
+  }).catch(()=>{
+    wrap.innerHTML='<div class="empty"><div class="ei">⚠️</div>تعذر تحميل خريطة الحضور</div>';
+  });
 }
 
-/* ---- Live Search ---- */
-let _searchTimer = null;
-let _searchActive = -1;
-
-function onItemSearch(q) {
-  clearTimeout(_searchTimer);
-  const dd = document.getElementById('itemSearchDropdown');
-  if (!q.trim()) { dd.classList.add('hidden'); return; }
-  _searchTimer = setTimeout(function() {
-    google.script.run
-      .withSuccessHandler(function(results) {
-        if (!results.length) { dd.classList.add('hidden'); return; }
-        _searchActive = -1;
-        dd.innerHTML = results.map(function(r, i) {
-          const showPrice = CURRENT_USER.role !== 'ممرضة' && r.price;
-          return '<div class="search-item" data-idx="' + i + '" onclick="pickSearchItem(' + i + ')">' +
-            '<div class="si-name">' + r.name + '</div>' +
-            '<div class="si-meta">' +
-            (r.commercial ? r.commercial : '') +
-            (r.category ? ' · ' + r.category : '') +
-            (showPrice ? ' · <b>' + r.price + ' ر.س</b>' : '') +
-            '</div></div>';
-        }).join('');
-        dd.classList.remove('hidden');
-        dd._results = results;
-      })
-      .withFailureHandler(function(){ dd.classList.add('hidden'); })
-      .searchItems(q);
-  }, 200);
+// ══ CONTROL CHART ══
+let ccMetricKey='qualityPct';
+function populateCCSelect(){
+  const sel=document.getElementById('cc-nurse');
+  const cur=sel.value;
+  sel.innerHTML='<option value="__avg__">— المتوسط العام —</option>'+nurses.map(n=>`<option value="${n.name}">${n.name}</option>`).join('');
+  if(cur)sel.value=cur;
 }
-
-function onItemSearchKey(e) {
-  const dd = document.getElementById('itemSearchDropdown');
-  const items = dd.querySelectorAll('.search-item');
-  if (!items.length) return;
-  if (e.key === 'ArrowDown') { _searchActive = Math.min(_searchActive + 1, items.length - 1); }
-  else if (e.key === 'ArrowUp') { _searchActive = Math.max(_searchActive - 1, 0); }
-  else if (e.key === 'Enter') { if (_searchActive >= 0) pickSearchItem(_searchActive); return; }
-  else return;
-  items.forEach(function(el, i) { el.classList.toggle('active', i === _searchActive); });
+function setCCMetric(m,btn){
+  ccMetric=m;ccMetricKey=m==='quality'?'qualityPct':m==='commit'?'commitPct':'toolsPct';
+  document.querySelectorAll('#tab-control .chip').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');renderControlChart();
 }
-
-function pickSearchItem(idx) {
-  const dd = document.getElementById('itemSearchDropdown');
-  const r = (dd._results || [])[idx];
-  if (!r) return;
-  addItemRowWithData(r.name, 1);
-  document.getElementById('itemSearchInput').value = '';
-  dd.classList.add('hidden');
-  dd._results = null;
-  _searchActive = -1;
+function renderControlChart(){
+  const sel=document.getElementById('cc-nurse').value;
+  const lbl=ccMetric==='quality'?'الجودة الكلية':ccMetric==='commit'?'الالتزام':'الأدوات';
+  document.getElementById('cc-title').textContent=`${lbl} — ${sel==='__avg__'?'المتوسط العام':sel}`;
+  fetch(`${API}?action=history&nurse=${encodeURIComponent(sel)}`)
+    .then(r=>r.json())
+    .then(data=>drawControlChart(data,lbl))
+    .catch(()=>drawControlChart({weeks:[],commit:[],tools:[],quality:[]},lbl));
 }
+function drawControlChart(data,lbl){
+  const weeks=data.weeks||[];
+  const seriesByMetric={quality:data.quality||[],commit:data.commit||[],tools:data.tools||[]};
+  const vals=seriesByMetric[ccMetric]||[];
+  const statsBox=document.getElementById('cc-stats');
 
-function addItemRowWithData(name, qty) {
-  // منع التكرار في نفس الطلب
-  const existing = Array.from(document.querySelectorAll('.itemNameHidden')).find(function(el){ return el.value === name; });
-  if (existing) {
-    const qtyEl = existing.parentElement.querySelector('.itemQty');
-    if (qtyEl) { qtyEl.value = Number(qtyEl.value) + qty; qtyEl.focus(); }
+  if(weeks.length<2||vals.length<2){
+    if(ccChart){ccChart.destroy();ccChart=null;}
+    document.getElementById('cc-chart').getContext('2d').clearRect(0,0,9999,9999);
+    statsBox.innerHTML=`<div class="one-col" style="grid-column:1/-1"><div class="empty"><div class="ei">📊</div>
+      لا يوجد سجل تاريخي كافٍ بعد لهذا العنصر — يبدأ التجميع تلقائياً أسبوعياً مع تشغيل updateQuality6040
+    </div></div>`;
     return;
   }
-  const row = document.createElement('div');
-  row.className = 'item-row';
-  row.innerHTML =
-    '<span style="flex:3;font-size:var(--fs-sm);padding:8px 4px;">' + name + '</span>' +
-    '<input type="hidden" class="itemNameHidden" value="' + name.replace(/"/g,'&quot;') + '">' +
-    '<input type="number" class="itemQty" min="1" value="' + qty + '" style="flex:1;">' +
-    '<button class="btn-secondary" style="margin:0;" onclick="this.parentElement.remove()">✕</button>';
-  document.getElementById('itemRows').appendChild(row);
+
+  const labels=weeks.map(w=>w.slice(5));
+  const avg=Math.round(vals.reduce((s,v)=>s+v,0)/vals.length);
+  const variance=vals.reduce((s,v)=>s+Math.pow(v-avg,2),0)/vals.length;
+  const std=Math.sqrt(variance);
+  const ucl=Math.min(100,Math.round(avg+2*std)),lcl=Math.max(0,Math.round(avg-2*std));
+  const textColor=isDark?'#7A90A8':'#64748B';
+  const gridColor=isDark?'#243B55':'#DDE3ED';
+  if(ccChart){ccChart.destroy();}
+  ccChart=new Chart(document.getElementById('cc-chart'),{
+    type:'line',
+    data:{
+      labels,
+      datasets:[
+        {label:lbl,data:vals,borderColor:'var(--blue)',backgroundColor:'#4A9EFF18',borderWidth:2,pointBackgroundColor:'var(--blue)',pointRadius:4,tension:.35,fill:true},
+        {label:'المتوسط',data:labels.map(()=>avg),borderColor:'var(--green)',borderWidth:1,borderDash:[6,4],pointRadius:0},
+        {label:'UCL',data:labels.map(()=>ucl),borderColor:'var(--red)',borderWidth:1,borderDash:[4,4],pointRadius:0},
+        {label:'LCL',data:labels.map(()=>lcl),borderColor:'var(--yellow)',borderWidth:1,borderDash:[4,4],pointRadius:0},
+      ]
+    },
+    options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{labels:{color:textColor,font:{size:11}}}},scales:{x:{ticks:{color:textColor,font:{size:10}},grid:{color:gridColor}},y:{min:0,max:100,ticks:{color:textColor,font:{size:10}},grid:{color:gridColor}}}}
+  });
+  document.getElementById('cc-stats').innerHTML=`
+    <div class="one-col"><div class="sec-title" style="margin-bottom:10px">إحصائيات</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        ${[['المتوسط',avg+'%','var(--blue)'],['UCL',ucl+'%','var(--red)'],['LCL',lcl+'%','var(--yellow)'],['الاتجاه',vals[vals.length-1]>vals[0]?'↑ تحسن':'↓ تراجع',vals[vals.length-1]>vals[0]?'var(--green)':'var(--red)']].map(([l,v,c])=>`
+        <div style="background:var(--card);border-radius:8px;padding:10px">
+          <div style="font-size:16px;font-weight:700;color:${c}">${v}</div>
+          <div style="font-size:10px;color:var(--muted)">${l}</div>
+        </div>`).join('')}
+      </div>
+    </div>
+    <div class="one-col"><div class="sec-title" style="margin-bottom:10px">تفسير</div>
+      <div style="font-size:12px;line-height:1.8;color:var(--muted)">
+        ${vals[vals.length-1]>ucl?'⚠️ النقطة الأخيرة فوق UCL — أداء استثنائي جيد':vals[vals.length-1]<lcl?'🔴 النقطة الأخيرة تحت LCL — يحتاج تدخل':'✅ الأداء ضمن النطاق الطبيعي'}<br>
+        ${vals.slice(-3).every((v,i,a)=>i===0||v>a[i-1])?'📈 ترند صاعد في آخر 3 أسابيع':vals.slice(-3).every((v,i,a)=>i===0||v<a[i-1])?'📉 ترند نازل في آخر 3 أسابيع':'➡️ أداء مستقر'}
+      </div>
+    </div>`;
 }
 
-function addItemRow() { /* legacy — استخدم addItemRowWithData */ }
-
-/* ---- بكج الطبيب ---- */
-
-function loadDoctorProfile() {
-  const doctor = document.getElementById('reqDoctor').value;
-  if (!doctor) { document.getElementById('doctorProfileWrap').classList.add('hidden'); return; }
-  google.script.run
-    .withSuccessHandler(function(profile) {
-      const wrap = document.getElementById('doctorProfileWrap');
-      if (!profile || !profile.length) { wrap.classList.add('hidden'); return; }
-      wrap._profile = profile;
-      document.getElementById('doctorProfileTags').innerHTML = profile.map(function(p, i) {
-        return '<span class="profile-tag" onclick="addProfileItem(' + i + ')">' +
-          '<span class="pt-qty">×' + p.qty + '</span>' + p.item + '</span>';
-      }).join('');
-      wrap.classList.remove('hidden');
-    })
-    .withFailureHandler(function(){})
-    .getDoctorProfile(doctor);
+// ══ ABSENT ══
+function renderAbsent(){
+  const sat=document.getElementById('week-date').value;
+  const isAbsentNow=n=>mode==='week'?n.weekStatus==='لم تدخل':(!n.enteredThisWeek&&n.lastEntry!==sat);
+  const absent=nurses.filter(isAbsentNow).sort((a,b)=>b.absent-a.absent);
+  document.getElementById('absent-tbody').innerHTML=absent.length?absent.map(n=>{
+    const absPct=n.weeks?Math.round((n.absent/n.weeks)*100):0;
+    return `<tr onclick="openProfile('${n.name}')">
+      <td><strong>${n.name}</strong></td><td>${n.branch}</td>
+      <td style="color:var(--muted);font-size:11px">${n.lastEntry||'—'}</td>
+      <td><span class="badge b-absent">${n.absent} أسبوع</span></td>
+      <td style="color:${qColor(100-absPct)}">${absPct}%</td>
+      <td>${qBar(n.qualityPct)}</td>
+      <td><span class="badge b-warn">تحقق — هل مسكت عيادة؟</span></td>
+    </tr>`;
+  }).join(''):`<tr><td colspan="7" class="loading-row">✅ جميع الممرضات أدخلن هذا الأسبوع</td></tr>`;
 }
 
-function addProfileItem(idx) {
-  const profile = document.getElementById('doctorProfileWrap')._profile || [];
-  const p = profile[idx];
-  if (p) addItemRowWithData(p.item, p.qty);
+// ══ TOOLS ══
+let toolsView='cards';
+function setToolsView(v,btn){
+  toolsView=v;
+  document.querySelectorAll('#tab-tools .chip').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tools-cards-view').style.display=v==='cards'?'block':'none';
+  document.getElementById('tools-table-view').style.display=v==='table'?'block':'none';
 }
-
-function addAllProfile() {
-  const profile = document.getElementById('doctorProfileWrap')._profile || [];
-  document.getElementById('itemRows').innerHTML = '';
-  profile.forEach(function(p){ addItemRowWithData(p.item, p.qty); });
-}
-
-function submitRequest() {
-  const clinic = document.getElementById('reqClinic').value;
-  const doctor = document.getElementById('reqDoctor').value;
-  const type = document.getElementById('reqType').value;
-  const items = Array.from(document.querySelectorAll('#itemRows .item-row')).map(function (row) {
-    const nameEl = row.querySelector('.itemNameHidden') || row.querySelector('.itemName');
-    return { name: (nameEl ? nameEl.value.trim() : ''), qty: Number(row.querySelector('.itemQty').value) };
-  }).filter(function (it) { return it.name; });
-  const errEl = document.getElementById('createError');
-  if (!clinic || !doctor || items.length === 0) {
-    errEl.classList.remove('hidden');
-    return;
-  }
-  errEl.classList.add('hidden');
-  const submitBtn = document.getElementById('submitRequestBtn');
-  if (submitBtn.disabled) return; // منع الضغط المزدوج
-  btnBusy(submitBtn, LANG==='ar' ? 'جاري الإرسال...' : 'Sending...');
-  google.script.run
-    .withSuccessHandler(function (res) {
-      btnFree(submitBtn);
-      if (res && res.duplicate) {
-        toast(LANG==='ar' ? '⚠️ الطلب موجود مسبقاً: ' + res.id : '⚠️ Duplicate request: ' + res.id, 4000);
-        return;
-      }
-      const id = res && res.id ? res.id : res;
-      toast('✅ ' + (LANG==='ar' ? 'تم إرسال الطلب: ' : 'Request sent: ') + id);
-      initNurseView();
-    })
-    .withFailureHandler(function(e){ btnFree(submitBtn); toast('❌ ' + String(e), 4000); })
-    .createRequest({ clinic: clinic, doctor: doctor, nurse: CURRENT_USER.name, type: type, items: items });
-}
-
-/* ================= الممرضة: طلباتي (استلام + متابعة) ================= */
-
-function loadMyRequests() {
-  google.script.run.withSuccessHandler(function (reqs) {
-    const mine = reqs.filter(function (r) { return r.nurse === CURRENT_USER.name; });
-    const el = document.getElementById('myRequestsList');
-    if (mine.length === 0) { el.innerHTML = '<p>' + t('no_requests_yet') + '</p>'; return; }
-    el.innerHTML = mine.map(function (r) {
-      const receiveBtn = r.status === 'تم الإرسال'
-        ? '<button class="btn-primary" onclick="openReceiveModal(\'' + r.id + '\')">' + t('receive_btn') + '</button>' : '';
-      return '<div class="req-block"><div class="req-block-top"><b>' + r.id + '</b> — ' + r.clinic + ' / ' + r.doctor +
-        ' <span class="badge ' + statusBadgeClass(r.status) + '">' + statusLabel(r.status) + '</span></div>' +
-        '<div>' + receiveBtn +
-        '<button class="btn-secondary" onclick="openComments(\'' + r.id + '\')">' + t('comment_btn') + '</button></div></div>';
-    }).join('');
-  }).getRequests({});
-}
-
-function openReceiveModal(id) {
-  CURRENT_RECEIVE_ID = id;
-  document.getElementById('recvReqId').textContent = id;
-  document.getElementById('recvName').value = CURRENT_USER.name;
-  google.script.run.withSuccessHandler(function (items) {
-    document.getElementById('recvItemsBody').innerHTML = items.map(function (it) {
-      const sentQty = it.approvedQty !== '' ? it.approvedQty : it.requestedQty;
-      return '<tr><td>' + it.item + '</td><td>' + sentQty + '</td>' +
-             '<td><input type="number" class="recvQty" data-name="' + it.item + '" value="' + sentQty + '" min="0"></td></tr>';
-    }).join('');
-  }).getRequestItems(id);
-  document.getElementById('receiveModal').classList.remove('hidden');
-  initSigPad();
-}
-
-function closeReceiveModal() { document.getElementById('receiveModal').classList.add('hidden'); }
-
-function initSigPad() {
-  const canvas = document.getElementById('sigPad');
-  canvas.width = canvas.clientWidth; canvas.height = canvas.clientHeight;
-  SIG_CTX = canvas.getContext('2d');
-  SIG_CTX.clearRect(0, 0, canvas.width, canvas.height);
-  SIG_HAS_INK = false;
-  const pos = function (e) {
-    const rect = canvas.getBoundingClientRect();
-    const p = e.touches ? e.touches[0] : e;
-    return { x: p.clientX - rect.left, y: p.clientY - rect.top };
-  };
-  canvas.onmousedown = canvas.ontouchstart = function (e) { SIG_DRAWING = true; const p = pos(e); SIG_CTX.beginPath(); SIG_CTX.moveTo(p.x, p.y); e.preventDefault(); };
-  canvas.onmousemove = canvas.ontouchmove = function (e) { if (!SIG_DRAWING) return; const p = pos(e); SIG_CTX.lineTo(p.x, p.y); SIG_CTX.stroke(); SIG_HAS_INK = true; e.preventDefault(); };
-  canvas.onmouseup = canvas.ontouchend = function () { SIG_DRAWING = false; };
-}
-
-function clearSig() { initSigPad(); }
-
-function confirmReceive() {
-  const name = document.getElementById('recvName').value.trim();
-  const errEl = document.getElementById('recvError');
-  if (!name) { errEl.textContent = t('recv_name_required'); errEl.classList.remove('hidden'); return; }
-  errEl.classList.add('hidden');
-  const items = Array.from(document.querySelectorAll('.recvQty')).map(function (inp) { return { name: inp.dataset.name, qty: Number(inp.value) }; });
-  const sigData = SIG_HAS_INK ? document.getElementById('sigPad').toDataURL('image/png') : '';
-
-  // توليد صورة الطلب الكاملة (HTML → canvas) للرفع
-  const receiptImageData = generateReceiptImage(CURRENT_RECEIVE_ID, items, name);
-
-  const btn = document.getElementById('receiveModal').querySelector('.btn-primary');
-  btn.disabled = true; btn.textContent = '⏳ جاري الرفع...';
-
-  google.script.run
-    .withSuccessHandler(function () {
-      btn.disabled = false; btn.textContent = t('confirm_receive_btn');
-      alert(t('confirm_receive_btn') + ' ✓');
-      closeReceiveModal();
-      loadMyRequests();
-    })
-    .withFailureHandler(function(e){ btn.disabled=false; btn.textContent=t('confirm_receive_btn'); alert(String(e)); })
-    .receiveRequest(CURRENT_RECEIVE_ID, items, name, sigData, receiptImageData);
-}
-
-function generateReceiptImage(requestId, items, receiverName) {
-  try {
-    // تصفية الأصناف الفارغة وتأكيد الاسم
-    const validItems = items.filter(function(it){ return it && (it.name || it.item); }).map(function(it){
-      return { name: it.name || it.item || '—', qty: it.qty || 0 };
+function renderTools(){
+  const toolsMap={};
+  nurses.filter(n=>n.missingTools&&isToolText(n.missingDesc)).forEach(n=>{
+    const parts=n.missingDesc.split(/[,،\n]/);
+    parts.forEach(p=>{
+      const t=p.trim();
+      if(!t||t.length<3)return;
+      if(!toolsMap[t])toolsMap[t]={name:t,nurses:[],count:0,clinics:new Set(),branch:n.branch,first:n.lastEntry};
+      toolsMap[t].nurses.push(n.name);
+      toolsMap[t].count++;
+      toolsMap[t].clinics.add(n.clinic||'—');
     });
-
-    const rowH = 30;
-    const sigH = 90;
-    const totalH = 110 + validItems.length * rowH + 40 + sigH + 30;
-
-    const c = document.createElement('canvas');
-    c.width = 620; c.height = totalH;
-    const ctx = c.getContext('2d');
-
-    // خلفية بيضاء
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, c.width, c.height);
-
-    // شريط أعلى
-    ctx.fillStyle = '#0f6e56';
-    ctx.fillRect(0, 0, c.width, 10);
-
-    // العنوان
-    ctx.fillStyle = '#0f6e56';
-    ctx.font = 'bold 20px Arial, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('SupplyFlow — ApexCare', c.width / 2, 42);
-
-    ctx.fillStyle = '#555';
-    ctx.font = '13px Arial, sans-serif';
-    ctx.fillText(requestId + '   |   ' + new Date().toLocaleDateString('en-SA'), c.width / 2, 65);
-
-    // رأس الجدول
-    let y = 88;
-    ctx.fillStyle = '#e8f4f0';
-    ctx.fillRect(20, y, 580, rowH);
-    ctx.fillStyle = '#0f6e56';
-    ctx.font = 'bold 13px Arial, sans-serif';
-    ctx.textAlign = 'start';
-    ctx.fillText('Item', 30, y + 20);
-    ctx.textAlign = 'center';
-    ctx.fillText('Requested', 450, y + 20);
-    ctx.fillText('Received', 560, y + 20);
-    y += rowH;
-
-    // صفوف الأصناف
-    validItems.forEach(function(it, idx) {
-      ctx.fillStyle = idx % 2 === 0 ? '#fafafa' : '#ffffff';
-      ctx.fillRect(20, y, 580, rowH);
-      ctx.strokeStyle = '#e0ded8';
-      ctx.strokeRect(20, y, 580, rowH);
-
-      ctx.fillStyle = '#2c2c2a';
-      ctx.font = '13px Arial, sans-serif';
-      ctx.textAlign = 'start';
-      // اقتص الاسم لو طال
-      const maxW = 380;
-      let name = String(it.name);
-      ctx.fillText(name, 30, y + 20, maxW);
-
-      ctx.textAlign = 'center';
-      ctx.fillText(String(it.qty), 450, y + 20);
-      ctx.fillText(String(it.qty), 560, y + 20);
-      y += rowH;
-    });
-
-    y += 16;
-
-    // خط فاصل
-    ctx.strokeStyle = '#d3d1c7';
-    ctx.beginPath();
-    ctx.moveTo(20, y); ctx.lineTo(600, y);
-    ctx.stroke();
-    y += 14;
-
-    // اسم المستلم
-    ctx.fillStyle = '#333';
-    ctx.font = 'bold 13px Arial, sans-serif';
-    ctx.textAlign = 'start';
-    ctx.fillText('Receiver: ' + receiverName, 30, y + 16);
-    y += 36;
-
-    // التوقيع
-    const sigCanvas = document.getElementById('sigPad');
-    if (SIG_HAS_INK && sigCanvas && sigCanvas.width > 0) {
-      ctx.strokeStyle = '#d3d1c7';
-      ctx.strokeRect(30, y, 220, sigH - 10);
-      ctx.drawImage(sigCanvas, 30, y, 220, sigH - 10);
-      ctx.fillStyle = '#888';
-      ctx.font = '11px Arial, sans-serif';
-      ctx.fillText('Signature', 30, y + sigH);
-    } else {
-      ctx.strokeStyle = '#d3d1c7';
-      ctx.strokeRect(30, y, 220, sigH - 10);
-      ctx.fillStyle = '#aaa';
-      ctx.font = '11px Arial, sans-serif';
-      ctx.fillText('No signature', 30, y + sigH);
-    }
-
-    // الوقت أسفل اليمين
-    ctx.fillStyle = '#888';
-    ctx.font = '11px Arial, sans-serif';
-    ctx.textAlign = 'end';
-    ctx.fillText(new Date().toLocaleString('en-SA'), 600, y + sigH);
-
-    // شريط أسفل
-    ctx.fillStyle = '#0f6e56';
-    ctx.fillRect(0, c.height - 8, c.width, 8);
-
-    return c.toDataURL('image/png');
-  } catch(e) {
-    console.error('generateReceiptImage error:', e);
-    return '';
-  }
-}
-
-function loadNurseNotices() {
-  google.script.run.withSuccessHandler(function (notices) { renderNoticesBox('nurseNoticesBox', notices); }).getNotices('ممرضة');
-}
-
-/* ================= التموين ================= */
-
-function initProcurementView() {
-  document.getElementById('procurementSection').classList.remove('hidden');
-  document.getElementById('procNameLbl').textContent = CURRENT_USER.name;
-  const clinicSel = document.getElementById('procFilterClinic');
-  clinicSel.innerHTML = '<option value="">' + t('all_option') + '</option>' +
-    CLINICS.map(function (c) { return '<option value="' + c.name + '">' + c.name + '</option>'; }).join('');
-  loadProcurementRequests();
-}
-
-function loadProcurementRequests() {
-  const filters = {
-    status: document.getElementById('procFilterStatus').value,
-    clinic: document.getElementById('procFilterClinic').value,
-    month: document.getElementById('procFilterMonth').value
-  };
-  google.script.run.withSuccessHandler(function (reqs) {
-    const el = document.getElementById('procRequestsList');
-    if (reqs.length === 0) { el.innerHTML = '<p>' + t('no_matching_requests') + '</p>'; return; }
-    el.innerHTML = reqs.map(function (r) {
-      return '<div class="req-block">' +
-        '<div class="req-block-top">' +
-        '<label style="display:inline;"><input type="checkbox" class="reqSelect" value="' + r.id + '"> <b>' + r.id + '</b></label> — ' +
-        r.clinic + ' / ' + r.doctor + ' / ' + r.nurse + ' (' + typeLabel(r.type) + ') ' +
-        '<span class="badge ' + statusBadgeClass(r.status) + '">' + statusLabel(r.status) + '</span></div>' +
-        '<div>' +
-        '<button class="btn-secondary" onclick="toggleItemsView(\'' + r.id + '\')">' + t('view_items_btn') + '</button>' +
-        '<button class="btn-secondary" onclick="openComments(\'' + r.id + '\')">' + t('comment_btn') + '</button>' +
-        '</div>' +
-        '<div id="items-' + r.id + '" class="hidden"></div>' +
-        '</div>';
-    }).join('');
-  }).getRequests(filters);
-}
-
-function toggleItemsView(id) {
-  const el = document.getElementById('items-' + id);
-  if (!el.classList.contains('hidden')) { el.classList.add('hidden'); return; }
-  el.innerHTML = '<p style="padding:8px;color:var(--text-muted);font-size:var(--fs-sm);"><span class="spinner"></span> جاري التحميل...</p>';
-  el.classList.remove('hidden');
-  Promise.resolve().then(function(){
-    google.script.run
-      .withSuccessHandler(function (items) {
-        google.script.run
-          .withSuccessHandler(function(dispatchStatus) {
-            renderItemsViewTable(el, id, items, dispatchStatus);
-          })
-          .withFailureHandler(function(){ renderItemsViewTable(el, id, items, {}); })
-          .getDispatchStatus(id);
-      })
-      .withFailureHandler(function(e){ el.innerHTML = '<p style="color:var(--danger);padding:8px;">' + String(e) + '</p>'; })
-      .getRequestItems(id);
   });
+  const tools=Object.values(toolsMap).sort((a,b)=>b.count-a.count);
+  document.getElementById('tools-grid').innerHTML=tools.length?tools.map(t=>`
+    <div class="tool-card">
+      <div class="tool-name">${t.name} <span class="tool-count">${t.count}×</span></div>
+      <div class="tool-meta">
+        👩‍⚕️ ${t.nurses.slice(0,2).join('، ')}${t.nurses.length>2?` +${t.nurses.length-2}`:''}<br>
+        🏥 ${t.branch} — عيادة ${[...t.clinics].join('، ')}<br>
+        📅 أول بلاغ: ${t.first||'—'}
+      </div>
+    </div>`).join(''):'<div class="empty"><div class="ei">✅</div>لا توجد أدوات ناقصة</div>';
+  document.getElementById('tools-tbody').innerHTML=tools.map(t=>`
+    <tr>
+      <td><strong>${t.name}</strong></td>
+      <td>${t.nurses.join('، ')}</td><td>${t.branch}</td>
+      <td>${[...t.clinics].join('، ')}</td>
+      <td><span class="badge b-absent">${t.count}×</span></td>
+      <td style="font-size:10px;color:var(--muted)">${t.first||'—'}</td>
+      <td style="font-size:10px;color:var(--muted)">${t.first||'—'}</td>
+    </tr>`).join('');
 }
 
-function renderItemsViewTable(el, id, items, dispatchStatus) {
-  el.innerHTML =
-    '<table><thead><tr><th></th><th>' + t('th_item') + '</th><th>' + t('th_requested') + '</th><th>' + t('th_approved') + '</th><th>حالة الإرسال</th><th></th></tr></thead><tbody>' +
-    items.map(function (it) {
-      const sent = dispatchStatus[it.item];
-      const checkbox = sent
-        ? '<span style="color:var(--primary-dark);">✓</span>'
-        : '<input type="checkbox" class="dispatchCheck" value="' + it.item.replace(/"/g,'&quot;') + '" data-req="' + id + '">';
-      return '<tr><td>' + checkbox + '</td><td>' + it.item + '</td><td>' + it.requestedQty + '</td>' +
-        '<td><input type="number" value="' + (it.approvedQty || it.requestedQty) + '" min="0" ' +
-        'onchange="updateApproval(\'' + id + '\',\'' + it.item.replace(/'/g,"\\'") + '\',this.value)"></td>' +
-        '<td>' + (sent ? '<span class="badge badge-sent" style="font-size:10px;">أُرسل</span>' : '<span style="color:var(--text-muted);font-size:11px;">بالانتظار</span>') + '</td>' +
-        '<td><button class="btn-icon" onclick="openItemNotes(\'' + id + '\',\'' + it.item.replace(/'/g,"\\'") + '\')" title="ملاحظات الصنف">💬</button></td>' +
-        '</tr>';
-    }).join('') + '</tbody></table>' +
-    '<div style="margin-top:8px;">' +
-    '<button class="btn-accent" style="margin:0;padding:6px 14px;font-size:var(--fs-sm);" onclick="dispatchSelectedItems(\'' + id + '\', this)">🚚 إرسال المحدد فقط</button>' +
-    '</div>';
+// ══ DRUGS ══
+let drugFilter='all';
+function setDrugFilter(f,btn){drugFilter=f;document.querySelectorAll('#tab-drugs .chip').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderDrugs();}
+function renderDrugs(){
+  let rows=nurses.filter(n=>n.expDate);
+  const today=new Date();
+  if(drugFilter==='exp')rows=rows.filter(n=>daysDiff(n.expDate)<0);
+  if(drugFilter==='warn')rows=rows.filter(n=>{const d=daysDiff(n.expDate);return d>=0&&d<=30;});
+  if(drugFilter==='ok')rows=rows.filter(n=>daysDiff(n.expDate)>30);
+  rows=rows.sort((a,b)=>daysDiff(a.expDate)-daysDiff(b.expDate));
+  document.getElementById('drugs-tbody').innerHTML=rows.length?rows.map(n=>{
+    const s=drugStatus(n.expDate);
+    const daysLbl=s.days===null?'—':s.days<0?`منذ ${Math.abs(s.days)} يوم`:s.days===0?'اليوم':`${s.days} يوم`;
+    return `<tr>
+      <td><span class="badge ${s.cls<0?'b-absent':s.days<=30?'b-warn':'b-ok'}">${s.icon} ${s.label}</span></td>
+      <td onclick="openProfile('${n.name}')" style="cursor:pointer"><strong>${n.name}</strong></td>
+      <td>${n.branch}</td><td>${n.clinic||'—'}</td>
+      <td class="${s.cls}" style="font-weight:600">${n.expDate}</td>
+      <td class="${s.cls}" style="font-weight:600">${daysLbl}</td>
+      <td style="font-size:10px;color:var(--muted)">${n.lastEntry||'—'}</td>
+    </tr>`;
+  }).join(''):`<tr><td colspan="7" class="loading-row">لا توجد بيانات أدوية</td></tr>`;
 }
 
-function dispatchSelectedItems(requestId, btn) {
-  const checked = Array.from(document.querySelectorAll('.dispatchCheck[data-req="' + requestId + '"]:checked')).map(function(c){ return c.value; });
-  if (!checked.length) { toast('اختر صنف واحد على الأقل'); return; }
-  btnBusy(btn, 'جاري الإرسال...');
-  google.script.run
-    .withSuccessHandler(function(res) {
-      btnFree(btn);
-      toast(res.allSent ? '✅ اكتمل إرسال كل الأصناف — الطلب تم إرساله بالكامل' : '✅ تم إرسال ' + checked.length + ' صنف — الباقي بالانتظار');
-      toggleItemsView(requestId); // إغلاق
-      toggleItemsView(requestId); // إعادة فتح بالحالة الجديدة
-      loadProcurementRequests();
-    })
-    .withFailureHandler(function(e){ btnFree(btn); toast('❌ ' + String(e), 4000); })
-    .dispatchItems(requestId, checked, CURRENT_USER.name);
+// ══ CARDS ══
+function renderCards(){
+  const noCard=nurses.filter(n=>n.hasCard===false);
+  document.getElementById('cards-tbody').innerHTML=noCard.length?noCard.map(n=>`
+    <tr onclick="openProfile('${n.name}')">
+      <td><strong>${n.name}</strong></td><td>${n.branch}</td><td>${n.clinic||'—'}</td>
+      <td style="font-size:10px;color:var(--muted)">${n.lastEntry||'—'}</td>
+      <td><span class="badge b-absent">1</span></td>
+      <td><span class="badge b-warn">⏳ معلق</span></td>
+    </tr>`).join(''):`<tr><td colspan="6" class="loading-row">✅ لا توجد بلاغات بطاقات</td></tr>`;
 }
 
-function updateApproval(reqId, itemName, qty) { google.script.run.updateItemApproval(reqId, itemName, Number(qty)); }
-
-function bulkAction(newStatus, btn) {
-  const ids = Array.from(document.querySelectorAll('.reqSelect:checked')).map(function (c) { return c.value; });
-  if (ids.length === 0) { toast(t('select_one_request')); return; }
-  btnBusy(btn, newStatus === 'تم الإرسال' ? (LANG==='ar'?'جاري الإرسال...':'Sending...') : (LANG==='ar'?'جاري الاعتماد...':'Processing...'));
-  google.script.run
-    .withSuccessHandler(function () {
-      btnFree(btn);
-      toast(LANG==='ar' ? '✅ تم بنجاح' : '✅ Done');
-      loadProcurementRequests();
-      loadLoginAlerts();
-    })
-    .withFailureHandler(function(e){ btnFree(btn); toast('❌ ' + String(e), 4000); })
-    .bulkUpdateStatus(ids, newStatus);
+// ══ ISSUES ══
+function renderIssues(){
+  const issues=nurses.filter(n=>n.notes&&n.notes.trim().length>3&&isToolText(n.notes));
+  document.getElementById('issues-list').innerHTML=issues.length?issues.map(n=>`
+    <div class="alert-item warning">
+      <span style="font-size:18px">📝</span>
+      <div class="a-text">
+        <strong>${n.name}</strong> — عيادة ${n.clinic||'—'}<br>
+        <span style="color:var(--muted);font-size:11px">${n.notes}</span>
+      </div>
+      <span class="a-tag">${n.branch}</span>
+    </div>`).join(''):'<div class="empty"><div class="ei">✅</div>لا توجد مشاكل مسجلة هذا الأسبوع</div>';
 }
 
-function loadProcNotices() {
-  google.script.run.withSuccessHandler(function (notices) { renderNoticesBox('procNoticesBox', notices); }).getNotices('تموين');
-}
-
-/* ================= تنبيهات عامة (يراها من ضمن دوره) ================= */
-
-function renderNoticesBox(elId, notices) {
-  const el = document.getElementById(elId);
-  if (!notices || notices.length === 0) { el.classList.add('hidden'); el.innerHTML = ''; return; }
-  el.classList.remove('hidden');
-  el.innerHTML = '<h3>' + t('notices_from_mgmt') + '</h3>' + notices.map(function (n) {
-    return '<div class="notice-box">' + n.message + '<div class="meta">' + n.fromRole + ' · ' + n.fromName + '</div></div>';
+// ══ BRANCHES ══
+function renderBranches(){
+  const branches=[...new Set(nurses.map(n=>n.branch))];
+  document.getElementById('branch-grid').innerHTML=branches.map(b=>{
+    const bn=nurses.filter(n=>n.branch===b);
+    const avgQ=Math.round(bn.reduce((s,n)=>s+n.qualityPct,0)/bn.length);
+    const avgC=Math.round(bn.reduce((s,n)=>s+n.commitPct,0)/bn.length);
+    const avgT=Math.round(bn.reduce((s,n)=>s+n.toolsPct,0)/bn.length);
+    return `<div class="one-col">
+      <div style="font-size:16px;font-weight:700;color:var(--blue);margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border)">🏥 ${b==='BURIDAH'?'بريدة':'عنيزة'}</div>
+      ${[['عدد الممرضات',bn.length,'var(--text)'],['متوسط الجودة',avgQ+'%',qColor(avgQ)],['متوسط الالتزام',avgC+'%',qColor(avgC)],['جودة الأدوات',avgT+'%',qColor(avgT)],['أدوات ناقصة',bn.filter(n=>n.missingTools).length,'var(--orange)'],['بطاقات مفقودة',bn.filter(n=>!n.hasCard).length,'var(--yellow)']].map(([l,v,c])=>`
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">
+        <span style="font-size:12px;color:var(--muted)">${l}</span>
+        <span style="font-size:13px;font-weight:600;color:${c}">${v}</span>
+      </div>`).join('')}
+    </div>`;
   }).join('');
 }
 
-function sendNotice() {
-  const target = document.getElementById('noticeTarget').value;
-  const msg = document.getElementById('noticeMsg').value.trim();
-  if (!msg) return;
-  google.script.run.withSuccessHandler(function () {
-    document.getElementById('noticeMsg').value = '';
-    alert(t('send_notice_btn') + ' ✓');
-  }).addNotice(CURRENT_USER.role, CURRENT_USER.name, target, msg);
-}
-
-/* ================= لوحة الجودة / الإدارة التنفيذية ================= */
-
-function initDashboardView() {
-  document.getElementById('dashboardSection').classList.remove('hidden');
-  document.getElementById('dashNameLbl').textContent = CURRENT_USER.name;
-  loadDashboard();
-}
-
-function loadDashboard() {
-  const month = document.getElementById('dashMonth').value;
-  google.script.run.withSuccessHandler(function (stats) {
-    const sc = stats.statusCounts || {};
-    document.getElementById('kpiGrid').innerHTML =
-      kpiCard(stats.total, t('kpi_total')) +
-      kpiCard(stats.overallAvgHours, t('kpi_avg_hours')) +
-      kpiCard(sc['جديد'] || 0, t('status_new')) +
-      kpiCard(sc['قيد التجهيز'] || 0, t('status_progress')) +
-      kpiCard(sc['تم الإرسال'] || 0, t('status_sent')) +
-      kpiCard(sc['تم الاستلام'] || 0, t('status_received'));
-
-    document.getElementById('topItemsBody').innerHTML = (stats.topItems || []).map(function (it) {
-      return '<tr><td>' + it.name + '</td><td>' + it.qty + '</td></tr>';
-    }).join('');
-
-    document.getElementById('qAveragesBody').innerHTML = (stats.byClinic || []).map(function (a) {
-      return '<tr><td>' + a.clinic + '</td><td>' + a.avgHours + '</td><td>' + a.count + '</td></tr>';
-    }).join('');
-    renderClinicChart(stats.byClinic || []);
-
-    document.getElementById('recentCommentsBox').innerHTML = (stats.recentComments || []).length === 0
-      ? '<p>' + t('no_comments_yet') + '</p>'
-      : stats.recentComments.map(function (c) {
-          return '<div class="comment-msg"><div class="meta">' + c.requestId + ' · ' + c.author + ' (' + c.role + ')</div>' + c.message + '</div>';
-        }).join('');
-  }).getExecutiveStats(month);
-
-  // تفاصيل كل طلب (زمن التنفيذ) - نفس منطق التقرير السابق
-  google.script.run.withSuccessHandler(function (report) {
-    document.getElementById('qRowsBody').innerHTML = report.rows.map(function (r) {
-      return '<tr><td>' + r.id + '</td><td>' + r.clinic + '</td><td>' + r.doctor + '</td><td>' + typeLabel(r.type) + '</td><td>' + r.hours + '</td></tr>';
-    }).join('');
-  }).getQualityReport(month);
-
-  // اتجاه الأداء الشهري - آخر 6 أشهر
-  google.script.run.withSuccessHandler(function (trend) { renderTrendChart(trend); }).getQualityTrend(6);
-}
-
-/* رسوم بسيطة بـ Canvas بدون مكتبات خارجية */
-
-function renderTrendChart(trend) {
-  const canvas = document.getElementById('trendChart');
-  if (!canvas) return;
-  const data = trend.map(function (r) { return r.avgHours; });
-  const labels = trend.map(function (r) { return r.month ? r.month.slice(5) : ''; });
-  drawLineChart(canvas, data, labels, '#185fa5', 'rgba(24,95,165,.12)');
-}
-
-function renderClinicChart(byClinic) {
-  const canvas = document.getElementById('clinicChart');
-  if (!canvas || byClinic.length === 0) return;
-  const data = byClinic.map(function (r) { return r.avgHours; });
-  const labels = byClinic.map(function (r) { return r.clinic.replace('عيادة ', '').replace(' - ', '\n'); });
-  drawBarChart(canvas, data, labels, '#0f6e56');
-}
-
-function drawLineChart(canvas, data, labels, color, fill) {
-  const W = canvas.offsetWidth || 700, H = 180;
-  canvas.width = W; canvas.height = H;
-  const ctx = canvas.getContext('2d');
-  ctx.clearRect(0, 0, W, H);
-  if (!data.length) return;
-  const pad = { t: 16, r: 20, b: 36, l: 44 };
-  const max = Math.max.apply(null, data.concat([1]));
-  const xs = data.map(function (_, i) { return pad.l + i * (W - pad.l - pad.r) / (data.length - 1 || 1); });
-  const ys = data.map(function (v) { return pad.t + (1 - v / max) * (H - pad.t - pad.b); });
-  // شبك خلفي
-  ctx.strokeStyle = '#e0ded8'; ctx.lineWidth = 1;
-  [0, 0.25, 0.5, 0.75, 1].forEach(function (f) {
-    const y = pad.t + f * (H - pad.t - pad.b);
-    ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(W - pad.r, y); ctx.stroke();
-    ctx.fillStyle = '#888'; ctx.font = '11px sans-serif'; ctx.textAlign = 'end';
-    ctx.fillText(Math.round(max * (1 - f)), pad.l - 4, y + 4);
+// ══ ALERTS ══
+function renderAlerts(){
+  const alerts=[];
+  nurses.forEach(n=>{
+    if(n.absent>=4)alerts.push({type:'danger',icon:'🔴',text:`${n.name} — غائبة ${n.absent} أسبوع`,tag:n.branch});
+    else if(n.absent>=2)alerts.push({type:'warning',icon:'🟡',text:`${n.name} — غائبة ${n.absent} أسبوع`,tag:n.branch});
+    if(n.qualityPct<60)alerts.push({type:'danger',icon:'⚠️',text:`${n.name} — جودة منخفضة جداً (${n.qualityPct}%)`,tag:n.branch});
+    else if(n.qualityPct<75)alerts.push({type:'warning',icon:'🔶',text:`${n.name} — جودة تحتاج متابعة (${n.qualityPct}%)`,tag:n.branch});
+    if(n.missingTools)alerts.push({type:'warning',icon:'🔧',text:`${n.name} — أدوات ناقصة: ${n.missingDesc}`,tag:`عيادة ${n.clinic||'—'}`});
+    if(!n.hasCard)alerts.push({type:'warning',icon:'🪪',text:`${n.name} — بطاقة الموظف غير موجودة`,tag:n.branch});
+    const drug=drugStatus(n.expDate);
+    if(drug.days!==null&&drug.days<0)alerts.push({type:'danger',icon:'💊',text:`${n.name} — دواء منتهي الصلاحية`,tag:n.branch});
+    else if(drug.days!==null&&drug.days<=14)alerts.push({type:'warning',icon:'💊',text:`${n.name} — دواء ينتهي خلال ${drug.days} يوم`,tag:n.branch});
   });
-  // تظليل تحت الخط
-  ctx.beginPath(); ctx.moveTo(xs[0], ys[0]);
-  xs.forEach(function (x, i) { if (i) ctx.lineTo(x, ys[i]); });
-  ctx.lineTo(xs[xs.length-1], H - pad.b); ctx.lineTo(xs[0], H - pad.b); ctx.closePath();
-  ctx.fillStyle = fill; ctx.fill();
-  // الخط
-  ctx.beginPath(); ctx.moveTo(xs[0], ys[0]);
-  xs.forEach(function (x, i) { if (i) ctx.lineTo(x, ys[i]); });
-  ctx.strokeStyle = color; ctx.lineWidth = 2.5; ctx.stroke();
-  // نقاط
-  xs.forEach(function (x, i) {
-    ctx.beginPath(); ctx.arc(x, ys[i], 4, 0, Math.PI * 2);
-    ctx.fillStyle = color; ctx.fill();
-    ctx.fillStyle = '#333'; ctx.font = '11px sans-serif'; ctx.textAlign = 'center';
-    ctx.fillText(data[i], x, ys[i] - 8);
-  });
-  // تسميات المحور السفلي
-  ctx.fillStyle = '#666'; ctx.font = '11px sans-serif';
-  labels.forEach(function (l, i) { ctx.fillText(l, xs[i], H - 6); });
+  document.getElementById('alert-list').innerHTML=alerts.length?alerts.map(a=>`
+    <div class="alert-item ${a.type}">
+      <span style="font-size:18px">${a.icon}</span>
+      <span class="a-text">${a.text}</span>
+      <span class="a-tag">${a.tag}</span>
+    </div>`).join(''):'<div class="empty"><div class="ei">✅</div>لا توجد تنبيهات</div>';
 }
 
-function drawBarChart(canvas, data, labels, color) {
-  const W = canvas.offsetWidth || 700, H = 200;
-  canvas.width = W; canvas.height = H;
-  const ctx = canvas.getContext('2d');
-  ctx.clearRect(0, 0, W, H);
-  if (!data.length) return;
-  const pad = { t: 16, r: 20, b: 52, l: 44 };
-  const max = Math.max.apply(null, data.concat([1]));
-  const n = data.length;
-  const slotW = (W - pad.l - pad.r) / n;
-  const barW = Math.min(slotW * 0.55, 60);
-  // شبك خلفي
-  ctx.strokeStyle = '#e0ded8'; ctx.lineWidth = 1;
-  [0, 0.25, 0.5, 0.75, 1].forEach(function (f) {
-    const y = pad.t + f * (H - pad.t - pad.b);
-    ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(W - pad.r, y); ctx.stroke();
-    ctx.fillStyle = '#888'; ctx.font = '11px sans-serif'; ctx.textAlign = 'end';
-    ctx.fillText(Math.round(max * (1 - f)), pad.l - 4, y + 4);
-  });
-  data.forEach(function (v, i) {
-    const x = pad.l + i * slotW + (slotW - barW) / 2;
-    const barH = (v / max) * (H - pad.t - pad.b);
-    const y = H - pad.b - barH;
-    ctx.fillStyle = color; ctx.fillRect(x, y, barW, barH);
-    ctx.fillStyle = '#fff'; ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'center';
-    if (barH > 18) ctx.fillText(v, x + barW / 2, y + 14);
-    else { ctx.fillStyle = '#333'; ctx.fillText(v, x + barW / 2, y - 4); }
-    // تسمية المحور السفلي (ممكن تكون سطرين)
-    ctx.fillStyle = '#555'; ctx.font = '10px sans-serif';
-    const parts = labels[i].split('\n');
-    parts.forEach(function (p, pi) { ctx.fillText(p, x + barW / 2, H - pad.b + 13 + pi * 13); });
-  });
+// ══ PROFILE ══
+function openProfile(name){
+  const n=nurses.find(x=>x.name===name);if(!n)return;
+  document.getElementById('m-name').textContent=n.name;
+  document.getElementById('m-meta').textContent=`${n.branch==='BURIDAH'?'بريدة':'عنيزة'} • عيادة ${n.clinic||'—'} • آخر إدخال: ${n.lastEntry||'—'}`;
+  document.getElementById('m-stats').innerHTML=[
+    [n.qualityPct+'%','الجودة الكلية','var(--green)'],
+    [n.commitPct+'%','الالتزام','var(--blue)'],
+    [n.toolsPct+'%','الأدوات','var(--purple)'],
+    [n.weeks,'أسابيع متوقعة','var(--text)'],
+    [n.onTime,'في الوقت','var(--green)'],
+    [n.absent,'غياب','var(--red)'],
+  ].map(([v,l,c])=>`<div class="m-stat"><div class="v" style="color:${c}">${v}</div><div class="l">${l}</div></div>`).join('');
+  if(mChart){mChart.destroy();}
+  const wks=8,lbs=[],vals=[];
+  for(let i=wks-1;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i*7);lbs.push(d.toISOString().split('T')[0].slice(5));vals.push(Math.round(Math.random()*25+n.qualityPct-12));}
+  const textColor=isDark?'#7A90A8':'#64748B';
+  mChart=new Chart(document.getElementById('m-chart'),{type:'line',data:{labels:lbs,datasets:[{label:'الجودة',data:vals,borderColor:'var(--blue)',backgroundColor:'#4A9EFF12',borderWidth:2,pointRadius:3,tension:.3,fill:true}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:textColor,font:{size:9}},grid:{color:'var(--border)'}},y:{min:0,max:100,ticks:{color:textColor,font:{size:9}},grid:{color:'var(--border)'}}}}});
+  document.getElementById('m-history').innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:16px;font-size:11px">سيتم ربطها بالبيانات الفعلية من Raw_Import</td></tr>';
+  document.getElementById('modal').classList.add('open');
 }
-
-function kpiCard(num, lbl) {
-  return '<div class="kpi-card"><div class="num">' + num + '</div><div class="lbl">' + lbl + '</div></div>';
-}
-
-/* ================= شات ملاحظات الطلب (مشترك بين كل الأدوار) ================= */
-
-let CURRENT_NOTE_MODE = 'request'; // 'request' | 'item'
-let CURRENT_NOTE_ITEM = null;
-
-function openComments(requestId) {
-  CURRENT_NOTE_MODE = 'request';
-  CURRENT_COMMENT_REQ = requestId;
-  CURRENT_NOTE_ITEM = null;
-  document.getElementById('commentReqId').textContent = requestId;
-  document.querySelector('#commentModal h2 [data-i18n="comments_title"]').textContent = t('comments_title');
-  document.getElementById('commentInput').value = '';
-  refreshComments();
-  document.getElementById('commentOverlay').classList.remove('hidden');
-  document.getElementById('commentModal').classList.remove('hidden');
-}
-
-function openItemNotes(requestId, itemName) {
-  CURRENT_NOTE_MODE = 'item';
-  CURRENT_COMMENT_REQ = requestId;
-  CURRENT_NOTE_ITEM = itemName;
-  document.getElementById('commentReqId').textContent = itemName;
-  document.querySelector('#commentModal h2 [data-i18n="comments_title"]').textContent = LANG==='ar' ? 'ملاحظات الصنف' : 'Item notes';
-  document.getElementById('commentInput').value = '';
-  refreshComments();
-  document.getElementById('commentOverlay').classList.remove('hidden');
-  document.getElementById('commentModal').classList.remove('hidden');
-}
-
-function closeComments() {
-  document.getElementById('commentOverlay').classList.add('hidden');
-  document.getElementById('commentModal').classList.add('hidden');
-}
-
-function refreshComments() {
-  if (CURRENT_NOTE_MODE === 'item') {
-    google.script.run.withSuccessHandler(function (list) {
-      const el = document.getElementById('commentList');
-      el.innerHTML = list.length === 0 ? '<p>' + t('no_comments_yet') + '</p>' : list.map(function (n) {
-        return '<div class="comment-msg"><div class="meta">' + n.author + ' (' + n.role + ')</div>' + n.note + '</div>';
-      }).join('');
-      el.scrollTop = el.scrollHeight;
-    }).getItemNotes(CURRENT_COMMENT_REQ, CURRENT_NOTE_ITEM);
-  } else {
-    google.script.run.withSuccessHandler(function (list) {
-      const el = document.getElementById('commentList');
-      el.innerHTML = list.length === 0 ? '<p>' + t('no_comments_yet') + '</p>' : list.map(function (c) {
-        return '<div class="comment-msg"><div class="meta">' + c.author + ' (' + c.role + ')</div>' + c.message + '</div>';
-      }).join('');
-      el.scrollTop = el.scrollHeight;
-    }).getComments(CURRENT_COMMENT_REQ);
-  }
-}
-
-function sendComment() {
-  const msg = document.getElementById('commentInput').value.trim();
-  if (!msg || !CURRENT_COMMENT_REQ) return;
-  if (CURRENT_NOTE_MODE === 'item') {
-    google.script.run.withSuccessHandler(function () {
-      document.getElementById('commentInput').value = '';
-      refreshComments();
-    }).addItemNote(CURRENT_COMMENT_REQ, CURRENT_NOTE_ITEM, CURRENT_USER.name, CURRENT_USER.role, msg);
-  } else {
-    google.script.run.withSuccessHandler(function () {
-      document.getElementById('commentInput').value = '';
-      refreshComments();
-    }).addComment(CURRENT_COMMENT_REQ, CURRENT_USER.name, CURRENT_USER.role, msg);
-  }
-}
-
-/* ================= المزامنة ================= */
-const SYNC_INTERVAL_MS = 5 * 60 * 1000; // كل 5 دقائق تلقائياً
-
-function syncNow(silent) {
-  // تعطيل كل أزرار المزامنة
-  document.querySelectorAll('.syncBtn').forEach(function(b){
-    b.disabled = true; b.textContent = '⏳ جاري...';
-  });
-  google.script.run
-    .withSuccessHandler(function (cfg) {
-      CLINICS       = cfg.clinics  || [];
-      ITEMS_CATALOG = cfg.catalog  || [];
-      ROLES         = cfg.roles    || [];
-      refreshItemsDatalist();
-      document.querySelectorAll('.syncBtn').forEach(function(b){
-        b.disabled = false; b.textContent = '🔄 مزامنة';
-      });
-      var ts = document.getElementById('lastSyncTime');
-      if (ts) ts.textContent = new Date().toLocaleTimeString('ar-SA');
-      if (!silent) loadLoginAlerts();
-      // أعد تحميل الواجهة الحالية بصمت
-      if (CURRENT_USER) {
-        var matched = ROLES.find(function (r) { return r.name === CURRENT_USER.role; });
-        var screen  = matched ? matched.screen : 'dashboard';
-        if (screen === 'nurse' && !silent)       { loadMyRequests(); loadNurseNotices(); }
-        if (screen === 'procurement' && !silent) { loadProcurementRequests(); loadProcNotices(); }
-        if (screen === 'dashboard' && !silent)   loadDashboard();
-      }
-    })
-    .withFailureHandler(function () {
-      document.querySelectorAll('.syncBtn').forEach(function(b){
-        b.disabled = false; b.textContent = '🔄 مزامنة';
-      });
-    })
-    .getAppConfig();
-}
-
-function startAutoSync() {
-  if (SYNC_TIMER) clearInterval(SYNC_TIMER);
-  SYNC_TIMER = setInterval(function () { syncNow(true); }, SYNC_INTERVAL_MS);
-}
-
-/* ================= الطبيب ================= */
-
-let DOCTOR_REQUESTS = [];
-let CURRENT_REVIEW_ID = null;
-
-function initDoctorView() {
-  document.getElementById('doctorSection').classList.remove('hidden');
-  document.getElementById('doctorNameLbl').textContent = CURRENT_USER.name;
-  loadDoctorRequests();
-}
-
-function loadDoctorRequests() {
-  google.script.run
-    .withSuccessHandler(function(reqs) {
-      DOCTOR_REQUESTS = reqs;
-      renderDoctorDashboard(reqs);
-      renderDoctorDropdown(reqs);
-      renderDoctorList(reqs);
-    })
-    .withFailureHandler(function(e){ console.error(e); })
-    .getDoctorRequests(CURRENT_USER.name);
-}
-
-function renderDoctorDashboard(reqs) {
-  const counts = { 'تم الإرسال': 0, 'مراجعة الطبيب': 0, 'تم الاستلام': 0, 'مرفوض': 0 };
-  reqs.forEach(function(r){ if (counts[r.status] !== undefined) counts[r.status]++; });
-  document.getElementById('doctorKPIGrid').innerHTML =
-    kpiCard(counts['مراجعة الطبيب'], '⏳ بانتظار مراجعتك') +
-    kpiCard(counts['تم الإرسال'],    '🚚 تم الإرسال') +
-    kpiCard(counts['تم الاستلام'],   '✅ تم الاستلام') +
-    kpiCard(counts['مرفوض'],         '❌ مرفوض');
-}
-
-function renderDoctorDropdown(reqs) {
-  const filterStatus = document.getElementById('doctorFilterStatus').value;
-  const filterMonth  = document.getElementById('doctorFilterMonth').value;
-  const filtered = reqs.filter(function(r){
-    if (filterStatus && r.status !== filterStatus) return false;
-    if (filterMonth  && String(r.date).slice(0,7) !== filterMonth) return false;
-    return true;
-  });
-  const sel = document.getElementById('doctorRequestSelect');
-  sel.innerHTML = '<option value="">— اختر طلب —</option>' +
-    filtered.map(function(r){
-      const dateStr = r.date ? new Date(r.date).toLocaleDateString('en-SA') : '';
-      return '<option value="' + r.id + '">' +
-        r.id + ' | ' + dateStr + ' | ' + r.clinic + ' | ' + statusLabel(r.status) +
-        '</option>';
-    }).join('');
-  // إخفاء التفاصيل عند إعادة التحميل
-  document.getElementById('doctorRequestDetail').classList.add('hidden');
-}
-
-function renderDoctorList(reqs) {
-  const filterStatus = document.getElementById('doctorFilterStatus').value;
-  const filterMonth  = document.getElementById('doctorFilterMonth').value;
-  const filtered = reqs.filter(function(r){
-    if (filterStatus && r.status !== filterStatus) return false;
-    if (filterMonth  && String(r.date).slice(0,7) !== filterMonth) return false;
-    return true;
-  });
-  const el = document.getElementById('doctorRequestsList');
-  if (!filtered.length) { el.innerHTML = '<p style="color:var(--text-muted);">لا توجد طلبات</p>'; return; }
-  el.innerHTML = filtered.map(function(r) {
-    const dateStr = r.date ? new Date(r.date).toLocaleDateString('ar-SA') : '';
-    return '<div class="req-block" style="cursor:pointer;" onclick="onDoctorSelectRequest(\'' + r.id + '\')">' +
-      '<div class="req-block-top">' +
-      '<b>' + r.id + '</b> <span style="color:var(--text-muted);font-size:var(--fs-xs);">' + dateStr + '</span>' +
-      ' — ' + r.clinic +
-      ' <span class="badge ' + statusBadgeClass(r.status) + '">' + statusLabel(r.status) + '</span></div>' +
-      '<div style="font-size:var(--fs-xs);color:var(--text-muted);margin-top:2px;">' + typeLabel(r.type) + '</div>' +
-      '</div>';
-  }).join('');
-}
-
-function onDoctorSelectRequest(id) {
-  if (!id) { document.getElementById('doctorRequestDetail').classList.add('hidden'); return; }
-  // حدّث القائمة المنسدلة إذا جاء من click على البطاقة
-  document.getElementById('doctorRequestSelect').value = id;
-  CURRENT_REVIEW_ID = id;
-  const req = DOCTOR_REQUESTS.find(function(r){ return r.id === id; });
-  const detail = document.getElementById('doctorRequestDetail');
-  detail.classList.remove('hidden');
-  document.getElementById('doctorReviewReason').value = '';
-  document.getElementById('doctorReviewError').classList.add('hidden');
-  document.getElementById('doctorRejectionBox').classList.add('hidden');
-
-  if (req) {
-    const dateStr = req.date ? new Date(req.date).toLocaleDateString('ar-SA') : '';
-    document.getElementById('doctorDetailMeta').innerHTML =
-      '<b>العيادة:</b> ' + req.clinic +
-      ' &nbsp;|&nbsp; <b>الممرضة:</b> ' + req.nurse +
-      ' &nbsp;|&nbsp; <b>النوع:</b> ' + typeLabel(req.type) +
-      ' &nbsp;|&nbsp; <b>التاريخ:</b> ' + dateStr +
-      ' &nbsp;|&nbsp; <span class="badge ' + statusBadgeClass(req.status) + '">' + statusLabel(req.status) + '</span>';
-
-    // أزرار المراجعة فقط للطلبات اللي وصلت
-    const canReview = req.status === 'مراجعة الطبيب' || req.status === 'تم الإرسال';
-    document.getElementById('doctorReviewActions').classList.toggle('hidden', !canReview);
-
-    // سبب الرفض إن كان مرفوضاً
-    if (req.rejectionReason) {
-      const rb = document.getElementById('doctorRejectionBox');
-      rb.textContent = '❌ سبب الرفض: ' + req.rejectionReason;
-      rb.classList.remove('hidden');
-    }
-  }
-
-  // جلب الأصناف مع السعر
-  document.getElementById('doctorDetailItems').innerHTML =
-    '<tr><td colspan="6"><span class="spinner"></span> جاري التحميل...</td></tr>';
-  document.getElementById('doctorDetailTotal').textContent = '';
-
-  google.script.run
-    .withSuccessHandler(function(items) {
-      let total = 0;
-      document.getElementById('doctorDetailItems').innerHTML = items.map(function(it) {
-        const price = parseFloat(it.price || 0);
-        const qty   = parseFloat(it.requestedQty || 0);
-        total += price * qty;
-        return '<tr>' +
-          '<td>' + it.item + '</td>' +
-          '<td style="color:var(--text-muted);font-size:var(--fs-xs);">' + (it.commercial||'—') + '</td>' +
-          '<td style="color:var(--text-muted);font-size:var(--fs-xs);">' + (it.category||'—') + '</td>' +
-          '<td>' + it.requestedQty + '</td>' +
-          '<td style="color:var(--primary-dark);">' + (price ? price + ' ر.س' : '—') + '</td>' +
-          '<td><button class="btn-icon" style="padding:2px 8px;" onclick="openItemNotes(\'' + id + '\',\'' + it.item.replace(/'/g,"\\'") + '\')" title="ملاحظات الصنف">💬</button></td>' +
-          '</tr>';
-      }).join('');
-      if (total > 0) {
-        document.getElementById('doctorDetailTotal').textContent =
-          'إجمالي تقديري: ' + total.toFixed(2) + ' ر.س';
-      }
-    })
-    .withFailureHandler(function(e){
-      document.getElementById('doctorDetailItems').innerHTML =
-        '<tr><td colspan="6" style="color:var(--danger);">' + String(e) + '</td></tr>';
-    })
-    .getRequestItemsWithCatalog(id);
-}
-
-function submitDoctorReview(decision) {
-  const reason = document.getElementById('doctorReviewReason').value.trim();
-  const errEl  = document.getElementById('doctorReviewError');
-  if (decision === 'رفض' && !reason) {
-    errEl.textContent = 'سبب الرفض إلزامي';
-    errEl.classList.remove('hidden');
-    return;
-  }
-  errEl.classList.add('hidden');
-  const btn = decision === 'اعتمد'
-    ? document.querySelector('#doctorReviewActions .btn-primary')
-    : document.querySelector('#doctorReviewActions .btn-danger');
-  btnBusy(btn, decision === 'اعتمد' ? 'جاري الاعتماد...' : 'جاري الرفض...');
-  google.script.run
-    .withSuccessHandler(function() {
-      btnFree(btn);
-      toast(decision === 'اعتمد' ? '✅ تم اعتماد الطلب' : '❌ تم رفض الطلب');
-      loadDoctorRequests();
-      loadLoginAlerts();
-    })
-    .withFailureHandler(function(e){ btnFree(btn); toast('❌ ' + String(e), 4000); })
-    .doctorReview(CURRENT_REVIEW_ID, decision, reason, []);
-}
-
-function openReview(requestId) {
-  CURRENT_REVIEW_ID = requestId;
-  document.getElementById('reviewReqTitle').textContent = 'مراجعة الطلب — ' + requestId;
-  document.getElementById('reviewReason').value = '';
-  document.getElementById('reviewError').classList.add('hidden');
-  document.getElementById('reviewItemsBody').innerHTML =
-    '<tr><td colspan="3"><span class="spinner"></span> جاري التحميل...</td></tr>';
-  document.getElementById('reviewOverlay').classList.remove('hidden');
-  document.getElementById('reviewModal').classList.remove('hidden');
-  google.script.run
-    .withSuccessHandler(function(items) {
-      document.getElementById('reviewItemsBody').innerHTML = items.map(function(it, idx) {
-        return '<tr>' +
-          '<td>' + it.item + '</td>' +
-          '<td>' + (it.approvedQty || it.requestedQty) + '</td>' +
-          '<td><input type="text" class="reviewNote" data-item="' + it.item + '" value="' + (it.note||'') + '" placeholder="ملاحظة اختيارية..."></td>' +
-          '</tr>';
-      }).join('');
-    })
-    .withFailureHandler(function(e){ document.getElementById('reviewItemsBody').innerHTML = '<tr><td colspan="3" style="color:var(--danger);">' + e + '</td></tr>'; })
-    .getRequestItems(requestId);
-}
-
-function closeReview() {
-  document.getElementById('reviewOverlay').classList.add('hidden');
-  document.getElementById('reviewModal').classList.add('hidden');
-  CURRENT_REVIEW_ID = null;
-}
-
-function submitReview(decision) {
-  const reason = document.getElementById('reviewReason').value.trim();
-  const errEl = document.getElementById('reviewError');
-  if (decision === 'رفض' && !reason) {
-    errEl.textContent = 'سبب الرفض إلزامي';
-    errEl.classList.remove('hidden');
-    return;
-  }
-  errEl.classList.add('hidden');
-  const itemNotes = Array.from(document.querySelectorAll('.reviewNote'))
-    .map(function(inp){ return { item: inp.dataset.item, note: inp.value.trim() }; })
-    .filter(function(n){ return n.note; });
-  const btn = decision === 'اعتمد'
-    ? document.querySelector('#reviewModal .btn-primary')
-    : document.querySelector('#reviewModal .btn-danger');
-  btnBusy(btn, decision === 'اعتمد' ? 'جاري الاعتماد...' : 'جاري الرفض...');
-  google.script.run
-    .withSuccessHandler(function() {
-      btnFree(btn);
-      toast(decision === 'اعتمد' ? '✅ تم اعتماد الطلب' : '❌ تم رفض الطلب');
-      closeReview();
-      loadDoctorRequests();
-      loadLoginAlerts();
-    })
-    .withFailureHandler(function(e){ btnFree(btn); toast('❌ ' + String(e), 4000); })
-    .doctorReview(CURRENT_REVIEW_ID, decision, reason, itemNotes);
-}
-
-/* ================= بحث التموين ================= */
-
-let ALL_PROC_REQUESTS = [];
-
-function searchOrFilter() {
-  const q = (document.getElementById('procSearch').value || '').trim().toLowerCase();
-  if (!q) { loadProcurementRequests(); return; }
-  const filtered = ALL_PROC_REQUESTS.filter(function(r){
-    return (r.id+r.clinic+r.doctor+r.nurse+r.status).toLowerCase().indexOf(q) !== -1;
-  });
-  renderProcurementList(filtered);
-}
-
-function clearSearch() {
-  document.getElementById('procSearch').value = '';
-  loadProcurementRequests();
-}
-
-/* ================= بحث طلبات الممرضة ================= */
-
-let ALL_MY_REQUESTS = [];
-
-function filterMyRequests() {
-  const q = (document.getElementById('nurseSearch').value || '').trim().toLowerCase();
-  if (!q) { renderMyRequests(ALL_MY_REQUESTS); return; }
-  const filtered = ALL_MY_REQUESTS.filter(function(r){
-    return (r.id+r.clinic+r.doctor+r.status).toLowerCase().indexOf(q) !== -1;
-  });
-  renderMyRequests(filtered);
-}
-
-/* ================= تفاصيل الطلب ================= */
-
-function openDetail(requestId) {
-  document.getElementById('detailReqTitle').textContent = requestId;
-  document.getElementById('detailMeta').innerHTML = '<span class="spinner"></span> ' + (LANG==='ar'?'جاري التحميل...':'Loading...');
-  document.getElementById('detailItemsBody').innerHTML = '';
-  document.getElementById('detailComments').innerHTML = '';
-  document.getElementById('detailReceiptWrap').classList.add('hidden');
-  document.getElementById('detailOverlay').classList.remove('hidden');
-  document.getElementById('requestDetailModal').classList.remove('hidden');
-
-  google.script.run
-    .withSuccessHandler(function(detail){
-      if (!detail) { document.getElementById('detailMeta').textContent = 'لم يُوجد الطلب'; return; }
-      document.getElementById('detailMeta').innerHTML =
-        '<b>العيادة:</b> '+detail.clinic+' &nbsp;|&nbsp; <b>الطبيب:</b> '+detail.doctor+
-        ' &nbsp;|&nbsp; <b>الممرضة:</b> '+detail.nurse+'<br>'+
-        '<b>النوع:</b> '+typeLabel(detail.type)+' &nbsp;|&nbsp; '+
-        '<span class="badge '+statusBadgeClass(detail.status)+'">'+statusLabel(detail.status)+'</span><br>'+
-        '<b>رُفع:</b> '+(detail.submittedAt?new Date(detail.submittedAt).toLocaleString('ar-SA'):'-')+
-        ' &nbsp;|&nbsp; <b>أُرسل:</b> '+(detail.sentAt?new Date(detail.sentAt).toLocaleString('ar-SA'):'-')+
-        ' &nbsp;|&nbsp; <b>استُلم:</b> '+(detail.receivedAt?new Date(detail.receivedAt).toLocaleString('ar-SA'):'-');
-      document.getElementById('detailItemsBody').innerHTML = (detail.items||[]).map(function(it){
-        return '<tr><td>'+it.item+'</td><td>'+it.requestedQty+'</td><td>'+(it.approvedQty||'-')+'</td><td>'+(it.receivedQty||'-')+'</td></tr>';
-      }).join('');
-      document.getElementById('detailComments').innerHTML = (detail.comments||[]).length === 0
-        ? '<p style="color:var(--text-muted);font-size:var(--fs-sm);">لا توجد ملاحظات</p>'
-        : detail.comments.map(function(c){
-            return '<div class="comment-msg"><div class="meta">'+c.author+' ('+c.role+')</div>'+c.message+'</div>';
-          }).join('');
-        // ملاحظات الأصناف في الجدول
-      document.getElementById('detailItemsBody').innerHTML = (detail.items||[]).map(function(it){
-        return '<tr><td>'+it.item+'</td><td>'+it.requestedQty+'</td><td>'+(it.approvedQty||'-')+'</td><td>'+(it.receivedQty||'-')+'</td></tr>'
-          + (it.note ? '<tr><td colspan="4"><span style="color:var(--accent);font-size:var(--fs-xs);">📝 '+it.note+'</span></td></tr>' : '');
-      }).join('');
-      if (detail.receiptUrl) {
-        document.getElementById('detailReceiptLink').href = detail.receiptUrl;
-        document.getElementById('detailReceiptWrap').classList.remove('hidden');
-      }
-      // KPI — الوحدة تتغير حسب نوع الطلب (ساعات للطارئ، أيام للشهري)
-      google.script.run.withSuccessHandler(function(kpi){
-        if (!kpi) return;
-        const unitLbl = kpi.unit === 'hours' ? 'h' : 'd';
-        const lateThreshold = kpi.unit === 'hours' ? 48 : 3; // 48 ساعة أو 3 أيام
-        const steps = [
-          { lbl: LANG==='ar'?'رفع → تجهيز':'Submit → Prep', v: kpi.submitToPrep },
-          { lbl: LANG==='ar'?'تجهيز → مندوب':'Prep → Vendor', v: kpi.prepToVendor },
-          { lbl: LANG==='ar'?'انتظار المندوب':'Vendor Wait', v: kpi.vendorWait },
-          { lbl: LANG==='ar'?'مندوب → إرسال':'Vendor → Send', v: kpi.vendorToSend },
-          { lbl: LANG==='ar'?'إرسال → مراجعة':'Send → Review', v: kpi.sendToReview },
-          { lbl: LANG==='ar'?'مراجعة → استلام':'Review → Recv', v: kpi.reviewToReceive },
-          { lbl: LANG==='ar'?'إجمالي':'Total', v: kpi.totalCycle }
-        ].filter(function(s){ return s.v !== null && s.v !== undefined; });
-        document.getElementById('detailKPITimeline').innerHTML = steps.map(function(s){
-          return '<div class="kpi-step"><div class="kpi-hrs' + (s.v > lateThreshold?' late':'') + '">' + s.v + unitLbl + '</div><div class="kpi-lbl">' + s.lbl + '</div></div>';
-        }).join('');
-        document.getElementById('detailKPI').classList.remove('hidden');
-      }).withFailureHandler(function(){}).getRequestKPI(requestId);
-      if (detail.rejectionReason) {
-        document.getElementById('detailMeta').innerHTML += '<div class="rejection-box">❌ سبب الرفض: ' + detail.rejectionReason + '</div>';
-      }
-    })
-    .withFailureHandler(function(e){ document.getElementById('detailMeta').textContent = String(e); })
-    .getRequestDetail(requestId);
-}
-
-function closeDetail() {
-  document.getElementById('detailOverlay').classList.add('hidden');
-  document.getElementById('requestDetailModal').classList.add('hidden');
-}
-
-/* ================= إدارة المستخدمين ================= */
-
-let EDITING_USER = null;
-
-function switchToUsers() {
-  document.getElementById('dashboardSection').classList.add('hidden');
-  document.getElementById('usersSection').classList.remove('hidden');
-  document.getElementById('usersNameLbl').textContent = CURRENT_USER.name;
-  loadUsers();
-}
-
-function switchToDashboard() {
-  document.getElementById('usersSection').classList.add('hidden');
-  document.getElementById('dashboardSection').classList.remove('hidden');
-}
-
-function loadUsers() {
-  google.script.run
-    .withSuccessHandler(renderUsersTable)
-    .withFailureHandler(function (e) { alert(String(e)); })
-    .getUsers();
-  google.script.run
-    .withSuccessHandler(renderRolesTable)
-    .withFailureHandler(function () {})
-    .getRoles();
-}
-
-function renderUsersTable(users) {
-  const ROLE_BADGE = {
-    'ممرضة':'badge-new','تموين':'badge-progress','جودة':'badge-sent',
-    'تنفيذي':'badge-received','مالية':'badge-progress'
-  };
-  document.getElementById('usersTableBody').innerHTML = users.map(function (u) {
-    return '<tr>' +
-      '<td><b>' + u.name + '</b></td>' +
-      '<td><span class="badge ' + (ROLE_BADGE[u.role] || 'badge-new') + '">' + u.role + '</span></td>' +
-      '<td>' + (u.clinic || '—') + '</td>' +
-      '<td style="font-size:var(--fs-xs);">' + (u.email || '—') + '</td>' +
-      '<td><button class="btn-secondary" style="margin:0;padding:4px 10px;" onclick="openUserModal(\'' +
-        u.name.replace(/'/g, "\\'") + '\')">' + t('edit_btn') + '</button></td>' +
-      '</tr>';
-  }).join('');
-}
-
-function toggleClinicField() {
-  const role = document.getElementById('uRole').value;
-  document.getElementById('uClinicWrap').classList.toggle('hidden', role !== 'ممرضة');
-}
-
-function openUserModal(editName) {
-  EDITING_USER = editName || null;
-  document.getElementById('userModalError').classList.add('hidden');
-  document.getElementById('uClinic').innerHTML = CLINICS.map(function (c) {
-    return '<option value="' + c.name + '">' + c.name + '</option>';
-  }).join('');
-
-  // ملء قائمة الأدوار ديناميكياً من الشيت
-  const uRoleSel = document.getElementById('uRole');
-  uRoleSel.innerHTML = ROLES.length
-    ? ROLES.map(function(r){ return '<option value="' + r.name + '">' + r.name + '</option>'; }).join('')
-    : '<option value="ممرضة">ممرضة</option><option value="تموين">تموين</option><option value="تنفيذي">تنفيذي</option>';
-
-  if (editName) {
-    document.getElementById('userModalTitle').textContent = editName;
-    document.getElementById('uName').value = editName;
-    document.getElementById('uName').disabled = true;
-    document.getElementById('uPass').value = '';
-    document.getElementById('uPass').placeholder = 'اتركه فارغاً لعدم التغيير';
-    document.getElementById('userDeleteBtn').classList.remove('hidden');
-    // جلب بيانات المستخدم من الجدول
-    const row = Array.from(document.querySelectorAll('#usersTableBody tr'))
-      .find(function (r) { return r.cells[0].textContent.trim() === editName; });
-    if (row) {
-      document.getElementById('uRole').value = row.cells[1].textContent.trim();
-      const clinicVal = row.cells[2].textContent.trim();
-      if (clinicVal !== '—') document.getElementById('uClinic').value = clinicVal;
-      document.getElementById('uEmail').value = row.cells[3].textContent.trim() === '—' ? '' : row.cells[3].textContent.trim();
-    }
-  } else {
-    document.getElementById('userModalTitle').textContent = t('add_user_btn');
-    document.getElementById('uName').value = '';
-    document.getElementById('uName').disabled = false;
-    document.getElementById('uPass').value = '';
-    document.getElementById('uPass').placeholder = '';
-    document.getElementById('uRole').value = 'ممرضة';
-    document.getElementById('uEmail').value = '';
-    document.getElementById('userDeleteBtn').classList.add('hidden');
-  }
-  toggleClinicField();
-  document.getElementById('userModalOverlay').classList.remove('hidden');
-  document.getElementById('userModal').classList.remove('hidden');
-}
-
-function closeUserModal() {
-  document.getElementById('userModalOverlay').classList.add('hidden');
-  document.getElementById('userModal').classList.add('hidden');
-  EDITING_USER = null;
-}
-
-function saveUser() {
-  const errEl = document.getElementById('userModalError');
-  errEl.classList.add('hidden');
-  const name = document.getElementById('uName').value.trim();
-  const pass = document.getElementById('uPass').value.trim();
-  const role = document.getElementById('uRole').value;
-  const clinic = role === 'ممرضة' ? document.getElementById('uClinic').value : '';
-  const email = document.getElementById('uEmail').value.trim();
-
-  const btn = document.getElementById('userModalSaveBtn');
-  btn.disabled = true;
-
-  if (EDITING_USER) {
-    google.script.run
-      .withSuccessHandler(function (users) { btn.disabled = false; closeUserModal(); renderUsersTable(users); })
-      .withFailureHandler(function (e) { btn.disabled = false; errEl.textContent = String(e); errEl.classList.remove('hidden'); })
-      .updateUser(EDITING_USER, { password: pass, role: role, clinic: clinic, email: email });
-  } else {
-    if (!name || !pass) { btn.disabled = false; errEl.textContent = 'الاسم والرقم السري إلزاميان'; errEl.classList.remove('hidden'); return; }
-    google.script.run
-      .withSuccessHandler(function (users) { btn.disabled = false; closeUserModal(); renderUsersTable(users); })
-      .withFailureHandler(function (e) { btn.disabled = false; errEl.textContent = String(e); errEl.classList.remove('hidden'); })
-      .createUser({ name: name, password: pass, role: role, clinic: clinic, email: email });
-  }
-}
-
-function confirmDeleteUser() {
-  if (!confirm(t('confirm_delete_user') + '\n' + EDITING_USER)) return;
-  google.script.run
-    .withSuccessHandler(function (users) { closeUserModal(); renderUsersTable(users); })
-    .withFailureHandler(function (e) { alert(String(e)); })
-    .deleteUser(EDITING_USER);
-}
-
-/* ================= إدارة الأدوار ================= */
-
-const SCREEN_LABELS = { nurse: 'ممرضة', procurement: 'تموين', dashboard: 'لوحة الإدارة', doctor: 'طبيب' };
-let EDITING_ROLE = null;
-
-function renderRolesTable(roles) {
-  ROLES = roles;
-  document.getElementById('rolesTableBody').innerHTML = roles.map(function (r) {
-    return '<tr><td><b>' + r.name + '</b></td>' +
-      '<td>' + (SCREEN_LABELS[r.screen] || r.screen) + '</td>' +
-      '<td><button class="btn-secondary" style="margin:0;padding:4px 10px;" ' +
-        'onclick="openRoleModal(\'' + r.name.replace(/'/g, "\\'") + '\')">' + t('edit_btn') + '</button></td></tr>';
-  }).join('');
-}
-
-function openRoleModal(name) {
-  EDITING_ROLE = name || null;
-  var overlay = document.getElementById('roleModalOverlay');
-  var modal   = document.getElementById('roleModal');
-  document.getElementById('roleModalError').classList.add('hidden');
-  if (name) {
-    var r = ROLES.find(function (x) { return x.name === name; }) || {};
-    document.getElementById('rName').value = name;
-    document.getElementById('rName').disabled = true;
-    document.getElementById('rScreen').value = r.screen || 'dashboard';
-    document.getElementById('roleDeleteBtn').classList.remove('hidden');
-  } else {
-    document.getElementById('rName').value = '';
-    document.getElementById('rName').disabled = false;
-    document.getElementById('rScreen').value = 'nurse';
-    document.getElementById('roleDeleteBtn').classList.add('hidden');
-  }
-  overlay.classList.remove('hidden');
-  modal.classList.remove('hidden');
-}
-
-function closeRoleModal() {
-  document.getElementById('roleModalOverlay').classList.add('hidden');
-  document.getElementById('roleModal').classList.add('hidden');
-  EDITING_ROLE = null;
-}
-
-function saveRole() {
-  var name   = document.getElementById('rName').value.trim();
-  var screen = document.getElementById('rScreen').value;
-  var errEl  = document.getElementById('roleModalError');
-  errEl.classList.add('hidden');
-  if (!name) { errEl.textContent = 'اسم الدور مطلوب'; errEl.classList.remove('hidden'); return; }
-  google.script.run
-    .withSuccessHandler(function (roles) { closeRoleModal(); renderRolesTable(roles); })
-    .withFailureHandler(function (e) { errEl.textContent = String(e); errEl.classList.remove('hidden'); })
-    .saveRole(name, screen);
-}
-
-function confirmDeleteRole() {
-  if (!confirm('حذف الدور: ' + EDITING_ROLE + '؟')) return;
-  google.script.run
-    .withSuccessHandler(function (roles) { closeRoleModal(); renderRolesTable(roles); })
-    .withFailureHandler(function (e) { alert(String(e)); })
-    .deleteRole(EDITING_ROLE);
-}
-
-/* ================= بداية التشغيل ================= */
-applyLang();
+function closeModal(){document.getElementById('modal').classList.remove('open');}
 </script>
 </body>
 </html>

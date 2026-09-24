@@ -956,7 +956,7 @@ function renderTable(){
   document.getElementById('nurses-tbody').innerHTML=rows.map(n=>{
     let st;
     if(mode==='week'){
-      const map={'في الوقت':['b-ok','✅ في الوقت'],'مبكر':['b-ok','✅ مبكر'],'متأخر':['b-warn','🟡 متأخر'],'لم تدخل':['b-absent','❌ لم تدخل']};
+      const map={'في الوقت':['b-ok','✅ في الوقت'],'متأخر':['b-warn','🟡 متأخر'],'لم تدخل':['b-absent','❌ لم تدخل']};
       const [cls,label]=map[n.weekStatus]||['b-absent','❌ لم تدخل'];
       st=`<span class="badge ${cls}">${label}</span>`;
     }else{
